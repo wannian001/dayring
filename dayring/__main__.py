@@ -6,6 +6,7 @@
     python -m dayring build-static --demo  # the GitHub Pages site (demo data only)
     python -m dayring check                # validate your data files
     python -m dayring import ...           # bring data in (Apple Health, .ics, Screen Time, any CSV)
+    python -m dayring kit json|export|check|lock  # the design kit: its manifest, a copy for another app, is a copy current
 """
 import argparse
 import json
@@ -69,6 +70,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     sub.add_parser("check", help="validate the CSV files in the data folder")
     p = sub.add_parser("schema", help="print the data format")
     p.add_argument("--markdown", action="store_true")
+    p = sub.add_parser("kit", help="the design kit: print its manifest, copy it into another app, check a copy")
+    kit_sub = p.add_subparsers(dest="kit_command", required=True)
+    kit_sub.add_parser("json", help="print the manifest: files with hashes, tokens, components, charts")
+    k = kit_sub.add_parser("export", help="copy the kit files into DIR (css/..., js/...) plus DIR/kit.json")
+    k.add_argument("dir")
+    k.add_argument("--force", action="store_true", help="overwrite files changed locally since the last export")
+    k = kit_sub.add_parser("check", help="compare DIR with its kit.json and with this kit; exit 0 only when up to date")
+    k.add_argument("dir")
+    kit_sub.add_parser("lock", help="record this KIT_VERSION's file hashes in dayring/kit.lock.json (after a version bump)")
     p = sub.add_parser("page", help="print one page's JSON (for scripts and assistants)")
     p.add_argument("name")
     p.add_argument("param", nargs="?")
@@ -94,6 +104,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         path = demo_mod.generate(Path(args.out), today)
         print(f"Demo written to {path.parent}. Open it with:\n  python -m dayring --config {path} serve")
         return 0
+    if args.command == "kit":
+        from . import kit
+        return kit.run(args)
     if args.command == "import":
         if importers_cli is None:
             sys.exit("importers are not installed")

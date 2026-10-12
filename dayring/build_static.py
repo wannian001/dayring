@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from . import kit
 from .config import Config
 from .context import Context
 from .modules import PAGES, static_params
@@ -28,8 +29,10 @@ def build(cfg: Config, out: Path, now: Optional[datetime] = None) -> Path:
     api = out / "api"
     api.mkdir()
     (api / "settings.json").write_text(json.dumps(cfg.public(), ensure_ascii=False), encoding="utf-8")
+    # the design kit's manifest for the gallery (#kit), from the kit files as written, before any ?v= stamp
+    (api / "kit.json").write_text(json.dumps(kit.manifest(WEB), ensure_ascii=False), encoding="utf-8")
     ctx = Context(cfg, now=now)
-    count = 1
+    count = 2
     for name in PAGES:
         for param in static_params(name, ctx):
             data = payload(cfg, name, param, ctx.now)

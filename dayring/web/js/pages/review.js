@@ -37,7 +37,7 @@ export default {
     return `<div class="head"><div><h1>${t("review.title", { from: day(p.week_start, { weekday: false }), to: day(p.week_end, { weekday: false }) })}</h1>
       <div class="sub">${p.partial ? t("review.partial") : t("review.sub")}</div></div>${stepper}</div>
       <div class="grid">
-        <section class="card span-7"><h2>${t("review.facts")}</h2><div class="table-wrap"><table class="review">
+        <section class="card span-7"><h2>${t("review.facts")}</h2><div class="table-wrap"><table class="review sectioned">
           <thead><tr><th></th><th scope="col">${t("review.this")}</th><th scope="col">${t("review.before")}</th><th scope="col">${t("review.change")}</th></tr></thead>
           <tbody>${rows}</tbody></table></div>
           ${p.gaps.length ? `<p class="xs muted" style="margin-top:12px">${t("review.gaps", { days: p.gaps.map((d) => day(d, { weekday: false })).join("、") })}</p>` : ""}

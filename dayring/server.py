@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 from urllib.parse import parse_qs, urlsplit
 
+from . import kit
 from .config import Config
 from .context import Context
 from .modules import PAGES
@@ -27,6 +28,8 @@ mimetypes.add_type("image/svg+xml", ".svg")
 def payload(cfg: Config, name: str, param: Optional[str] = None, now: Optional[datetime] = None) -> Any:
     if name == "settings":
         return cfg.public()
+    if name == "kit":  # the design kit's manifest, for the gallery page (#kit)
+        return kit.manifest()
     ctx = Context(cfg, now=now)
     return PAGES[name](ctx, param)
 
@@ -65,7 +68,7 @@ def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: No
             path = url.path
             if path.startswith("/api/"):
                 name = path[len("/api/"):]
-                if name != "settings" and name not in PAGES:
+                if name not in ("settings", "kit") and name not in PAGES:
                     return self._send(404, to_json({"error": "unknown page"}), "application/json")
                 query = parse_qs(url.query)
                 param = (query.get("day") or query.get("week") or [None])[0]

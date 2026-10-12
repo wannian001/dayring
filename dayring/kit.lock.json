@@ -1,0 +1,9 @@
+{
+  "version": "1.1.0",
+  "files": {
+    "css/tokens.css": "b2c2e3d0080c3c3edb8684a836f54e3832d139c88916a976d25afddd5399be20",
+    "css/kit.css": "c497a9c8f18bae2d7bf4a9d67b300ac376a0a5d6ea488d9399b816396a1cfce6",
+    "js/charts.js": "40ae63c62783275b1aeccf6c57e05795b4dcadb0ee20f84ee63b1d773b375f84",
+    "js/icons.js": "0310336ee06be775381f25242efaac60ed046c6c32dfb6890e7a9edfb2a57781"
+  }
+}

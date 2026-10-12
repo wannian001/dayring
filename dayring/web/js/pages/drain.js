@@ -1,6 +1,6 @@
 // Drain: seven quiet signals over the last 7 days, each against your normal and, where set, your plan.
 // No total score: the signals have different units and different strength of evidence.
-import { draw, esc } from "../charts.js";
+import { draw, esc, legendKey, rangeStrip, trendLine } from "../charts.js";
 import { day, dur, inSentence, num, shortDay, t } from "../i18n.js";
 
 const STATUS = { bad: "bad", good: "good", neutral: "" };
@@ -15,51 +15,9 @@ function fmt(unit, v) {
   return dur(v);
 }
 
-// one row's own scale: grey band = normal, tick = its median, dot = these 7 days, dashed tick = plan.
-// Nothing is drawn for a row without a value: a plan tick on an empty line says nothing.
-function strip(row, width) {
-  if (row.value === null || row.value === undefined) return "";
-  const h = 30, pad = 10;
-  const vals = [row.value, row.band?.q1, row.band?.q3, row.plan?.limit].filter((v) => v !== null && v !== undefined);
-  let lo = Math.min(...vals), hi = Math.max(...vals);
-  const span = hi - lo || Math.abs(hi) * 0.2 || 1;
-  lo -= span * 0.25; hi += span * 0.25;
-  const x = (v) => pad + ((v - lo) / (hi - lo)) * (width - 2 * pad);
-  const parts = [`<line x1="${pad}" x2="${width - pad}" y1="${h / 2}" y2="${h / 2}" stroke="var(--line-2)" stroke-width="2" stroke-linecap="round"/>`];
-  if (row.band) {
-    parts.push(`<rect x="${x(row.band.q1).toFixed(1)}" y="${h / 2 - 6}" width="${Math.max(3, x(row.band.q3) - x(row.band.q1)).toFixed(1)}" height="12" rx="6" fill="var(--c-band)" stroke="var(--line-2)"/>`);
-    parts.push(`<line x1="${x(row.band.median).toFixed(1)}" x2="${x(row.band.median).toFixed(1)}" y1="${h / 2 - 6}" y2="${h / 2 + 6}" stroke="var(--ink-3)" stroke-width="1.5"/>`);
-  }
-  if (row.plan) parts.push(`<line x1="${x(row.plan.limit).toFixed(1)}" x2="${x(row.plan.limit).toFixed(1)}" y1="2" y2="${h - 2}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 2"/>`);
-  const color = row.tone === "bad" ? "var(--off)" : row.tone === "good" ? "var(--good)" : "var(--c-mark)";
-  parts.push(`<circle cx="${x(row.value).toFixed(1)}" cy="${h / 2}" r="6" fill="${color}" stroke="var(--surface)" stroke-width="2"/>`);
-  return `<svg viewBox="0 0 ${width} ${h}" width="${width}" height="${h}" aria-hidden="true">${parts.join("")}</svg>`;
-}
-
-// the legend keys, each drawn the way its mark is drawn in the rows
-const KEY = {
-  normal: `<svg width="20" height="12" aria-hidden="true"><rect x=".5" y=".5" width="19" height="11" rx="5.5" fill="var(--c-band)" stroke="var(--line-2)"/></svg>`,
-  median: `<svg width="20" height="12" aria-hidden="true"><rect x=".5" y=".5" width="19" height="11" rx="5.5" fill="var(--c-band)" stroke="var(--line-2)"/><line x1="10" x2="10" y1=".5" y2="11.5" stroke="var(--ink-3)" stroke-width="1.5"/></svg>`,
-  now: `<svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="var(--c-mark)"/></svg>`,
-  plan: `<svg width="6" height="18" aria-hidden="true"><line x1="3" x2="3" y1="1" y2="17" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 2"/></svg>`,
-  weeks: `<svg width="22" height="12" aria-hidden="true"><path d="M1 9 7 5l6 2.5L19 2" fill="none" stroke="var(--ink-2)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="19" cy="2.6" r="2" fill="var(--c-mark)"/></svg>`,
-};
-
-// eight weekly averages, to see the direction (HRV in particular moves slowly)
-function weeks(row, width) {
-  const h = 34, pts = row.weeks.map((w, i) => ({ ...w, i })).filter((w) => w.value !== null && w.value !== undefined);
-  if (pts.length < 2) return "";
-  const vals = pts.map((p) => p.value);
-  let lo = Math.min(...vals), hi = Math.max(...vals);
-  const pad = (hi - lo) * 0.2 || 1; lo -= pad; hi += pad;
-  const x = (i) => 4 + (i / (row.weeks.length - 1)) * (width - 8), y = (v) => h - 4 - ((v - lo) / (hi - lo)) * (h - 8);
-  const d = pts.map((p, k) => `${k ? "L" : "M"}${x(p.i).toFixed(1)},${y(p.value).toFixed(1)}`).join("");
-  const last = pts[pts.length - 1];
-  const tips = row.weeks.map((w, i) => `<rect x="${(x(i) - width / 16).toFixed(1)}" y="0" width="${(width / 8).toFixed(1)}" height="${h}" fill="transparent" data-tip="${esc(`${t("drain.week_to", { day: shortDay(w.to) })} · ${fmt(row.unit, w.value)}`)}"/>`).join("");
-  return `<svg viewBox="0 0 ${width} ${h}" width="${width}" height="${h}" aria-hidden="true">
-    <path d="${d}" fill="none" stroke="var(--ink-2)" stroke-width="1.6" stroke-linejoin="round"/>
-    <circle cx="${x(last.i).toFixed(1)}" cy="${y(last.value).toFixed(1)}" r="3.5" fill="var(--c-mark)"/>${tips}</svg>`;
-}
+// one row's own scale (the kit's rangeStrip): grey band = normal, tick = its median, dot = these 7 days,
+// dashed tick = plan. Eight weekly averages (the kit's trendLine) show the direction; HRV in particular moves slowly.
+const weekTip = (row) => (w) => `${t("drain.week_to", { day: shortDay(w.to) })} · ${fmt(row.unit, w.value)}`;
 
 function stateChip(row) {
   if (row.value === null || row.value === undefined) return `<span class="chip">${t("drain.no_window")}</span>`;
@@ -128,7 +86,7 @@ export default {
     const strainFacts = s.nights ? [t("week.nights", { short: s.short_nights, n: s.nights, h: s.rule.short_hours }), t("week.train", { n: s.train_days })] : [];
     if (s.hrv_change !== null && s.hrv_change !== undefined) strainFacts.push(t("week.hrv", { dir: t(s.hrv_change >= 0 ? "week.up" : "week.down"), pct: `${num(Math.abs(s.hrv_change) * 100)}%` }));
     const load = s.strain ? "drain.load_strain" : s.nights < p.rule.min_window ? "drain.load_unknown" : "drain.load_ok";
-    const key = (k, text) => `<span class="key">${KEY[k]}${text}</span>`;
+    const key = (k, text) => `<span class="key">${legendKey(k)}${text}</span>`;
     return `<div class="head"><div><h1>${t("drain.title")}</h1><div class="sub">${t("drain.sub", { from: day(p.window.from, { weekday: false }), to: day(p.window.to, { weekday: false }) })}</div></div>${stepper}</div>
       <div class="grid">
         <section class="card span-12"><span class="eyebrow">${t("drain.eyebrow")}</span>
@@ -144,7 +102,7 @@ export default {
       </div>`;
   },
   mount(root, p) {
-    root.querySelectorAll(".drain-strip").forEach((el) => draw(el, (w) => strip(p.rows[el.dataset.i], w)));
-    root.querySelectorAll(".drain-weeks").forEach((el) => draw(el, (w) => weeks(p.rows[el.dataset.i], w)));
+    root.querySelectorAll(".drain-strip").forEach((el) => draw(el, (w) => rangeStrip(p.rows[el.dataset.i], { width: w })));
+    root.querySelectorAll(".drain-weeks").forEach((el) => { const row = p.rows[el.dataset.i]; draw(el, (w) => trendLine(row.weeks, { width: w, tip: weekTip(row) })); });
   },
 };

@@ -34,7 +34,8 @@ python -m dayring import macos-screentime
 python -m dayring import csv deadlines my.csv \\
   --map "Due=due,Task=title,Course=group"
 python -m dayring check</pre>
-          <p class="xs muted">${t("data.import_note")}</p></section>
+          <p class="xs muted">${t("data.import_note")}</p>
+          <p class="xs muted" style="margin:0"><a href="#kit">${t("kit.link")}</a> · ${t("kit.link_note")}</p></section>
       </div>`;
   },
   mount(root, p) {

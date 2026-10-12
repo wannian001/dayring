@@ -1,5 +1,8 @@
 # Design notes
 
+The look itself (tokens, components, charts, icons) is the design kit: [DESIGN_KIT.md](DESIGN_KIT.md), shown on the
+gallery page `#kit`. This file is about what dayring's pages say and why.
+
 ## Who it is for
 
 One person looking at their own data, usually in the morning and before bed. The page has to answer four
@@ -17,7 +20,8 @@ Everything else is detail behind a "How this is worked out" fold.
   Planned training blocks are left off the ring, so it shows the workout you did, not the one you planned.
 - **Two columns on desktop, one on phones.** HTML order is the phone priority order; the desktop grid only places
   it. Cards in a column stack so no card stretches over empty space.
-- Every chart is drawn at its real pixel width (redrawn on resize), so text never scales with the chart.
+- Every chart is drawn at its real pixel width (redrawn on resize), so text never scales with the chart. The charts
+  live in the design kit (`dayring/web/js/charts.js`); pages only map their data onto them.
 
 ## The Time page: one rule
 
@@ -116,7 +120,7 @@ matters, and says when the evidence is softer (entertainment).
   could not be checked is named as such, never counted as within plan.
 - **App switches** count each session once, even when the same session was imported under two device names, so
   they agree with screen hours, which count each minute once across devices.
-- **Row anatomy.** Grey band = your normal, tick = its median, dot = these 7 days, dashed tick = the plan (the
+- **Row anatomy.** The design kit's `rangeStrip` and `trendLine`. Grey band = your normal, tick = its median, dot = these 7 days, dashed tick = the plan (the
   legend draws each key the way the row draws it); on the right the value, its normal, the state and the plan
   chips; the last column is eight weekly averages, for slow signals like HRV. All rows share one set of columns,
   so the strips line up down the card. At 900 px and narrower the strip and the weekly line get rows of their
@@ -134,6 +138,8 @@ titled by its own tab (Weight, Sleep).
 
 ## Colour
 
+- The colour rules are the design kit's ([DESIGN_KIT.md](DESIGN_KIT.md#colour-rules)); the values are in
+  `dayring/web/css/tokens.css` and on the gallery page (`#kit`).
 - Two looks, no theme picker (`dayring/web/css/tokens.css`): **light mode** uses graphite neutrals with a blue
   accent, **dark mode** uses dusk neutrals (blue-black) with a violet accent. The page follows the system setting;
   the moon button overrides it and remembers the choice (a shared `?mode=` link sets the starting look; a click
@@ -141,15 +147,15 @@ titled by its own tab (Weight, Sleep).
   Today) has its own raised step in each look (`--seg-on`), lighter than its track in dark mode.
 - Data colours are the same in both modes (each mode has its own step of the same hue):
 
-  | thing | light | dark |
-  |---|---|---|
-  | focus (work + learning) | `#2a78d6` | `#3987e5` |
-  | entertainment & social | `#eb6834` | `#d95926` |
-  | communication | `#1baf7a` | `#199e70` |
-  | other | `#a3a9b5` | `#5d6474` |
-  | sleep (own ring track) | `#4a3aa7` | `#9085e9` |
-  | exercise (workouts) | `#bf3fa6` | `#cb4db2` |
-  | exercise as text | `#a8318f` | `#de78c8` |
+  | thing | token | light | dark |
+  |---|---|---|---|
+  | focus (work + learning) | `--c-focus` | `#2a78d6` | `#3987e5` |
+  | entertainment & social | `--c-fun` | `#eb6834` | `#d95926` |
+  | communication | `--c-comms` | `#1baf7a` | `#199e70` |
+  | other | `--c-other` | `#a3a9b5` | `#5d6474` |
+  | sleep (own ring track) | `--c-sleep` | `#4a3aa7` | `#9085e9` |
+  | exercise (workouts) | `--c-exercise` | `#bf3fa6` | `#cb4db2` |
+  | exercise as text | `--c-exercise-ink` | `#a8318f` | `#de78c8` |
 
   Focus / entertainment / communication pass the colour-vision checks in both modes for every pair
   (worst CVD ΔE 9.2). Sleep is too close to focus for protanopia, so it is never placed next to it: it has its
@@ -175,7 +181,7 @@ titled by its own tab (Weight, Sleep).
 | alarm ladder | the alarm as a step line (earlier = higher), dots = actual wake (green on time, red late) |
 | lanes | one row per activity (sleep, exercise, calendar, screens; the daily-average tiles use the same order), one column per hour or per day; on the 30-day lanes each row has its own scale, written under its label (the hour lanes all run to 60 minutes); screens stack entertainment on the baseline so days compare against the dashed limit, whose label also sits under the row's name; × = no record that day, shaded = the 7 days above |
 | activity icons | one stroke icon per lane (screen, exercise, calendar, sleep, a dashed clock for not recorded) and per thing "what changed" can name (entertainment & social = a feed with a play button, focused work = a laptop with a code bracket, communication = a speech bubble), drawn in its colour; a change carries an up / down badge in its tone, a usual day a check, a day with no normal yet a dashed clock |
-| week load | one column per week, one block per deadline, height = share of grade, amber = due within 3 days |
+| week load | `blockColumns`: one column per week, one block per deadline, height = share of grade, amber = due within 3 days (its label in `--on-watch`), faded = done |
 | arrivals | one cell per day per stream: has data / partial / nothing |
 
 ## Words

@@ -1,24 +1,33 @@
-/* dayring design tokens.
+/* dayring design kit: tokens. Part of the kit (see docs/DESIGN_KIT.md); every colour in kit.css, charts.js and icons.js
+   is one of these, and so is every spacing step in kit.css.
    Layout concept: a calm instrument panel — one day ring as the anchor, then rows of small,
    honest measurements, each compared with "your normal".
    Light mode uses graphite neutrals with a blue accent, dark mode dusk neutrals with a violet accent.
    Data colours follow the thing measured and keep the same hue in both modes, each mode with its own step
    (validated for colour-vision deficiency with the dataviz validator):
    focus = blue, fun = orange, communication = aqua, other = grey, sleep = violet (own ring track).
-   Status colours are reserved for good / watch / off and always come with a word or icon. */
+   Status colours are reserved for good / watch / off and always come with a word or icon.
+   A comment "[role]" starts each group; `dayring kit json` reads the roles from these comments. */
 
 :root {
   color-scheme: light;
+
+  /* [type] font stacks and the type scale */
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC",
           "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-
   --t-xs: 12px; --t-sm: 13px; --t-md: 15px; --t-lg: 18px; --t-xl: 24px; --t-2xl: 34px; --t-3xl: 44px;
+
+  /* [space] spacing steps */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 28px; --s-7: 40px; --s-8: 56px;
+
+  /* [radius] corner radii */
   --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-pill: 999px;
+
+  /* [motion] */
   --ease: cubic-bezier(.2, .7, .2, 1);
 
-  /* light mode: graphite neutrals, blue accent */
+  /* [neutral] light mode: graphite neutrals */
   --bg: #f4f4f3;
   --surface: #ffffff;
   --surface-2: #f7f7f6;
@@ -27,15 +36,20 @@
   --ink-3: #6a6a67;
   --line: #e4e4e1;
   --line-2: #cfcfcb;
+  --header: rgba(244, 244, 243, .84);             /* the see-through sticky header */
+  --seg-on: #ffffff;                              /* the chosen part of a switch, raised off its track */
+  --halo: var(--surface);                         /* ring drawn round a chart mark; .tile sets it to --surface-2 */
+
+  /* [accent] blue in light mode */
   --accent: #1f5fbf;
   --accent-soft: rgba(31, 95, 191, .1);
   --on-accent: #ffffff;
+
+  /* [effect] shadows */
   --shadow: 0 1px 2px rgba(22, 22, 22, .05), 0 6px 22px rgba(22, 22, 22, .05);
-  --header: rgba(244, 244, 243, .84);
-  --seg-on: #ffffff;                              /* the chosen part of a switch, raised off its track */
   --seg-on-edge: 0 1px 2px rgba(0, 0, 0, .12);
 
-  /* data colours (light steps) */
+  /* [data] data colours (light steps): one per thing measured */
   --c-focus: #2a78d6;
   --c-fun: #eb6834;
   --c-comms: #1baf7a;
@@ -49,13 +63,15 @@
   --c-axis: rgba(22, 22, 22, .22);
   --c-mark: #161616;
 
-  /* status */
+  /* [status] good / watch / off: fill, text (ink) and background (soft); the fills are the same in both modes */
   --good: #0ca30c; --good-ink: #1d7a1d; --good-soft: rgba(12, 163, 12, .11);
   --watch: #fab219; --watch-ink: #8a5a00; --watch-soft: rgba(250, 178, 25, .16);
+  --on-watch: #161616;        /* text written on a --watch fill */
   --off: #d03b3b; --off-ink: #b42828; --off-soft: rgba(208, 59, 59, .1);
 }
 
-/* ---- dark mode: dusk neutrals, violet accent ---- */
+/* ---- dark mode: dusk neutrals, violet accent ----
+   The same block twice: once for the system setting, once for the moon button (data-mode). A test keeps them equal. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-mode="light"]) {
     color-scheme: dark;
@@ -70,7 +86,7 @@
     --c-event: #eceef5; --c-band: rgba(236, 238, 245, .085); --c-grid: rgba(236, 238, 245, .07);
     --c-axis: rgba(236, 238, 245, .22); --c-mark: #eceef5;
     --good-ink: #4cc94c; --good-soft: rgba(12, 163, 12, .18);
-    --watch-ink: #f5bd4a; --watch-soft: rgba(250, 178, 25, .14);
+    --watch-ink: #f5bd4a; --watch-soft: rgba(250, 178, 25, .14); --on-watch: #0b0d13;
     --off-ink: #f27c7c; --off-soft: rgba(208, 59, 59, .2);
   }
 }
@@ -87,6 +103,6 @@
   --c-event: #eceef5; --c-band: rgba(236, 238, 245, .085); --c-grid: rgba(236, 238, 245, .07);
   --c-axis: rgba(236, 238, 245, .22); --c-mark: #eceef5;
   --good-ink: #4cc94c; --good-soft: rgba(12, 163, 12, .18);
-  --watch-ink: #f5bd4a; --watch-soft: rgba(250, 178, 25, .14);
+  --watch-ink: #f5bd4a; --watch-soft: rgba(250, 178, 25, .14); --on-watch: #0b0d13;
   --off-ink: #f27c7c; --off-soft: rgba(208, 59, 59, .2);
 }

@@ -60,6 +60,15 @@ English and Chinese, light and dark (it follows your system), phone and desktop.
   orange, exercise always magenta) and were checked for colour-vision deficiency. Green and red are kept for
   "better" and "worse" and always come with a word.
 
+### Design kit
+
+Every page is built from one design kit: the colour tokens of both modes, the components, the SVG charts and the
+icons, in four files (`css/tokens.css`, `css/kit.css`, `js/charts.js`, `js/icons.js`). The
+**[gallery](https://wannian001.github.io/dayring/#kit)** shows all of them, each chart drawn from sample data
+(it is not in the menu; every page links to it from its footer). Another app can take the kit with
+`python3 -m dayring kit export DIR` and later see whether its copy is up to date, outdated or changed locally with
+`python3 -m dayring kit check DIR`. How to use it, the colour rules and the versioning: [docs/DESIGN_KIT.md](docs/DESIGN_KIT.md).
+
 ### Quick start
 
 Needs Python 3.9 or newer. No other packages.
@@ -110,7 +119,7 @@ importers ─▶ data/*.csv ─▶ store (checked against schema.py) ─▶ page
   the page shows.
 - The demo site is the same app with pre-rendered JSON (`python3 -m dayring build-static --demo`), served by
   GitHub Pages.
-- Design notes: [docs/DESIGN.md](docs/DESIGN.md).
+- Design notes: [docs/DESIGN.md](docs/DESIGN.md); the shared look is the design kit ([docs/DESIGN_KIT.md](docs/DESIGN_KIT.md), gallery at `#kit`).
 
 ### Development
 
@@ -121,8 +130,8 @@ python3 -m dayring page today --demo --today 2026-10-12
 
 ### Where it comes from
 
-dayring is the public, generic core of a personal system I use every day. The private version reads
-my own watch, phone and laptop data and runs this same interface; this repository contains none of that data.
+dayring is the public showcase of a personal system I use every day. My own version has more features and runs on
+my real watch, phone and laptop data; it takes its look from the design kit here. This repository contains none of that data.
 
 ### License
 
@@ -168,6 +177,10 @@ my own watch, phone and laptop data and runs this same interface; this repositor
 - **是关联，不是因果。** “做什么第二天会更好”拿做了和没做的第二天比，给 95% 区间，整张表一起做 Benjamini–Hochberg 校正，只有校正后还成立的才上颜色；页面也写明为什么状态好的日子本来就更可能去练。
 - **颜色有含义。** 数据颜色跟着被测的东西走（专注永远是蓝，娱乐永远是橙，运动永远是品红），做过色弱校验；绿和红只用来表示更好和更差，而且一定配文字。
 
+### 设计套件
+
+每一页都出自同一套设计套件：两种模式的颜色变量、组件、SVG 图表和图标，放在四个文件里（`css/tokens.css`、`css/kit.css`、`js/charts.js`、`js/icons.js`）。**[展示页](https://wannian001.github.io/dayring/#kit)**把它们全摆出来，每张图都用示例数据现场画（展示页不在菜单里，每一页底部都有链接）。别的应用可以用 `python3 -m dayring kit export DIR` 拷走这套文件，之后用 `python3 -m dayring kit check DIR` 查自己那份是最新、过期还是本地改过。怎么用、颜色规则和版本规则见 [docs/DESIGN_KIT.md](docs/DESIGN_KIT.md)。
+
 ### 快速开始
 
 需要 Python 3.9 以上，不用装别的包。
@@ -212,7 +225,7 @@ Apple 健康、.ics、        一张表一个文件，              今天、本
 - 每页的计算只返回数字、单位、平常范围和状态，不返回句子；文字由浏览器写，所以同一份数据能切中英文（`dayring/web/js/i18n.js`）。
 - `python3 -m dayring page today` 打出一页的 JSON，脚本或 AI 助手读到的数和页面上的一样。
 - 演示站就是同一个网页加上预先算好的 JSON（`python3 -m dayring build-static --demo`），放在 GitHub Pages 上。
-- 设计说明：[docs/DESIGN.md](docs/DESIGN.md)。
+- 设计说明：[docs/DESIGN.md](docs/DESIGN.md)；共用的外观是设计套件（[docs/DESIGN_KIT.md](docs/DESIGN_KIT.md)，展示页在 `#kit`）。
 
 ### 开发
 
@@ -223,7 +236,7 @@ python3 -m dayring page today --demo --today 2026-10-12
 
 ### 来历
 
-dayring 是我每天在用的个人系统里抽出来的公开、通用的核心。私有版本读我自己的手表、手机和电脑数据，用的是同一套界面；这个仓库里没有任何那边的数据。
+dayring 是我每天在用的个人系统的公开展示版。我自己那一版功能更多，用的是真实的手表、手机和电脑数据；它的外观来自这里的设计套件。这个仓库里没有任何那边的数据。
 
 ### 许可
 

@@ -1,12 +1,8 @@
 import { bullet, dayDots, dayRing, draw, esc, interval, RING_CATS, spark } from "../charts.js";
 import { clock, day, dur, inSentence, measure, num, pct, signed, t, weekdayShort, wtype } from "../i18n.js";
-import { icon } from "../icons.js";
+import { icon, STATE_ICON } from "../icons.js";
 import { worseLine } from "./drain.js";
 
-const STATE_ICON = {
-  good: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 6.3 2.3 2.3 4.7-5.1"/></svg>`,
-  bad: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2.6v4.2"/><circle cx="6" cy="9.3" r=".4" fill="currentColor"/></svg>`,
-};
 const shiftDay = (iso, n) => { const d = new Date(`${iso}T12:00:00`); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 
 function stateChip(m) {
