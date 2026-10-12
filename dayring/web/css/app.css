@@ -294,3 +294,10 @@ code, .code { font-family: var(--mono); font-size: 12px; }
 .act-name svg { flex: none; }
 .act-name span { color: var(--ink-2); }
 #hours svg, #history svg { display: block; max-width: 100%; }
+
+/* training in the calendar */
+.workout-icon { color: var(--c-exercise); display: inline-flex; vertical-align: -2px; margin-right: 4px; }
+.daylist li.workout { color: var(--ink); }
+.day-train { display: flex; align-items: center; gap: 2px; }
+.day-train.missed { color: var(--ink-3); }
+.training-row .when { display: inline-flex; align-items: center; }

@@ -25,6 +25,7 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
     body = ctx.store.by_date("body_daily")
     events = ctx.store.rows("events")
     deadlines = ctx.store.rows("deadlines")
+    workouts = ctx.store.rows("workouts")
     days: List[Dict[str, Any]] = []
     for k in range(7):
         d = start + timedelta(days=k)
@@ -39,6 +40,9 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
                         "location": e.get("location")} for e in sorted(events, key=lambda e: e["start"]) if e["start"].date() == d],
             "deadlines": [_deadline(x, today) for x in deadlines if x["due"].date() == d],
             "training": plans.training_for(ctx.cfg, d), "actual": actual,
+            "workouts": [{"start": iso(w["start"]), "end": iso(w["end"]), "type": w["type"],
+                          "minutes": (w["end"] - w["start"]).total_seconds() / 60}
+                         for w in sorted(workouts, key=lambda w: w["start"]) if w["start"].date() == d],
         })
     load = []
     first = monday(today)
