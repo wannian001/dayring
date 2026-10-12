@@ -1,5 +1,5 @@
-import { draw, esc, ladderChart, sleepWindows } from "../charts.js?v=f1813bf9c8";
-import { clock, day, dur, shortDay, t } from "../i18n.js?v=f1813bf9c8";
+import { draw, esc, ladderChart, sleepWindows } from "../charts.js?v=60b432d5aa";
+import { clock, day, dur, shortDay, t } from "../i18n.js?v=60b432d5aa";
 
 const MARK = { true: ["✓", "good"], false: ["✗", "bad"], null: ["–", ""] };
 const CHECKS = ["woke_on_time", "asleep_in_time", "slept_enough", "screen_before_sleep_ok"];
@@ -32,7 +32,7 @@ export default {
           ${compare("woke", tw.wake, lw.wake, (v) => v || "—")}
           ${compare("duration", tw.sleep_min, lw.sleep_min, (v) => dur(v))}
           ${compare("spread", tw.onset_spread_min, lw.onset_spread_min, (v) => (v == null ? "—" : `± ${dur(v)}`))}</div></section>
-        <section class="card span-7"><h2>${t("sleep.windows")}<span class="aside legend"><span class="key"><i style="background:var(--c-sleep)"></i>${t("ring.sleep")}</span>${s ? `<span class="key"><i style="background:var(--accent);width:3px"></i>${t("today.alarm")}</span>` : ""}</span></h2><div id="nights"></div></section>
+        <section class="card span-7"><h2>${t("sleep.windows")}<span class="aside legend"><span class="key"><i style="background:var(--c-sleep)"></i>${t("ring.sleep")}</span>${s ? `<span class="key"><i style="background:var(--c-mark);width:3px;height:14px;border-radius:2px"></i>${t("today.alarm")}</span>` : ""}</span></h2><div id="nights"></div></section>
         <section class="card span-5"><h2>${t("sleep.checks")}</h2>
           <div class="table-wrap"><table class="checks"><thead><tr><th></th>${p.checks.map((d) => `<th scope="col">${shortDay(d.date)}</th>`).join("")}</tr></thead><tbody>${checkRows}</tbody></table></div>
           <details class="how"><summary>${t("ui.how")}</summary><p>${t("sleep.checks_rule", { min: p.rules.fun_before_sleep_ok_min, slack: p.rules.slack_min })}</p></details></section>

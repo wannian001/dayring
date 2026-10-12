@@ -5,9 +5,9 @@
 // outside normal (`clear`, worked out in modules/time.py), and colours only those. Lanes may overlap;
 // unrecorded waking time is shown as such. A day without an activity's record shows "—" for it (never 0)
 // and is left out of its average and normal.
-import { bullet, draw, esc, lanes } from "../charts.js?v=f1813bf9c8";
-import { day, device, dur, getLang, num, shortDay, t, weekdayShort, wtype } from "../i18n.js?v=f1813bf9c8";
-import { COLOR, icon } from "../icons.js?v=f1813bf9c8";
+import { bullet, draw, esc, lanes } from "../charts.js?v=60b432d5aa";
+import { day, device, dur, getLang, num, shortDay, t, weekdayShort, wtype } from "../i18n.js?v=60b432d5aa";
+import { COLOR, icon } from "../icons.js?v=60b432d5aa";
 
 const ORDER = ["sleep", "exercise", "calendar", "screen"];  // the lanes, in the same order in both lane charts
 const TILES = ["screen", "fun", "focus", "communication", "exercise", "calendar", "sleep", "not_recorded"];  // every candidate has a tile

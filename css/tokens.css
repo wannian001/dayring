@@ -2,7 +2,8 @@
    Layout concept: a calm instrument panel — one day ring as the anchor, then rows of small,
    honest measurements, each compared with "your normal".
    Light mode uses graphite neutrals with a blue accent, dark mode dusk neutrals with a violet accent.
-   Data colors follow the thing measured and never change between the two (validated for colour-vision deficiency with the dataviz validator):
+   Data colours follow the thing measured and keep the same hue in both modes, each mode with its own step
+   (validated for colour-vision deficiency with the dataviz validator):
    focus = blue, fun = orange, communication = aqua, other = grey, sleep = violet (own ring track).
    Status colours are reserved for good / watch / off and always come with a word or icon. */
 
@@ -31,6 +32,8 @@
   --on-accent: #ffffff;
   --shadow: 0 1px 2px rgba(22, 22, 22, .05), 0 6px 22px rgba(22, 22, 22, .05);
   --header: rgba(244, 244, 243, .84);
+  --seg-on: #ffffff;                              /* the chosen part of a switch, raised off its track */
+  --seg-on-edge: 0 1px 2px rgba(0, 0, 0, .12);
 
   /* data colours (light steps) */
   --c-focus: #2a78d6;
@@ -62,6 +65,7 @@
     --accent: #aea2f7; --accent-soft: rgba(174, 162, 247, .14); --on-accent: #14102e;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .25);
     --header: rgba(11, 13, 19, .8);
+    --seg-on: #353d50; --seg-on-edge: 0 0 0 1px rgba(236, 238, 245, .12);
     --c-focus: #3987e5; --c-fun: #d95926; --c-comms: #199e70; --c-other: #5d6474; --c-sleep: #9085e9; --c-exercise: #cb4db2; --c-exercise-ink: #de78c8;
     --c-event: #eceef5; --c-band: rgba(236, 238, 245, .085); --c-grid: rgba(236, 238, 245, .07);
     --c-axis: rgba(236, 238, 245, .22); --c-mark: #eceef5;
@@ -78,6 +82,7 @@
   --accent: #aea2f7; --accent-soft: rgba(174, 162, 247, .14); --on-accent: #14102e;
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .25);
   --header: rgba(11, 13, 19, .8);
+  --seg-on: #353d50; --seg-on-edge: 0 0 0 1px rgba(236, 238, 245, .12);
   --c-focus: #3987e5; --c-fun: #d95926; --c-comms: #199e70; --c-other: #5d6474; --c-sleep: #9085e9; --c-exercise: #cb4db2; --c-exercise-ink: #de78c8;
   --c-event: #eceef5; --c-band: rgba(236, 238, 245, .085); --c-grid: rgba(236, 238, 245, .07);
   --c-axis: rgba(236, 238, 245, .22); --c-mark: #eceef5;

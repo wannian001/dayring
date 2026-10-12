@@ -1,21 +1,23 @@
 // Shell: header, language and light/dark, hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js?v=f1813bf9c8";
-import { installTooltip, esc } from "./charts.js?v=f1813bf9c8";
-import { getLang, setLang, t, clock } from "./i18n.js?v=f1813bf9c8";
-import body from "./pages/body.js?v=f1813bf9c8";
-import data from "./pages/data.js?v=f1813bf9c8";
-import drain from "./pages/drain.js?v=f1813bf9c8";
-import review from "./pages/review.js?v=f1813bf9c8";
-import sleep from "./pages/sleep.js?v=f1813bf9c8";
-import time from "./pages/time.js?v=f1813bf9c8";
-import today from "./pages/today.js?v=f1813bf9c8";
-import week from "./pages/week.js?v=f1813bf9c8";
+import { get, isStatic } from "./api.js?v=60b432d5aa";
+import { installTooltip, esc } from "./charts.js?v=60b432d5aa";
+import { getLang, setLang, t, clock } from "./i18n.js?v=60b432d5aa";
+import body from "./pages/body.js?v=60b432d5aa";
+import data from "./pages/data.js?v=60b432d5aa";
+import drain from "./pages/drain.js?v=60b432d5aa";
+import review from "./pages/review.js?v=60b432d5aa";
+import sleep from "./pages/sleep.js?v=60b432d5aa";
+import time from "./pages/time.js?v=60b432d5aa";
+import today from "./pages/today.js?v=60b432d5aa";
+import week from "./pages/week.js?v=60b432d5aa";
 
 const PAGES = { today, week, body, sleep, time, drain, review, data };
 const NAV = ["today", "week", "body", "time", "drain", "review", "data"];
-// a menu item that holds several pages shows a small switch under the page title
+// a menu item that holds several pages shows a small switch above the page title
 const GROUPS = { body: [["body", "nav.weight"], ["sleep", "nav.sleep_tab"]] };
 const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) => p === page)) || page;
+// a page inside a group is titled by its own tab (Weight, Sleep), not by the group
+const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;
 const ALIAS = { attention: "time" };  // old links keep working
 const store = {
   get(key) { try { return localStorage.getItem(`dayring.${key}`); } catch { return null; } },
@@ -26,13 +28,13 @@ let settings = { title: "dayring", locale: "en", demo: false };
 const ICON = {
   logo: `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="var(--c-band)" stroke-width="5"/><path d="M16 3.5a12.5 12.5 0 0 1 11.8 8.3" fill="none" stroke="var(--c-sleep)" stroke-width="5" stroke-linecap="round"/><path d="M28.3 18.5a12.5 12.5 0 0 1-6.6 9.1" fill="none" stroke="var(--c-focus)" stroke-width="5" stroke-linecap="round"/><path d="M17.5 28.4a12.5 12.5 0 0 1-9.7-3.7" fill="none" stroke="var(--c-fun)" stroke-width="5" stroke-linecap="round"/></svg>`,
   moon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z"/></svg>`,
-  swatch: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M10 3.5v13" /><path d="M10 3.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg>`,
 };
 
 const query = new URLSearchParams(location.search);  // ?mode=light&lang=zh for shared links
+let picked = null;  // the moon button's choice in this tab: wins over a ?mode= link, works without storage
 function applyLook() {
   const root = document.documentElement;
-  const mode = query.get("mode") || store.get("mode");
+  const mode = picked || query.get("mode") || store.get("mode");
   if (mode === "light" || mode === "dark") root.dataset.mode = mode; else delete root.dataset.mode;
 }
 
@@ -56,7 +58,14 @@ function header(active) {
   top.querySelector("#lang").onclick = () => { const next = getLang() === "zh" ? "en" : "zh"; store.set("lang", next); setLang(next); route(); };
   top.querySelector("#mode").onclick = () => {
     const dark = document.documentElement.dataset.mode ? document.documentElement.dataset.mode === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    store.set("mode", dark ? "light" : "dark"); applyLook();
+    picked = dark ? "light" : "dark";
+    store.set("mode", picked);
+    if (query.has("mode")) {  // so a reload keeps the choice instead of the link's
+      query.delete("mode");
+      const rest = query.toString();
+      history.replaceState(null, "", `${location.pathname}${rest ? `?${rest}` : ""}${location.hash}`);
+    }
+    applyLook();
   };
 }
 
@@ -69,7 +78,7 @@ async function route() {
   main.setAttribute("aria-busy", "true");
   try {
     const data = await get(page, param);
-    document.title = `${t(`nav.${page}`)} · ${settings.title}`;
+    document.title = `${t(titleKey(page))} · ${settings.title}`;
     const group = GROUPS[groupOf(page)];
     const sub = group ? `<nav class="subnav seg" aria-label="${esc(t(`nav.${groupOf(page)}`))}">${group.map(([p, key]) => `<a href="#${p}" ${p === page ? 'aria-current="page"' : ""}>${t(key)}</a>`).join("")}</nav>` : "";
     main.innerHTML = sub + PAGES[page].render(data);
@@ -84,6 +93,7 @@ async function route() {
 }
 
 async function start() {
+  window.dayringStarted = true;  // index.html shows a reload message if this never runs
   try { settings = { ...settings, ...(await get("settings")) }; } catch { /* defaults */ }
   setLang(query.get("lang") || store.get("lang") || settings.locale);
   applyLook();

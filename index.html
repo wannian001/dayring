@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="en" data-static="true" data-build="f1813bf9c8">
+<html lang="en" data-static="true" data-build="60b432d5aa">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
   <title>dayring</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/tokens.css?v=f1813bf9c8">
-  <link rel="stylesheet" href="css/app.css?v=f1813bf9c8">
+  <link rel="stylesheet" href="css/tokens.css?v=60b432d5aa">
+  <link rel="stylesheet" href="css/app.css?v=60b432d5aa">
   <script>
     // apply a saved light/dark choice before first paint so the page does not flash
     try {
@@ -15,7 +15,18 @@
       if (m === "light" || m === "dark") document.documentElement.dataset.mode = m;
     } catch (e) {}
   </script>
-  <script type="module" src="js/app.js?v=f1813bf9c8"></script>
+  <script>
+    // if a script of the app could not be loaded (a dropped connection), say so instead of "Loading…" forever
+    function dayringFailed() {
+      if (window.dayringStarted || !document.querySelector("main")) return;
+      var zh = false;
+      try { zh = (new URLSearchParams(location.search).get("lang") || localStorage.getItem("dayring.lang") || navigator.language || "").slice(0, 2) === "zh"; } catch (e) {}
+      document.querySelector("main").innerHTML = '<div class="card"><p class="lede">' + (zh ? "这一页没加载完" : "The page did not finish loading") +
+        '</p><p><button class="tool" type="button" onclick="location.reload()">' + (zh ? "重新加载" : "Reload") + "</button></p></div>";
+    }
+    setTimeout(dayringFailed, 10000);
+  </script>
+  <script type="module" src="js/app.js?v=60b432d5aa" onerror="dayringFailed()"></script>
 </head>
 <body>
   <header class="top"><div class="top-in"></div></header>

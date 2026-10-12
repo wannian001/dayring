@@ -320,27 +320,36 @@ Object.assign(DICT.en, {
   "drain.title": "Drain", "drain.sub": "{from} – {to}, against the 28 days before",
   "drain.prev": "Earlier 7 days", "drain.next": "Later 7 days", "drain.latest": "Latest",
   "drain.eyebrow": "What is quietly wearing you down", "drain.sep": ", ",
-  "drain.worse_none": "Against your normal, nothing got worse", "drain.worse_some": "Against your normal, {n} got worse: {list}",
+  "drain.worse_none": "Against your normal, nothing got worse", "drain.worse_some": "Worse than your normal: {list}",
   "drain.plan_none": "Everything with a plan is within it.", "drain.plan_some": "Against your plan: {list}.",
   "drain.plan_unset": "No plans set for these yet (plan.sleep.bedtime, plan.screen.entertainment_max_hours).",
   "drain.items": "Seven signals", "drain.weeks": "Last 8 weeks", "drain.week_to": "week to {day}",
-  "drain.key.normal": "your normal", "drain.key.now": "last 7 days", "drain.key.plan": "plan",
+  "drain.key.normal": "your normal", "drain.key.now": "these 7 days", "drain.key.plan": "plan",
   "drain.item.resting_hr": "Resting heart rate", "drain.item.hrv": "HRV", "drain.item.asleep": "Falling asleep",
   "drain.item.spread": "Sleep-timing spread", "drain.item.before_sleep": "Screens in the hour before sleep",
   "drain.item.fun": "Entertainment & social", "drain.item.switches": "App switching",
   "drain.why.resting_hr": "Staying high: the stress side of the nervous system is winning, recovery is worse.",
-  "drain.why.hrv": "Staying low: less vagal tone. Watch HRV jumps around daily, so read the weekly direction.",
-  "drain.why.asleep": "Later pushes the body clock back; enough hours does not fully make up for it.",
+  "drain.why.hrv": "Staying low: less vagal tone. HRV from a watch jumps around from day to day, so read the direction over several weeks.",
+  "drain.why.asleep": "Later pushes the body clock back; sleeping enough hours does not fully make up for it.",
   "drain.why.spread": "How much the middle of your sleep moves night to night; large = the body clock never lines up.",
   "drain.why.before_sleep": "Light holds back melatonin and stimulating content keeps you alert, so sleep comes later.",
   "drain.why.fun": "Dense, high-reward input. The evidence here is softer than for the signals above.",
-  "drain.why.switches": "The more often you switch apps, the more scattered attention gets; each switch leaves residue.",
+  "drain.why.switches": "The more often you switch apps, the more scattered attention gets; after each switch, part of it stays on the last thing.",
   "drain.state.bad": "worse than normal", "drain.state.good": "better than normal", "drain.state.neutral": "within normal",
-  "drain.no_window": "too few records in the last 7 days", "drain.no_baseline": "no normal yet",
-  "drain.usual": "normal {a}–{b}", "drain.per_hour": "{v} an hour",
+  "drain.no_window": "too few records in these 7 days", "drain.no_baseline": "no normal yet",
+  "drain.usual": "normal {a}–{b}", "drain.per_hour": "{v} switches an hour",
   "drain.plan.bedtime": "plan: asleep by {clock}", "drain.plan.limit": "limit {v}", "drain.plan.ok": "within plan",
   "drain.plan.over.asleep": " later than planned by {d}", "drain.plan.over.fun": " over the limit by {d}",
-  "drain.rule": "Against your normal: the average of the last {w} days against the middle half of the {b} days before (sleep-timing spread: against the range of the four 7-night blocks before). Outside that band in the worse direction counts as worse; if your normal was already bad, it will say within normal, which is why the plan comparison is separate. Against your plan: falling asleep against plan.sleep.bedtime, entertainment & social against plan.screen.entertainment_max_hours in dayring.toml. Each signal uses only days its own record covers. There is no total score: the signals have different units and different strength of evidence.",
+  "drain.rule": "Against your normal: the average of these {w} days against the middle half of the daily values in the {b} days before (sleep-timing spread: against the range of the four 7-night blocks before). Outside that band in the worse direction counts as worse; if your normal was already bad, it will say within normal, which is why the plan comparison is separate. Against your plan: falling asleep against plan.sleep.bedtime, entertainment & social against plan.screen.entertainment_max_hours in dayring.toml. Each signal uses only days its own record covers in full (when Screen Time imports have stopped, their last day is left out: it was most likely cut off part-way). There is no total score: the signals have different units and different strength of evidence.",
+  "drain.worse_unknown": "Too few records to set these 7 days against your normal",
+  "drain.worse_none_some": "Of the {n} signals with enough records, none got worse than your normal",
+  "drain.plan_within": "Within plan: {list}.", "drain.plan_unchecked": "Too few records to check against the plan: {list}.",
+  "drain.plan_sep": ", ", "drain.sentence_sep": " ",
+  "drain.load_title": "Load over these 7 days", "drain.load_strain": "Short sleep and hard training stacked up in these 7 days",
+  "drain.load_ok": "No stack-up of short sleep and hard training in these 7 days",
+  "drain.load_unknown": "Too few nights recorded in these 7 days to check for a stack-up",
+  "drain.key.median": "middle of your normal", "drain.key.weeks": "weekly averages, last 8 weeks",
+  "drain.usual_per_hour": "normal {a}–{b} an hour",
   "today.drain": "Drain, last 7 days", "today.drain_more": "See what is wearing you down →",
 });
 Object.assign(DICT.zh, {
@@ -352,7 +361,7 @@ Object.assign(DICT.zh, {
   "drain.plan_none": "定了计划的几项都在计划内。", "drain.plan_some": "跟计划比：{list}。",
   "drain.plan_unset": "这几项还没定计划（plan.sleep.bedtime、plan.screen.entertainment_max_hours）。",
   "drain.items": "七个信号", "drain.weeks": "最近 8 周", "drain.week_to": "到 {day} 的一周",
-  "drain.key.normal": "你的平常", "drain.key.now": "最近 7 天", "drain.key.plan": "计划",
+  "drain.key.normal": "你的平常", "drain.key.now": "这 7 天", "drain.key.plan": "计划",
   "drain.item.resting_hr": "静息心率", "drain.item.hrv": "HRV", "drain.item.asleep": "入睡时刻",
   "drain.item.spread": "作息波动", "drain.item.before_sleep": "睡前一小时屏幕",
   "drain.item.fun": "娱乐和社交", "drain.item.switches": "应用切换",
@@ -362,13 +371,22 @@ Object.assign(DICT.zh, {
   "drain.why.spread": "每晚睡眠中点差多少；大 = 生物钟每天对不齐。",
   "drain.why.before_sleep": "光抑制褪黑素，内容让人更清醒，都会推迟入睡。",
   "drain.why.fun": "奖励密集的高刺激输入。这一条的证据比上面几条软。",
-  "drain.why.switches": "切得越勤，注意力越碎，每次切换都会留下残留。",
+  "drain.why.switches": "切得越勤，注意力越碎；每切一次，注意力都有一部分还留在上一件事上。",
   "drain.state.bad": "比平常差", "drain.state.good": "比平常好", "drain.state.neutral": "在平常范围",
-  "drain.no_window": "最近 7 天记录不够", "drain.no_baseline": "还定不出平常",
+  "drain.no_window": "这 7 天记录不够", "drain.no_baseline": "还定不出平常",
   "drain.usual": "平常 {a}–{b}", "drain.per_hour": "每小时 {v} 次",
   "drain.plan.bedtime": "计划 {clock} 前睡着", "drain.plan.limit": "上限 {v}", "drain.plan.ok": "在计划内",
   "drain.plan.over.asleep": "比计划晚 {d}", "drain.plan.over.fun": "比上限多 {d}",
-  "drain.rule": "跟平常比：最近 {w} 天的平均，对之前 {b} 天每天的中间一半（作息波动对之前 4 段、每段 7 晚的范围），往坏的方向出界算变差；平常本来就差时这里会说在平常范围，所以跟计划比单独写。跟计划比：入睡对 dayring.toml 里的 plan.sleep.bedtime，娱乐和社交对 plan.screen.entertainment_max_hours。每个信号只用它自己的记录覆盖到的日子。不打总分：几项的单位不同，证据强弱也不同。",
+  "drain.rule": "跟平常比：拿这 {w} 天的平均，和之前 {b} 天每天数值里居中的一半比（作息波动和之前 4 段、每段 7 晚各自的波动范围比），往坏的方向超出就算变差。平常本来就差时这里会显示“在平常范围”，所以另外跟计划比：入睡时刻和 dayring.toml 里的 plan.sleep.bedtime 比，娱乐和社交和 plan.screen.entertainment_max_hours 比。每个信号只用它自己的记录完整覆盖到的日子（屏幕使用时间停止导入时，最后一天多半只导了一半，不算）。不打总分：几项的单位不同，证据强弱也不同。",
+  "drain.worse_unknown": "记录不够，这 7 天没法跟平常比",
+  "drain.worse_none_some": "记录够的 {n} 项里，没有哪项比平常差",
+  "drain.plan_within": "在计划内：{list}。", "drain.plan_unchecked": "记录不够，没法跟计划比：{list}。",
+  "drain.plan_sep": "，", "drain.sentence_sep": "",
+  "drain.load_title": "这 7 天的负荷", "drain.load_strain": "这 7 天睡眠不足和高强度训练叠在一起了",
+  "drain.load_ok": "这 7 天没有出现睡眠不足叠加高强度训练",
+  "drain.load_unknown": "这 7 天记到的夜晚太少，看不出有没有叠加",
+  "drain.key.median": "平常的中间值", "drain.key.weeks": "最近 8 周的每周平均",
+  "drain.usual_per_hour": "平常每小时 {a}–{b} 次",
   "today.drain": "消耗 · 最近 7 天", "today.drain_more": "看哪些在耗你 →",
 });
 
@@ -437,6 +455,13 @@ export function shortDay(iso) {
 }
 
 export function weekdayShort(iso) { return WEEKDAY[lang][parse(iso).getDay()]; }
+
+// a label used inside a sentence ("Worse than your normal: resting heart rate, HRV"): English lowercases its
+// first letter unless the label starts with an abbreviation; Chinese has no case
+export function inSentence(label) {
+  if (lang !== "en" || !label) return label;
+  return /^[A-Z][a-z]/.test(label) ? label.charAt(0).toLowerCase() + label.slice(1) : label;
+}
 
 export function num(value, digits = 0) {
   if (value === null || value === undefined) return "—";
