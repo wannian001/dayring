@@ -243,11 +243,15 @@ export function timeChart(layers, { width, height = 240, first, last, unit = "",
   const parts = [];
   yTicks(lo, hi).forEach((v) => parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--c-grid)"/>
     <text x="${m.l - 8}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-3)" class="num">${esc(fmt(v))}</text>`));
-  const tickEvery = n > 90 ? 30 : n > 40 ? 14 : 7;
+  // date labels at least 44 px apart (a label is up to ~38 px), so a long span on a phone does not pile up
+  const base = n > 90 ? 30 : n > 40 ? 14 : 7;
+  const room = Math.max(2, Math.floor((width - m.l - m.r) / 44));
+  const tickEvery = Math.max(base, Math.ceil(n / (room - 1) / base) * base);
   for (let k = 0; k <= n; k += tickEvery) {
     const d = new Date(toDate(first)); d.setDate(d.getDate() + k);
     const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    parts.push(`<text x="${x(k).toFixed(1)}" y="${height - 6}" text-anchor="middle" font-size="11" fill="var(--ink-3)">${esc(shortDay(iso))}</text>`);
+    const anchor = x(k) + 20 > width ? "end" : "middle";  // the last label stays inside the chart
+    parts.push(`<text x="${(anchor === "end" ? width - 1 : x(k)).toFixed(1)}" y="${height - 6}" text-anchor="${anchor}" font-size="11" fill="var(--ink-3)">${esc(shortDay(iso))}</text>`);
   }
   if (layers.band && layers.band.length) {
     const top = layers.band.map((b) => `${X(b.date).toFixed(1)},${y(b.high).toFixed(1)}`);
@@ -322,7 +326,7 @@ export function stackedColumns(columns, groups, { width, height = 200, limit = n
 // ---- nights as bars on an evening-to-afternoon axis ------------------------------------------------------
 const fromNoon = (iso) => { const d = toDate(iso); const mm = d.getHours() * 60 + d.getMinutes(); return mm >= 720 ? mm - 720 : mm + 720; };
 export function sleepWindows(nights, { width, target = null, rowH = 18 }) {
-  const m = { l: 64, r: 12, t: 22, b: 8 };
+  const m = { l: 64, r: 18, t: 22, b: 8 };  // r: half of the last hour label ("14:00") must fit
   const x0 = 8 * 60, x1 = 26 * 60; // 20:00 .. 14:00 next day, in minutes after noon
   const x = linear(x0, x1, m.l, width - m.r);
   const h = m.t + m.b + nights.length * rowH;
@@ -339,10 +343,6 @@ export function sleepWindows(nights, { width, target = null, rowH = 18 }) {
     if (target) {
       parts.push(`<rect x="${x(target.start).toFixed(1)}" y="${(cy - rowH / 2 + 2).toFixed(1)}" width="${(x(target.end) - x(target.start)).toFixed(1)}" height="${rowH - 4}" rx="4" fill="none" stroke="var(--line-2)" stroke-dasharray="3 3"/>`);
     }
-    if (n.alarm) {
-      const [hh, mi] = n.alarm.split(":").map(Number); const am = hh * 60 + mi + 720;
-      parts.push(`<line x1="${x(am).toFixed(1)}" x2="${x(am).toFixed(1)}" y1="${(cy - rowH / 2 + 1).toFixed(1)}" y2="${(cy + rowH / 2 - 1).toFixed(1)}" stroke="var(--accent)" stroke-width="2"/>`);
-    }
     if (n.start && n.end) {
       const begin = fromNoon(n.start), span = (toDate(n.end) - toDate(n.start)) / 60000; // wake can be after noon
       const a = Math.max(x0, begin), b = Math.min(x1, begin + span);
@@ -350,6 +350,13 @@ export function sleepWindows(nights, { width, target = null, rowH = 18 }) {
         data-tip="${esc(`${shortDay(n.date)} · ${clock(n.start)}–${clock(n.end)} · ${dur(n.sleep_min)}${n.alarm ? ` · ${t("sleep.alarm_at", { alarm: n.alarm })}` : ""}`)}"/>`);
     } else {
       parts.push(`<text x="${x(x0 + 30)}" y="${(cy + 4).toFixed(1)}" font-size="10.5" fill="var(--ink-3)">${esc(t("sleep.no_record"))}</text>`);
+    }
+    // the alarm goes on top of the bar, in ink with a surface halo, so it shows on a night that ran past it
+    if (n.alarm) {
+      const [hh, mi] = n.alarm.split(":").map(Number); const ax = x(hh * 60 + mi + 720).toFixed(1);
+      const y1 = (cy - rowH / 2 + 1).toFixed(1), y2 = (cy + rowH / 2 - 1).toFixed(1);
+      parts.push(`<line x1="${ax}" x2="${ax}" y1="${y1}" y2="${y2}" stroke="var(--surface)" stroke-width="5" stroke-linecap="round" pointer-events="none"/>
+        <line x1="${ax}" x2="${ax}" y1="${y1}" y2="${y2}" stroke="var(--c-mark)" stroke-width="2" stroke-linecap="round" pointer-events="none"/>`);
     }
   });
   return `<svg viewBox="0 0 ${width} ${h}" width="${width}" height="${h}" role="img" aria-label="${esc(t("sleep.windows"))}">${parts.join("")}</svg>`;

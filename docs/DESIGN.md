@@ -22,7 +22,7 @@ Everything else is detail behind a "How this is worked out" fold.
 ## The Time page: one rule
 
 The page answers "where did the time go, and what changed?". Every block on it (the sentence and icons at
-the top, the per-day tiles, the typical day, the last 30 days) uses the same rule:
+the top, the daily-average tiles, the typical day, the last 30 days) uses the same rule:
 
 - **Each activity from its own record, minute by minute.** Sleep = falling asleep to waking (`sleep_start` to
   `sleep_end`). Exercise = workouts with a start and an end (`workouts.csv`; a paused workout counts its minutes moving); a day known only by its daily
@@ -38,29 +38,45 @@ the top, the per-day tiles, the typical day, the last 30 days) uses the same rul
 - **Not recorded.** The minutes of the day that no record covers. It is a tile of its own, not shared out among
   the others.
 - **What changed, not what was biggest.** Screens take the most waking time almost every day, so naming the
-  biggest activity says nothing. The page names what moved furthest from your normal instead, the same "you
+  biggest activity says nothing. The page names what changed against your normal instead, the same "you
   vs you" rule as every other page. The candidates are entertainment & social, focused work, communication,
   exercise, calendar time and sleep; the screen total is not one (its parts say what moved), nor are other
   screen time and not recorded.
-  - *Normal* for an activity on a day = `stats.typical` over that activity's daily minutes in the 28 days
-    before it (at least 10 days), counting only days whose record for it exists: a day without Screen Time
-    is not a zero-screen day. For the 7 days shown, the value is their daily average and the normal is the
-    28 days before the first of them; an average resting on fewer than half of the days is shown but not
-    compared.
-  - *Score* = how far the value lies outside the band, divided by max(q3 − q1, 15 minutes, 10% of the
-    median), so a few minutes outside a very steady habit do not outrank a real change; 0 inside the band.
-    The standout is the highest score above 0, ties going to the order above. Its change is value − median.
-  - *Tone* (green / red) only gives the direction: less entertainment, more focused work, more exercise and
-    more sleep are better; communication and calendar time have none.
+  - *Normal for a day* = `stats.typical` over that activity's daily minutes in the 28 days before it (at
+    least 10 days), counting only days whose record for it exists: a day without Screen Time is not a
+    zero-screen day.
+  - *Normal for the 7 days shown* = the middle half of your 7-day averages (`time.typical_week`): one
+    average for the 7 days ending on each of the 28 days before the first shown day, each over the days
+    with the record (at least 4 of the 7), and at least 10 such averages. The value is the shown days'
+    daily average; an average resting on fewer than half of the shown days is shown but not compared. A
+    band of single days would not do here: exercise three times a week or classes on weekdays put many
+    single days at 0, so a week with no workout or no class at all would sit inside it, and the change
+    would be measured from a daily median of 0.
+  - *Score* = how far the value lies outside its band, in band widths: the distance past q1 or q3 divided
+    by max(q3 − q1, the floor, 10% of the median), where the floor is 30 minutes for a single day and 15
+    minutes a day for the 7-day average; 0 inside the band. Values are compared in whole minutes, as
+    printed.
+  - *A change* is a score of at least 1 (`STANDOUT_MIN`): at least one band width past the edge of
+    normal. Inside the middle half every candidate would land outside about half the time, so with six of
+    them nearly every day and every week would name something; one band width keeps the usual ups and
+    downs quiet (measured on made-up usual habits: about 1 day in 20 names a change instead of 19 in 20).
+    The floor keeps a habit that hardly moves from turning a few minutes into a change.
+  - *The standout* is the change furthest from the middle of its normal in minutes (delta = value −
+    median), ties going to the order above, so the sentence and the minutes printed with it always agree.
+    No change: no standout.
+  - *Tone* (green / red) only gives the direction, and only for a change: less entertainment, more focused
+    work, more exercise and more sleep are better; communication and calendar time have none. A value
+    outside the middle half but not one band width out reads "just above / just below normal", uncoloured.
   - The top shows the standout's icon in its colour with an up / down badge and one sentence ("Compared with
     your normal, the biggest change these 7 days: entertainment & social, 1h 12m more a day"), with chips for
-    the other candidates outside normal; when nothing is outside, a check and "These 7 days look like your
-    normal". Each day cell shows that day's standout (or a check for a usual day) with its change, and that
-    day's screen total and workout minutes underneath.
-  - The tiles (screens with their split, entertainment & social, focused work, exercise, calendar, sleep,
-    not recorded) are the 7-day averages, each with a state chip, a bullet against the band and "normal
-    x–y", like the Today tiles. There is one baseline for the whole page: nothing is compared with "the 7
-    days before".
+    the other changes; with no change, a check and "These 7 days look like your normal". Each day cell shows
+    that day's change (or a check for a usual day, or a dashed clock and "No normal yet" when nothing that
+    day could be compared yet) and that day's screen total and workout minutes underneath.
+  - The daily-average tiles (screens with their split, entertainment & social, focused work, communication,
+    exercise, calendar, sleep, not recorded) are the 7-day averages, each with a state chip, a bullet against
+    the band of 7-day averages and "normal x–y" (one value is written once, "usually none" when it is 0),
+    like the Today tiles. There is one baseline for the whole page: nothing is compared with "the 7 days
+    before".
 - **A missing record is not zero.** Each activity is only counted on a day that has the record it needs, and
   is left out of its average otherwise (the tile says "6 of 7 days have a record"; the 30-day lanes draw ×):
   sleep needs the night that ended that morning and the one that started that evening; exercise needs a
@@ -78,12 +94,52 @@ the top, the per-day tiles, the typical day, the last 30 days) uses the same rul
 
 The Today page's screen card links here. Old `#attention` links open this page.
 
+## The Drain page
+
+The page answers "what has been quietly wearing me down this week?" with seven signals named the way physiology
+and sleep research name them: resting heart rate (higher is worse), HRV (lower is worse), the time you fall
+asleep (later is worse), sleep-timing spread (the standard deviation of each night's midpoint; larger is worse), screens in the
+hour before sleep, entertainment & social, and app switches per screen hour. Each row has one line on why it
+matters, and says when the evidence is softer (entertainment).
+
+- **Two judgements, never mixed.** Against your normal: the last 7 days' average against the middle half of the
+  28 days before (sleep-timing spread against the range of the four 7-night blocks before, because a spread only
+  exists over a run of nights). Against your plan, only where `dayring.toml` sets one: falling asleep against
+  `plan.sleep.bedtime`, entertainment & social against `plan.screen.entertainment_max_hours`. A habit that was
+  already bad reads as "within normal" and still shows up against the plan.
+- **No total score.** The signals have different units and different strength of evidence.
+- **Missing is missing.** Each signal uses only days its own record covers in full; fewer than 4 of the 7 days and
+  the row says so instead of guessing. A screen day counts only when it is whole: not today, and not the last day
+  of a Screen Time import that has stopped arriving (the same rule the Time page uses), since that day was most
+  likely cut off part-way. Screens in the hour before sleep need a screen record for every day that hour touches.
+  When no signal can be set against your normal, the page says so instead of "nothing got worse", and a plan that
+  could not be checked is named as such, never counted as within plan.
+- **App switches** count each session once, even when the same session was imported under two device names, so
+  they agree with screen hours, which count each minute once across devices.
+- **Row anatomy.** Grey band = your normal, tick = its median, dot = these 7 days, dashed tick = the plan (the
+  legend draws each key the way the row draws it); on the right the value, its normal, the state and the plan
+  chips; the last column is eight weekly averages, for slow signals like HRV. All rows share one set of columns,
+  so the strips line up down the card. At 900 px and narrower the strip and the weekly line get rows of their
+  own and the weekly line carries its own label; on phones the value moves under the name.
+- **Stepping.** Earlier / Later move 7 days at a time; Later from a window off the 7-day grid (opened from a past
+  day on Today) ends on the latest window. Today's card links to the Drain window it summarises.
+- The week stack-up check (at least 3 nights under 7 hours and at least 3 training days) moved here from Today;
+  Today keeps a two-line summary that links to this page.
+
+## Menu
+
+Today · Week · Body (Weight, Sleep) · Time · Drain · Review · Data. A menu item that holds more than one page shows
+a small switch under the menu, above the page title; the menu item stays highlighted on both, and each page is
+titled by its own tab (Weight, Sleep).
+
 ## Colour
 
-- Themes (`dayring/web/css/tokens.css`) change only neutrals and the UI accent: **dusk** (blue-black / violet
-  accent), **graphite** (neutral / blue accent), **celadon** (green-grey / jade accent). Each has its own light
-  and dark steps.
-- Data colours never change between themes:
+- Two looks, no theme picker (`dayring/web/css/tokens.css`): **light mode** uses graphite neutrals with a blue
+  accent, **dark mode** uses dusk neutrals (blue-black) with a violet accent. The page follows the system setting;
+  the moon button overrides it and remembers the choice (a shared `?mode=` link sets the starting look; a click
+  wins over it and drops it from the address). The chosen part of a switch (Weight / Sleep, the outcome switch on
+  Today) has its own raised step in each look (`--seg-on`), lighter than its track in dark mode.
+- Data colours are the same in both modes (each mode has its own step of the same hue):
 
   | thing | light | dark |
   |---|---|---|
@@ -100,9 +156,9 @@ The Today page's screen card links here. Old `#attention` links open this page.
   own track on the ring, its own lane on the Time page and its own chart on the Sleep page.
   Exercise was checked against every colour above, sleep included, in both modes: worst CVD ΔE 8.7 in light and
   8.4 in dark (both against sleep), at least 9.3 against the screen colours, and at least 3:1 contrast on every
-  theme's surface. So exercise may sit next to sleep: they are neighbouring lanes on the Time page and
+  mode's surface. So exercise may sit next to sleep: they are neighbouring lanes on the Time page and
   neighbouring tracks on the ring. Exercise minutes written as text use the darker (light mode) or lighter
-  (dark mode) text step, at least 5.5:1 on every theme's surface. Calendar blocks are drawn in ink, not a
+  (dark mode) text step, at least 5.5:1 on every mode's surface. Calendar blocks are drawn in ink, not a
   data colour.
 - Status colours (good / watch / off) are reserved for states and always come with a word or icon.
 - Charts are otherwise ink and grey. The "normal" band is a faint fill; dashed lines mean a plan or a limit.
@@ -115,10 +171,10 @@ The Today page's screen card links here. Old `#attention` links open this page.
 | bullet | today's value against the band; tick = median |
 | interval | difference after doing vs not doing, 95% interval, against zero |
 | weight corridor | dots = weigh-ins, line = 7-day average, shaded corridor = the plan's two weekly rates, dashed = target |
-| sleep windows | one bar per night from falling asleep to waking, on an 20:00–14:00 axis; accent tick = that morning's alarm |
+| sleep windows | one bar per night from falling asleep to waking, on an 20:00–14:00 axis; ink tick with a surface halo, drawn over the bar = that morning's alarm |
 | alarm ladder | the alarm as a step line (earlier = higher), dots = actual wake (green on time, red late) |
-| lanes | one row per activity (sleep, exercise, calendar, screens; the per-day tiles use the same order), one column per hour or per day; on the 30-day lanes each row has its own scale, written under its label (the hour lanes all run to 60 minutes); screens stack entertainment on the baseline so days compare against the dashed limit, whose label also sits under the row's name; × = no record that day, shaded = the 7 days above |
-| activity icons | one stroke icon per lane (screen, exercise, calendar, sleep, a dashed clock for not recorded) and per thing "what changed" can name (entertainment & social = a feed with a play button, focused work = a laptop with a code bracket, communication = a speech bubble), drawn in its colour; a change carries an up / down badge in its tone, a usual day a check |
+| lanes | one row per activity (sleep, exercise, calendar, screens; the daily-average tiles use the same order), one column per hour or per day; on the 30-day lanes each row has its own scale, written under its label (the hour lanes all run to 60 minutes); screens stack entertainment on the baseline so days compare against the dashed limit, whose label also sits under the row's name; × = no record that day, shaded = the 7 days above |
+| activity icons | one stroke icon per lane (screen, exercise, calendar, sleep, a dashed clock for not recorded) and per thing "what changed" can name (entertainment & social = a feed with a play button, focused work = a laptop with a code bracket, communication = a speech bubble), drawn in its colour; a change carries an up / down badge in its tone, a usual day a check, a day with no normal yet a dashed clock |
 | week load | one column per week, one block per deadline, height = share of grade, amber = due within 3 days |
 | arrivals | one cell per day per stream: has data / partial / nothing |
 

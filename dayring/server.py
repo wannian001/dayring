@@ -89,12 +89,19 @@ def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: No
     return Handler
 
 
+class Server(ThreadingHTTPServer):
+    # the page loads about a dozen scripts at once; the stdlib backlog of 5 resets some of those connections,
+    # and a module that fails to load leaves the page on "Loading…"
+    request_queue_size = 128
+    daemon_threads = True
+
+
 def serve(cfg: Config, host: str = "127.0.0.1", port: int = 8790,
           now: Callable[[], Optional[datetime]] = lambda: None) -> None:
     if host not in ("127.0.0.1", "localhost", "::1"):
         print(f"[dayring] warning: listening on {host}; anyone who can reach this address can read your data.",
               file=sys.stderr)
-    httpd = ThreadingHTTPServer((host, port), make_handler(cfg, now))
+    httpd = Server((host, port), make_handler(cfg, now))
     print(f"dayring on http://{'localhost' if host in ('127.0.0.1', '::1') else host}:{port}  (data: {cfg.data_dir})")
     try:
         httpd.serve_forever()

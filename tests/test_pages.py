@@ -1,5 +1,6 @@
 """Every page builds from the demo person, stays JSON-clean, and keeps the rules it promises."""
 import json
+import re
 import math
 import shutil
 import tempfile
@@ -175,6 +176,14 @@ class StaticBuild(unittest.TestCase):
             self.assertTrue((out / "api" / "today.json").is_file())
             self.assertTrue((out / "api" / f"today@{(TODAY - timedelta(days=1)).isoformat()}.json").is_file())
             self.assertTrue((out / ".nojekyll").is_file())
+            # every script and stylesheet URL carries the build's content hash, imports included
+            index = (out / "index.html").read_text()
+            version = re.search(r'data-build="([0-9a-f]{10})"', index).group(1)
+            self.assertIn(f'js/app.js?v={version}"', index)
+            self.assertIn(f'css/app.css?v={version}"', index)
+            for js in (out / "js").rglob("*.js"):
+                for spec in re.findall(r'from\s+"(\.{1,2}/[^"]+)"', js.read_text()):
+                    self.assertTrue(spec.endswith(f"?v={version}"), f"{js.name}: {spec}")
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 

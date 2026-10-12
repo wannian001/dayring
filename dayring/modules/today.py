@@ -247,6 +247,17 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
         "activity": activity(ctx, picked),
         "attention": att,
         "week": week_load(ctx, picked),
+        "drain": _drain_summary(ctx, picked),
         "ring": ring(ctx, picked, att["day"]),
         "effects": effects(ctx, picked),
     }
+
+
+def _drain_summary(ctx: Context, day: date) -> Dict[str, Any]:
+    """The Drain page's two lines for the same 7 days (imported here to avoid a circular import)."""
+    from . import drain
+    page = drain.build(ctx, (day - timedelta(days=1)).isoformat())
+    return {"window": page["window"], "worse": page["worse"], "strain": page["strain"]["strain"],
+            # how many signals could be set against your normal: 0 says so, never "nothing got worse"
+            "compared": page["compared"], "signals": len(page["rows"]),
+            "plan_off": [{"key": r["key"], "over": r.get("plan_over")} for r in page["rows"] if r.get("plan_tone") == "bad"]}

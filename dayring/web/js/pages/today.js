@@ -1,6 +1,7 @@
 import { bullet, dayDots, dayRing, draw, esc, interval, RING_CATS, spark } from "../charts.js";
-import { clock, day, dur, measure, num, pct, signed, t, weekdayShort, wtype } from "../i18n.js";
+import { clock, day, dur, inSentence, measure, num, pct, signed, t, weekdayShort, wtype } from "../i18n.js";
 import { icon } from "../icons.js";
+import { worseLine } from "./drain.js";
 
 const STATE_ICON = {
   good: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 6.3 2.3 2.3 4.7-5.1"/></svg>`,
@@ -92,7 +93,7 @@ function recoveryHtml(p) {
     <div class="dots"></div>
     <div class="note">${training.last ? esc(t("training.last", { type: wtype(training.last.type), min: dur(training.last.min) })) : t("training.none")}</div></div>`;
   return `<section class="card"><h2>${t("recovery.title")}<span class="aside">${p.recovery.as_of ? day(p.recovery.as_of) : ""}</span></h2>
-    <div class="tiles">${tiles}</div>
+    <div class="tiles aligned">${tiles}</div>
     <div class="tiles" style="margin-top:var(--s-3)">${actTiles}${trainTile}</div>
     <details class="how"><summary>${t("ui.how")}</summary><p>${t("recovery.rule")}</p></details></section>`;
 }
@@ -118,7 +119,7 @@ function attentionHtml(p) {
     ${a.stale ? `<p class="chip watch" style="height:auto;padding:4px 10px;white-space:normal;margin:0 0 12px">${t("screens.stale", { n: a.days_behind })}</p>` : ""}
     <div class="catbar" role="img" aria-label="${esc(t("screens.total", { total: dur(a.total) }))}">${bar}</div>
     <div class="legend" style="margin:8px 0 14px">${RING_CATS.map(([key, keys, color]) => { const m = keys.reduce((s, k) => s + (cats[k] || 0), 0); return `<span class="key"><i style="background:${color}"></i>${t(`cat.${key}`)} ${dur(m)}</span>`; }).join("")}</div>
-    <div class="tiles two">${tiles}</div>
+    <div class="tiles two aligned">${tiles}</div>
     ${targets ? `<div class="stack" style="margin-top:var(--s-4);gap:8px">${targets}</div>` : ""}
     <p class="small" style="margin:var(--s-3) 0 0"><a href="#time">${t("screens.more")}</a></p>
     <details class="how"><summary>${t("ui.how")}</summary><p>${t("screens.rule")}</p></details></section>`;
@@ -160,24 +161,28 @@ function effectRows(e, outcome) {
   }).join("");
 }
 
-function weekHtml(p) {
-  const w = p.week;
-  const facts = [t("week.nights", { short: w.short_nights, n: w.nights, h: w.rule.short_hours }), t("week.train", { n: w.train_days })];
-  if (w.hrv_change !== null) facts.push(t("week.hrv", { dir: t(w.hrv_change >= 0 ? "week.up" : "week.down"), pct: pct(w.hrv_change) }));
-  return `<section class="card"><h2>${t("week.title")}</h2>
-    <p class="lede" style="font-size:var(--t-lg)">${t(w.strain ? "week.strain" : "week.ok")}</p>
-    <ul class="agenda">${facts.map((f) => `<li style="grid-template-columns:minmax(0,1fr)"><span>${esc(f)}</span></li>`).join("")}</ul>
-    <details class="how"><summary>${t("ui.how")}</summary><p>${t("week.rule")}</p></details></section>`;
+function drainHtml(p) {
+  const d = p.drain;
+  if (!d) return "";
+  const worse = worseLine(d.worse, d.compared, d.signals);
+  const plan = d.plan_off.length ? t("drain.plan_some", { list: d.plan_off.map((r) => `${inSentence(t(`drain.item.${r.key}`))}${t(`drain.plan.over.${r.key}`, { d: dur(r.over) })}`).join(t("drain.plan_sep")) }) : "";
+  // the Drain page for the same 7 days as this card (the latest window when this is today)
+  const more = p.looking_back ? `#drain/${d.window.to}` : "#drain";
+  return `<section class="card"><h2>${t("today.drain")}<span class="aside">${day(d.window.from, { weekday: false })} – ${day(d.window.to, { weekday: false })}</span></h2>
+    <p class="lede" style="font-size:var(--t-lg)">${esc(worse)}</p>
+    ${plan ? `<p class="small" style="margin:0 0 8px;color:var(--ink-2)">${esc(plan)}</p>` : ""}
+    ${d.strain ? `<p class="chip watch" style="height:auto;padding:4px 10px;white-space:normal">${t("week.strain")}</p>` : ""}
+    <p class="small" style="margin:var(--s-3) 0 0"><a href="${more}">${t("today.drain_more")}</a></p></section>`;
 }
 
 export default {
   render(p) {
     const prev = shiftDay(p.day, -1), next = shiftDay(p.day, 1);
     const stepper = `<div class="stepper"><a href="#today/${prev}">‹ ${t("ui.prev_day")}</a>
-      ${p.looking_back ? `<a href="#today/${next}">${t("ui.next_day")} ›</a><a href="#today">${t("ui.back_today")}</a>` : `<span aria-disabled="true">${t("ui.next_day")} ›</span>`}</div>`;
+      ${p.looking_back ? `<a href="${next === p.today ? "#today" : `#today/${next}`}">${t("ui.next_day")} ›</a><a href="#today">${t("ui.back_today")}</a>` : `<span aria-disabled="true">${t("ui.next_day")} ›</span>`}</div>`;
     return `<div class="head"><div><h1>${p.looking_back ? t("today.looking_back", { day: day(p.day) }) : t("today.title")}</h1>
       <div class="sub">${day(p.day)} · ${t("ui.computed", { time: clock(p.now) })}</div></div>${stepper}</div>
-      <div class="grid">${heroHtml(p)}<div class="col span-7">${recoveryHtml(p)}${effectsHtml(p)}</div><div class="col span-5">${attentionHtml(p)}${weekHtml(p)}</div></div>`;
+      <div class="grid">${heroHtml(p)}<div class="col span-7">${recoveryHtml(p)}${effectsHtml(p)}</div><div class="col span-5">${attentionHtml(p)}${drainHtml(p)}</div></div>`;
   },
   mount(root, p) {
     const ringBox = root.querySelector("#ring");

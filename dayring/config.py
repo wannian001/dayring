@@ -94,7 +94,6 @@ class Config:
     data_dir: Path
     timezone: str = "UTC"
     locale: str = "en"
-    theme: str = "dusk"
     title: str = "dayring"
     demo: bool = False
     devices: List[str] = field(default_factory=lambda: list(DEFAULT_DEVICES))
@@ -112,7 +111,7 @@ class Config:
 
     def public(self) -> Dict[str, Any]:
         """What the browser is allowed to know about the settings."""
-        return {"title": self.title, "locale": self.locale, "theme": self.theme,
+        return {"title": self.title, "locale": self.locale,
                 "timezone": self.timezone, "demo": self.demo}
 
 
@@ -193,7 +192,6 @@ def load(path: Optional[Path] = None, data_dir: Optional[Path] = None) -> Config
     cfg = Config(root=root, data_dir=folder.resolve(),
                  timezone=str(main.get("timezone", "UTC")),
                  locale=str(main.get("locale", "en")),
-                 theme=str(main.get("theme", "dusk")),
                  title=str(main.get("title", "dayring")),
                  demo=bool(main.get("demo", False)))
     if cfg.locale not in ("en", "zh"):

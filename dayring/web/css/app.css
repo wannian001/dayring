@@ -123,8 +123,12 @@ main { max-width: 1320px; margin: 0 auto; padding: var(--s-6) var(--s-6) var(--s
 /* ---- metric tiles ---- */
 .tiles { display: grid; gap: var(--s-3); grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
 .tile { background: var(--surface-2); border-radius: var(--r-md); padding: 14px 14px 10px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.tile .label { font-size: var(--t-xs); color: var(--ink-2); font-weight: 600; display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
-.tile .label > span:first-child { min-width: 0; padding-top: 3px; }
+/* the name wraps beside its chip down to its longest word; past that the chip goes under the name, never over it
+   (basis 0 + the automatic minimum = a line holds them when the longest word and the chip fit) */
+.tile .label { font-size: var(--t-xs); color: var(--ink-2); font-weight: 600; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; align-items: flex-start; }
+.tile .label > span:first-child { padding-top: 3px; }
+.tile .label > span:first-child:not(.act-name) { flex: 1 1 0; }
+.tile .label > .chip { flex: none; }
 .tile .value { font-size: var(--t-xl); font-weight: 680; letter-spacing: -.01em; line-height: 1.15; }
 .tile .value small { font-size: var(--t-sm); font-weight: 550; color: var(--ink-3); margin-left: 3px; }
 .tile .note { font-size: var(--t-xs); color: var(--ink-3); }
@@ -146,7 +150,7 @@ main { max-width: 1320px; margin: 0 auto; padding: var(--s-6) var(--s-6) var(--s
 
 .seg { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 2px; gap: 2px; }
 .seg button { border: 0; background: transparent; padding: 4px 12px; border-radius: var(--r-pill); font-size: var(--t-xs); font-weight: 600; color: var(--ink-2); cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.seg button[aria-pressed="true"] { background: var(--seg-on); color: var(--ink); box-shadow: var(--seg-on-edge); }
 
 details.how { margin-top: var(--s-3); font-size: var(--t-xs); color: var(--ink-3); }
 details.how summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
@@ -232,6 +236,9 @@ code, .code { font-family: var(--mono); font-size: 12px; }
 .day-actual { margin: 0; }
 
 .tiles.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* tiles made of the same five parts share their rows, so a name that wraps (or a chip that drops under it)
+   never pushes one value below its neighbour's */
+.tiles.aligned > .tile { display: grid; grid-template-columns: minmax(0, 1fr); grid-row: span 5; grid-template-rows: subgrid; row-gap: 6px; align-content: start; }
 @media (max-width: 360px) { .tiles.two { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .tile .value { font-size: var(--t-lg); } .hero-num { font-size: var(--t-2xl); } }
 
@@ -283,16 +290,30 @@ code, .code { font-family: var(--mono); font-size: 12px; }
   .time-top .chg-icon > svg { width: 38px; height: 38px; }
   .time-top .chg-badge { right: -8px; bottom: -8px; padding: 2px; }
   .time-top .chg-badge svg { width: 18px; height: 18px; }
+  .time-lede .lede { font-size: var(--t-lg); }
 }
-.act-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+/* eight tiles in full rows: three columns (screens two wide) on desktop, two below 1100px, one on phones */
+.act-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .act-tiles .act-wide { grid-column: span 2; }
-@media (max-width: 1100px) { .act-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 520px) { .act-tiles { grid-template-columns: minmax(0, 1fr); } .act-tiles .act-wide { grid-column: auto; } }
-.act-tile .label { flex-wrap: wrap; row-gap: 4px; }
+@media (max-width: 1100px) { .act-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .act-tiles .act-wide { grid-column: auto; } }
+@media (max-width: 520px) { .act-tiles { grid-template-columns: minmax(0, 1fr); } }
+/* the four rows of a tile (name, value, bullet, note) are shared across its grid row, so a name that
+   wraps never pushes one value or bullet below its neighbours' */
+.act-tile { display: grid; grid-template-columns: minmax(0, 1fr); grid-row: span 4; grid-template-rows: subgrid; row-gap: 6px;
+  align-content: start; }
+/* the chip sits right of the name. Two narrow columns (521–700px): every chip goes under its name, so a
+   row stays even; one column: a chip that does not fit wraps under the name (nothing to line up with) */
+.act-tile .label { flex-wrap: nowrap; }
+@media (min-width: 521px) and (max-width: 700px) { .act-tile .label { flex-direction: column; align-items: flex-start; gap: 4px; } }
+@media (max-width: 520px) { .act-tile .label { flex-wrap: wrap; row-gap: 4px; } }
+.act-tile .label .chip { flex: none; }
+.act-tile .act-value .catbar { margin-top: 8px; }
 .act-tile .note .piece { display: inline-block; max-width: 100%; }
-.act-name { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; }
+.act-name { display: inline-flex; align-items: flex-start; gap: 6px; font-weight: 650; min-width: 0; }
 .act-name svg { flex: none; }
-.act-name span { color: var(--ink-2); }
+.act-name span { color: var(--ink-2); min-width: 0; }
+/* a Chinese sentence breaks between its phrases (at the punctuation) before it breaks inside one */
+.ph { display: inline-block; }
 #hours svg, #history svg { display: block; max-width: 100%; }
 
 /* training in the calendar */
@@ -301,3 +322,43 @@ code, .code { font-family: var(--mono); font-size: 12px; }
 .day-train { display: flex; align-items: center; gap: 2px; }
 .day-train.missed { color: var(--ink-3); }
 .training-row .when { display: inline-flex; align-items: center; }
+
+/* grouped pages: the small switch under the menu */
+.subnav { display: inline-flex; margin-bottom: var(--s-4); }
+.subnav a { padding: 5px 14px; border-radius: var(--r-pill); font-size: var(--t-xs); font-weight: 650; color: var(--ink-2); }
+.subnav a:hover { text-decoration: none; color: var(--ink); }
+.subnav a[aria-current="page"] { background: var(--seg-on); color: var(--ink); box-shadow: var(--seg-on-edge); }
+
+/* drain: one set of column tracks for the header and all seven rows (subgrid), so the strips and the
+   descriptions line up down the card whatever chips a row carries; the value column grows to 260px and
+   then wraps its chips */
+.drain-rows { display: grid; grid-template-columns: minmax(180px, 1.25fr) minmax(140px, 1.4fr) fit-content(260px) 150px; column-gap: var(--s-4); }
+.drain-head, .drain-row { grid-column: 1 / -1; display: grid; gap: var(--s-4);
+  grid-template-columns: minmax(180px, 1.25fr) minmax(140px, 1.4fr) fit-content(260px) 150px; grid-template-columns: subgrid; align-items: center; }
+.drain-head { font-size: var(--t-xs); color: var(--ink-3); font-weight: 600; padding-bottom: 4px; }
+.drain-row { padding: 12px 0; border-top: 1px solid var(--line); }
+.drain-row .what b { font-size: var(--t-sm); }
+.drain-row .what span { display: block; font-size: var(--t-xs); color: var(--ink-3); margin-top: 2px; }
+.drain-value { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; min-width: 0; }
+.drain-value b { font-size: var(--t-lg); font-weight: 680; }
+.drain-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.drain-strip svg, .drain-weeks svg { display: block; width: 100%; }
+.drain-weeks-label, .drain-weeks-key { display: none; }
+/* narrower: the strip and the weekly line get rows of their own, the weekly line with its own label */
+@media (max-width: 900px) {
+  .drain-rows { display: block; }
+  .drain-head { display: none; }
+  .drain-row { grid-template-columns: minmax(0, 1fr) fit-content(300px); row-gap: 8px; column-gap: var(--s-3); }
+  .drain-row .drain-strip { grid-column: 1 / -1; grid-row: 2; }
+  .drain-row .drain-weeks-cell { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-3); align-items: center; }
+  .drain-weeks-label { display: block; white-space: nowrap; }
+  .drain-weeks-key { display: inline-flex; }
+}
+/* phones: everything in one column, the value under the name (left-aligned), so no column is squeezed */
+@media (max-width: 600px) {
+  .drain-row { grid-template-columns: minmax(0, 1fr); }
+  .drain-row .drain-value { grid-row: 2; flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 10px; row-gap: 4px; text-align: left; }
+  .drain-row .drain-chips { justify-content: flex-start; }
+  .drain-row .drain-strip { grid-row: 3; }
+  .drain-row .drain-weeks-cell { grid-row: 4; }
+}

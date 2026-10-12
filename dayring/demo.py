@@ -286,7 +286,6 @@ def demo_config(today: date) -> str:
 data_dir = "data"
 timezone = "Australia/Melbourne"
 locale = "en"
-theme = "dusk"
 title = "dayring"
 demo = true
 

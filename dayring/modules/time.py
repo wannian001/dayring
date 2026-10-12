@@ -9,11 +9,20 @@ its average and of its normal, so a late Screen Time import or a night with the 
 as a drop.
 
 The page does not name the biggest activity (screens would win almost every day, which says nothing).
-It names what changed: each candidate is compared with your own normal, the middle half of the 28 days
-before (stats.typical), and the one furthest outside it is the standout. The distance is measured in
-"widths of the normal band", so a 40-minute change in exercise and a 40-minute change in screens are
-not weighed the same when one of them moves that much every week.
+It names what changed: each candidate is compared with your own normal, and a change counts only when
+it lies clearly outside it, at least one width of the normal band past its edge (the width counts as at
+least 30 minutes for a single day and 15 minutes a day for the 7-day average, or a tenth of the usual
+value when that is larger). Measuring in band widths keeps the usual ups and downs quiet: an activity that swings by an hour
+from day to day needs a bigger change than one that hardly moves. Of the clear changes, the biggest in
+minutes is named, so the sentence and the minutes printed under it always agree.
+
+A single day is compared with the middle half of the 28 days before it (stats.typical). The 7 days
+shown are compared by their daily average with your usual 7-day averages (typical_week): an average of
+7 days moves much less than one day does, so a band of single days would let a week with no exercise or
+no classes at all read as normal.
 """
+import math
+import statistics
 from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
 
@@ -34,8 +43,11 @@ CANDIDATES = ("fun", "focus", "communication", "exercise", "calendar", "sleep")
 NORMAL_KEYS = CANDIDATES + ("screen", "not_recorded")  # the tiles also show these two against their normal
 BETTER = {"fun": "lower", "focus": "higher", "communication": "none", "exercise": "higher", "calendar": "none",
           "sleep": "higher", "screen": "none", "not_recorded": "none"}
-MIN_WIDTH_MIN = 15      # a band narrower than this (or than 10% of the median) is widened when scoring,
-MIN_WIDTH_SHARE = 0.10  # so a few minutes outside a very steady habit do not outrank a real change
+STANDOUT_MIN = 1.0      # a change counts when it lies at least one band width outside normal
+DAY_MIN_WIDTH = 30      # minutes: a single day's band counts as at least this wide when measuring,
+SPAN_MIN_WIDTH = 15     # minutes a day: and a 7-day average's band as at least this wide,
+MIN_WIDTH_SHARE = 0.10  # or a tenth of the usual value if larger, so a few minutes off a steady habit are no change
+WEEK_MIN_DAYS = 4       # a 7-day average in the normal needs at least this many days with the record
 
 
 def _owner(key: str) -> str:
@@ -92,8 +104,32 @@ def normal_series(ctx: Context) -> Dict[str, stats.Series]:
     return out
 
 
-def score(value: Optional[float], band: Optional[Dict[str, float]]) -> float:
-    """How far ``value`` lies outside the normal band, in band widths; 0 inside it or when unknown."""
+def typical_week(values: stats.Series, first: date) -> Optional[Dict[str, float]]:
+    """Your normal for a 7-day average: the middle half of the 7-day averages ending on each of the 28
+    days before ``first``. Each average is over the days in it that have the record (at least
+    WEEK_MIN_DAYS of the 7), and it needs at least stats.MIN_BASELINE of them. ``days`` is how many
+    averages it rests on."""
+    means = []
+    for k in range(1, stats.BASELINE_DAYS + 1):
+        end = first - timedelta(days=k)
+        week = [values[end - timedelta(days=j)] for j in range(SPAN) if end - timedelta(days=j) in values]
+        if len(week) >= WEEK_MIN_DAYS:
+            means.append(sum(week) / len(week))
+    if len(means) < stats.MIN_BASELINE:
+        return None
+    q1, median, q3 = statistics.quantiles(means, n=4, method="inclusive")
+    return {"median": median, "q1": q1, "q3": q3, "days": len(means)}
+
+
+def _whole(minutes: Optional[float]) -> Optional[float]:
+    """Whole minutes, rounded the way the page prints them (half up), so a chip never says "above
+    normal" about a value that reads the same as the top of its normal."""
+    return None if minutes is None else float(math.floor(minutes + 0.5))
+
+
+def score(value: Optional[float], band: Optional[Dict[str, float]], min_width: float) -> float:
+    """How far ``value`` lies outside the normal band, in band widths (the width counts as at least
+    ``min_width`` minutes or a tenth of the median); 0 inside it or when unknown."""
     if value is None or band is None:
         return 0.0
     if value > band["q3"]:
@@ -102,44 +138,50 @@ def score(value: Optional[float], band: Optional[Dict[str, float]]) -> float:
         outside = band["q1"] - value
     else:
         return 0.0
-    return outside / max(band["q3"] - band["q1"], MIN_WIDTH_MIN, MIN_WIDTH_SHARE * band["median"])
+    return outside / max(band["q3"] - band["q1"], min_width, MIN_WIDTH_SHARE * band["median"])
 
 
-def compare(key: str, value: Optional[float], band: Optional[Dict[str, float]]) -> Dict[str, Any]:
-    state = stats.classify(value, band)
+def compare(key: str, value: Optional[float], band: Optional[Dict[str, float]], min_width: float) -> Dict[str, Any]:
+    """``value`` against ``band`` in whole minutes. ``clear`` = far enough outside to count as a change."""
+    v = _whole(value)
+    b = {k: _whole(band[k]) for k in ("q1", "median", "q3")} if band is not None else None
+    state = stats.classify(v, b)
+    s = score(v, b, min_width)
     return {"key": key, "value": value, "band": band, "state": state,
             "delta": value - band["median"] if state is not None else None,
-            "score": score(value, band), "tone": stats.tone(state, BETTER[key])}
+            "score": s, "clear": s >= STANDOUT_MIN, "tone": stats.tone(state, BETTER[key])}
 
 
 def ranked(changes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Furthest outside normal first; ties keep the order of CANDIDATES."""
+    """The clear changes first, biggest in minutes first; then the rest, furthest outside first.
+    Ties keep the order of CANDIDATES."""
     order = {k: i for i, k in enumerate(CANDIDATES)}
-    return sorted(changes, key=lambda c: (-c["score"], order.get(c["key"], len(order))))
+    return sorted(changes, key=lambda c: (not c["clear"], -abs(c["delta"]) if c["clear"] else -c["score"],
+                                          order.get(c["key"], len(order))))
 
 
 def standout(changes: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
-    """The candidate furthest outside its normal, or None when every one is within it (or unknown)."""
+    """The biggest clear change among the candidates, or None when nothing is clearly outside normal."""
     best = next(iter(ranked([c for c in changes if c["key"] in CANDIDATES])), None)
-    return best if best is not None and best["score"] > 0 else None
+    return best if best is not None and best["clear"] else None
 
 
 def _day(td: TimeDay, series: Dict[str, stats.Series]) -> Dict[str, Any]:
     totals = td.totals()
-    changes = [compare(k, totals[k], stats.typical(series[k], td.day)) for k in CANDIDATES]
+    changes = [compare(k, totals[k], stats.typical(series[k], td.day), DAY_MIN_WIDTH) for k in CANDIDATES]
     best = standout(changes)
     return {"date": iso(td.day), "totals": totals, "minutes_in_day": td.length,
-            "standout": {k: best[k] for k in ("key", "value", "band", "state", "delta", "tone")} if best else None,
+            "standout": {k: best[k] for k in ("key", "value", "band", "state", "delta", "score", "tone")} if best else None,
             "compared": sum(1 for c in changes if c["state"] is not None)}
 
 
 def _span_changes(span: Dict[str, Any], first: date, series: Dict[str, stats.Series]) -> Dict[str, Any]:
-    """The span's daily average against the normal of the 28 days before its first day. An average
+    """The span's daily average against your usual 7-day averages before its first day. An average
     that rests on fewer than half of the shown days is shown but not compared."""
     metrics = {}
     for k in NORMAL_KEYS:
         enough = span["known"][k] * 2 >= span["n"]
-        m = compare(k, span["avg"][k], stats.typical(series[k], first) if enough else None)
+        m = compare(k, span["avg"][k], typical_week(series[k], first) if enough else None, SPAN_MIN_WIDTH)
         m.update(known=span["known"][k], few=not enough)
         metrics[k] = m
     changes = ranked([metrics[k] for k in CANDIDATES])
@@ -172,11 +214,11 @@ def _workouts(ctx: Context, first: date, last: date) -> List[Dict[str, Any]]:
 
 
 def _stale(ctx: Context, time: Dict[date, TimeDay], span_to: date) -> List[Dict[str, Any]]:
-    """Records that stop before the last shown day, with the last day that has one."""
+    """Records that stop before the last shown day, with the last whole day that has one. For screens
+    that is the day before the last imported one, which the import probably cut off (context.time_days)."""
     out = []
     for activity in STALE:
-        held = (lambda td: td.has_screen) if activity == "screen" else (lambda td, a=activity: td.known[a])
-        last = max((d for d, td in time.items() if d < ctx.today and held(td)), default=None)
+        last = max((d for d, td in time.items() if d < ctx.today and td.known[activity]), default=None)
         if last is None or last < span_to:
             out.append({"activity": activity, "last": iso(last)})
     return out

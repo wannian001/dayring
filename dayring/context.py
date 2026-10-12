@@ -256,9 +256,7 @@ class Context:
         starts = sorted(w["start"].date() for w in self.store.rows("workouts") if w["end"] > w["start"])
         first_w, last_w = (starts[0], starts[-1]) if starts else (None, None)
         has_calendar = self.store.load("events").present
-        # when Screen Time has stopped arriving, its last day was most likely cut off by the import
-        last_screen = max(self.screen_days(), default=None)
-        partial_screen = last_screen if last_screen is not None and last_screen < self.today - timedelta(days=1) else None
+        partial_screen = self.screen_partial_day()
         for d, td in days.items():
             td.known["screen"] = td.has_screen and d != partial_screen
             # the night that ended this morning and the one that ended next morning (its evening part)
@@ -292,6 +290,17 @@ class Context:
     def screen_last_day(self) -> Optional[date]:
         days = self.screen_days()
         return max(days) if days else None
+
+    def screen_partial_day(self) -> Optional[date]:
+        """The last Screen Time day when imports have stopped arriving: the import most likely cut it off
+        part-way (run at 14:00, the evening is not in), so it is not a whole day. None while imports keep coming."""
+        last = self.screen_last_day()
+        return last if last is not None and last < self.today - timedelta(days=1) else None
+
+    def screen_known_days(self) -> Dict[date, ScreenDay]:
+        """Screen days whose record is whole: before today and not the cut-off last import day."""
+        partial = self.screen_partial_day()
+        return {d: sd for d, sd in self.screen_days().items() if d < self.today and d != partial}
 
     def fun_before_sleep(self, day: date) -> Optional[float]:
         """Fun minutes in the hour before falling asleep the night after ``day``."""

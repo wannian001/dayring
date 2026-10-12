@@ -1,8 +1,9 @@
 /* dayring design tokens.
    Layout concept: a calm instrument panel — one day ring as the anchor, then rows of small,
    honest measurements, each compared with "your normal".
-   Themes change only neutrals and the UI accent. Data colors follow the thing measured and never
-   change between themes (validated for colour-vision deficiency with the dataviz validator):
+   Light mode uses graphite neutrals with a blue accent, dark mode dusk neutrals with a violet accent.
+   Data colours follow the thing measured and keep the same hue in both modes, each mode with its own step
+   (validated for colour-vision deficiency with the dataviz validator):
    focus = blue, fun = orange, communication = aqua, other = grey, sleep = violet (own ring track).
    Status colours are reserved for good / watch / off and always come with a word or icon. */
 
@@ -17,20 +18,22 @@
   --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-pill: 999px;
   --ease: cubic-bezier(.2, .7, .2, 1);
 
-  /* theme: dusk (default), light */
-  --bg: #f2f3f7;
+  /* light mode: graphite neutrals, blue accent */
+  --bg: #f4f4f3;
   --surface: #ffffff;
-  --surface-2: #f6f7fa;
-  --ink: #12151d;
-  --ink-2: #474e5e;
-  --ink-3: #646c7d;
-  --line: #e2e5ec;
-  --line-2: #ccd1dc;
-  --accent: #4b3fb0;
-  --accent-soft: rgba(75, 63, 176, .1);
+  --surface-2: #f7f7f6;
+  --ink: #161616;
+  --ink-2: #4a4a48;
+  --ink-3: #6a6a67;
+  --line: #e4e4e1;
+  --line-2: #cfcfcb;
+  --accent: #1f5fbf;
+  --accent-soft: rgba(31, 95, 191, .1);
   --on-accent: #ffffff;
-  --shadow: 0 1px 2px rgba(16, 20, 33, .05), 0 6px 22px rgba(16, 20, 33, .05);
-  --header: rgba(242, 243, 247, .82);
+  --shadow: 0 1px 2px rgba(22, 22, 22, .05), 0 6px 22px rgba(22, 22, 22, .05);
+  --header: rgba(244, 244, 243, .84);
+  --seg-on: #ffffff;                              /* the chosen part of a switch, raised off its track */
+  --seg-on-edge: 0 1px 2px rgba(0, 0, 0, .12);
 
   /* data colours (light steps) */
   --c-focus: #2a78d6;
@@ -40,11 +43,11 @@
   --c-sleep: #4a3aa7;
   --c-exercise: #bf3fa6;
   --c-exercise-ink: #a8318f;  /* exercise as text: >= 5.5:1 on every light surface */
-  --c-event: #12151d;
-  --c-band: rgba(18, 21, 29, .075);
-  --c-grid: rgba(18, 21, 29, .07);
-  --c-axis: rgba(18, 21, 29, .22);
-  --c-mark: #12151d;
+  --c-event: #161616;
+  --c-band: rgba(22, 22, 22, .075);
+  --c-grid: rgba(22, 22, 22, .07);
+  --c-axis: rgba(22, 22, 22, .22);
+  --c-mark: #161616;
 
   /* status */
   --good: #0ca30c; --good-ink: #1d7a1d; --good-soft: rgba(12, 163, 12, .11);
@@ -52,7 +55,7 @@
   --off: #d03b3b; --off-ink: #b42828; --off-soft: rgba(208, 59, 59, .1);
 }
 
-/* ---- dusk · dark ---- */
+/* ---- dark mode: dusk neutrals, violet accent ---- */
 @media (prefers-color-scheme: dark) {
   :root:not([data-mode="light"]) {
     color-scheme: dark;
@@ -62,6 +65,7 @@
     --accent: #aea2f7; --accent-soft: rgba(174, 162, 247, .14); --on-accent: #14102e;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .25);
     --header: rgba(11, 13, 19, .8);
+    --seg-on: #353d50; --seg-on-edge: 0 0 0 1px rgba(236, 238, 245, .12);
     --c-focus: #3987e5; --c-fun: #d95926; --c-comms: #199e70; --c-other: #5d6474; --c-sleep: #9085e9; --c-exercise: #cb4db2; --c-exercise-ink: #de78c8;
     --c-event: #eceef5; --c-band: rgba(236, 238, 245, .085); --c-grid: rgba(236, 238, 245, .07);
     --c-axis: rgba(236, 238, 245, .22); --c-mark: #eceef5;
@@ -78,66 +82,11 @@
   --accent: #aea2f7; --accent-soft: rgba(174, 162, 247, .14); --on-accent: #14102e;
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .25);
   --header: rgba(11, 13, 19, .8);
+  --seg-on: #353d50; --seg-on-edge: 0 0 0 1px rgba(236, 238, 245, .12);
   --c-focus: #3987e5; --c-fun: #d95926; --c-comms: #199e70; --c-other: #5d6474; --c-sleep: #9085e9; --c-exercise: #cb4db2; --c-exercise-ink: #de78c8;
   --c-event: #eceef5; --c-band: rgba(236, 238, 245, .085); --c-grid: rgba(236, 238, 245, .07);
   --c-axis: rgba(236, 238, 245, .22); --c-mark: #eceef5;
   --good-ink: #4cc94c; --good-soft: rgba(12, 163, 12, .18);
   --watch-ink: #f5bd4a; --watch-soft: rgba(250, 178, 25, .14);
   --off-ink: #f27c7c; --off-soft: rgba(208, 59, 59, .2);
-}
-
-/* ---- graphite ---- */
-:root[data-theme="graphite"] {
-  --bg: #f4f4f3; --surface: #ffffff; --surface-2: #f7f7f6;
-  --ink: #161616; --ink-2: #4a4a48; --ink-3: #6a6a67;
-  --line: #e4e4e1; --line-2: #cfcfcb;
-  --accent: #1f5fbf; --accent-soft: rgba(31, 95, 191, .1); --on-accent: #ffffff;
-  --header: rgba(244, 244, 243, .84);
-  --c-event: #161616; --c-band: rgba(22, 22, 22, .075); --c-grid: rgba(22, 22, 22, .07); --c-mark: #161616;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="graphite"]:not([data-mode="light"]) {
-    --bg: #0e0e0e; --surface: #181818; --surface-2: #202020;
-    --ink: #f1f1ef; --ink-2: #bdbdb8; --ink-3: #92928d;
-    --line: #2a2a29; --line-2: #383836;
-    --accent: #79aefc; --accent-soft: rgba(121, 174, 252, .14); --on-accent: #0b1a33;
-    --header: rgba(14, 14, 14, .82);
-    --c-event: #f1f1ef; --c-band: rgba(241, 241, 239, .085); --c-grid: rgba(241, 241, 239, .07); --c-mark: #f1f1ef;
-  }
-}
-:root[data-theme="graphite"][data-mode="dark"] {
-  --bg: #0e0e0e; --surface: #181818; --surface-2: #202020;
-  --ink: #f1f1ef; --ink-2: #bdbdb8; --ink-3: #92928d;
-  --line: #2a2a29; --line-2: #383836;
-  --accent: #79aefc; --accent-soft: rgba(121, 174, 252, .14); --on-accent: #0b1a33;
-  --header: rgba(14, 14, 14, .82);
-  --c-event: #f1f1ef; --c-band: rgba(241, 241, 239, .085); --c-grid: rgba(241, 241, 239, .07); --c-mark: #f1f1ef;
-}
-
-/* ---- celadon ---- */
-:root[data-theme="celadon"] {
-  --bg: #edf2f0; --surface: #fbfdfc; --surface-2: #f3f7f5;
-  --ink: #0f1f1a; --ink-2: #41544c; --ink-3: #5f716a;
-  --line: #d8e2de; --line-2: #c2cfca;
-  --accent: #14745b; --accent-soft: rgba(20, 116, 91, .1); --on-accent: #ffffff;
-  --header: rgba(237, 242, 240, .84);
-  --c-event: #0f1f1a; --c-band: rgba(15, 31, 26, .075); --c-grid: rgba(15, 31, 26, .07); --c-mark: #0f1f1a;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="celadon"]:not([data-mode="light"]) {
-    --bg: #0a1210; --surface: #111b18; --surface-2: #17241f;
-    --ink: #e5efeb; --ink-2: #a8bcb4; --ink-3: #82968e;
-    --line: #20302b; --line-2: #2c3f39;
-    --accent: #63cba8; --accent-soft: rgba(99, 203, 168, .14); --on-accent: #062019;
-    --header: rgba(10, 18, 16, .82);
-    --c-event: #e5efeb; --c-band: rgba(229, 239, 235, .085); --c-grid: rgba(229, 239, 235, .07); --c-mark: #e5efeb;
-  }
-}
-:root[data-theme="celadon"][data-mode="dark"] {
-  --bg: #0a1210; --surface: #111b18; --surface-2: #17241f;
-  --ink: #e5efeb; --ink-2: #a8bcb4; --ink-3: #82968e;
-  --line: #20302b; --line-2: #2c3f39;
-  --accent: #63cba8; --accent-soft: rgba(99, 203, 168, .14); --on-accent: #062019;
-  --header: rgba(10, 18, 16, .82);
-  --c-event: #e5efeb; --c-band: rgba(229, 239, 235, .085); --c-grid: rgba(229, 239, 235, .07); --c-mark: #e5efeb;
 }

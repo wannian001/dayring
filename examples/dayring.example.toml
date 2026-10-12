@@ -5,7 +5,6 @@
 data_dir = "data"                 # where the CSV files live (relative to this file)
 timezone = "Australia/Melbourne"  # IANA name; all times in the CSV files are local to it
 locale = "en"                     # en or zh; the page has a switch too
-theme = "dusk"                    # dusk, graphite or celadon
 title = "dayring"
 
 [devices]

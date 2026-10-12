@@ -11,7 +11,7 @@ A local-first dashboard for your day: sleep, recovery, where the time goes and d
 
 ## English
 
-![Today page, dark theme](docs/images/today-dark.png)
+![Today page, dark mode](docs/images/today-dark.png)
 
 The ring at the top is one day on a 24-hour clock. The outer band is last night's sleep, the middle band is
 today's calendar with the day's workouts in their own colour, and the inner bars are screen time for each hour,
@@ -24,9 +24,10 @@ weeks, how am I doing today?
 |---|---|
 | **Today** | Recovered as usual? (sleep, HRV and resting heart rate against the middle half of your previous 28 days) What is on today, and when should I be asleep tonight? What went on screens yesterday? What has tended to help the next day? |
 | **Week** | Seven days of classes, deadlines and training, and how heavy the coming weeks are by share of grade. |
-| **Body** | Weight as a 7-day average inside the corridor your plan allows, the weekly rate, and the long view. |
-| **Sleep** | 21 nights on one axis, last week against the week before, and an optional wake-time plan that moves the alarm earlier one step after each on-time morning. |
-| **Time** | Where did the time go, and what changed? Sleep, workouts, calendar blocks and screens (phone, tablet and laptop counted once when they overlap), each measured from its own record and compared with your normal (the middle half of the 28 days before). The top names what moved furthest from normal (say, more entertainment & social), not the biggest activity, and each day gets an icon for its own change plus its screen and exercise minutes. Time no record covers is shown as not recorded. By hour, by app, over 30 days. |
+| **Body** · Weight | Weight as a 7-day average inside the corridor your plan allows, the weekly rate, and the long view. |
+| **Body** · Sleep | 21 nights on one axis, last week against the week before, and an optional wake-time plan that moves the alarm earlier one step after each on-time morning. |
+| **Time** | Where did the time go, and what changed? Sleep, workouts, calendar blocks and screens (phone, tablet and laptop counted once when they overlap), each measured from its own record and compared with your normal (a day with the middle half of the 28 days before it, the 7 days with your usual 7-day averages). The top names the biggest change, counted only when it is clearly outside your normal (say, more entertainment & social), not the biggest activity; each day gets an icon for its own change, or a check when it was a usual day, plus its screen and exercise minutes. Time no record covers is shown as not recorded. By hour, by app, over 30 days. |
+| **Drain** | What has been quietly wearing you down over the last 7 days? Seven signals (resting heart rate, HRV, the time you fall asleep, sleep-timing spread, screens in the hour before sleep, entertainment & social, app switching), each against your normal and, where you set one, your plan, plus whether short nights and hard training stacked up. No total score. |
 | **Review** | One week of facts next to the four weeks before it. No scores, no judging. |
 | **Data** | What arrived each day for 90 days, which files have unreadable rows, how to import more. |
 
@@ -35,11 +36,15 @@ weeks, how am I doing today?
   <img src="docs/images/time.png" width="49%" alt="Time page">
 </p>
 <p>
-  <img src="docs/images/today-zh-celadon.png" width="49%" alt="Today page in Chinese, celadon theme">
-  <img src="docs/images/body.png" width="49%" alt="Body page, graphite theme">
+  <img src="docs/images/today-zh.png" width="49%" alt="Today page in Chinese, light mode">
+  <img src="docs/images/body.png" width="49%" alt="Body page, Weight tab, light mode">
+</p>
+<p>
+  <img src="docs/images/drain.png" width="49%" alt="Drain page, light mode">
+  <img src="docs/images/drain-zh.png" width="49%" alt="Drain page in Chinese, dark mode">
 </p>
 
-English and Chinese, three themes (dusk, graphite, celadon), light and dark, phone and desktop.
+English and Chinese, light and dark (it follows your system), phone and desktop.
 
 ### How it decides what to say
 
@@ -127,7 +132,7 @@ my own watch, phone and laptop data and runs this same interface; this repositor
 
 ## 中文
 
-![今天页，青瓷主题](docs/images/today-zh-celadon.png)
+![今天页，浅色](docs/images/today-zh.png)
 
 最上面的环是 24 小时的一天：外圈是昨晚的睡眠，中圈是今天的日程（当天的训练用它自己的颜色画在上面），内圈是每小时的屏幕时间，按用途上色。
 下面所有内容都在回答一个问题：和我自己最近四周比，今天怎么样？
@@ -138,18 +143,23 @@ my own watch, phone and laptop data and runs this same interface; this repositor
 |---|---|
 | **今天** | 恢复得怎么样（睡眠、HRV、静息心率，各自和你之前 28 天的中间 50% 比）？今天要做什么，今晚几点放手机、几点睡？昨天屏幕时间花在哪了？做什么第二天会更好？ |
 | **本周** | 七天的课、截止和训练；接下来几周按占成绩的比例看有多重。 |
-| **身体** | 体重 7 天平均是不是在计划允许的走廊里、每周降多少、长期走势。 |
-| **作息** | 21 晚画在同一根轴上，这周和上周比；可选的起床前移计划：每按时起一天，闹钟往前挪一步。 |
-| **时间** | 时间都去哪了，和平常比变了什么？睡眠、训练、日程和屏幕（手机、平板、电脑同一时刻只算一次）各按自己的记录算，各自和你的平常（之前 28 天的中间一半）比。最上面写的是离平常最远的那一项（比如娱乐社交多了），而不是占得最多的那一项；每天一个图标标出当天的变化，下面写当天的屏幕时间和运动分钟。哪项记录都没覆盖的时间写成“没有记录”。按小时、按应用、最近 30 天。 |
+| **身体** · 体重 | 体重 7 天平均是不是在计划允许的走廊里、每周降多少、长期走势。 |
+| **身体** · 作息 | 21 晚画在同一根轴上，这周和上周比；可选的起床前移计划：每按时起一天，闹钟往前挪一步。 |
+| **时间** | 时间都去哪了，和平常比变了什么？睡眠、训练、日程和屏幕（手机、平板、电脑同一时刻只算一次）各按自己的记录算，各自和你的平常比（单独一天和它之前 28 天的中间一半比，这 7 天和你平常的 7 天平均比）。最上面写的是明显超出平常的变化里最大的那一项（比如娱乐社交多了），而不是占得最多的那一项；每天一个图标标出当天的变化，平常的一天打个勾，下面写当天的屏幕时间和运动分钟。哪项记录都没覆盖的时间写成“没有记录”。按小时、按应用、最近 30 天。 |
+| **消耗** | 最近 7 天哪些东西在悄悄耗你？七个信号（静息心率、HRV、入睡时刻、作息波动、睡前一小时屏幕、娱乐和社交、应用切换），各自跟你的平常比，定了计划的再跟计划比；另外看这一周睡眠不足和高强度训练有没有叠在一起。不打总分。 |
 | **复盘** | 一周的事实和之前四周并排。不打分，不评价。 |
 | **数据** | 90 天里每天到了什么数据、哪些文件有读不出的行、怎么继续导入。 |
 
 <p>
   <img src="docs/images/week.png" width="49%" alt="本周页">
-  <img src="docs/images/sleep-zh.png" width="49%" alt="作息页">
+  <img src="docs/images/sleep-zh.png" width="49%" alt="身体页的作息，深色">
+</p>
+<p>
+  <img src="docs/images/drain-zh.png" width="49%" alt="消耗页，深色">
+  <img src="docs/images/today-dark.png" width="49%" alt="今天页，英文，深色">
 </p>
 
-界面中英双语，三套主题（暮色、石墨、青瓷），深浅色都有，手机和电脑都能用。
+界面中英双语，浅色和深色（默认跟随系统），手机和电脑都能用。
 
 ### 它怎么判断
 

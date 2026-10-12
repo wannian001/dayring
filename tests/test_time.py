@@ -7,9 +7,11 @@ Rules under test (dayring/context.py, dayring/modules/time.py):
 - a day without the record an activity needs shows None for it, never 0 (tests/test_time_coverage.py);
 - a workout known only as a daily total (body_daily.workout_min) still counts, without hours;
 - planned training on the calendar is not counted; logged workouts are;
-- the page names what changed compared with your normal (the middle half of the 28 days before),
-  never the biggest activity: the screen total is not a candidate, a day without a record is left
-  out of the normal, and the furthest outside wins (see WhatChanged below).
+- the page names what changed compared with your normal, never the biggest activity: the screen
+  total is not a candidate, a day without a record is left out of the normal, a change counts only
+  when it is at least one band width outside normal, and the biggest of those in minutes is named; a
+  day is compared with the 28 days before it, the 7-day average with your usual 7-day averages (see
+  WhatChanged below).
 """
 import json
 import re
@@ -235,27 +237,43 @@ def history(first: date, last: date, fun=lambda k: 90 + (k % 5) * 10, work=lambd
     return body, sessions
 
 
+def weekdays_from(first: date, last: date, weekdays, make):
+    """``make(d)`` for every day in [first, last] whose weekday (0 = Monday) is in ``weekdays``."""
+    out, d = [], first
+    while d <= last:
+        if d.weekday() in weekdays:
+            out.append(make(d))
+        d += timedelta(days=1)
+    return out
+
+
+def at(d: date, hour: int, minute: int = 0) -> datetime:
+    return datetime.combine(d, datetime.min.time()) + timedelta(hours=hour, minutes=minute)
+
+
 class WhatChanged(FolderCase):
-    """The standout is what moved furthest outside your normal, not the biggest activity."""
+    """The standout is the biggest clear change against your normal, not the biggest activity."""
+    WEEK = date(2026, 10, 5)  # the first shown day of the latest page (today = 12 Oct)
 
     def test_fun_above_normal_is_named_although_screens_are_the_biggest(self):
-        week = date(2026, 10, 5)
+        week = self.WEEK
         # four normal weeks (fun 90-130 minutes, work 420-460), then a week with 200 minutes of fun a day
         body, sessions = history(date(2026, 8, 20), date(2026, 10, 11),
                                  fun=lambda k: 200 if date(2026, 8, 20) + timedelta(days=k) >= week else 90 + (k % 5) * 10)
         ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions)
         span = time_page.build(ctx)["span"]
         self.assertEqual(span["from"], "2026-10-05")
-        normal = stats.typical(time_page.normal_series(ctx)["fun"], week)
+        normal = time_page.typical_week(time_page.normal_series(ctx)["fun"], week)
         for d in span["days"]:
             tot = d["totals"]
             self.assertGreater(tot["screen"], max(tot["sleep"] or 0, tot["exercise"] or 0, tot["calendar"] or 0), d["date"])  # screens win every day
             s = d["standout"]
             self.assertEqual((s["key"], s["state"], s["tone"]), ("fun", "high", "bad"), d["date"])
             self.assertAlmostEqual(s["delta"], 200 - s["band"]["median"])
+            self.assertGreaterEqual(s["score"], time_page.STANDOUT_MIN, d["date"])
         top = span["standout"]
-        self.assertEqual((top["key"], top["state"], top["tone"]), ("fun", "high", "bad"))
-        self.assertEqual(top["band"], normal)  # the 28 days before the first shown day
+        self.assertEqual((top["key"], top["state"], top["tone"], top["clear"]), ("fun", "high", "bad", True))
+        self.assertEqual(top["band"], normal)  # your usual 7-day averages before the first shown day
         self.assertAlmostEqual(top["value"], 200)
         self.assertAlmostEqual(top["delta"], 200 - normal["median"])
         self.assertEqual(span["changes"][0], top)
@@ -279,6 +297,64 @@ class WhatChanged(FolderCase):
             # the last day's evening belongs to tonight's sleep, not recorded yet: sleep is not compared
             self.assertEqual(d["compared"], 4 if d["date"] == "2026-10-11" else 5, d["date"])
 
+    def test_a_varied_usual_week_stays_quiet(self):
+        # the same random habits every day: each day lands outside the middle half of something about
+        # half the time, but almost never one band width outside it
+        import random
+        quiet_days = days = quiet_spans = spans = 0
+        for seed in range(6):
+            rng = random.Random(seed)
+            fun = [rng.randint(100, 200) for _ in range(80)]
+            work = [rng.randint(240, 420) for _ in range(80)]
+            body, sessions = history(date(2026, 7, 25), date(2026, 10, 11), fun=lambda k: fun[k], work=lambda k: work[k])
+            ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions)
+            page = time_page.build(ctx)
+            for _ in range(5):
+                span = page["span"]
+                spans += 1
+                quiet_spans += span["standout"] is None
+                for d in span["days"]:
+                    days += 1
+                    quiet_days += d["standout"] is None
+                    if d["standout"]:
+                        self.assertGreaterEqual(abs(d["standout"]["delta"]), time_page.DAY_MIN_WIDTH)
+                page = time_page.build(ctx, page["prev"])
+            shutil.rmtree(self.tmp / "data")
+        # (with "anything outside the middle half" nearly every day and every week would name something)
+        self.assertGreaterEqual(quiet_days / days, 0.85, (quiet_days, days))
+        self.assertGreaterEqual(quiet_spans / spans, 2 / 3, (quiet_spans, spans))
+
+    def test_a_week_without_exercise_reads_low(self):
+        # three 50-minute workouts a week, then none at all: the 7-day average falls from about 21 minutes
+        # a day to 0. Single days are 0 on four days of every week, so a band of single days would call it
+        # normal; the band of 7-day averages does not.
+        body, sessions = history(date(2026, 8, 20), date(2026, 10, 11), fun=lambda k: 110, work=lambda k: 440)
+        workouts = weekdays_from(date(2026, 8, 20), self.WEEK - timedelta(days=1), (0, 2, 4), lambda d: {
+            "start": at(d, 18), "end": at(d, 18, 50), "type": "running", "source": "Apple Watch"})
+        ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions, workouts=workouts)
+        span = time_page.build(ctx)["span"]
+        ex = span["metrics"]["exercise"]
+        self.assertEqual(span["known"]["exercise"], 7)
+        self.assertEqual(ex["value"], 0)
+        self.assertAlmostEqual(ex["band"]["median"], 150 / 7)
+        self.assertEqual((ex["state"], ex["tone"], ex["clear"]), ("low", "bad", True))
+        self.assertAlmostEqual(ex["delta"], -150 / 7)
+        self.assertEqual(span["standout"]["key"], "exercise")
+        # a band of single days has its bottom at 0, so 0 would sit inside it
+        self.assertEqual(stats.typical(time_page.normal_series(ctx)["exercise"], self.WEEK)["q1"], 0)
+
+    def test_a_week_without_classes_reads_low(self):
+        body, sessions = history(date(2026, 8, 20), date(2026, 10, 11), fun=lambda k: 110, work=lambda k: 440)
+        events = weekdays_from(date(2026, 8, 20), self.WEEK - timedelta(days=1), range(5), lambda d: {
+            "start": at(d, 10), "end": at(d, 12), "title": "Lecture", "kind": "class"})
+        ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions, events=events)
+        span = time_page.build(ctx)["span"]
+        cal = span["metrics"]["calendar"]
+        self.assertEqual(span["known"]["calendar"], 7)  # the calendar file exists, the week is just empty
+        self.assertEqual((cal["value"], cal["state"], cal["tone"], cal["clear"]), (0, "low", "neutral", True))
+        self.assertAlmostEqual(cal["delta"], -600 / 7)
+        self.assertEqual(span["standout"]["key"], "calendar")
+
     def test_a_day_without_screen_time_never_makes_fun_or_focus_the_standout(self):
         gap = {date(2026, 9, 14) + timedelta(days=k) for k in range(14)}  # Screen Time off for two weeks
         body, sessions = history(date(2026, 8, 1), date(2026, 10, 11), skip=gap)
@@ -300,14 +376,17 @@ class WhatChanged(FolderCase):
         # back on screens with the usual habits: the normal skips the gap, so nothing reads as a jump
         # (with the gap counted as 0 the normal would sink and the usual 110 minutes of fun would look high)
         span = time_page.build(ctx)["span"]
-        self.assertEqual(span["metrics"]["fun"]["state"], "normal")
-        self.assertEqual(span["metrics"]["focus"]["state"], "normal")
+        for key in ("fun", "focus"):
+            m = span["metrics"][key]
+            self.assertFalse(m["clear"], key)
+            self.assertLess(abs(m["delta"]), 10, key)
+        # 7-day averages with at least 4 days of screen time: 10 before the gap, 4 after it
         self.assertEqual(span["metrics"]["fun"]["band"]["days"], 14)
         self.assertIsNone(span["standout"])
 
     def test_tone_follows_the_better_direction(self):
         band = {"q1": 100.0, "median": 120.0, "q3": 140.0, "days": 20}
-        tones = {(key, value): time_page.compare(key, value, band)["tone"]
+        tones = {(key, value): time_page.compare(key, value, band, 15)["tone"]
                  for key in time_page.CANDIDATES for value in (60.0, 120.0, 200.0)}
         self.assertEqual(tones[("fun", 200.0)], "bad")
         self.assertEqual(tones[("fun", 60.0)], "good")
@@ -320,25 +399,59 @@ class WhatChanged(FolderCase):
 
     def test_score_is_distance_outside_in_band_widths(self):
         band = {"q1": 100.0, "median": 120.0, "q3": 140.0, "days": 20}
-        self.assertEqual(time_page.score(120, band), 0)
-        self.assertEqual(time_page.score(140, band), 0)                 # the edge is still normal
-        self.assertAlmostEqual(time_page.score(180, band), 40 / 40)
-        self.assertAlmostEqual(time_page.score(80, band), 20 / 40)
+        self.assertEqual(time_page.score(120, band, 15), 0)
+        self.assertEqual(time_page.score(140, band, 15), 0)                 # the edge is still normal
+        self.assertAlmostEqual(time_page.score(180, band, 15), 40 / 40)
+        self.assertAlmostEqual(time_page.score(80, band, 15), 20 / 40)
         narrow = {"q1": 10.0, "median": 12.0, "q3": 14.0, "days": 20}
-        self.assertAlmostEqual(time_page.score(29, narrow), 15 / 15)    # at least 15 minutes wide
+        self.assertAlmostEqual(time_page.score(29, narrow, 15), 15 / 15)    # at least 15 minutes wide (7-day averages)
+        self.assertAlmostEqual(time_page.score(44, narrow, 30), 30 / 30)    # at least 30 minutes wide (single days)
         steady = {"q1": 470.0, "median": 480.0, "q3": 490.0, "days": 20}
-        self.assertAlmostEqual(time_page.score(538, steady), 48 / 48)   # or a tenth of the usual value
-        self.assertEqual(time_page.score(None, band), 0)
-        self.assertEqual(time_page.score(500, None), 0)
+        self.assertAlmostEqual(time_page.score(538, steady, 30), 48 / 48)   # or a tenth of the usual value, if larger
+        self.assertEqual(time_page.score(None, band, 15), 0)
+        self.assertEqual(time_page.score(500, None, 15), 0)
+
+    def test_values_are_compared_in_whole_minutes(self):
+        band = {"q1": 100.2, "median": 120.0, "q3": 475.5, "days": 20}
+        on_edge = time_page.compare("sleep", 475.57, band, 30)  # prints as the top of the normal
+        self.assertEqual((on_edge["state"], on_edge["score"], on_edge["clear"]), ("normal", 0, False))
+        self.assertEqual(time_page.compare("sleep", 476.6, band, 30)["state"], "high")
+
+    def test_a_change_must_be_clearly_outside(self):
+        band = {"q1": 100.0, "median": 120.0, "q3": 140.0, "days": 20}
+        just = time_page.compare("fun", 170.0, band, 15)        # 30 minutes past the edge of a 40-minute band
+        self.assertEqual((just["state"], just["clear"]), ("high", False))
+        self.assertIsNone(time_page.standout([just]))
+        clear = time_page.compare("fun", 180.0, band, 15)       # one band width past it
+        self.assertTrue(clear["clear"])
+        self.assertEqual(time_page.standout([just, clear]), clear)
+        # a single day: communication 28 minutes above an 18-minute band is not a change (the band counts
+        # as 30 minutes wide), entertainment 130 minutes above a 110-minute band is
+        comms = time_page.compare("communication", 58.0, {"q1": 12.0, "median": 18.0, "q3": 30.0}, time_page.DAY_MIN_WIDTH)
+        fun = time_page.compare("fun", 387.0, {"q1": 146.0, "median": 189.0, "q3": 257.0}, time_page.DAY_MIN_WIDTH)
+        self.assertEqual((comms["state"], comms["clear"]), ("high", False))
+        self.assertEqual(time_page.standout([comms, fun])["key"], "fun")
+
+    def test_the_biggest_clear_change_in_minutes_is_named(self):
+        # communication is further outside in band widths, but focused work moved far more minutes:
+        # the sentence names focused work, so its minutes are the biggest number on the page
+        comms = time_page.compare("communication", 60.0, {"q1": 10.0, "median": 15.0, "q3": 20.0}, 15)
+        focus = time_page.compare("focus", 180.0, {"q1": 300.0, "median": 340.0, "q3": 380.0}, 15)
+        self.assertGreater(comms["score"], focus["score"])
+        self.assertTrue(comms["clear"] and focus["clear"])
+        ranked = time_page.ranked([comms, focus])
+        self.assertEqual([c["key"] for c in ranked], ["focus", "communication"])
+        self.assertEqual(time_page.standout(ranked)["key"], "focus")
+        self.assertAlmostEqual(time_page.standout(ranked)["delta"], -160)
 
     def test_ties_follow_the_candidate_order(self):
         band = {"q1": 100.0, "median": 120.0, "q3": 140.0, "days": 20}
-        changes = [time_page.compare(k, 180.0, band) for k in reversed(time_page.CANDIDATES)]
+        changes = [time_page.compare(k, 180.0, band, 15) for k in reversed(time_page.CANDIDATES)]
         self.assertEqual(time_page.standout(changes)["key"], "fun")
-        changes = [time_page.compare("sleep", 180.0, band), time_page.compare("exercise", 180.0, band),
-                   time_page.compare("fun", 130.0, band)]
+        changes = [time_page.compare("sleep", 180.0, band, 15), time_page.compare("exercise", 180.0, band, 15),
+                   time_page.compare("fun", 130.0, band, 15)]
         self.assertEqual(time_page.standout(changes)["key"], "exercise")
-        self.assertIsNone(time_page.standout([time_page.compare("fun", 130.0, band)]))
+        self.assertIsNone(time_page.standout([time_page.compare("fun", 130.0, band, 15)]))
         self.assertEqual(time_page.CANDIDATES, ("fun", "focus", "communication", "exercise", "calendar", "sleep"))
 
 
@@ -402,6 +515,7 @@ class DemoTimePage(unittest.TestCase):
                 self.assertLessEqual(s["band"]["days"], 28)
                 self.assertAlmostEqual(s["delta"], s["value"] - s["band"]["median"], msg=d["date"])
                 self.assertEqual(s["tone"], stats.tone(s["state"], time_page.BETTER[s["key"]]))
+                self.assertGreaterEqual(s["score"], time_page.STANDOUT_MIN, d["date"])  # clearly outside, not a wobble
 
         avg = span["avg"]
         for key in avg:
@@ -413,11 +527,15 @@ class DemoTimePage(unittest.TestCase):
                 self.assertIsNone(avg[key], (label, key))
         self.assertAlmostEqual(avg["screen"], sum(avg[k] for k in SCREEN_PARTS), msg=label)
 
-        # what changed: every candidate once, furthest outside normal first; the standout is the first
-        # one outside, the screen total is never one of them
+        # what changed: every candidate once, the clear changes first (biggest in minutes first), then the
+        # rest (furthest outside first); the standout is the first clear one, the screen total never one
         changes = span["changes"]
         self.assertEqual(sorted(c["key"] for c in changes), sorted(time_page.CANDIDATES), label)
-        self.assertEqual([c["score"] for c in changes], sorted((c["score"] for c in changes), reverse=True), label)
+        clear = [c for c in changes if c["clear"]]
+        self.assertEqual(changes[:len(clear)], clear, label)
+        self.assertEqual([abs(c["delta"]) for c in clear], sorted((abs(c["delta"]) for c in clear), reverse=True), label)
+        rest = [c["score"] for c in changes[len(clear):]]
+        self.assertEqual(rest, sorted(rest, reverse=True), label)
         for c in changes:
             self.assertEqual(c["value"], avg[c["key"]], (label, c["key"]))
             self.assertEqual(c, span["metrics"][c["key"]])
@@ -425,14 +543,16 @@ class DemoTimePage(unittest.TestCase):
                 self.assertEqual(c["score"], 0, (label, c["key"]))
             else:
                 self.assertGreater(c["score"], 0, (label, c["key"]))
+            self.assertEqual(c["clear"], c["score"] >= time_page.STANDOUT_MIN, (label, c["key"]))
         if span["standout"] is None:
-            self.assertTrue(all(c["score"] == 0 for c in changes), label)
+            self.assertEqual(clear, [], label)
         else:
             self.assertEqual(span["standout"], changes[0], label)
-            self.assertGreater(span["standout"]["score"], 0, label)
+            self.assertTrue(span["standout"]["clear"], label)
         self.assertNotIn("top", span)
         self.assertNotIn("before", p)  # one baseline for the whole page: no "vs the 7 days before"
-        self.assertIn(span["metrics"]["screen"]["state"], ("high", "low", "normal"))  # the total keeps a tile
+        screen = span["metrics"]["screen"]  # the total keeps a tile, compared once its normal exists
+        self.assertIn(screen["state"], ("high", "low", "normal") if screen["band"] else (None,), label)
 
         # the hour chart adds up to the per-day numbers
         self.assertEqual(len(span["by_hour"]), 24)

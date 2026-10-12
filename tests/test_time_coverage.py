@@ -76,7 +76,8 @@ class MissingRecords(Folder):
         self.assertEqual(span["known"]["screen"], 0)
         self.assertIsNone(span["avg"]["screen"])  # not 480/7 = 69 minutes, which would read as a big drop
         self.assertAlmostEqual(time_page.build(ctx, p["prev"])["span"]["avg"]["screen"], 480)  # the week before had it
-        self.assertEqual(span["stale"], [{"activity": "screen", "last": "2026-10-05"}])
+        # the note names the last whole day (4 Oct), the same day the numbers stop counting
+        self.assertEqual(span["stale"], [{"activity": "screen", "last": "2026-10-04"}])
         for d in span["days"]:
             self.assertIsNone(d["totals"]["screen"], d["date"])
             self.assertIsNone(d["totals"]["not_recorded"], d["date"])

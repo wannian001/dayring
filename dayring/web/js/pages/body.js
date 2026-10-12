@@ -7,7 +7,7 @@ const STATUS = { on_track: "good", faster: "watch", slower: "watch", reached: "g
 export default {
   render(p) {
     if (!p.points.length) {
-      return `<div class="head"><div><h1>${t("nav.body")}</h1></div></div><div class="card"><div class="empty">${t("body.empty")}</div></div>`;
+      return `<div class="head"><div><h1>${t("nav.weight")}</h1></div></div><div class="card"><div class="empty">${t("body.empty")}</div></div>`;
     }
     const L = p.latest;
     const plan = p.plan;
@@ -18,7 +18,7 @@ export default {
       plan && L.eta ? [t("body.eta"), day(L.eta, { weekday: false })] : null,
       [t("body.weighed"), t("body.weighed_n", { n: p.weighed_days_14 })],
     ].filter(Boolean);
-    return `<div class="head"><div><h1>${t("nav.body")}</h1><div class="sub">${t("body.sub")}</div></div></div>
+    return `<div class="head"><div><h1>${t("nav.weight")}</h1><div class="sub">${t("body.sub")}</div></div></div>
       <div class="grid">
         <section class="card span-4"><h2>${t("body.weight")}</h2>
           <p class="hero-num">${kg(L.avg7)}</p>
