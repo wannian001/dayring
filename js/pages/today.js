@@ -160,14 +160,17 @@ function effectRows(e, outcome) {
   }).join("");
 }
 
-function weekHtml(p) {
-  const w = p.week;
-  const facts = [t("week.nights", { short: w.short_nights, n: w.nights, h: w.rule.short_hours }), t("week.train", { n: w.train_days })];
-  if (w.hrv_change !== null) facts.push(t("week.hrv", { dir: t(w.hrv_change >= 0 ? "week.up" : "week.down"), pct: pct(w.hrv_change) }));
-  return `<section class="card"><h2>${t("week.title")}</h2>
-    <p class="lede" style="font-size:var(--t-lg)">${t(w.strain ? "week.strain" : "week.ok")}</p>
-    <ul class="agenda">${facts.map((f) => `<li style="grid-template-columns:minmax(0,1fr)"><span>${esc(f)}</span></li>`).join("")}</ul>
-    <details class="how"><summary>${t("ui.how")}</summary><p>${t("week.rule")}</p></details></section>`;
+function drainHtml(p) {
+  const d = p.drain;
+  if (!d) return "";
+  const name = (k) => t(`drain.item.${k}`);
+  const worse = d.worse.length ? t("drain.worse_some", { n: d.worse.length, list: d.worse.map(name).join(t("drain.sep")) }) : t("drain.worse_none");
+  const plan = d.plan_off.length ? t("drain.plan_some", { list: d.plan_off.map((r) => `${name(r.key)}${t(`drain.plan.over.${r.key}`, { d: dur(r.over) })}`).join(t("drain.sep")) }) : "";
+  return `<section class="card"><h2>${t("today.drain")}<span class="aside">${day(d.window.from, { weekday: false })} – ${day(d.window.to, { weekday: false })}</span></h2>
+    <p class="lede" style="font-size:var(--t-lg)">${esc(worse)}</p>
+    ${plan ? `<p class="small" style="margin:0 0 8px;color:var(--ink-2)">${esc(plan)}</p>` : ""}
+    ${d.strain ? `<p class="chip watch" style="height:auto;padding:4px 10px;white-space:normal">${t("week.strain")}</p>` : ""}
+    <p class="small" style="margin:var(--s-3) 0 0"><a href="#drain">${t("today.drain_more")}</a></p></section>`;
 }
 
 export default {
@@ -177,7 +180,7 @@ export default {
       ${p.looking_back ? `<a href="#today/${next}">${t("ui.next_day")} ›</a><a href="#today">${t("ui.back_today")}</a>` : `<span aria-disabled="true">${t("ui.next_day")} ›</span>`}</div>`;
     return `<div class="head"><div><h1>${p.looking_back ? t("today.looking_back", { day: day(p.day) }) : t("today.title")}</h1>
       <div class="sub">${day(p.day)} · ${t("ui.computed", { time: clock(p.now) })}</div></div>${stepper}</div>
-      <div class="grid">${heroHtml(p)}<div class="col span-7">${recoveryHtml(p)}${effectsHtml(p)}</div><div class="col span-5">${attentionHtml(p)}${weekHtml(p)}</div></div>`;
+      <div class="grid">${heroHtml(p)}<div class="col span-7">${recoveryHtml(p)}${effectsHtml(p)}</div><div class="col span-5">${attentionHtml(p)}${drainHtml(p)}</div></div>`;
   },
   mount(root, p) {
     const ringBox = root.querySelector("#ring");

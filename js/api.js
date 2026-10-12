@@ -5,7 +5,7 @@ const cache = new Map();
 
 export function apiUrl(name, param) {
   if (STATIC) return `api/${name}${param ? `@${param}` : ""}.json`;
-  const key = { today: "day", week: "day", review: "week", time: "day" }[name] || "day";
+  const key = { today: "day", week: "day", review: "week", time: "day", drain: "day" }[name] || "day";
   return `api/${name}${param ? `?${key}=${encodeURIComponent(param)}` : ""}`;
 }
 
