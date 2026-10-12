@@ -5,9 +5,9 @@
 // outside normal (`clear`, worked out in modules/time.py), and colours only those. Lanes may overlap;
 // unrecorded waking time is shown as such. A day without an activity's record shows "—" for it (never 0)
 // and is left out of its average and normal.
-import { bullet, draw, esc, lanes } from "../charts.js?v=60b432d5aa";
-import { day, device, dur, getLang, num, shortDay, t, weekdayShort, wtype } from "../i18n.js?v=60b432d5aa";
-import { COLOR, icon } from "../icons.js?v=60b432d5aa";
+import { bullet, draw, esc, lanes } from "../charts.js?v=a8cf20d79e";
+import { day, device, dur, getLang, num, shortDay, t, weekdayShort, wtype } from "../i18n.js?v=a8cf20d79e";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=a8cf20d79e";
 
 const ORDER = ["sleep", "exercise", "calendar", "screen"];  // the lanes, in the same order in both lane charts
 const TILES = ["screen", "fun", "focus", "communication", "exercise", "calendar", "sleep", "not_recorded"];  // every candidate has a tile
@@ -15,10 +15,6 @@ const SCREEN_PARTS = [["fun", "var(--c-fun)"], ["focus", "var(--c-focus)"], ["co
 // compact, for the small day cells; a narrow cell may break before the unit, never inside it ("10.6 / 小时")
 const hours = (m) => t("time.hours", { h: num(m / 60, 1) });
 const CAT_COLOR = { work: "var(--c-focus)", learning: "var(--c-focus)", entertainment: "var(--c-fun)", social: "var(--c-fun)", communication: "var(--c-comms)", other: "var(--c-other)" };
-const STATE_ICON = {
-  good: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 6.3 2.3 2.3 4.7-5.1"/></svg>`,
-  bad: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2.6v4.2"/><circle cx="6" cy="9.3" r=".4" fill="currentColor"/></svg>`,
-};
 const keep = (text) => text.replace(/ /g, "\u00a0");  // one duration never breaks across lines ("4 小时 23 分")
 const toneCls = (tone) => (tone === "good" ? "good" : tone === "bad" ? "bad" : "");
 const shownTone = (c) => (c.clear ? c.tone : "neutral");  // green and red only for a clear change
@@ -176,8 +172,8 @@ export default {
       <div class="grid">
         ${heroHtml(p)}
         <section class="card span-12"><h2>${t("time.per_day")}<span class="aside">${t("time.vs_normal", { n: p.baseline_days })}</span></h2><div class="tiles act-tiles">${tiles}</div></section>
-        <section class="card span-12"><h2><span>${phrases(t("time.typical"))}</span><span class="aside legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}</span></h2><div id="hours"></div></section>
-        <section class="card span-12"><h2>${t("time.history")}<span class="aside">${phrases(t("time.history_note"))}</span></h2><div id="history"></div></section>
+        <section class="card span-12"><h2><span>${phrases(t("time.typical"))}</span><span class="aside legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}</span></h2><div id="hours" class="chart"></div></section>
+        <section class="card span-12"><h2>${t("time.history")}<span class="aside">${phrases(t("time.history_note"))}</span></h2><div id="history" class="chart"></div></section>
         <section class="card span-7"><h2>${t("time.apps")}<span class="aside">${t("time.apps_note")}</span></h2>${apps ? `<ul class="apps">${apps}</ul>
           <p class="xs muted" style="margin:10px 0 0">${t("time.devices")}: ${devices}</p>` : `<p class="muted small">${t("time.no_screens")}</p>`}</section>
         <section class="card span-5"><h2>${t("time.workouts")}<span class="aside">${t("time.workouts_note")}</span></h2>${workouts}</section>

@@ -1,9 +1,10 @@
-// Stroke icons, coloured by currentColor: one per lane of the Time page and one per thing "what changed"
-// can name, plus a check (a usual day) and the up / down arrows of the change badge. Same grid (24),
-// stroke (1.8) and round joins throughout.
+// dayring design kit: stroke icons, coloured by currentColor. Part of the kit (see docs/DESIGN_KIT.md).
+// One per lane of the Time page and one per thing "what changed" can name, plus a check (a usual day) and
+// the up / down arrows of the change badge. Same grid (24), stroke (1.8) and round joins throughout.
+// Convention: the comment line right above each export is its one-line doc (`dayring kit json` reads it).
 const svg = (body, size) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 const PATHS = {
-  screen: '<rect x="2.5" y="4" width="15" height="10.5" rx="1.6"/><path d="M7 18.5h6M10 14.5v4"/><rect x="16.5" y="8.5" width="5" height="10" rx="1.2" fill="var(--surface)"/><path d="M18.4 16.6h1.2"/>',
+  screen: '<rect x="2.5" y="4" width="15" height="10.5" rx="1.6"/><path d="M7 18.5h6M10 14.5v4"/><rect x="16.5" y="8.5" width="5" height="10" rx="1.2" fill="var(--halo)"/><path d="M18.4 16.6h1.2"/>',
   exercise: '<path d="M6.5 7.5v9M17.5 7.5v9M3.5 10v4M20.5 10v4M6.5 12h11"/>',
   calendar: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path d="M7.5 13h3M13.5 13h3M7.5 16.5h3"/>',
   sleep: '<path d="M19.5 14.6A8 8 0 0 1 9.4 4.5a8 8 0 1 0 10.1 10.1z"/>',
@@ -18,7 +19,16 @@ const PATHS = {
   up: '<path d="M12 19V5.5M6.5 11 12 5.5l5.5 5.5"/>',
   down: '<path d="M12 5v13.5M6.5 13 12 18.5l5.5-5.5"/>',
 };
+// The names icon() knows, in drawing order.
+export const ICON_KEYS = Object.freeze(Object.keys(PATHS));
+// The icon for key at size px (an unknown key draws the dashed clock of "not recorded").
 export function icon(key, size = 20) { return svg(PATHS[key] || PATHS.not_recorded, size); }
+// The colour each icon is drawn in: its data colour, ink-3 for not recorded, ink-2 for the check.
 export const COLOR = { sleep: "var(--c-sleep)", exercise: "var(--c-exercise)", calendar: "var(--c-event)", screen: "var(--c-focus)",
   focus: "var(--c-focus)", fun: "var(--c-fun)", communication: "var(--c-comms)", other: "var(--c-other)", not_recorded: "var(--ink-3)",
   check: "var(--ink-2)" };
+// The 12px glyphs inside a state chip: good = a tick, bad = an exclamation mark.
+export const STATE_ICON = Object.freeze({
+  good: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 6.3 2.3 2.3 4.7-5.1"/></svg>`,
+  bad: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2.6v4.2"/><circle cx="6" cy="9.3" r=".4" fill="currentColor"/></svg>`,
+});

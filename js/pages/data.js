@@ -1,5 +1,5 @@
-import { coverage, draw, esc } from "../charts.js?v=60b432d5aa";
-import { clock, day, num, t } from "../i18n.js?v=60b432d5aa";
+import { coverage, draw, esc } from "../charts.js?v=a8cf20d79e";
+import { clock, day, num, t } from "../i18n.js?v=a8cf20d79e";
 
 const STATUS = { ok: "good", stale: "watch", missing: "bad" };
 
@@ -34,7 +34,8 @@ python -m dayring import macos-screentime
 python -m dayring import csv deadlines my.csv \\
   --map "Due=due,Task=title,Course=group"
 python -m dayring check</pre>
-          <p class="xs muted">${t("data.import_note")}</p></section>
+          <p class="xs muted">${t("data.import_note")}</p>
+          <p class="xs muted" style="margin:0"><a href="#kit">${t("kit.link")}</a> · ${t("kit.link_note")}</p></section>
       </div>`;
   },
   mount(root, p) {

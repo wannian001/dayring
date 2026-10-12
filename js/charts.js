@@ -1,9 +1,67 @@
-// Hand-drawn SVG charts. Each one is drawn at the real pixel width of its box and redrawn on resize,
-// so text never scales with the chart. Colours are CSS variables from tokens.css.
-import { clock, dur, measure, shortDay, t, toDate, wtype } from "./i18n.js?v=60b432d5aa";
+// dayring design kit: hand-drawn SVG charts. Part of the kit (see docs/DESIGN_KIT.md).
+// Each chart is drawn at the real pixel width of its box and redrawn on resize (draw()), so text never
+// scales with the chart. Colours are CSS variables from tokens.css. This file imports nothing: words and
+// number formats come from the app through setFormat() (dayring hands over its i18n.js in app.js).
+// Convention: the comment line right above each export is its one-line doc (`dayring kit json` reads it).
 
 const has = (v) => v !== null && v !== undefined && !Number.isNaN(v);
+// Escapes text for HTML and SVG attributes and content.
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// ---- words and formats -------------------------------------------------------------------------
+const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+// The words the charts write, with their English defaults; an app's own t() gets the same keys.
+export const CHART_WORDS = Object.freeze({
+  "ui.no_data": "No data yet", band: "normal {low}–{high}",
+  "ring.label": "Day ring: last night's sleep, the day's calendar and workouts, and screen time by hour", "ring.sleep": "Sleep",
+  "cat.focus": "Focus", "cat.fun": "Entertainment & social", "cat.communication": "Communication", "cat.other": "Other",
+  "chart.avg7": "7-day average", "chart.series": "Chart", "chart.row_max": "top {v}",
+  "sleep.alarm_at": "alarm {alarm}", "sleep.no_record": "no record", "sleep.windows": "Last 21 nights", "sleep.final": "goal {alarm}",
+  "sleep.woke_at": "woke {woke}", "sleep.ladder": "The alarm ladder",
+  "data.mark.1": "has data", "data.mark.p": "partial", "data.mark.0": "nothing",
+});
+const parseIso = (iso) => {
+  const [d, time = "00:00"] = String(iso).split("T");
+  const [y, m, dd] = d.split("-").map(Number);
+  const [hh, mm] = time.split(":").map(Number);
+  return new Date(y, m - 1, dd, hh || 0, mm || 0);
+};
+const fill = (text, vars = {}) => String(text).replace(/\{(\w+)\}/g, (_, name) => (vars[name] ?? `{${name}}`));
+const FMT = {
+  t: (key, vars = {}) => fill(CHART_WORDS[key] ?? key, vars),
+  toDate: parseIso,
+  dur: (minutes) => {
+    if (!has(minutes)) return "—";
+    const total = Math.round(Math.abs(minutes)), h = Math.floor(total / 60), m = total % 60;
+    return h === 0 ? `${m}m` : m ? `${h}h ${m}m` : `${h}h`;
+  },
+  clock: (iso) => { if (!iso) return "—"; const d = parseIso(iso); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; },
+  shortDay: (iso) => { const d = parseIso(iso); return `${d.getDate()} ${MONTH[d.getMonth()]}`; },
+  measure: (value, unit) => (!has(value) ? "—" : unit === "min" ? FMT.dur(value) : `${Math.round(value)}${unit && unit !== "steps" ? ` ${unit}` : ""}`),
+  wtype: (name) => (name ? String(name).charAt(0).toUpperCase() + String(name).slice(1) : "—"),
+};
+// Hands the kit an app's words and formats: any of t, dur, clock, shortDay, measure, toDate, wtype; a word t() lacks falls back to CHART_WORDS.
+export function setFormat(fns) {
+  const next = { ...fns };
+  if (typeof fns.t === "function") {
+    // an app's t() usually answers a key it does not know with the key itself: the chart then writes CHART_WORDS' English
+    const appT = fns.t;
+    next.t = (key, vars = {}) => {
+      const said = appT(key, vars);
+      return (said === key || said === undefined || said === null) && key in CHART_WORDS ? fill(CHART_WORDS[key], vars) : said;
+    };
+  }
+  Object.assign(FMT, next);
+}
+const t = (...a) => FMT.t(...a), dur = (...a) => FMT.dur(...a), clock = (...a) => FMT.clock(...a);
+const shortDay = (...a) => FMT.shortDay(...a), measure = (...a) => FMT.measure(...a), toDate = (...a) => FMT.toDate(...a);
+const wtype = (...a) => FMT.wtype(...a);
+// Minutes written as a duration by the dur() handed to setFormat() ("7h 54m" by default); stackedColumns and lanes write their values with it.
+export const formatDuration = (minutes) => FMT.dur(minutes);
+
+// ---- tone ----------------------------------------------------------------------------------------
+// The colour of a mark for a tone: "good" = --good, "bad" = --off, anything else = the neutral --c-mark.
+export const toneColor = (tone) => (tone === "good" ? "var(--good)" : tone === "bad" ? "var(--off)" : "var(--c-mark)");
 
 // ---- drawing at real width ---------------------------------------------------------------------
 const draws = new WeakMap();
@@ -13,6 +71,7 @@ const observer = typeof ResizeObserver === "function"
       if (fn && target.clientWidth) target.innerHTML = fn(target.clientWidth);
     }))
   : null;
+// Draws fn(width) into el at its real pixel width and again whenever the box is resized.
 export function draw(el, fn) {
   if (!el) return;
   draws.set(el, fn);
@@ -22,6 +81,7 @@ export function draw(el, fn) {
 
 // ---- tooltip (one for the page; marks carry data-tip) ----------------------------------------
 let tip = null;
+// Adds the page's one tooltip (.tip): any element with data-tip shows it on hover and on keyboard focus.
 export function installTooltip() {
   if (tip) return;
   tip = document.createElement("div");
@@ -49,14 +109,18 @@ export function installTooltip() {
 }
 
 // ---- scales ------------------------------------------------------------------------------------
+// A round axis step (1, 2, 2.5 or 5 times a power of ten) that splits span into about count parts.
 export function niceStep(span, count = 4) {
   const raw = span / Math.max(1, count);
   const mag = 10 ** Math.floor(Math.log10(raw || 1));
   return [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw) || raw;
 }
+// about how wide a label is at font size `size`: CJK characters are square, Latin ones about 0.56 em
+const textWidth = (text, size = 11) => [...String(text)].reduce((w, ch) => w + (/[\u2e80-\u9fff\uff00-\uffef]/.test(ch) ? size : size * 0.56), 0);
 const linear = (d0, d1, r0, r1) => (v) => (d1 === d0 ? (r0 + r1) / 2 : r0 + ((v - d0) / (d1 - d0)) * (r1 - r0));
 
 // ---- sparkline with "your normal" band -------------------------------------------------------
+// 14 days as a line over the "your normal" band; × marks a day without a record, the end dot takes the tone.
 export function spark(series, band, { width, height = 46, unit = "", tone = "neutral" }) {
   const pts = series.map((p, i) => ({ ...p, i }));
   const vals = pts.filter((p) => has(p.value)).map((p) => p.value);
@@ -73,7 +137,7 @@ export function spark(series, band, { width, height = 46, unit = "", tone = "neu
     open = true;
   });
   const last = [...pts].reverse().find((p) => has(p.value));
-  const endColor = tone === "good" ? "var(--good)" : tone === "bad" ? "var(--off)" : "var(--c-mark)";
+  const endColor = toneColor(tone);
   const hit = pts.map((p) => {
     const w = width / pts.length;
     const label = `${shortDay(p.date)} · ${has(p.value) ? measure(p.value, unit) : t("ui.no_data")}`;
@@ -83,29 +147,81 @@ export function spark(series, band, { width, height = 46, unit = "", tone = "neu
   return `<svg viewBox="0 0 ${width} ${height}" height="${height}" role="img" aria-label="${esc(t("band", { low: measure(band?.q1, unit), high: measure(band?.q3, unit) }))}">
     ${band ? `<rect x="0" y="${y(band.q3).toFixed(1)}" width="${width}" height="${Math.max(1, y(band.q1) - y(band.q3)).toFixed(1)}" rx="3" fill="var(--c-band)"/>` : ""}
     <path d="${path}" fill="none" stroke="var(--ink-2)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
-    ${last ? `<circle cx="${x(last.i).toFixed(1)}" cy="${y(last.value).toFixed(1)}" r="4" fill="${endColor}" stroke="var(--surface-2)" stroke-width="2"/>` : ""}
+    ${last ? `<circle cx="${x(last.i).toFixed(1)}" cy="${y(last.value).toFixed(1)}" r="4" fill="${endColor}" stroke="var(--halo)" stroke-width="2"/>` : ""}
     ${gaps}${hit}</svg>`;
 }
 
 // ---- value vs band on one line -------------------------------------------------------------------
+// One value against its band on a line: band = normal, tick = its median, dot = the value in its tone.
 export function bullet(value, band, { width, unit = "", tone = "neutral", height = 18 }) {
   if (!has(value)) return "";
   let lo = value, hi = value;
   if (band) { lo = Math.min(lo, band.q1); hi = Math.max(hi, band.q3); }
   const span = hi - lo || Math.abs(value) || 1;
   const x = linear(lo - span * 0.35, hi + span * 0.35, 6, width - 6);
-  const color = tone === "good" ? "var(--good)" : tone === "bad" ? "var(--off)" : "var(--c-mark)";
+  const color = toneColor(tone);
   return `<svg viewBox="0 0 ${width} ${height}" height="${height}" aria-hidden="true">
     <line x1="2" x2="${width - 2}" y1="${height / 2}" y2="${height / 2}" stroke="var(--line-2)" stroke-width="2" stroke-linecap="round"/>
     ${band ? `<rect x="${x(band.q1).toFixed(1)}" y="${height / 2 - 5}" width="${Math.max(2, x(band.q3) - x(band.q1)).toFixed(1)}" height="10" rx="5" fill="var(--c-band)" stroke="var(--line-2)"/>
       <line x1="${x(band.median).toFixed(1)}" x2="${x(band.median).toFixed(1)}" y1="${height / 2 - 5}" y2="${height / 2 + 5}" stroke="var(--ink-3)" stroke-width="1.5"/>` : ""}
-    <circle cx="${x(value).toFixed(1)}" cy="${height / 2}" r="5.5" fill="${color}" stroke="var(--surface-2)" stroke-width="2"/></svg>`;
+    <circle cx="${x(value).toFixed(1)}" cy="${height / 2}" r="5.5" fill="${color}" stroke="var(--halo)" stroke-width="2"/></svg>`;
 }
 
+// ---- one value on its own scale, with a plan --------------------------------------------------------
+// One value on its own scale: band = normal (q1–q3), tick = median, dot = the value, dashed tick = a plan or limit.
+export function rangeStrip(row, { width, height = 30, pad = 10 }) {
+  // nothing is drawn for a row without a value: a plan tick on an empty line says nothing
+  if (!has(row.value)) return "";
+  const h = height;
+  const vals = [row.value, row.band?.q1, row.band?.q3, row.plan?.limit].filter(has);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const span = hi - lo || Math.abs(hi) * 0.2 || 1;
+  lo -= span * 0.25; hi += span * 0.25;
+  const x = (v) => pad + ((v - lo) / (hi - lo)) * (width - 2 * pad);
+  const parts = [`<line x1="${pad}" x2="${width - pad}" y1="${h / 2}" y2="${h / 2}" stroke="var(--line-2)" stroke-width="2" stroke-linecap="round"/>`];
+  if (row.band) {
+    parts.push(`<rect x="${x(row.band.q1).toFixed(1)}" y="${h / 2 - 6}" width="${Math.max(3, x(row.band.q3) - x(row.band.q1)).toFixed(1)}" height="12" rx="6" fill="var(--c-band)" stroke="var(--line-2)"/>`);
+    parts.push(`<line x1="${x(row.band.median).toFixed(1)}" x2="${x(row.band.median).toFixed(1)}" y1="${h / 2 - 6}" y2="${h / 2 + 6}" stroke="var(--ink-3)" stroke-width="1.5"/>`);
+  }
+  if (row.plan) parts.push(`<line x1="${x(row.plan.limit).toFixed(1)}" x2="${x(row.plan.limit).toFixed(1)}" y1="2" y2="${h - 2}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 2"/>`);
+  parts.push(`<circle cx="${x(row.value).toFixed(1)}" cy="${h / 2}" r="6" fill="${toneColor(row.tone)}" stroke="var(--halo)" stroke-width="2"/>`);
+  return `<svg viewBox="0 0 ${width} ${h}" width="${width}" height="${h}" aria-hidden="true">${parts.join("")}</svg>`;
+}
+
+// ---- a few averages as a line --------------------------------------------------------------------
+// A short line through a few averages (eight weeks, say) with an end dot; missing points are bridged; needs two.
+export function trendLine(points, { width, height = 34, tip = () => "" }) {
+  const h = height, n = points.length;
+  const pts = points.map((p, i) => ({ ...p, i })).filter((p) => has(p.value));
+  if (pts.length < 2) return "";
+  const vals = pts.map((p) => p.value);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = (hi - lo) * 0.2 || 1; lo -= pad; hi += pad;
+  const x = (i) => 4 + (i / (n - 1)) * (width - 8), y = (v) => h - 4 - ((v - lo) / (hi - lo)) * (h - 8);
+  const d = pts.map((p, k) => `${k ? "L" : "M"}${x(p.i).toFixed(1)},${y(p.value).toFixed(1)}`).join("");
+  const last = pts[pts.length - 1];
+  const slot = width / n;
+  const tips = points.map((p, i) => `<rect x="${(x(i) - slot / 2).toFixed(1)}" y="0" width="${slot.toFixed(1)}" height="${h}" fill="transparent" data-tip="${esc(tip(p, i))}"/>`).join("");
+  return `<svg viewBox="0 0 ${width} ${h}" width="${width}" height="${h}" aria-hidden="true">
+    <path d="${d}" fill="none" stroke="var(--ink-2)" stroke-width="1.6" stroke-linejoin="round"/>
+    <circle cx="${x(last.i).toFixed(1)}" cy="${y(last.value).toFixed(1)}" r="3.5" fill="var(--c-mark)"/>${tips}</svg>`;
+}
+
+// ---- legend keys ---------------------------------------------------------------------------------
+const KEY = {
+  normal: `<svg width="20" height="12" aria-hidden="true"><rect x=".5" y=".5" width="19" height="11" rx="5.5" fill="var(--c-band)" stroke="var(--line-2)"/></svg>`,
+  median: `<svg width="20" height="12" aria-hidden="true"><rect x=".5" y=".5" width="19" height="11" rx="5.5" fill="var(--c-band)" stroke="var(--line-2)"/><line x1="10" x2="10" y1=".5" y2="11.5" stroke="var(--ink-3)" stroke-width="1.5"/></svg>`,
+  now: `<svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="var(--c-mark)"/></svg>`,
+  plan: `<svg width="6" height="18" aria-hidden="true"><line x1="3" x2="3" y1="1" y2="17" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 2"/></svg>`,
+  weeks: `<svg width="22" height="12" aria-hidden="true"><path d="M1 9 7 5l6 2.5L19 2" fill="none" stroke="var(--ink-2)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="19" cy="2.6" r="2" fill="var(--c-mark)"/></svg>`,
+};
+// A legend key drawn the way its mark is drawn: "normal" (band), "median", "now" (dot), "plan" (dashed tick), "weeks" (trend).
+export function legendKey(kind) { return KEY[kind] || ""; }
+
 // ---- the day ring --------------------------------------------------------------------------------
-const CATS = [["focus", ["work", "learning"], "var(--c-focus)"], ["fun", ["entertainment", "social"], "var(--c-fun)"],
+// The screen groups of the ring, inside out: [key, the categories it adds up, colour].
+export const RING_CATS = [["focus", ["work", "learning"], "var(--c-focus)"], ["fun", ["entertainment", "social"], "var(--c-fun)"],
   ["communication", ["communication"], "var(--c-comms)"], ["other", ["other"], "var(--c-other)"]];
-export const RING_CATS = CATS;
 
 function polar(cx, cy, r, minute) {
   const a = (minute / 1440) * Math.PI * 2 - Math.PI / 2;
@@ -120,7 +236,8 @@ function arc(cx, cy, r0, r1, m0, m1) {
 }
 const minuteOf = (iso) => { const d = toDate(iso); return d.getHours() * 60 + d.getMinutes(); };
 
-export function dayRing(ring, { size = 360, center = "", centerSub = "" }) {
+// A 24-hour clock, midnight at the top: sleep outside, calendar and workouts in the middle, screen minutes per hour inside.
+export function dayRing(ring, { size = 360, center = "", centerSub = "", cats = RING_CATS }) {
   const c = size / 2, s = size / 360;
   const R = { label: 172 * s, sleep: [150 * s, 162 * s], events: [130 * s, 144 * s], screen: [58 * s, 122 * s] };
   const parts = [];
@@ -142,8 +259,8 @@ export function dayRing(ring, { size = 360, center = "", centerSub = "" }) {
   const span = R.screen[1] - R.screen[0];
   (ring.screen_hours || []).forEach((hour, h) => {
     let r = R.screen[0];
-    CATS.forEach(([key, cats, color]) => {
-      const minutes = cats.reduce((sum, k) => sum + (hour[k] || 0), 0);
+    cats.forEach(([key, keys, color]) => {
+      const minutes = keys.reduce((sum, k) => sum + (hour[k] || 0), 0);
       if (!minutes) return;
       const r1 = r + (Math.min(60, minutes) / 60) * span;
       const m0 = h * 60 + 3, m1 = h * 60 + 57;
@@ -179,7 +296,7 @@ export function dayRing(ring, { size = 360, center = "", centerSub = "" }) {
     const m = minuteOf(ring.now);
     const [x0, y0] = polar(c, c, R.screen[0] - 4 * s, m), [x1, y1] = polar(c, c, R.sleep[1] + 4 * s, m);
     parts.push(`<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>`);
-    parts.push(`<circle cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="${4 * s}" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`);
+    parts.push(`<circle cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="${4 * s}" fill="var(--accent)" stroke="var(--halo)" stroke-width="2"/>`);
   }
   parts.push(`<text x="${c}" y="${c + 2 * s}" text-anchor="middle" font-size="${30 * s}" font-weight="680" fill="var(--ink)" letter-spacing="-.5">${esc(center)}</text>`);
   parts.push(`<text x="${c}" y="${c + 22 * s}" text-anchor="middle" font-size="${11.5 * s}" font-weight="550" fill="var(--ink-3)">${esc(centerSub)}</text>`);
@@ -187,6 +304,7 @@ export function dayRing(ring, { size = 360, center = "", centerSub = "" }) {
 }
 
 // ---- difference with interval, against zero ------------------------------------------------------
+// A difference with its 95% interval against a zero line; right = a better next day (flip mirrors it).
 export function interval(row, domain, { width, height = 26, flip = false }) {
   // right = a better next day: when lower is better (resting heart rate) the values are mirrored
   const x = linear(-domain, domain, 8, width - 8);
@@ -195,14 +313,15 @@ export function interval(row, domain, { width, height = 26, flip = false }) {
   if (row.status !== "ok") return `<svg viewBox="0 0 ${width} ${height}" height="${height}" aria-hidden="true">${base}</svg>`;
   const s = flip ? -1 : 1;
   const d = s * row.diff, lo = Math.min(s * row.low, s * row.high), hi = Math.max(s * row.low, s * row.high);
-  const color = row.detected ? (d > 0 ? "var(--good)" : "var(--off)") : "var(--ink-3)";
+  const color = row.detected ? toneColor(d > 0 ? "good" : "bad") : "var(--ink-3)";
   const clamp = (v) => Math.max(8, Math.min(width - 8, x(v)));
   return `<svg viewBox="0 0 ${width} ${height}" height="${height}" aria-hidden="true">${base}
     <line x1="${clamp(lo).toFixed(1)}" x2="${clamp(hi).toFixed(1)}" y1="${height / 2}" y2="${height / 2}" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
-    <circle cx="${clamp(d).toFixed(1)}" cy="${height / 2}" r="5" fill="${color}" stroke="var(--surface)" stroke-width="2"/></svg>`;
+    <circle cx="${clamp(d).toFixed(1)}" cy="${height / 2}" r="5" fill="${color}" stroke="var(--halo)" stroke-width="2"/></svg>`;
 }
 
 // ---- seven small day columns (training) -------------------------------------------------------------
+// One circle per day: filled = done, hollow = 0, dashed = no record; the day of the month under each.
 export function dayDots(series, { width, height = 30 }) {
   const n = series.length, w = width / n;
   return `<svg viewBox="0 0 ${width} ${height}" height="${height}" aria-hidden="true">${series.map((p, i) => {
@@ -218,9 +337,27 @@ export function dayDots(series, { width, height = 30 }) {
 }
 
 // ---- shared axis helpers -----------------------------------------------------------------------------
+// text drawn over marks gets a ring in the colour behind it (the kit's halo rule)
+const HALO = 'paint-order="stroke" stroke="var(--halo)" stroke-width="3" stroke-linejoin="round"';
 const dayIndex = (iso, first) => Math.round((toDate(iso) - toDate(first)) / 86400000);
-function yTicks(lo, hi, count = 4) {
-  const step = niceStep(hi - lo, count);
+// a step for an axis in minutes: a round number of minutes or hours, so ticks read 0 / 2h / 4h, never 3h 20m
+const minuteStep = (span, count = 4) => [5, 10, 15, 30, 60, 120, 180, 240, 360, 480, 720, 1440].find((s) => span / s <= count) || niceStep(span, count);
+// the smallest k at which every k-th label, centred in slots `slot` wide, keeps `gap` px from the next one kept
+function keepEvery(widths, slot, gap) {
+  for (let k = 1; k < widths.length; k++) {
+    let fits = true;
+    for (let i = 0; i + k < widths.length && fits; i += k) fits = (widths[i] + widths[i + k]) / 2 + gap <= k * slot;
+    if (fits) return k;
+  }
+  return Math.max(1, widths.length);
+}
+// a label centred on x, kept inside 0..width (the first and last labels of a narrow chart would be cut at the edge)
+function inside(x, text, size, width) {
+  const half = textWidth(text, size) / 2;
+  return x - half < 1 ? 'x="1" text-anchor="start"' : x + half > width - 1 ? `x="${width - 1}" text-anchor="end"` : `x="${x.toFixed(1)}" text-anchor="middle"`;
+}
+function yTicks(lo, hi, count = 4, stepOf = niceStep) {
+  const step = stepOf(hi - lo, count);
   const start = Math.ceil(lo / step) * step;
   const out = [];
   for (let v = start; v <= hi + 1e-9; v += step) out.push(Number(v.toFixed(6)));
@@ -229,6 +366,7 @@ function yTicks(lo, hi, count = 4) {
 
 // ---- time series: corridor band, points, smoothed line, reference lines ---------------------------------
 // layers: { band: [{date, low, high}], points: [{date, value}], line: [{date, value}], refs: [{value, label}] }
+// A date axis with a shaded corridor, faint daily points, a line that breaks after maxGap days and dashed reference lines.
 export function timeChart(layers, { width, height = 240, first, last, unit = "", fmt = (v) => String(v), yPad = 0.15, maxGap = 7 }) {
   const m = { l: 44, r: 12, t: 12, b: 26 };
   const n = Math.max(1, dayIndex(last, first));
@@ -258,8 +396,7 @@ export function timeChart(layers, { width, height = 240, first, last, unit = "",
     const bottom = [...layers.band].reverse().map((b) => `${X(b.date).toFixed(1)},${y(b.low).toFixed(1)}`);
     parts.push(`<polygon points="${[...top, ...bottom].join(" ")}" fill="var(--accent-soft)" stroke="none"/>`);
   }
-  (layers.refs || []).forEach((r) => parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(r.value).toFixed(1)}" y2="${y(r.value).toFixed(1)}" stroke="var(--ink-3)" stroke-dasharray="4 4"/>
-    <text x="${width - m.r}" y="${(y(r.value) - 6).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-2)">${esc(r.label)}</text>`));
+  (layers.refs || []).forEach((r) => parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(r.value).toFixed(1)}" y2="${y(r.value).toFixed(1)}" stroke="var(--ink-3)" stroke-dasharray="4 4"/>`));
   (layers.points || []).forEach((p) => parts.push(`<circle cx="${X(p.date).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="3" fill="var(--ink-3)" fill-opacity=".55"/>`));
   if (layers.line && layers.line.length) {
     let d = "", prev = null;
@@ -270,8 +407,10 @@ export function timeChart(layers, { width, height = 240, first, last, unit = "",
     });
     parts.push(`<path d="${d}" fill="none" stroke="var(--c-mark)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`);
     const end = layers.line[layers.line.length - 1];
-    parts.push(`<circle cx="${X(end.date).toFixed(1)}" cy="${y(end.value).toFixed(1)}" r="4.5" fill="var(--c-mark)" stroke="var(--surface)" stroke-width="2"/>`);
+    parts.push(`<circle cx="${X(end.date).toFixed(1)}" cy="${y(end.value).toFixed(1)}" r="4.5" fill="var(--c-mark)" stroke="var(--halo)" stroke-width="2"/>`);
   }
+  // a reference line's label goes over the points and the line, with a halo so it reads on top of them
+  (layers.refs || []).forEach((r) => parts.push(`<text x="${width - m.r}" y="${(y(r.value) - 6).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-2)" ${HALO}>${esc(r.label)}</text>`));
   // hover columns, one per day
   const byDay = new Map();
   (layers.points || []).forEach((p) => byDay.set(p.date, { ...(byDay.get(p.date) || {}), point: p.value }));
@@ -286,15 +425,22 @@ export function timeChart(layers, { width, height = 240, first, last, unit = "",
 
 // ---- stacked columns (categories over days or hours) -------------------------------------------------------
 // columns: [{label, values: {key: minutes}, shade: bool, tip}] ; groups: [[key, color, name]] bottom first
-export function stackedColumns(columns, groups, { width, height = 200, limit = null, limitLabel = "", maxValue = null, labelEvery = 1, unitFmt = dur }) {
-  const m = { l: 44, r: 8, t: 14, b: 24 };
+// Columns of stacked categories on one scale (minutes tick on round hours), with an optional dashed limit named in a key under the axis; × = no record.
+export function stackedColumns(columns, groups, { width, height = 200, limit = null, limitLabel = "", maxValue = null, labelEvery = 1, unitFmt = formatDuration, minutes = true }) {
   const totals = columns.map((c) => groups.reduce((s, [k]) => s + (c.values?.[k] || 0), 0));
   const top = maxValue || Math.max(limit || 0, ...totals, 1);
-  const ticks = yTicks(0, top * 1.05);
+  // values in minutes step on round minutes or hours (0 / 2h / 4h); anything else on 1, 2, 2.5 or 5 times a power of ten
+  const ticks = yTicks(0, top * 1.05, 4, minutes ? minuteStep : niceStep);
+  // the limit's label sits in a key row under the axis, never over the columns (as lanes() keeps it under the row's name)
+  const keyRow = limit && limitLabel ? 20 : 0;
+  // the left margin fits the longest tick label ("6h", "6 小时")
+  const m = { l: Math.max(44, Math.ceil(12 + Math.max(...ticks.map((v) => textWidth(unitFmt(v)))))), r: 8, t: 14, b: 24 + keyRow };
   const hi = Math.max(top * 1.05, ticks[ticks.length - 1]);
   const y = linear(0, hi, height - m.b, m.t);
   const slot = (width - m.l - m.r) / columns.length;
   const bw = Math.max(3, Math.min(28, slot - 3));
+  // labelEvery, or more when neighbouring labels would still run into each other
+  const every = Math.max(labelEvery, keepEvery(columns.map((c) => textWidth(c.label || "", 10.5)), slot, 6));
   const parts = [];
   ticks.forEach((v) => parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--c-grid)"/>
     <text x="${m.l - 8}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-3)" class="num">${esc(unitFmt(v))}</text>`));
@@ -315,23 +461,61 @@ export function stackedColumns(columns, groups, { width, height = 200, limit = n
     }
     const tip = c.tip || `${c.label} · ${unitFmt(totals[i])}`;
     parts.push(`<rect x="${(cx - slot / 2).toFixed(1)}" y="${m.t}" width="${slot.toFixed(1)}" height="${height - m.t - m.b}" fill="transparent" data-tip="${esc(tip)}"/>`);
-    if (i % labelEvery === 0) parts.push(`<text x="${cx.toFixed(1)}" y="${height - 6}" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">${esc(c.label)}</text>`);
+    if (i % every === 0) parts.push(`<text ${inside(cx, c.label || "", 10.5, width)} y="${height - keyRow - 6}" font-size="10.5" fill="var(--ink-3)">${esc(c.label)}</text>`);
   });
   parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--c-axis)"/>`);
-  if (limit) parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(limit).toFixed(1)}" y2="${y(limit).toFixed(1)}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="5 4"/>
-    <text x="${width - m.r}" y="${(y(limit) - 5).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-2)">${esc(limitLabel)}</text>`);
+  if (limit) parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(limit).toFixed(1)}" y2="${y(limit).toFixed(1)}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="5 4"/>`);
+  if (keyRow) parts.push(`<line x1="${m.l}" x2="${m.l + 14}" y1="${height - 7.5}" y2="${height - 7.5}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="5 4"/>
+    <text x="${m.l + 20}" y="${height - 4}" font-size="11" fill="var(--ink-2)">${esc(limitLabel)}</text>`);
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${esc(limitLabel)}">${parts.join("")}</svg>`;
+}
+
+// ---- blocks stacked in columns ------------------------------------------------------------------------------
+// columns: [{label, sub, total, blocks: [{value, tone: "mark" | "watch" | "none", faded, text, tip}]}], bottom block first
+// Columns of stacked blocks, one per item (block height = its value), a total above each column and two label lines under it.
+export function blockColumns(columns, { width, height = 210, minTop = 60, label = "", maxChars = 12 }) {
+  const m = { l: 8, r: 8, t: 18, b: 34 };
+  const slot = (width - m.l - m.r) / columns.length;
+  const bw = Math.min(120, slot - 14);
+  const max = Math.max(minTop, ...columns.map((c) => c.blocks.reduce((s, b) => s + b.value, 0)));
+  const scale = (height - m.t - m.b) / max;
+  // in a narrow box a label that would run into its neighbour's is left out, every k-th one kept (k the same along the row)
+  const labelEvery = keepEvery(columns.map((c) => textWidth(c.label || "", 11)), slot, 5);
+  const subEvery = keepEvery(columns.map((c) => textWidth(c.sub || "", 10.5)), slot, 4);
+  const parts = [];
+  columns.forEach((col, i) => {
+    const cx = m.l + slot * i + slot / 2;
+    let y = height - m.b;
+    col.blocks.forEach((b) => {
+      const h = Math.max(4, b.value * scale);
+      const fill = b.tone === "none" ? "var(--c-band)" : b.tone === "watch" ? "var(--watch)" : "var(--c-mark)";
+      const op = b.tone === "none" ? 1 : b.tone === "watch" ? 0.9 : b.faded ? 0.25 : 0.72;
+      // text on the block: inverted on the ink block, dark on amber, plain ink on a faded or empty one
+      const ink = b.tone === "watch" ? "var(--on-watch)" : b.tone === "none" ? "var(--ink-2)" : b.faded ? "var(--ink)" : "var(--surface)";
+      parts.push(`<rect x="${(cx - bw / 2).toFixed(1)}" y="${(y - h + 1).toFixed(1)}" width="${bw.toFixed(1)}" height="${(h - 2).toFixed(1)}" rx="4" fill="${fill}" fill-opacity="${op}"
+        data-tip="${esc(b.tip || "")}"/>`);
+      if (b.text && h > 18 && bw > 50) parts.push(`<text x="${cx.toFixed(1)}" y="${(y - h / 2 + 4).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="600" fill="${ink}" pointer-events="none">${esc(String(b.text).slice(0, maxChars))}</text>`);
+      y -= h;
+    });
+    parts.push(`<text x="${cx.toFixed(1)}" y="${(y - 6).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--ink-2)" font-weight="600">${esc(col.total || "")}</text>`);
+    if (i % labelEvery === 0) parts.push(`<text ${inside(cx, col.label || "", 11, width)} y="${height - 18}" font-size="11" fill="var(--ink-2)" font-weight="600">${esc(col.label || "")}</text>`);
+    if (i % subEvery === 0) parts.push(`<text ${inside(cx, col.sub || "", 10.5, width)} y="${height - 4}" font-size="10.5" fill="var(--ink-3)">${esc(col.sub || "")}</text>`);
+  });
+  parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${height - m.b}" y2="${height - m.b}" stroke="var(--c-axis)"/>`);
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${esc(label)}">${parts.join("")}</svg>`;
 }
 
 // ---- nights as bars on an evening-to-afternoon axis ------------------------------------------------------
 const fromNoon = (iso) => { const d = toDate(iso); const mm = d.getHours() * 60 + d.getMinutes(); return mm >= 720 ? mm - 720 : mm + 720; };
+// One bar per night on a 20:00–14:00 axis, the alarm as an ink tick over it, an optional dashed target window.
 export function sleepWindows(nights, { width, target = null, rowH = 18 }) {
   const m = { l: 64, r: 18, t: 22, b: 8 };  // r: half of the last hour label ("14:00") must fit
   const x0 = 8 * 60, x1 = 26 * 60; // 20:00 .. 14:00 next day, in minutes after noon
   const x = linear(x0, x1, m.l, width - m.r);
   const h = m.t + m.b + nights.length * rowH;
   const parts = [];
-  const labelStep = width < 520 ? 240 : 120;
+  const room = (step) => (width - m.l - m.r) / ((x1 - x0) / step);  // px between two hour labels
+  const labelStep = [120, 240, 360].find((step) => room(step) >= textWidth("00:00", 10.5) + 12) || 540;
   for (let mm = x0; mm <= x1; mm += labelStep) {
     const label = String(((mm / 60) + 12) % 24).padStart(2, "0") + ":00";
     parts.push(`<line x1="${x(mm).toFixed(1)}" x2="${x(mm).toFixed(1)}" y1="${m.t - 4}" y2="${h - m.b}" stroke="var(--c-grid)"/>
@@ -351,11 +535,11 @@ export function sleepWindows(nights, { width, target = null, rowH = 18 }) {
     } else {
       parts.push(`<text x="${x(x0 + 30)}" y="${(cy + 4).toFixed(1)}" font-size="10.5" fill="var(--ink-3)">${esc(t("sleep.no_record"))}</text>`);
     }
-    // the alarm goes on top of the bar, in ink with a surface halo, so it shows on a night that ran past it
+    // the alarm goes on top of the bar, in ink with a halo, so it shows on a night that ran past it
     if (n.alarm) {
       const [hh, mi] = n.alarm.split(":").map(Number); const ax = x(hh * 60 + mi + 720).toFixed(1);
       const y1 = (cy - rowH / 2 + 1).toFixed(1), y2 = (cy + rowH / 2 - 1).toFixed(1);
-      parts.push(`<line x1="${ax}" x2="${ax}" y1="${y1}" y2="${y2}" stroke="var(--surface)" stroke-width="5" stroke-linecap="round" pointer-events="none"/>
+      parts.push(`<line x1="${ax}" x2="${ax}" y1="${y1}" y2="${y2}" stroke="var(--halo)" stroke-width="5" stroke-linecap="round" pointer-events="none"/>
         <line x1="${ax}" x2="${ax}" y1="${y1}" y2="${y2}" stroke="var(--c-mark)" stroke-width="2" stroke-linecap="round" pointer-events="none"/>`);
     }
   });
@@ -363,6 +547,7 @@ export function sleepWindows(nights, { width, target = null, rowH = 18 }) {
 }
 
 // ---- the alarm ladder: steps down after on-time mornings ---------------------------------------------------
+// The alarm as a step line (earlier = higher) with wake dots, green on time and red late, and the goal dashed.
 export function ladderChart(ladder, { width, height = 200, final }) {
   if (!ladder.length) return "";
   const m = { l: 48, r: 12, t: 14, b: 24 };
@@ -375,8 +560,9 @@ export function ladderChart(ladder, { width, height = 200, final }) {
   const clockStep = [15, 30, 60, 120].find((st) => (hi - lo) / st <= 5) || 180;  // clock ticks land on round times
   for (let v = Math.ceil(lo / clockStep) * clockStep; v <= hi; v += clockStep) parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--c-grid)"/>
     <text x="${m.l - 8}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-3)" class="num">${String(Math.floor(v / 60)).padStart(2, "0")}:${String(Math.round(v % 60)).padStart(2, "0")}</text>`);
-  parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(toMin(final)).toFixed(1)}" y2="${y(toMin(final)).toFixed(1)}" stroke="var(--ink-3)" stroke-dasharray="4 4"/>
-    <text x="${width - m.r}" y="${(y(toMin(final)) - 6).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-2)">${esc(t("sleep.final", { alarm: final }))}</text>`);
+  parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(toMin(final)).toFixed(1)}" y2="${y(toMin(final)).toFixed(1)}" stroke="var(--ink-3)" stroke-dasharray="4 4"/>`);
+  // at most seven day labels, and never closer than the longest one needs
+  const dayEvery = Math.max(Math.ceil(ladder.length / 7), keepEvery(ladder.map((day) => textWidth(shortDay(day.date), 10.5)), (width - m.l - m.r) / ladder.length, 8));
   let d = "";
   ladder.forEach((day, i) => { const v = y(toMin(day.alarm)); d += `${i ? "L" : "M"}${x(i).toFixed(1)},${v.toFixed(1)}L${x(i + 1).toFixed(1)},${v.toFixed(1)}`; });
   parts.push(`<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linejoin="round"/>`);
@@ -384,17 +570,19 @@ export function ladderChart(ladder, { width, height = 200, final }) {
     const cx = (x(i) + x(i + 1)) / 2;
     if (day.woke) {
       const w = toDate(day.woke); const v = w.getHours() * 60 + w.getMinutes();
-      const color = day.on_time ? "var(--good)" : "var(--off)";
-      parts.push(`<circle cx="${cx.toFixed(1)}" cy="${y(v).toFixed(1)}" r="4.5" fill="${color}" stroke="var(--surface)" stroke-width="2"/>`);
+      parts.push(`<circle cx="${cx.toFixed(1)}" cy="${y(v).toFixed(1)}" r="4.5" fill="${toneColor(day.on_time ? "good" : "bad")}" stroke="var(--halo)" stroke-width="2"/>`);
     }
     const tip = `${shortDay(day.date)} · ${t("sleep.alarm_at", { alarm: day.alarm })} · ${day.woke ? t("sleep.woke_at", { woke: clock(day.woke) }) : t("sleep.no_record")}`;
     parts.push(`<rect x="${x(i).toFixed(1)}" y="${m.t}" width="${(x(i + 1) - x(i)).toFixed(1)}" height="${height - m.t - m.b}" fill="transparent" data-tip="${esc(tip)}"/>`);
-    if (i % Math.ceil(ladder.length / 7) === 0) parts.push(`<text x="${cx.toFixed(1)}" y="${height - 6}" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">${esc(shortDay(day.date))}</text>`);
+    if (i % dayEvery === 0) parts.push(`<text ${inside(cx, shortDay(day.date), 10.5, width)} y="${height - 6}" font-size="10.5" fill="var(--ink-3)">${esc(shortDay(day.date))}</text>`);
   });
+  // the goal's label goes over the step line and the wake dots, with a halo
+  parts.push(`<text x="${width - m.r}" y="${(y(toMin(final)) - 6).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-2)" ${HALO} pointer-events="none">${esc(t("sleep.final", { alarm: final }))}</text>`);
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${esc(t("sleep.ladder"))}">${parts.join("")}</svg>`;
 }
 
 // ---- arrival calendar: one cell per day ----------------------------------------------------------------------
+// One cell per day from first: "1" = has data, "p" = partial, anything else = nothing.
 export function coverage(marks, first, { width, height = 16 }) {
   const n = marks.length, gap = 1.5, w = (width - gap * (n - 1)) / n;
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" aria-hidden="true">${[...marks].map((c, i) => {
@@ -409,7 +597,8 @@ export function coverage(marks, first, { width, height = 16 }) {
 // ---- lanes: one row per activity, columns over hours or days, each row on its own scale -------------
 // rows: [{key, label, sub, parts: [[partKey, color]], values: [{partKey: minutes} | null], max, limit, limitLabel}]
 // cols: [{label, tip, shade}]. showMax: write each row's top value under its name (off when every row has the same scale)
-export function lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = dur, showMax = true }) {
+// One row per activity with columns over hours or days, each row on its own scale; × = no record, dashed = a limit.
+export function lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true }) {
   const top = 4, axis = 20;
   const plotW = width - labelW - 8;
   const slot = plotW / cols.length;

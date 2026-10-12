@@ -1,17 +1,19 @@
 // Shell: header, language and light/dark, hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js?v=60b432d5aa";
-import { installTooltip, esc } from "./charts.js?v=60b432d5aa";
-import { getLang, setLang, t, clock } from "./i18n.js?v=60b432d5aa";
-import body from "./pages/body.js?v=60b432d5aa";
-import data from "./pages/data.js?v=60b432d5aa";
-import drain from "./pages/drain.js?v=60b432d5aa";
-import review from "./pages/review.js?v=60b432d5aa";
-import sleep from "./pages/sleep.js?v=60b432d5aa";
-import time from "./pages/time.js?v=60b432d5aa";
-import today from "./pages/today.js?v=60b432d5aa";
-import week from "./pages/week.js?v=60b432d5aa";
+import { get, isStatic } from "./api.js?v=a8cf20d79e";
+import { installTooltip, esc, setFormat } from "./charts.js?v=a8cf20d79e";
+import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=a8cf20d79e";
+import body from "./pages/body.js?v=a8cf20d79e";
+import data from "./pages/data.js?v=a8cf20d79e";
+import drain from "./pages/drain.js?v=a8cf20d79e";
+import kit from "./pages/kit.js?v=a8cf20d79e";
+import review from "./pages/review.js?v=a8cf20d79e";
+import sleep from "./pages/sleep.js?v=a8cf20d79e";
+import time from "./pages/time.js?v=a8cf20d79e";
+import today from "./pages/today.js?v=a8cf20d79e";
+import week from "./pages/week.js?v=a8cf20d79e";
 
-const PAGES = { today, week, body, sleep, time, drain, review, data };
+// the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
+const PAGES = { today, week, body, sleep, time, drain, review, data, kit };
 const NAV = ["today", "week", "body", "time", "drain", "review", "data"];
 // a menu item that holds several pages shows a small switch above the page title
 const GROUPS = { body: [["body", "nav.weight"], ["sleep", "nav.sleep_tab"]] };
@@ -24,6 +26,9 @@ const store = {
   set(key, value) { try { localStorage.setItem(`dayring.${key}`, value); } catch { /* private mode */ } },
 };
 let settings = { title: "dayring", locale: "en", demo: false };
+// the kit's charts write their words and numbers with this app's i18n (charts.js imports nothing)
+setFormat({ t, dur, clock, shortDay, measure, toDate, wtype });
+const footer = () => `<footer class="foot"><a href="#kit">${t("kit.link")}</a></footer>`;
 
 const ICON = {
   logo: `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="var(--c-band)" stroke-width="5"/><path d="M16 3.5a12.5 12.5 0 0 1 11.8 8.3" fill="none" stroke="var(--c-sleep)" stroke-width="5" stroke-linecap="round"/><path d="M28.3 18.5a12.5 12.5 0 0 1-6.6 9.1" fill="none" stroke="var(--c-focus)" stroke-width="5" stroke-linecap="round"/><path d="M17.5 28.4a12.5 12.5 0 0 1-9.7-3.7" fill="none" stroke="var(--c-fun)" stroke-width="5" stroke-linecap="round"/></svg>`,
@@ -81,7 +86,7 @@ async function route() {
     document.title = `${t(titleKey(page))} · ${settings.title}`;
     const group = GROUPS[groupOf(page)];
     const sub = group ? `<nav class="subnav seg" aria-label="${esc(t(`nav.${groupOf(page)}`))}">${group.map(([p, key]) => `<a href="#${p}" ${p === page ? 'aria-current="page"' : ""}>${t(key)}</a>`).join("")}</nav>` : "";
-    main.innerHTML = sub + PAGES[page].render(data);
+    main.innerHTML = sub + PAGES[page].render(data) + footer();
     PAGES[page].mount?.(main, data);
   } catch (error) {
     const staticGap = isStatic && /^404/.test(error.message);  // the demo site only has a few pre-rendered dates

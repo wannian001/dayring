@@ -1,5 +1,5 @@
-import { draw, esc, timeChart } from "../charts.js?v=60b432d5aa";
-import { day, num, signed, t } from "../i18n.js?v=60b432d5aa";
+import { draw, esc, timeChart } from "../charts.js?v=a8cf20d79e";
+import { day, num, signed, t } from "../i18n.js?v=a8cf20d79e";
 
 const kg = (v) => (v == null ? "—" : `${num(v, 1)} kg`);
 const STATUS = { on_track: "good", faster: "watch", slower: "watch", reached: "good" };
@@ -30,9 +30,9 @@ export default {
             <span class="key"><i style="background:var(--ink-3);border-radius:50%"></i>${t("body.daily")}</span>
             <span class="key"><i style="background:var(--c-mark);height:3px"></i>${t("chart.avg7")}</span>
             ${plan ? `<span class="key"><i style="background:var(--accent-soft);border:1px solid var(--accent)"></i>${t("body.corridor", { lo: num(Math.min(...plan.weekly_loss_pct), 1), hi: num(Math.max(...plan.weekly_loss_pct), 1) })}</span>` : ""}</span></h2>
-          <div id="wchart"></div>
+          <div id="wchart" class="chart"></div>
           <details class="how"><summary>${t("ui.how")}</summary><p>${t("body.rule")}</p></details></section>
-        <section class="card span-8"><h2>${t("body.long")}<span class="aside">${t("body.long_note")}</span></h2><div id="mchart"></div></section>
+        <section class="card span-8"><h2>${t("body.long")}<span class="aside">${t("body.long_note")}</span></h2><div id="mchart" class="chart"></div></section>
         <section class="card span-4"><h2>${t("body.waist")}</h2>${p.waist.length ? `<ul class="agenda">${p.waist.slice(-6).reverse().map((w) => `<li style="grid-template-columns:1fr auto"><span>${day(w.date)}</span><b class="num">${num(w.value, 1)} cm</b></li>`).join("")}</ul>` : `<p class="muted small">${t("body.no_waist")}</p>`}</section>
       </div>`;
   },
