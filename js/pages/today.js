@@ -1,5 +1,6 @@
 import { bullet, dayDots, dayRing, draw, esc, interval, RING_CATS, spark } from "../charts.js";
 import { clock, day, dur, measure, num, pct, signed, t, weekdayShort, wtype } from "../i18n.js";
+import { icon } from "../icons.js";
 
 const STATE_ICON = {
   good: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 6.3 2.3 2.3 4.7-5.1"/></svg>`,
@@ -25,7 +26,7 @@ function tile(m, i, extraNote = "") {
   </div>`;
 }
 
-function agendaHtml(a, isToday) {
+function agendaHtml(a, isToday, workouts) {
   const rows = [];
   a.events.forEach((e) => rows.push({ sort: e.start, html: `<li><span class="when">${clock(e.start)}–${clock(e.end)}</span>
     <span class="what"><b>${esc(e.title)}</b>${e.location ? `<span class="muted">${esc(e.location)}</span>` : ""}</span><span></span></li>` }));
@@ -36,7 +37,10 @@ function agendaHtml(a, isToday) {
       <span class="chip ${d.days_left <= 1 ? "watch" : ""}">${t("today.due", { when })}</span></li>` });
   });
   rows.sort((x, y) => (x.sort < y.sort ? -1 : 1));
-  const training = `<li><span class="when">${t("today.training")}</span><span class="what">${a.training ? `<b>${esc(a.training)}</b>` : `<span class="muted">${t("today.rest")}</span>`}</span><span></span></li>`;
+  const done = (workouts || []).map((w) => esc(t("today.trained", { what: wtype(w.type), d: dur((new Date(w.end) - new Date(w.start)) / 60000), time: clock(w.start) })));
+  const plan = a.training ? `<b>${esc(a.training)}</b>` : `<span class="muted">${t("today.rest")}</span>`;
+  const training = `<li class="training-row"><span class="when"><span class="workout-icon">${icon("exercise", 15)}</span>${t("today.training")}</span>
+    <span class="what">${done.length ? `<b>${done.join("<br>")}</b>${a.training ? `<span class="muted">${esc(t("week.planned", { what: a.training }))}</span>` : ""}` : plan}</span><span></span></li>`;
   let tonight = "";
   if (a.sleep && isToday) {
     const last = a.sleep.last;
@@ -74,7 +78,7 @@ function heroHtml(p) {
         <p class="lede" style="font-size:var(--t-3xl);margin:0">${t(`recovery.${r.verdict}`)}</p>
         <p class="small muted" style="margin:0">${r.as_of ? t("recovery.as_of", { day: day(r.as_of) }) : ""}</p>
         <div class="row" style="gap:6px">${chips}</div>${self}${behind}</div>
-      <div>${agendaHtml(p.agenda, !p.looking_back)}</div>
+      <div>${agendaHtml(p.agenda, !p.looking_back, p.ring.workouts)}</div>
     </div></div></section>`;
 }
 

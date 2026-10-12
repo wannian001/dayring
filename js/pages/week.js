@@ -1,27 +1,41 @@
 import { draw, esc } from "../charts.js";
 import { clock, day, dur, num, shortDay, t, weekdayShort, wtype } from "../i18n.js";
+import { icon } from "../icons.js";
 
 const shift = (iso, n) => { const d = new Date(`${iso}T12:00:00`); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 const leftText = (n) => (n < 0 ? t("week.days_ago", { n: -n }) : n <= 1 ? t(`today.days_left.${n}`) : t("today.days_left.n", { n }));
 
+// the plan's training for the day; once the day is over it says whether a workout happened
+function planLine(d) {
+  if (!d.training) return "";
+  const done = (d.workouts || []).length > 0 || (d.actual && d.actual.workout_min > 0);
+  if (d.past && !done && d.actual && d.actual.workout_min === 0) {
+    return `<p class="xs day-train missed"><span class="workout-icon">${icon("exercise", 14)}</span>${esc(t("week.planned_missed", { what: d.training }))}</p>`;
+  }
+  if ((d.past || d.is_today) && done) return "";  // the workout itself is listed above
+  return `<p class="xs day-train"><span class="workout-icon">${icon("exercise", 14)}</span>${esc(t("week.planned", { what: d.training }))}</p>`;
+}
+
 function dayCard(d) {
   const items = [];
-  d.events.forEach((e) => items.push(`<li><span class="num">${clock(e.start)}</span> ${esc(e.title)}${e.location ? `<span class="muted"> · ${esc(e.location)}</span>` : ""}</li>`));
+  const timed = [...d.events.map((e) => ({ start: e.start, html: `<li><span class="num">${clock(e.start)}</span> ${esc(e.title)}${e.location ? `<span class="muted"> · ${esc(e.location)}</span>` : ""}</li>` })),
+    ...(d.workouts || []).map((w) => ({ start: w.start, html: `<li class="workout"><span class="workout-icon">${icon("exercise", 14)}</span><span class="num">${clock(w.start)}</span> ${esc(wtype(w.type))}<span class="muted"> · ${dur(w.minutes)}</span></li>` }))];
+  timed.sort((a, b) => (a.start < b.start ? -1 : 1)).forEach((x) => items.push(x.html));
   const due = d.deadlines.map((x) => `<li class="due ${x.status !== "todo" ? "done" : x.days_left <= 1 ? "soon" : ""}"><span class="num">${clock(x.due)}</span> ${esc(x.title)}
     <span class="muted">· ${esc(x.group || "")}${x.weight_pct ? ` · ${num(x.weight_pct)}%` : ""}${x.status !== "todo" ? ` · ${t(`status.${x.status}`)}` : ""}</span></li>`).join("");
   let actual = "";
   if (d.actual) {
     const bits = [];
     if (d.actual.sleep_min != null) bits.push(t("week.slept", { d: dur(d.actual.sleep_min) }));
-    if (d.actual.workout_min) bits.push(t("week.trained", { what: d.actual.workout_type ? wtype(d.actual.workout_type) : "", d: dur(d.actual.workout_min) }));
-    else if (d.actual.workout_min === 0) bits.push(t("week.rested"));
+    if (d.actual.workout_min && !(d.workouts || []).length) bits.push(t("week.trained", { what: d.actual.workout_type ? wtype(d.actual.workout_type) : "", d: dur(d.actual.workout_min) }));
+    else if (d.actual.workout_min === 0 && !d.training) bits.push(t("week.rested"));
     actual = bits.length ? `<p class="xs muted day-actual">${esc(bits.join(" · "))}</p>` : "";
   }
   return `<article class="daycol ${d.is_today ? "is-today" : ""} ${d.past ? "past" : ""}">
     <header><b>${weekdayShort(d.date)}</b><span>${shortDay(d.date)}</span>${d.is_today ? `<span class="chip accent">${t("nav.today")}</span>` : ""}</header>
     ${due ? `<ul class="daylist">${due}</ul>` : ""}
     ${items.length ? `<ul class="daylist">${items.join("")}</ul>` : `<p class="xs muted">${t("week.free")}</p>`}
-    ${d.training ? `<p class="xs day-train">${esc(d.training)}</p>` : ""}
+    ${planLine(d)}
     ${actual}</article>`;
 }
 
