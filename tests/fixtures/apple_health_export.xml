@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic Apple Health export for dayring tests. No real data. Exported in Melbourne (+1100). -->
+<!DOCTYPE HealthData [
+<!ELEMENT HealthData (ExportDate,Me,(Record|Correlation|Workout|ActivitySummary)*)>
+<!ATTLIST HealthData locale CDATA #REQUIRED>
+<!ELEMENT ExportDate EMPTY>
+<!ATTLIST ExportDate value CDATA #REQUIRED>
+<!ELEMENT Me EMPTY>
+<!ELEMENT Record ((MetadataEntry|HeartRateVariabilityMetadataList)*)>
+<!ATTLIST Record type CDATA #REQUIRED unit CDATA #IMPLIED value CDATA #IMPLIED sourceName CDATA #REQUIRED
+  device CDATA #IMPLIED creationDate CDATA #IMPLIED startDate CDATA #REQUIRED endDate CDATA #REQUIRED>
+<!ELEMENT MetadataEntry EMPTY>
+<!ATTLIST MetadataEntry key CDATA #REQUIRED value CDATA #REQUIRED>
+]>
+<HealthData locale="en_AU">
+ <ExportDate value="2026-10-12 14:30:00 +1100"/>
+ <Me HKCharacteristicTypeIdentifierDateOfBirth="" HKCharacteristicTypeIdentifierBiologicalSex="HKBiologicalSexNotSet"/>
+
+ <!-- A type the importer does not use -->
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Example Apple Watch" unit="count/min" startDate="2026-10-11 08:00:00 +1100" endDate="2026-10-11 08:00:00 +1100" value="88"/>
+
+ <!-- Steps on 2026-10-11: watch and phone overlap. Expected 1000 + 2000 + 0 + 450 + 1500 = 4950. -->
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="Example Apple Watch" device="&lt;&lt;HKDevice: 0x1&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch7,1&gt;" unit="count" startDate="2026-10-11 08:00:00 +1100" endDate="2026-10-11 08:10:00 +1100" value="1000"/>
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="Example Apple Watch" device="&lt;&lt;HKDevice: 0x1&gt;, name:Apple Watch, manufacturer:Apple Inc., model:Watch, hardware:Watch7,1&gt;" unit="count" startDate="2026-10-11 08:00:00 +1100" endDate="2026-10-11 08:10:00 +1100" value="1000"/>
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="Example Apple Watch" unit="count" startDate="2026-10-11 12:00:00 +1100" endDate="2026-10-11 12:30:00 +1100" value="2000"/>
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="Example iPhone" device="&lt;&lt;HKDevice: 0x2&gt;, name:iPhone, manufacturer:Apple Inc., model:iPhone, hardware:iPhone15,2&gt;" unit="count" startDate="2026-10-11 08:00:00 +1100" endDate="2026-10-11 08:10:00 +1100" value="950"/>
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="Example iPhone" unit="count" startDate="2026-10-11 12:15:00 +1100" endDate="2026-10-11 12:45:00 +1100" value="900"/>
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="Example iPhone" unit="count" startDate="2026-10-11 18:00:00 +1100" endDate="2026-10-11 18:20:00 +1100" value="1500"/>
+ <!-- Export day: not complete -->
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="Example iPhone" unit="count" startDate="2026-10-12 09:00:00 +1100" endDate="2026-10-12 09:30:00 +1100" value="500"/>
+
+ <!-- Exercise minutes: the phone copy of the morning is covered by the watch. Expected 40. -->
+ <Record type="HKQuantityTypeIdentifierAppleExerciseTime" sourceName="Example Apple Watch" unit="min" startDate="2026-10-11 08:00:00 +1100" endDate="2026-10-11 08:30:00 +1100" value="30"/>
+ <Record type="HKQuantityTypeIdentifierAppleExerciseTime" sourceName="Example Apple Watch" unit="min" startDate="2026-10-11 12:00:00 +1100" endDate="2026-10-11 12:10:00 +1100" value="10"/>
+ <Record type="HKQuantityTypeIdentifierAppleExerciseTime" sourceName="Example iPhone" unit="min" startDate="2026-10-11 08:00:00 +1100" endDate="2026-10-11 08:30:00 +1100" value="30"/>
+
+ <!-- HRV and resting heart rate: daily means -->
+ <Record type="HKQuantityTypeIdentifierHeartRateVariabilitySDNN" sourceName="Example Apple Watch" unit="ms" startDate="2026-10-11 03:00:00 +1100" endDate="2026-10-11 03:01:00 +1100" value="40">
+  <HeartRateVariabilityMetadataList>
+   <InstantaneousBeatsPerMinute bpm="55" time="3:00:01.00 am"/>
+  </HeartRateVariabilityMetadataList>
+ </Record>
+ <Record type="HKQuantityTypeIdentifierHeartRateVariabilitySDNN" sourceName="Example Apple Watch" unit="ms" startDate="2026-10-11 15:00:00 +1100" endDate="2026-10-11 15:01:00 +1100" value="60"/>
+ <Record type="HKQuantityTypeIdentifierRestingHeartRate" sourceName="Example Apple Watch" unit="count/min" startDate="2026-10-11 00:00:00 +1100" endDate="2026-10-11 23:59:00 +1100" value="55"/>
+ <Record type="HKQuantityTypeIdentifierRestingHeartRate" sourceName="Example Apple Watch" unit="count/min" startDate="2026-10-11 12:00:00 +1100" endDate="2026-10-11 23:59:00 +1100" value="57"/>
+
+ <!-- Weight: pounds converted, last of the day wins (164 lb = 74.39 kg) -->
+ <Record type="HKQuantityTypeIdentifierBodyMass" sourceName="Example Scale" unit="lb" startDate="2026-10-11 08:00:00 +1100" endDate="2026-10-11 08:00:00 +1100" value="165"/>
+ <Record type="HKQuantityTypeIdentifierBodyMass" sourceName="Example Scale" unit="lb" startDate="2026-10-11 20:00:00 +1100" endDate="2026-10-11 20:00:00 +1100" value="164"/>
+ <Record type="HKQuantityTypeIdentifierBodyMass" sourceName="Example Scale" unit="kg" startDate="2026-10-10 07:00:00 +1100" endDate="2026-10-10 07:00:00 +1100" value="75.2"/>
+
+ <!-- Night of 10 -> 11 October, crossing midnight. The phone writes in-bed and a rough asleep
+      estimate; the watch writes stages. Expected: asleep 450 min (watch only), in bed 510 min,
+      23:20 -> 07:00, filed under 2026-10-11. The 14:00 nap is a separate, shorter session. -->
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Example iPhone" startDate="2026-10-10 23:00:00 +1100" endDate="2026-10-11 07:30:00 +1100" value="HKCategoryValueSleepAnalysisInBed">
+  <MetadataEntry key="HKTimeZone" value="Australia/Melbourne"/>
+ </Record>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Example iPhone" startDate="2026-10-10 23:10:00 +1100" endDate="2026-10-11 07:20:00 +1100" value="HKCategoryValueSleepAnalysisAsleepUnspecified"/>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Example Apple Watch" startDate="2026-10-10 23:20:00 +1100" endDate="2026-10-11 01:00:00 +1100" value="HKCategoryValueSleepAnalysisAsleepCore">
+  <MetadataEntry key="HKTimeZone" value="Australia/Melbourne"/>
+ </Record>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Example Apple Watch" startDate="2026-10-11 01:00:00 +1100" endDate="2026-10-11 01:10:00 +1100" value="HKCategoryValueSleepAnalysisAwake"/>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Example Apple Watch" startDate="2026-10-11 01:10:00 +1100" endDate="2026-10-11 02:00:00 +1100" value="HKCategoryValueSleepAnalysisAsleepDeep"/>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Example Apple Watch" startDate="2026-10-11 02:00:00 +1100" endDate="2026-10-11 03:00:00 +1100" value="HKCategoryValueSleepAnalysisAsleepREM"/>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Example Apple Watch" startDate="2026-10-11 03:00:00 +1100" endDate="2026-10-11 07:00:00 +1100" value="HKCategoryValueSleepAnalysisAsleepCore"/>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Example Apple Watch" startDate="2026-10-11 14:00:00 +1100" endDate="2026-10-11 14:30:00 +1100" value="HKCategoryValueSleepAnalysisAsleepUnspecified"/>
+
+ <!-- A night in Los Angeles. The strings carry the export offset (+1100); HKTimeZone says the
+      phone was in Los Angeles: 23:00 on 3 Oct to 06:30 on 4 Oct local, so it is filed under
+      2026-10-04 (in Melbourne time it would wrongly land on 2026-10-05). -->
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Example Apple Watch" startDate="2026-10-04 17:00:00 +1100" endDate="2026-10-04 21:00:00 +1100" value="HKCategoryValueSleepAnalysisAsleepCore">
+  <MetadataEntry key="HKTimeZone" value="America/Los_Angeles"/>
+ </Record>
+ <!-- no metadata on this one: it takes the zone of its session -->
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Example Apple Watch" startDate="2026-10-04 21:00:00 +1100" endDate="2026-10-05 00:30:00 +1100" value="HKCategoryValueSleepAnalysisAsleepREM"/>
+ <Record type="HKQuantityTypeIdentifierHeartRateVariabilitySDNN" sourceName="Example Apple Watch" unit="ms" startDate="2026-10-05 01:00:00 +1100" endDate="2026-10-05 01:01:00 +1100" value="45">
+  <MetadataEntry key="HKTimeZone" value="America/Los_Angeles"/>
+ </Record>
+
+ <!-- A correlation: its nested records are not top-level and are ignored -->
+ <Correlation type="HKCorrelationTypeIdentifierBloodPressure" sourceName="Example Cuff" startDate="2026-10-11 09:00:00 +1100" endDate="2026-10-11 09:00:00 +1100">
+  <Record type="HKQuantityTypeIdentifierBodyMass" sourceName="Example Cuff" unit="kg" startDate="2026-10-11 23:00:00 +1100" endDate="2026-10-11 23:00:00 +1100" value="99"/>
+ </Correlation>
+
+ <!-- Workouts. The running app copied the watch run (counted once). Expected 2026-10-11:
+      20 + 45 = 65 min, type "strength training"; 2026-10-09: 30 min walking. -->
+ <Workout workoutActivityType="HKWorkoutActivityTypeWalking" duration="30" durationUnit="min" sourceName="Example Apple Watch" startDate="2026-10-09 18:00:00 +1100" endDate="2026-10-09 18:30:00 +1100">
+  <MetadataEntry key="HKTimeZone" value="Australia/Melbourne"/>
+ </Workout>
+ <Workout workoutActivityType="HKWorkoutActivityTypeRunning" duration="20" durationUnit="min" sourceName="Example Apple Watch" startDate="2026-10-11 07:00:00 +1100" endDate="2026-10-11 07:20:00 +1100">
+  <WorkoutStatistics type="HKQuantityTypeIdentifierActiveEnergyBurned" startDate="2026-10-11 07:00:00 +1100" endDate="2026-10-11 07:20:00 +1100" sum="200" unit="kcal"/>
+ </Workout>
+ <Workout workoutActivityType="HKWorkoutActivityTypeRunning" duration="21" durationUnit="min" sourceName="RunTracker" startDate="2026-10-11 07:00:00 +1100" endDate="2026-10-11 07:21:00 +1100"/>
+ <Workout workoutActivityType="HKWorkoutActivityTypeTraditionalStrengthTraining" duration="45" durationUnit="min" sourceName="Example Apple Watch" startDate="2026-10-11 17:00:00 +1100" endDate="2026-10-11 17:45:00 +1100"/>
+
+ <ActivitySummary dateComponents="2026-10-11" activeEnergyBurned="500" appleExerciseTime="40" appleStandHours="10"/>
+</HealthData>

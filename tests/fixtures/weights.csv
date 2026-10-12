@@ -1,0 +1,6 @@
+Date,Weight (kg),Waist,Notes
+2026-10-01,75.4,81,after breakfast
+2026-10-02,abc,81,typo in weight
+2026-10-03,75.1,,
+13/10/2026,74.9,80,wrong date layout
+2026-10-04,500,80,out of range

@@ -1,0 +1,42 @@
+# Copy this file to ./dayring.toml and edit. Every section is optional:
+# a page without its plan still shows the facts, just without a goal to compare with.
+
+[dayring]
+data_dir = "data"                 # where the CSV files live (relative to this file)
+timezone = "Australia/Melbourne"  # IANA name; all times in the CSV files are local to it
+locale = "en"                     # en or zh; the page has a switch too
+theme = "dusk"                    # dusk, graphite or celadon
+title = "dayring"
+
+[devices]
+# When two devices are in use at the same minute, the first one in this list counts.
+priority = ["phone", "tablet", "laptop", "desktop"]
+
+[plan.sleep]
+target_hours = 8
+bedtime = "23:30"
+wake = "07:30"
+
+# Optional: pull a late wake time earlier, one step after each on-time morning.
+# [plan.wake_shift]
+# start = "2026-10-01"
+# first_alarm = "10:30"
+# final_alarm = "07:30"
+# step_min = 15
+# grace_min = 15
+
+# Optional: a weight plan. The Body page draws the corridor between the two weekly rates.
+# [plan.weight]
+# start_date = "2026-09-01"
+# start_kg = 80
+# target_kg = 74
+# weekly_loss_pct = [0.5, 1.0]
+
+[plan.training]
+mon = "Strength · upper body"
+wed = "Easy run 30 min"
+fri = "Strength · lower body"
+
+[plan.screen]
+entertainment_max_hours = 3
+work_min_hours = 4

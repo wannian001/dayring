@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dayring"
+version = "0.1.0"
+description = "A local-first dashboard for your day: sleep, recovery, attention and deadlines, each compared with your own normal."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Jiakuo Tang" }]
+keywords = ["personal informatics", "quantified self", "dashboard", "local-first", "apple health", "screen time"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = []
+
+[project.optional-dependencies]
+toml = ["tomli>=1.1; python_version < '3.11'"]
+
+[project.scripts]
+dayring = "dayring.__main__:main"
+
+[project.urls]
+Demo = "https://wannian001.github.io/dayring/"
+Source = "https://github.com/wannian001/dayring"
+
+[tool.setuptools.packages.find]
+include = ["dayring*"]
+
+[tool.setuptools.package-data]
+dayring = ["web/*", "web/**/*", "importers/*.json"]

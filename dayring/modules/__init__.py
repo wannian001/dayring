@@ -1,0 +1,28 @@
+"""Page registry: name -> build(ctx, param) returning a JSON-ready dict."""
+from datetime import timedelta
+from typing import Any, Callable, Dict, List, Optional
+
+from ..context import Context
+from . import body, data, review, sleep, time, today, week
+
+PAGES: Dict[str, Callable[..., Dict[str, Any]]] = {
+    "today": lambda ctx, param=None: today.build(ctx, day=param),
+    "week": lambda ctx, param=None: week.build(ctx, day=param),
+    "body": lambda ctx, param=None: body.build(ctx, day=param),
+    "sleep": lambda ctx, param=None: sleep.build(ctx, day=param),
+    "time": lambda ctx, param=None: time.build(ctx, day=param),
+    "review": lambda ctx, param=None: review.build(ctx, week=param),
+    "data": lambda ctx, param=None: data.build(ctx, day=param),
+}
+
+
+def static_params(name: str, ctx: Context) -> List[Optional[str]]:
+    """Which parameter values `dayring build-static` pre-renders (a static site cannot compute)."""
+    if name == "today":
+        return [None] + [(ctx.today - timedelta(days=k)).isoformat() for k in range(1, 15)]
+    if name in ("week", "review"):
+        start = ctx.today - timedelta(days=ctx.today.weekday())
+        return [None] + [(start + timedelta(days=7 * k)).isoformat() for k in range(-4, 3)]
+    if name == "time":
+        return time.static_params(ctx)
+    return [None]

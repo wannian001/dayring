@@ -1,0 +1,26 @@
+# your own data never goes into git
+/data/
+/dayring.toml
+/dayring.json
+/dayring-demo/
+/site/
+*.csv.tmp
+export.zip
+export.xml
+*.ics
+!tests/fixtures/*.ics
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.DS_Store
+.claude/
+
+# planning notes that map to the author's private system stay local
+/docs/plans/
+
+# demo-film production notes reference local paths; not published yet
+/video/
