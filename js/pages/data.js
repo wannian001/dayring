@@ -1,5 +1,5 @@
-import { coverage, draw, esc } from "../charts.js";
-import { clock, day, num, t } from "../i18n.js";
+import { coverage, draw, esc } from "../charts.js?v=f1813bf9c8";
+import { clock, day, num, t } from "../i18n.js?v=f1813bf9c8";
 
 const STATUS = { ok: "good", stale: "watch", missing: "bad" };
 

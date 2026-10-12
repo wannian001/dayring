@@ -1,5 +1,5 @@
-import { draw, esc, ladderChart, sleepWindows } from "../charts.js";
-import { clock, day, dur, shortDay, t } from "../i18n.js";
+import { draw, esc, ladderChart, sleepWindows } from "../charts.js?v=f1813bf9c8";
+import { clock, day, dur, shortDay, t } from "../i18n.js?v=f1813bf9c8";
 
 const MARK = { true: ["✓", "good"], false: ["✗", "bad"], null: ["–", ""] };
 const CHECKS = ["woke_on_time", "asleep_in_time", "slept_enough", "screen_before_sleep_ok"];

@@ -1,5 +1,5 @@
-import { esc } from "../charts.js";
-import { clock, day, dur, measure, num, signed, t } from "../i18n.js";
+import { esc } from "../charts.js?v=f1813bf9c8";
+import { clock, day, dur, measure, num, signed, t } from "../i18n.js?v=f1813bf9c8";
 
 function fmt(m, v) {
   if (v == null) return "—";

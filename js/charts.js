@@ -1,6 +1,6 @@
 // Hand-drawn SVG charts. Each one is drawn at the real pixel width of its box and redrawn on resize,
 // so text never scales with the chart. Colours are CSS variables from tokens.css.
-import { clock, dur, measure, shortDay, t, toDate, wtype } from "./i18n.js";
+import { clock, dur, measure, shortDay, t, toDate, wtype } from "./i18n.js?v=f1813bf9c8";
 
 const has = (v) => v !== null && v !== undefined && !Number.isNaN(v);
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

@@ -1,15 +1,15 @@
 // Shell: header, language and light/dark, hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js";
-import { installTooltip, esc } from "./charts.js";
-import { getLang, setLang, t, clock } from "./i18n.js";
-import body from "./pages/body.js";
-import data from "./pages/data.js";
-import drain from "./pages/drain.js";
-import review from "./pages/review.js";
-import sleep from "./pages/sleep.js";
-import time from "./pages/time.js";
-import today from "./pages/today.js";
-import week from "./pages/week.js";
+import { get, isStatic } from "./api.js?v=f1813bf9c8";
+import { installTooltip, esc } from "./charts.js?v=f1813bf9c8";
+import { getLang, setLang, t, clock } from "./i18n.js?v=f1813bf9c8";
+import body from "./pages/body.js?v=f1813bf9c8";
+import data from "./pages/data.js?v=f1813bf9c8";
+import drain from "./pages/drain.js?v=f1813bf9c8";
+import review from "./pages/review.js?v=f1813bf9c8";
+import sleep from "./pages/sleep.js?v=f1813bf9c8";
+import time from "./pages/time.js?v=f1813bf9c8";
+import today from "./pages/today.js?v=f1813bf9c8";
+import week from "./pages/week.js?v=f1813bf9c8";
 
 const PAGES = { today, week, body, sleep, time, drain, review, data };
 const NAV = ["today", "week", "body", "time", "drain", "review", "data"];

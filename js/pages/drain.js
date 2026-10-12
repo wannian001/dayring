@@ -1,7 +1,7 @@
 // Drain: seven quiet signals over the last 7 days, each against your normal and, where set, your plan.
 // No total score: the signals have different units and different strength of evidence.
-import { draw, esc } from "../charts.js";
-import { day, dur, num, shortDay, t } from "../i18n.js";
+import { draw, esc } from "../charts.js?v=f1813bf9c8";
+import { day, dur, num, shortDay, t } from "../i18n.js?v=f1813bf9c8";
 
 const STATUS = { bad: "bad", good: "good", neutral: "" };
 const clockOf = (noon) => { const m = ((Math.round(noon + 720) % 1440) + 1440) % 1440; return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`; };

@@ -1,6 +1,6 @@
-import { bullet, dayDots, dayRing, draw, esc, interval, RING_CATS, spark } from "../charts.js";
-import { clock, day, dur, measure, num, pct, signed, t, weekdayShort, wtype } from "../i18n.js";
-import { icon } from "../icons.js";
+import { bullet, dayDots, dayRing, draw, esc, interval, RING_CATS, spark } from "../charts.js?v=f1813bf9c8";
+import { clock, day, dur, measure, num, pct, signed, t, weekdayShort, wtype } from "../i18n.js?v=f1813bf9c8";
+import { icon } from "../icons.js?v=f1813bf9c8";
 
 const STATE_ICON = {
   good: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 6.3 2.3 2.3 4.7-5.1"/></svg>`,
