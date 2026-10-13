@@ -246,3 +246,13 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 .kit-font-sample { font-size: var(--t-lg); font-weight: 600; line-height: 1.3; }
 .kit-font > .xs { overflow-wrap: anywhere; }
 .kit-steps { margin: var(--s-3) 0 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: var(--s-1); color: var(--ink-2); }
+
+/* ---- time: devices at once ---- */
+/* three tiles in one row down to phone width (with or without the sidebar), then one per row: never two and a gap */
+.act-tiles.stack-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 660px) { .act-tiles.stack-tiles { grid-template-columns: minmax(0, 1fr); } }
+/* a narrow tile (the sidebar takes part of the width) puts the chip under the name instead of squeezing the name */
+.act-tiles.stack-tiles .act-tile .label { flex-direction: row; flex-wrap: wrap; align-items: flex-start; row-gap: 4px; }
+.stack-hours-title { margin: var(--s-5) 0 var(--s-2); flex-wrap: wrap; row-gap: 6px; }
+/* the gallery's sample of the sidebar: a framed column as wide as the real one */
+.kit-side { max-width: 232px; padding: var(--s-4) var(--s-3); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }

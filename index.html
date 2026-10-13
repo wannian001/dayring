@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-static="true" data-build="a8cf20d79e">
+<html lang="en" data-static="true" data-build="a0fb39e998">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,14 +7,15 @@
   <title>dayring</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <!-- the design kit (tokens, components), then dayring's own page rules -->
-  <link rel="stylesheet" href="css/tokens.css?v=a8cf20d79e">
-  <link rel="stylesheet" href="css/kit.css?v=a8cf20d79e">
-  <link rel="stylesheet" href="css/app.css?v=a8cf20d79e">
+  <link rel="stylesheet" href="css/tokens.css?v=a0fb39e998">
+  <link rel="stylesheet" href="css/kit.css?v=a0fb39e998">
+  <link rel="stylesheet" href="css/app.css?v=a0fb39e998">
   <script>
-    // apply a saved light/dark choice before first paint so the page does not flash
+    // apply a saved light/dark choice and a folded sidebar before first paint so the page does not flash
     try {
       var m = new URLSearchParams(location.search).get("mode") || localStorage.getItem("dayring.mode");
       if (m === "light" || m === "dark") document.documentElement.dataset.mode = m;
+      if (localStorage.getItem("dayring.side") === "folded") document.documentElement.classList.add("side-folded");
     } catch (e) {}
   </script>
   <script>
@@ -28,10 +29,10 @@
     }
     setTimeout(dayringFailed, 10000);
   </script>
-  <script type="module" src="js/app.js?v=a8cf20d79e" onerror="dayringFailed()"></script>
+  <script type="module" src="js/app.js?v=a0fb39e998" onerror="dayringFailed()"></script>
 </head>
 <body>
-  <header class="top"><div class="top-in"></div></header>
+  <header class="side"></header>
   <main aria-live="polite"><p class="muted">Loading…</p></main>
 </body>
 </html>
