@@ -1,4 +1,4 @@
-"""The two reading pages under the menu: Guide (#guide) and History (#history)."""
+"""The reading pages under the menu: Overview (#project), Guide (#guide) and History (#history)."""
 import json
 import re
 import shutil
@@ -16,7 +16,7 @@ ICONS = (WEB / "js" / "icons.js").read_text(encoding="utf-8")
 
 
 class Registry(unittest.TestCase):
-    def test_both_pages_are_registered_and_only_name_themselves(self):
+    def test_the_pages_are_registered_and_only_name_themselves(self):
         for name in docs.DOC_PAGES:
             self.assertIn(name, PAGES)
             self.assertEqual(PAGES[name](None), {"page": name})
@@ -27,20 +27,20 @@ class Registry(unittest.TestCase):
 class Menu(unittest.TestCase):
     def test_they_sit_under_the_menu_not_in_it(self):
         listed = re.findall(r'"(\w+)"', re.search(r"const DOCS\s*=\s*\[([^\]]*)\]", APP).group(1))
-        self.assertEqual(listed, ["guide", "history"])
+        self.assertEqual(listed, ["project", "guide", "history"])
         nav = re.search(r"const NAV\s*=\s*\[([^\]]*)\]", APP).group(1)
         for name in listed:
             self.assertNotIn(f'"{name}"', nav)  # the tab bar keeps the six items of the health loop
         glyphs = dict(re.findall(r'(\w+): "(\w+)"', re.search(r"const DOC_ICON\s*=\s*\{([^}]*)\}", APP).group(1)))
         self.assertEqual(sorted(glyphs), sorted(listed))
         for glyph in glyphs.values():
-            self.assertRegex(ICONS, rf"\b{glyph}: '<", glyph)  # an icon the kit already draws: no kit change
+            self.assertRegex(ICONS, rf"\b{glyph}: '<", glyph)  # an icon the kit draws
         self.assertIn('class="side-docs"', APP)
         self.assertIn("history: historyPage", APP)  # never a top-level `history`: it would hide window.history
         self.assertNotRegex(APP, r"import history from")
 
     def test_every_word_in_both_languages(self):
-        for key in ("nav.about", "nav.guide", "nav.history", "doc.other_lang"):
+        for key in ("nav.about", "nav.project", "nav.guide", "nav.history", "doc.other_lang"):
             self.assertEqual(I18N.count(f'"{key}"'), 2, key)
 
 
@@ -72,6 +72,16 @@ class Words(unittest.TestCase):
             self.assertEqual(len(re.findall(r'<button type="button" class="r\d" data-to="g\d"', html)), 4)
             self.assertNotRegex(html, r'href="#g\d"')  # the app routes on the hash: in-page jumps are buttons
 
+    def test_the_overview_says_the_same_things_in_both_languages(self):
+        shapes = []
+        for lang, title in (("en", "Overview"), ("zh", "项目说明")):
+            html = self.render(lang, "project")["html"]
+            self.assertIn(f"<h1>{title}</h1>", html)
+            shapes.append([len(re.findall(pattern, html)) for pattern in
+                           (r'class="card doc-card"', r"<li><b>[^<]*</b><span>", r"<li><details", r"<tr>", r'class="chip"')])
+        self.assertEqual(shapes[0], shapes[1])
+        self.assertEqual(shapes[0][:3], [3, 5, 4])  # three cards, the five steps of the loop, four folds
+
     def test_the_two_languages_say_the_same_things(self):
         h = self.render("en", "history")["history"]
 
@@ -94,7 +104,7 @@ class Words(unittest.TestCase):
         self.assertEqual(lefts, sorted(lefts))
 
     def test_no_personal_data_on_the_pages(self):
-        text = (WEB / "js" / "history-content.js").read_text(encoding="utf-8") + (WEB / "js" / "pages" / "guide.js").read_text(encoding="utf-8")
+        text = "".join((WEB / "js" / f).read_text(encoding="utf-8") for f in ("history-content.js", "pages/guide.js", "pages/project.js"))
         for leak in ("/Users/", "Data/raw", "Vault/", "kg", "bpm", " ms", "MAE"):
             self.assertNotIn(leak, text, leak)
 

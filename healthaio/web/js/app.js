@@ -14,6 +14,7 @@ import goals from "./pages/goals.js";
 import guide from "./pages/guide.js";
 import historyPage from "./pages/history.js";  // not `history`: that would hide window.history (replaceState)
 import kit from "./pages/kit.js";
+import project from "./pages/project.js";
 import review from "./pages/review.js";
 import sleep from "./pages/sleep.js";
 import time from "./pages/time.js";
@@ -21,7 +22,7 @@ import today from "./pages/today.js";
 import week from "./pages/week.js";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
-const PAGES = { today, week, body, sleep, exercise, food, time, ai, drain, goals, review, data, kit, guide, history: historyPage };
+const PAGES = { today, week, body, sleep, exercise, food, time, ai, drain, goals, review, data, kit, project, guide, history: historyPage };
 // the menu follows the loop of managing your health: today's state and what to adjust, the body (sleep, exercise,
 // food, weight), behaviour (where the time goes, AI work, drain), the plan (goals, schedule), the review, the data
 const NAV = ["today", "body", "time", "plan", "review", "data"];
@@ -37,11 +38,11 @@ const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === pag
 const ALIAS = { attention: "time", plan: "goals" };  // old links keep working
 // each menu item's glyph (icons.js)
 const NAV_ICON = { today: "sun", body: "heart", time: "walk", plan: "target", review: "list", data: "database" };
-// the reading pages sit under the menu, apart from the health loop: how to use the app, and how the personal
-// system it comes from changed over a year. On a phone they are two small links in the top row, so the tab bar
-// keeps the six items of the loop.
-const DOCS = ["guide", "history"];
-const DOC_ICON = { guide: "communication", history: "clock" };
+// the reading pages sit under the menu, apart from the health loop: what the project is and who it is for, how to
+// use the app, and how the personal system it comes from changed over a year. On a phone they are small links in
+// the top row, so the tab bar keeps the six items of the loop.
+const DOCS = ["project", "guide", "history"];
+const DOC_ICON = { project: "info", guide: "communication", history: "clock" };
 const store = {
   get(key) { try { return localStorage.getItem(`healthaio.${key}`); } catch { return null; } },
   set(key, value) { try { localStorage.setItem(`healthaio.${key}`, value); } catch { /* private mode */ } },
@@ -75,17 +76,23 @@ const openGroups = new Set();
 let lastGroup = null;
 const CARET = `<svg class="side-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m4.5 2.5 3.5 3.5-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
+// on a phone's tab bar six items share the width, so each takes its short name (Body, not Body data)
+const navName = (p) => t(wide() ? `nav.${p}` : `nav.short.${p}`);
+let shown = "today";
+matchMedia("(min-width: 900px)").addEventListener("change", () => header(shown));
+
 function header(active) {
+  shown = active;
   const top = document.querySelector(".side");
   const group = groupOf(active);
   if (GROUPS[group] && group !== lastGroup) openGroups.add(group);
   lastGroup = group;
   const items = NAV.filter((p) => PAGES[p] || GROUPS[p]).map((p) => {
     const here = p === group;
-    if (!GROUPS[p]) return `<a href="#${p}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${t(`nav.${p}`)}</span></a>`;
+    if (!GROUPS[p]) return `<a href="#${p}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${navName(p)}</span></a>`;
     const open = openGroups.has(p);
     const subs = GROUPS[p].map(([page, key]) => `<a class="side-sub" data-in="${p}" href="#${page}" ${page === active ? 'aria-current="page"' : ""}${open ? "" : " hidden"}><span>${t(key)}</span></a>`).join("");
-    return `<a href="#${GROUPS[p][0][0]}" data-group="${p}" aria-expanded="${open}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${t(`nav.${p}`)}</span>${CARET}</a>${subs}`;
+    return `<a href="#${GROUPS[p][0][0]}" data-group="${p}" aria-expanded="${open}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${navName(p)}</span>${CARET}</a>${subs}`;
   }).join("");
   top.innerHTML = `
     <div class="side-head">

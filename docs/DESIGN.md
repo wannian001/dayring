@@ -188,8 +188,9 @@ divided among them).
 
 ## Menu
 
-Today · Body (Sleep, Exercise, Food, Weight) · Behaviour (Where it went, AI work, Drain) · Plan (Goals, Schedule) ·
-Review · Data. The items follow the loop of managing your health, one axis each: today's state and adjustments, the
+Today · Body (Sleep, Exercise, Food, Weight) · Time & energy (Where it went, AI work, Drain) · Goals & schedule (Goals,
+Schedule) · Weekly review · Data sources. (Plain names over single words: "Behaviour" and "Plan" said too little about
+what is inside; on a phone's tab bar each item takes a short name, Body, Time, Goals.) The items follow the loop of managing your health, one axis each: today's state and adjustments, the
 body (what you do for it and what it shows), behaviour (where time and attention go), the plan, the look back, the
 data. (An earlier menu mixed time (Today, Week) with topics (Time, Drain) and meta pages (Review, Data); one axis
 per item reads more easily.) The menu sits in a sidebar on the left from 900 px (the

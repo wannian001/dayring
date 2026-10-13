@@ -2,7 +2,7 @@
 const DICT = {
   en: {
     "nav.today": "Today", "nav.week": "Week", "nav.body": "Body", "nav.sleep": "Sleep",
-    "nav.review": "Review", "nav.data": "Data",
+    "nav.review": "Weekly review", "nav.data": "Data sources",
     "ui.demo": "Demo data", "ui.lang": "中文", "ui.mode": "Light / dark", "ui.fold": "Fold the menu", "ui.unfold": "Unfold the menu",
     "ui.prev_day": "Previous day", "ui.next_day": "Next day", "ui.back_today": "Back to today",
     "ui.how": "How this is worked out", "ui.list_sep": ", ", "ui.loading": "Loading…", "ui.error": "Could not load this page",
@@ -64,8 +64,8 @@ const DICT = {
     "unit.min": "min", "unit.ms": "ms", "unit.bpm": "bpm", "unit.steps": "steps", "unit.pct": "%", "unit.points": "pts",
   },
   zh: {
-    "nav.today": "今天", "nav.week": "本周", "nav.body": "身体", "nav.sleep": "作息",
-    "nav.review": "复盘", "nav.data": "数据",
+    "nav.today": "今天", "nav.week": "本周", "nav.body": "身体数据", "nav.sleep": "作息",
+    "nav.review": "每周复盘", "nav.data": "数据来源",
     "ui.demo": "演示数据", "ui.lang": "EN", "ui.mode": "浅色 / 深色", "ui.fold": "收起菜单", "ui.unfold": "展开菜单",
     "ui.prev_day": "前一天", "ui.next_day": "后一天", "ui.back_today": "回到今天",
     "ui.how": "怎么算的", "ui.list_sep": "、", "ui.loading": "正在读取…", "ui.error": "这一页没读出来",
@@ -651,7 +651,7 @@ Object.assign(DICT.zh, {
 
 // ---- proactive health: the health menu, what to adjust today, Exercise, Food and Goals ----
 Object.assign(DICT.en, {
-  "nav.time": "Behaviour", "nav.plan": "Plan", "nav.exercise": "Exercise", "nav.food": "Food", "nav.goals": "Goals", "nav.schedule": "Schedule",
+  "nav.time": "Time & energy", "nav.plan": "Goals & schedule", "nav.exercise": "Exercise", "nav.food": "Food", "nav.goals": "Goals", "nav.schedule": "Schedule",
   "eff.ate_early": "Last meal {hours}+ h before sleep that night",
 
   "todo.title": "What to adjust today", "todo.aside": "read off every page this morning",
@@ -763,7 +763,7 @@ Object.assign(DICT.en, {
   "kit.enc.c-exercise-2": "a kind of exercise, lighter: cardio", "kit.enc.c-exercise-3": "a kind of exercise, lightest: walking",
 });
 Object.assign(DICT.zh, {
-  "nav.time": "行为", "nav.plan": "计划", "nav.exercise": "运动", "nav.food": "饮食", "nav.goals": "目标", "nav.schedule": "日程",
+  "nav.time": "时间与精力", "nav.plan": "目标与日程", "nav.exercise": "运动", "nav.food": "饮食", "nav.goals": "目标", "nav.schedule": "日程",
   "eff.ate_early": "当晚最后一餐离睡着 {hours} 小时以上",
 
   "todo.title": "今天该调整的", "todo.aside": "今早从各页读出来的",
@@ -879,11 +879,11 @@ Object.assign(DICT.zh, {
 
 // ---- the reading pages under the menu (their own words are in pages/guide.js and history-content.js) ----
 Object.assign(DICT.en, {
-  "nav.about": "About this project", "nav.guide": "Guide", "nav.history": "History",
+  "nav.about": "About this project", "nav.project": "Overview", "nav.guide": "Guide", "nav.history": "History",
   "doc.other_lang": "阅读中文版",
 });
 Object.assign(DICT.zh, {
-  "nav.about": "关于这个项目", "nav.guide": "使用说明", "nav.history": "迭代记录",
+  "nav.about": "关于这个项目", "nav.project": "项目说明", "nav.guide": "使用说明", "nav.history": "迭代记录",
   "doc.other_lang": "Read in English",
 });
 
@@ -954,6 +954,44 @@ Object.assign(DICT.zh, {
   "ai.tab.day": "AI 和你的一天",
   "doc.open": "展开",
   "time.detail": "细看", "time.tab.day": "典型的一天", "time.tab.history": "最近 30 天", "time.tab.trend": "刺激和专注", "time.tab.apps": "常用应用",
+});
+
+// ---- the menu's short names on a phone's tab bar, and goals set on the Goals page (goal_log.py) ----
+Object.assign(DICT.en, {
+  "nav.short.today": "Today", "nav.short.body": "Body", "nav.short.time": "Time", "nav.short.plan": "Goals",
+  "nav.short.review": "Review", "nav.short.data": "Data",
+  "goals.edit": "Edit", "goals.set_one": "Set one", "goals.save": "Save", "goals.cancel": "Cancel", "goals.reset": "Back to the original",
+  "goals.src.you": "set here", "goals.src.accepted": "suggestion you accepted",
+  "goals.static": "The online demo is read-only. On your own computer, Save recomputes every page against the new goal.",
+  "goals.err": "Not saved: {e}", "goals.nothing": "Fill in a value first.",
+  "goals.props": "Waiting for you", "goals.accept": "Accept", "goals.decline": "Decline", "goals.assistant": "Assistant",
+  "goals.prop_from": "{by} · {day}",
+  "goals.props_note": "Nothing changes until you accept. An assistant writes these with healthaio goal propose; every change stays in goals.jsonl.",
+  "goals.f.sleep.bedtime": "Asleep by", "goals.f.sleep.wake": "Up by", "goals.f.sleep.target_hours": "Sleep a night",
+  "goals.f.exercise.weekly_min": "Active a week", "goals.f.exercise.strength_days": "Strength days a week",
+  "goals.f.food.kcal_min": "Energy a day, at least", "goals.f.food.kcal_max": "Energy a day, at most",
+  "goals.f.food.protein_g_per_kg": "Protein per kg of weight", "goals.f.food.last_meal_gap_h": "Last meal before sleep, at least",
+  "goals.f.weight.target_kg": "Target weight", "goals.f.screen.work_min_hours": "Focused work a day, at least",
+  "goals.f.screen.entertainment_max_hours": "Entertainment & social a day, at most",
+  "goals.u.h": "h", "goals.u.min": "min", "goals.u.days": "days", "goals.u.kcal": "kcal", "goals.u.g_per_kg": "g", "goals.u.kg": "kg",
+});
+Object.assign(DICT.zh, {
+  "nav.short.today": "今天", "nav.short.body": "身体", "nav.short.time": "时间", "nav.short.plan": "目标",
+  "nav.short.review": "复盘", "nav.short.data": "数据",
+  "goals.edit": "改", "goals.set_one": "设一个", "goals.save": "保存", "goals.cancel": "取消", "goals.reset": "用回原来的",
+  "goals.src.you": "在这里设的", "goals.src.accepted": "采纳的建议",
+  "goals.static": "在线演示只能看。在自己电脑上运行时，点保存后每一页都按新目标重算。",
+  "goals.err": "没保存上：{e}", "goals.nothing": "先填一个数。",
+  "goals.props": "等你决定", "goals.accept": "采纳", "goals.decline": "不要", "goals.assistant": "AI 助手",
+  "goals.prop_from": "{by} · {day}",
+  "goals.props_note": "你采纳之前什么都不变。助手用 healthaio goal propose 写建议；每一次改动都留在 goals.jsonl 里。",
+  "goals.f.sleep.bedtime": "几点前睡着", "goals.f.sleep.wake": "几点前起床", "goals.f.sleep.target_hours": "每晚睡够",
+  "goals.f.exercise.weekly_min": "每周活动", "goals.f.exercise.strength_days": "每周力量训练",
+  "goals.f.food.kcal_min": "每天热量至少", "goals.f.food.kcal_max": "每天热量至多",
+  "goals.f.food.protein_g_per_kg": "每公斤体重的蛋白质", "goals.f.food.last_meal_gap_h": "最后一餐离睡着至少",
+  "goals.f.weight.target_kg": "目标体重", "goals.f.screen.work_min_hours": "每天专注至少",
+  "goals.f.screen.entertainment_max_hours": "每天娱乐和社交至多",
+  "goals.u.h": "小时", "goals.u.min": "分钟", "goals.u.days": "天", "goals.u.kcal": "千卡", "goals.u.g_per_kg": "克", "goals.u.kg": "千克",
 });
 
 const WEEKDAY = { en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], zh: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"] };

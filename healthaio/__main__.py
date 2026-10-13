@@ -7,6 +7,7 @@
     python -m healthaio check                # validate your data files
     python -m healthaio import ...           # bring data in (Apple Health, .ics, Screen Time, any CSV)
     python -m healthaio kit json|export|check|lock  # the design kit: its manifest, a copy for another app, is a copy current
+    python -m healthaio goal list|set|propose|accept|decline  # goals beyond healthaio.toml (also set on the Goals page)
 """
 import argparse
 import json
@@ -79,6 +80,19 @@ def main(argv: Optional[List[str]] = None) -> int:
     k = kit_sub.add_parser("check", help="compare DIR with its kit.json and with this kit; exit 0 only when up to date")
     k.add_argument("dir")
     kit_sub.add_parser("lock", help="record this KIT_VERSION's file hashes in healthaio/kit.lock.json (after a version bump)")
+    p = sub.add_parser("goal", help="goals set beyond healthaio.toml: list them, set one, or (for an assistant) propose one")
+    goal_sub = p.add_subparsers(dest="goal_command", required=True)
+    g = goal_sub.add_parser("list", help="every goal field: its value now, where it comes from, and open proposals")
+    g.add_argument("--json", action="store_true")
+    g = goal_sub.add_parser("set", help="FIELD VALUE [FIELD VALUE ...], e.g. food.kcal_max 2200; null = back to healthaio.toml")
+    g.add_argument("pairs", nargs="+")
+    g = goal_sub.add_parser("propose", help="for an assistant: suggest FIELD VALUE pairs; nothing changes until accepted")
+    g.add_argument("pairs", nargs="+")
+    g.add_argument("--note", help="why, in a sentence (shown with the proposal)")
+    g.add_argument("--by", default="assistant", help="who proposes (shown with the proposal)")
+    for name in ("accept", "decline"):
+        g = goal_sub.add_parser(name, help=f"{name} an open proposal by its id (see `goal list`)")
+        g.add_argument("id")
     p = sub.add_parser("page", help="print one page's JSON (for scripts and assistants)")
     p.add_argument("name")
     p.add_argument("param", nargs="?")
@@ -113,6 +127,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         return importers_cli.run(args, _config(args))
 
     cfg = _config(args)
+    if args.command == "goal":
+        from . import goal_log
+        return goal_log.run(args, cfg)
     if args.command == "serve":
         from .server import serve
         fixed = _now(args)

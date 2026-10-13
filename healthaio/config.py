@@ -132,6 +132,10 @@ class Config:
     screen: ScreenPlan = field(default_factory=ScreenPlan)
     food: FoodPlan = field(default_factory=FoodPlan)
     exercise: ExercisePlan = field(default_factory=ExercisePlan)
+    # filled by goal_log.apply(): the fields set on the Goals page (laid over the plans above) and the proposals
+    # waiting for an answer
+    goals_set: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    goals_proposed: List[Dict[str, Any]] = field(default_factory=list)
 
     @property
     def tz(self):

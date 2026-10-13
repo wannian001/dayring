@@ -37,14 +37,15 @@ in one place, each compared with your own normal, and every morning, what to adj
 | | Exercise | This week against the weekly goal (your plan, or the WHO guideline of 150 active minutes and 2 strength days, and it says which), day by day with the training planned for the days to come; the last 7 days against your normal; training load against recovery; 12 weeks by kind (strength, cardio, walking); how HRV and resting heart rate tend to answer each kind the next morning. |
 | | Food | The last 7 logged days against your normal and your plan: energy, protein (per kg of your weight), fibre, and the hours from the last meal to falling asleep; 14 days of meals by time of day with the hours before sleep striped; the food log set against the scale (the weekly change the log implies against the one the scale shows); what an early dinner has gone with the next morning. |
 | | Weight | Weight as a 7-day average inside the corridor your plan allows, the weekly rate, and the long view. |
-| **Behaviour** | Where it went | Where did the time go, and what changed? Sleep, workouts, calendar and screens (phone, tablet and laptop counted once when they overlap), each against your normal; the biggest change clearly outside your normal is named, not the biggest activity. **Devices at once** counts every device on its own: screens at once, the longest stretch on one thing, each device by the hour. **Stimulation and focus, averaged**: 90 days of entertainment & social minutes and of the longest focus stretch, each as a 7-day average against your normal, the last 28 days next to the 28 before them. What people call “dopamine tolerance” can't be measured by a phone or a watch, so the card shows the behaviour, never a dopamine number. The page is two cards: what changed with the daily averages, then the detail in tabs (a typical day, 30 days, stimulation and focus, devices at once, top apps). |
+| **Time & energy** | Where it went | Where did the time go, and what changed? Sleep, workouts, calendar and screens (phone, tablet and laptop counted once when they overlap), each against your normal; the biggest change clearly outside your normal is named, not the biggest activity. **Devices at once** counts every device on its own: screens at once, the longest stretch on one thing, each device by the hour. **Stimulation and focus, averaged**: 90 days of entertainment & social minutes and of the longest focus stretch, each as a 7-day average against your normal, the last 28 days next to the 28 before them. What people call “dopamine tolerance” can't be measured by a phone or a watch, so the card shows the behaviour, never a dopamine number. The page is two cards: what changed with the daily averages, then the detail in tabs (a typical day, 30 days, stimulation and focus, devices at once, top apps). |
 | | AI work | How much AI agents worked for you, on how many instructions, next to your own focused work (Claude Code and Codex logs on this computer: times and counts only, never what was said). Usage is input, not output, so it is never coloured better or worse. |
 | | Drain | What has been quietly wearing you down over 7 days? Seven signals (resting heart rate, HRV, the time you fall asleep, sleep-timing spread, screens before sleep, entertainment & social, app switching), each against your normal and your plan, plus whether short nights and hard training stacked up. No total score. |
-| **Plan** | Goals | Every plan in one place: sleep, exercise, food, weight, screens, each with the last 28 days as kept / not kept / no record, counted as "n of the days with a record" (never a streak, never a score). A plan you have not set is listed with the line that sets it. |
+| **Goals & schedule** | Goals | Every plan in one place: sleep, exercise, food, weight, screens, each with the last 28 days as kept / not kept / no record, counted as "n of the days with a record" (never a streak, never a score). **Set or change any goal right on the page**; a goal not set yet is listed with a button to set it. An assistant's proposals wait at the top until you accept or decline them. |
 | | Schedule | Seven days of classes, deadlines and training, and how heavy the coming weeks are by share of grade. |
-| **Review** | | One week of facts next to the four weeks before it, food and activity included, and **what has tended to help the next day** (the next morning's HRV, resting heart rate and energy after doing something against not doing it, with 95% intervals). No scores, no judging. |
-| **Data** | | What arrived each day for 90 days (sleep, HRV, steps, weight, screens, food log, …), which files have unreadable rows, how to import more. |
-| *About this project* | Guide | How to use it: look around the demo, install it, bring in your Apple Health export, write down your plans, and what to open each day. |
+| **Weekly review** | | One week of facts next to the four weeks before it, food and activity included, and **what has tended to help the next day** (the next morning's HRV, resting heart rate and energy after doing something against not doing it, with 95% intervals). No scores, no judging. |
+| **Data sources** | | What arrived each day for 90 days (sleep, HRV, steps, weight, screens, food log, …), which files have unreadable rows, how to import more. |
+| *About this project* | Overview | What it is, who it is for, the problem it answers, how it compares with what people use now, the trade-offs and what comes next. |
+| | Guide | How to use it: look around the demo, install it, bring in your Apple Health export, set your goals, and what to open each day. |
 | | History | Where this project comes from: the personal system it was taken out of, over a year and four generations (Word draft, Word rebuild, web, phone app with scheduled AI messages), what each one found and what changed. |
 
 <p>
@@ -119,11 +120,26 @@ Lose It!, Cronometer and others) write into Health. Deadlines, self-reports and 
 can edit by hand or map from another export
 (`python3 -m healthaio import csv meals my-food-log.csv --map "Date=time,Meal=meal,Calories=kcal,Protein=protein_g"`).
 
+### Goals, and where an assistant plugs in
+
+Set goals on the Goals page, or from the command line. Either way the change is a line in `goals.jsonl` next to
+`healthaio.toml`, laid over the file (which stays as you wrote it), so the log is also the history of every change.
+An assistant (any agent that can run a command) reads the pages as JSON and proposes; nothing changes until you
+accept, on the Goals page or here:
+
+```bash
+python3 -m healthaio page goals                       # every goal and how often it was kept, as JSON
+python3 -m healthaio goal propose screen.entertainment_max_hours 2.5 --note "A smaller step first"
+python3 -m healthaio goal list                        # values now, where each comes from, open proposals
+python3 -m healthaio goal accept <id>                 # or decline <id>; set FIELD VALUE to set one yourself
+```
+
 ### Your data stays on your computer
 
 - Data lives in plain CSV files in a folder you choose ([format](docs/DATA_FORMAT.md)). Importers write them
   ([how each importer works](docs/IMPORTERS.md)); the dashboard only reads them.
-- The server listens on `127.0.0.1`, has no write endpoints, and sends nothing anywhere.
+- The server listens on `127.0.0.1` and sends nothing anywhere. The one thing it writes is a goal you set on the Goals
+  page: a line in `goals.jsonl` next to `healthaio.toml`, accepted only from the app's own page.
 - `build-static` (used for the demo site) refuses to run on your own data unless you pass a flag that says you mean to
   publish it.
 
@@ -197,14 +213,15 @@ repository contains none of that data.
 | | 运动 | 本周对照每周目标（你的计划，没设就用世卫组织建议的每周 150 分钟活动、2 天力量训练，并写明用的是哪个），一天一格，还没到的日子写着计划的训练；最近 7 天对比平常；训练负荷对照恢复；12 周按种类（力量、有氧、步行）；每种训练后第二天早上的 HRV 和静息心率通常怎么样。 |
 | | 饮食 | 最近 7 天里记全的日子对比平常、对比计划：热量、蛋白质（按体重每公斤算）、膳食纤维、最后一餐到睡着隔了几小时；最近 14 天每一餐在一天里的时刻，睡前几小时画斜纹；饮食记录和体重秤对账（按记录该每周变多少、秤上实际变多少）；早点吃完晚饭的第二天早上有什么不同。 |
 | | 体重 | 体重 7 天平均是不是在计划允许的走廊里、每周降多少、长期走势。 |
-| **行为** | 去向 | 时间都去哪了，和平常比变了什么？睡眠、训练、日程和屏幕（手机、平板、电脑同一时刻只算一次）各自和平常比；写出的是明显超出平常的变化里最大的那一项，而不是占得最多的那一项。**几台同时用**：每台设备各算各的，叠加倍数、最长一段只做一件事、每台设备按小时。**刺激均线 · 专注均线**：90 天里每天的娱乐社交时长和最长一段专注，各画成 7 天平均、对着你的平常，并把最近 28 天和再之前 28 天并排。常说的“多巴胺阈值”手机和手表测不了，所以这里只摆行为，不出现多巴胺的数。整页两张卡：变了什么和每天平均，其余放在标签里（典型的一天、最近 30 天、刺激和专注、几台同时用、常用应用）。 |
+| **时间与精力** | 去向 | 时间都去哪了，和平常比变了什么？睡眠、训练、日程和屏幕（手机、平板、电脑同一时刻只算一次）各自和平常比；写出的是明显超出平常的变化里最大的那一项，而不是占得最多的那一项。**几台同时用**：每台设备各算各的，叠加倍数、最长一段只做一件事、每台设备按小时。**刺激均线 · 专注均线**：90 天里每天的娱乐社交时长和最长一段专注，各画成 7 天平均、对着你的平常，并把最近 28 天和再之前 28 天并排。常说的“多巴胺阈值”手机和手表测不了，所以这里只摆行为，不出现多巴胺的数。整页两张卡：变了什么和每天平均，其余放在标签里（典型的一天、最近 30 天、刺激和专注、几台同时用、常用应用）。 |
 | | AI 干活量 | AI 代理替你干了多少、你下了多少指令，和你自己专注做事放在一起看（读这台电脑上 Claude Code 和 Codex 的日志：只读时刻和条数，绝不读说了什么）。用量是投入不是产出，所以不分好坏。 |
 | | 消耗 | 最近 7 天哪些东西在悄悄耗你？七个信号（静息心率、HRV、入睡时刻、作息波动、睡前屏幕、娱乐和社交、应用切换），各自和平常比、和计划比；另外看睡眠不足和高强度训练有没有叠在一起。不打总分。 |
-| **计划** | 目标 | 所有计划放在一处：睡眠、运动、饮食、体重、屏幕，每个目标把最近 28 天画成做到 / 没做到 / 没记录，计数写成“有记录的日子里做到几天”（不算连续天数，也不打分）。还没设的计划也列出来，附上设置它的那一行。 |
+| **目标与日程** | 目标 | 所有计划放在一处：睡眠、运动、饮食、体重、屏幕，每个目标把最近 28 天画成做到 / 没做到 / 没记录，计数写成“有记录的日子里做到几天”（不算连续天数，也不打分）。**目标可以直接在页面上设、随时改**；没设的目标列出来，旁边有“设一个”。AI 助手提的建议放在最上面，你采纳或不要之前什么都不变。 |
 | | 日程 | 七天的课、截止和训练；接下来几周按占成绩的比例看有多重。 |
-| **复盘** | | 一周的事实和之前四周并排，饮食和活动也在里面；还有**做什么第二天会更好**（做了和没做的日子比第二天早上的 HRV、静息心率和精力，带 95% 区间）。不打分，不评价。 |
-| **数据** | | 90 天里每天到了什么数据（睡眠、HRV、步数、体重、屏幕、饮食记录……）、哪些文件有读不出的行、怎么继续导入。 |
-| *关于这个项目* | 使用说明 | 怎么用：先看演示，装到自己电脑上，导入 Apple 健康的导出包，写下计划，以及每天该看哪里。 |
+| **每周复盘** | | 一周的事实和之前四周并排，饮食和活动也在里面；还有**做什么第二天会更好**（做了和没做的日子比第二天早上的 HRV、静息心率和精力，带 95% 区间）。不打分，不评价。 |
+| **数据来源** | | 90 天里每天到了什么数据（睡眠、HRV、步数、体重、屏幕、饮食记录……）、哪些文件有读不出的行、怎么继续导入。 |
+| *关于这个项目* | 项目说明 | 它是什么、为谁做、解决什么问题、和现在常用的比、有意的取舍、接下来做什么。 |
+| | 使用说明 | 怎么用：先看演示，装到自己电脑上，导入 Apple 健康的导出包，设目标，以及每天该看哪里。 |
 | | 迭代记录 | 这个项目的来历：它是从作者自己用了一年的个人系统里抽出来的；那个系统换了四代（Word 手稿、Word 重构、网页版、手机 App 加 AI 定时推送），每一代发现了什么、改了什么。 |
 
 <p>
@@ -259,10 +276,24 @@ python3 -m healthaio serve
 一个 Apple 健康导出包就能带进来大部分：睡眠、HRV、静息心率、步数、活动圆环、消耗的热量、体重、每次训练（带起止时间和平均心率），以及记饮食的 App（MyFitnessPal、Lose It!、Cronometer 等）写进健康里的每一餐。截止日期、自评等其他数据都是普通 CSV，可以手改，也可以从别的导出文件映射过来
 （`python3 -m healthaio import csv meals my-food-log.csv --map "Date=time,Meal=meal,Calories=kcal,Protein=protein_g"`）。
 
+### 目标，以及 AI 助手从哪里接进来
+
+目标在目标页设，也可以用命令行设。两种方式都是在 `healthaio.toml` 旁边的 `goals.jsonl` 里加一行，叠在文件上面用
+（文件本身不动），所以这份记录也是每一次改动的历史。AI 助手（任何能运行命令的代理）读每一页的 JSON，提出建议；
+你在目标页或下面这样采纳之前，什么都不变：
+
+```bash
+python3 -m healthaio page goals                       # 每个目标和做到了几天，JSON
+python3 -m healthaio goal propose screen.entertainment_max_hours 2.5 --note "先小步收"
+python3 -m healthaio goal list                        # 现在的值、各自从哪来、待决定的建议
+python3 -m healthaio goal accept <id>                 # 或 decline <id>；自己设用 set 字段 值
+```
+
 ### 数据只在你的电脑上
 
 - 数据是你指定文件夹里的普通 CSV（[格式](docs/DATA_FORMAT.md)）。导入工具写它们（[每个导入工具怎么工作](docs/IMPORTERS.md)），看板只读。
-- 服务只监听 `127.0.0.1`，没有写接口，不往任何地方发数据。
+- 服务只监听 `127.0.0.1`，不往任何地方发数据。它唯一会写的，是你在目标页设的目标：一行记在 `healthaio.toml` 旁边的
+  `goals.jsonl` 里，而且只接受这个应用自己页面发来的。
 - `build-static`（演示站用的）遇到你自己的数据会拒绝运行，除非你加一个明确表示“我要公开”的参数。
 
 ### 怎么搭的

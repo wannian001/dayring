@@ -284,8 +284,43 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 .goal-row:first-child { border-top: 0; padding-top: 2px; }
 .goal-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--t-sm); }
 .goal-name .chip { height: 20px; font-size: 11px; padding: 0 7px; }
-.goal-unset .goal-name { flex-direction: column; align-items: flex-start; gap: 2px; color: var(--ink-3); }
+.goal-unset .goal-name { color: var(--ink-3); }
 .goal-unset .goal-name b { font-weight: 550; }
+/* setting a goal here: Edit opens a small form under the goal; an assistant's proposals sit in a card at the top */
+.goal-edit {
+  margin-left: auto; padding: 2px 4px; border: 0; background: none; color: var(--accent); font: inherit;
+  font-size: var(--t-xs); font-weight: 600; cursor: pointer;
+}
+.goal-edit:hover { text-decoration: underline; }
+.goal-edit[aria-expanded="true"] { color: var(--ink-3); }
+.goal-form { display: grid; gap: 10px; margin-top: 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2); }
+.goal-form[hidden] { display: none; }
+.goal-field { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: var(--t-sm); color: var(--ink-2); }
+.goal-input { display: inline-flex; align-items: center; gap: 6px; }
+.goal-input input {
+  width: 7.5em; height: 32px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--ink); font: inherit; font-variant-numeric: tabular-nums;
+}
+.goal-input input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.goal-act { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.goal-btn {
+  height: 30px; padding: 0 12px; border: 1px solid var(--line-2); border-radius: var(--r-pill); background: transparent;
+  color: var(--ink-2); font: inherit; font-size: var(--t-xs); font-weight: 600; cursor: pointer;
+}
+.goal-btn:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-3); }
+.goal-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.goal-btn.primary:hover:not(:disabled) { color: var(--on-accent); border-color: var(--accent); filter: brightness(1.08); }
+.goal-btn.quiet { border-color: transparent; }
+.goal-btn:disabled { opacity: .45; cursor: not-allowed; }
+.goal-msg { margin: 0; color: var(--ink-3); }
+.goal-msg:empty { display: none; }
+.goal-prop { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--line); }
+.goal-prop:first-of-type { border-top: 0; padding-top: 2px; }
+.goal-prop-what { display: flex; align-items: flex-start; gap: 10px; font-size: var(--t-sm); }
+.goal-prop-what svg { flex: none; margin-top: 1px; color: var(--c-focus); }
+.goal-prop-what p { margin: 0; }
+.goal-prop-note { margin: 0 0 0 28px; color: var(--ink-2); }
+.goal-prop .goal-act { margin-left: 28px; }
 .goal-dots { max-width: 360px; }
 .goal-count { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: var(--t-sm); }
 .goal-weeks { display: flex; flex-direction: column; gap: 6px; }
@@ -495,6 +530,27 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 .sleep-fact b { font-size: var(--t-lg); }
 
 /* ---- guide and history: titles in view, text one click away ---- */
+/* Overview (#project): the one-sentence answer, the daily loop as five steps, the comparison table */
+.doc-lede { margin: 0; font-size: var(--t-lg); font-weight: 600; line-height: 1.55; max-width: 62ch; text-wrap: pretty; }
+.doc-facts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--s-3); }
+.doc-loop { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--s-4); }
+.doc-loop li {
+  position: relative; display: grid; align-content: start; gap: 4px; padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface);
+}
+.doc-loop li:not(:last-child)::after { content: "→"; position: absolute; top: 50%; right: -1.05em; transform: translateY(-50%); color: var(--ink-3); }
+.doc-loop b { font-size: var(--t-md); }
+.doc-loop span { font-size: var(--t-sm); line-height: 1.5; color: var(--ink-2); }
+.doc-loop a { font-size: var(--t-xs); font-weight: 600; }
+@media (max-width: 760px) {
+  .doc-loop { grid-template-columns: minmax(0, 1fr); gap: var(--s-2); }
+  .doc-loop li:not(:last-child)::after { content: none; }
+}
+.doc-table { font-size: var(--t-sm); }
+.doc-table th[scope="row"] { font-weight: 600; text-align: left; }
+.doc-list { margin: 0; padding-left: 1.1em; display: grid; gap: var(--s-2); font-size: var(--t-sm); line-height: 1.65; color: var(--ink-2); max-width: 80ch; }
+.doc-list b { color: var(--ink); }
+.doc-folds details .table-wrap { margin-bottom: var(--s-3); }
 .doc-folds { list-style: none; margin: 0; padding: 0; }
 .doc-folds > li { border-top: 1px solid var(--line); }
 .doc-folds > li:first-child { border-top: 0; }

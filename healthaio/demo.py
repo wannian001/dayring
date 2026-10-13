@@ -8,6 +8,7 @@ habits of most students. Everything is generated from a
 fixed seed relative to "today", so the same day always gives the same numbers.
 Nothing here is a real measurement; every page shows a "demo data" badge.
 """
+import json
 import math
 import random
 from datetime import date, datetime, time, timedelta
@@ -535,4 +536,10 @@ def generate(out: Path, today: Optional[date] = None, now: Optional[datetime] = 
     write_table(data, "ai_prompts", prompts)
     config = out / "healthaio.toml"
     config.write_text(demo_config(today), encoding="utf-8")
+    # one proposal from an assistant, waiting on the Goals page (see goal_log): it changes nothing until accepted
+    proposal = {"id": "5a3e0c1d", "at": f"{today.isoformat()}T08:30:00", "op": "propose", "by": "assistant",
+                "changes": {"screen.entertainment_max_hours": 2.5},
+                "note": {"en": "A smaller step first: half an hour less a day, then look again in two weeks.",
+                         "zh": "先小步收：每天少半小时，两周后再看。"}}
+    (out / "goals.jsonl").write_text(json.dumps(proposal, ensure_ascii=False) + "\n", encoding="utf-8")
     return config

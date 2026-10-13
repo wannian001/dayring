@@ -8,14 +8,19 @@ Rules
   no plan for it). Food goals count logged days only (see the Food page). Screen goals count whole days.
 - Weekly goals (active minutes, strength days): the last four calendar weeks, plus this week so far.
 - Weight: the Body page's place against the planned corridor (listed with food, the plan it mostly answers to).
-- A plan that is not set is listed with the section of healthaio.toml that would set it, so this page is also the
-  menu of what can be planned.
+- A plan that is not set is listed too, so this page is also the menu of what can be planned.
+- Each goal names the healthaio.toml fields that set it ("edit"), so the page can change them: a change is a line in
+  goals.jsonl laid over the file (see goal_log), marked "set_here". Proposals an assistant wrote wait in
+  "proposals" until you accept or decline them; until then they change nothing. The built-in rule (a calm last
+  hour) and the alarm ladder's goals are not edited here.
 - The top line names the goal kept most often over the last 7 days and the one kept least often (each needs at
   least 3 days with a record), or says they are all kept alike.
 """
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 from typing import Any, Callable, Dict, List, Optional
 
+from .. import goal_log
+from ..config import Config
 from ..context import FOCUS, FUN, Context, iso
 from . import body as body_page
 from . import exercise as exercise_page
@@ -42,6 +47,32 @@ def _daily(key: str, domain: str, source: str, target: Dict[str, Any], test: Cal
 
 def _unset(key: str, domain: str, section: str, link: str) -> Dict[str, Any]:
     return {"key": key, "domain": domain, "kind": "unset", "source": "unset", "section": section, "link": link}
+
+
+def _fields(r: Dict[str, Any], cfg: Config) -> List[str]:
+    """The healthaio.toml fields a goal row is set by, when the page may change them."""
+    if r["key"] in ("asleep_in_time", "woke_on_time") and cfg.wake_shift:
+        return []  # the alarm ladder moves these; it is set in the file
+    return {"asleep_in_time": ["sleep.bedtime"], "woke_on_time": ["sleep.wake"], "slept_enough": ["sleep.target_hours"],
+            "weekly_min": ["exercise.weekly_min"], "strength_days": ["exercise.strength_days"],
+            "kcal_range": ["food.kcal_min", "food.kcal_max"], "protein": ["food.protein_g_per_kg"],
+            "last_meal": ["food.last_meal_gap_h"], "weight_pace": ["weight.target_kg"],
+            "focus_min": ["screen.work_min_hours"], "fun_max": ["screen.entertainment_max_hours"]}.get(r["key"], [])
+
+
+def _value(cfg: Config, name: str) -> Any:
+    """A field's value as the pages use it now (the guideline for exercise when no plan sets it)."""
+    section, key = name.split(".", 1)
+    if section == "weight":
+        return cfg.weight.target_kg if cfg.weight else None
+    if section == "exercise":
+        return exercise_page.goal(cfg)[key]
+    value = getattr(getattr(cfg, section), key)
+    return value.strftime("%H:%M") if isinstance(value, time) else value
+
+
+def _spec(cfg: Config, name: str, **extra: Any) -> Dict[str, Any]:
+    return {"field": name, **goal_log.FIELDS[name], "value": _value(cfg, name), **extra}
 
 
 def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
@@ -142,6 +173,18 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
             return value >= limit if op == ">=" else value <= limit
         rows.append(_daily(key, "screens", "plan", {"hours": hours}, test, end, "#time"))
 
+    # what the page may change, and which goals were last set here (by you, or an assistant's proposal you accepted)
+    for r in rows:
+        names = _fields(r, cfg)
+        r["edit"] = [_spec(cfg, n) for n in names]
+        mine = [cfg.goals_set[n] for n in names if n in cfg.goals_set]
+        if mine:
+            last = max(mine, key=lambda x: x.get("at") or "")
+            r["set_here"] = {"by": last["by"], "at": last["at"], "accepted": last["accepted"]}
+    proposals = [{"id": e["id"], "at": e.get("at"), "by": e.get("by"), "note": e.get("note"),
+                  "changes": [_spec(cfg, n, to=v) for n, v in e["changes"].items() if n in goal_log.FIELDS]}
+                 for e in cfg.goals_proposed]
+
     # the top line: kept most and least often over the last 7 days (daily goals with enough records)
     ranked = [r for r in rows if r["kind"] == "daily" and r["known"] >= MIN_KNOWN]
     ranked.sort(key=lambda r: (r["kept"] / r["known"], r["known"]))
@@ -149,7 +192,7 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
     worst = ranked[0] if ranked else None
     same = bool(ranked) and best["kept"] / best["known"] == worst["kept"] / worst["known"]
     return {"page": "goals", "day": iso(end), "today": iso(ctx.today), "now": iso(ctx.now),
-            "rows": rows, "domains": ["sleep", "exercise", "food", "screens"],
+            "rows": rows, "domains": ["sleep", "exercise", "food", "screens"], "proposals": proposals,
             "best": None if same or not best else {"key": best["key"], "kept": best["kept"], "known": best["known"]},
             "worst": None if same or not worst else {"key": worst["key"], "kept": worst["kept"], "known": worst["known"]},
             "same": same, "set": sum(1 for r in rows if r["kind"] != "unset"), "unset": sum(1 for r in rows if r["kind"] == "unset"),

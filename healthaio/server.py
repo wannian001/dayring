@@ -1,7 +1,8 @@
-"""A small read-only web server: the page files plus one JSON endpoint per page.
+"""A small web server: the page files plus one JSON endpoint per page.
 
-Binds to 127.0.0.1 by default. There are no write endpoints; data changes by
-editing or importing the CSV files.
+Binds to 127.0.0.1 by default. The data is only read; it changes by editing or importing the CSV files. The one
+thing the browser can write is a goal (POST /api/goals: set one, or answer an assistant's proposal), added as a line
+to goals.jsonl next to healthaio.toml, and only from a page this server served itself.
 """
 import json
 import mimetypes
@@ -14,7 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 from urllib.parse import parse_qs, urlsplit
 
-from . import kit
+from . import goal_log, kit
 from .config import Config
 from .context import Context
 from .modules import PAGES
@@ -30,7 +31,7 @@ def payload(cfg: Config, name: str, param: Optional[str] = None, now: Optional[d
         return cfg.public()
     if name == "kit":  # the design kit's manifest, for the gallery page (#kit)
         return kit.manifest()
-    ctx = Context(cfg, now=now)
+    ctx = Context(goal_log.apply(cfg), now=now)  # the goals set on the Goals page, laid over healthaio.toml
     return PAGES[name](ctx, param)
 
 
@@ -62,6 +63,29 @@ def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: No
 
         def do_HEAD(self) -> None:
             self.do_GET()
+
+        def _same_site(self) -> bool:
+            # only this app's own page may write: a page on any other site (or a DNS name pointed at this computer)
+            # sends another Origin or Host, and JSON forces the browser to ask first, which this server never answers
+            host = self.headers.get("Host", "")
+            name = host.rsplit(":", 1)[0] if not host.startswith("[") else host.split("]")[0] + "]"
+            return (name in ("127.0.0.1", "localhost", "[::1]", self.server.server_address[0])
+                    and self.headers.get("Origin") == f"http://{host}"
+                    and self.headers.get("Content-Type", "").split(";")[0].strip() == "application/json")
+
+        def do_POST(self) -> None:
+            if urlsplit(self.path).path != "/api/goals":
+                return self._send(404, to_json({"error": "nothing to write here"}), "application/json")
+            if not self._same_site():
+                return self._send(403, to_json({"error": "goals can only be changed from this app's own page"}), "application/json")
+            length = int(self.headers.get("Content-Length") or 0)
+            if not 0 < length <= 8192:
+                return self._send(413, to_json({"error": "expected a small JSON body"}), "application/json")
+            try:
+                entry = goal_log.from_browser(cfg, json.loads(self.rfile.read(length)), now())
+            except ValueError as error:  # GoalError, ConfigError and bad JSON are all ValueErrors
+                return self._send(400, to_json({"error": str(error)}), "application/json")
+            return self._send(200, to_json({"ok": True, "id": entry["id"]}), "application/json; charset=utf-8")
 
         def do_GET(self) -> None:
             url = urlsplit(self.path)
