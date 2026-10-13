@@ -1,27 +1,33 @@
-"""A small web server: the page files plus one JSON endpoint per page.
+"""A small web server: the page files, one JSON endpoint per page, and the routes the iPhone app uses.
 
-Binds to 127.0.0.1 by default. The data is only read; it changes by editing or importing the CSV files. The one
-thing the browser can write is a goal (POST /api/goals: set one, or answer an assistant's proposal), added as a line
-to goals.jsonl next to healthaio.toml, and only from a page this server served itself.
+Binds to 127.0.0.1 by default. The pages only read the data; it changes by editing or importing the CSV files, or by
+a package from the paired iPhone app. The one thing the browser can write is a goal (POST /api/goals: set one, or
+answer an assistant's proposal), added as a line to goals.jsonl next to healthaio.toml, and only from a page this
+server served itself. ``--lan`` lets phones on your home network or Tailscale in: they need a token from pairing,
+and nobody else is answered (docs/CAPTURE.md).
 """
 import json
 import mimetypes
+import os
 import re
 import sys
-from datetime import datetime
-from http import HTTPStatus
+import threading
+from datetime import datetime, timedelta
+from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional
 from urllib.parse import parse_qs, urlsplit
 
-from . import goal_log, kit
+from . import __version__, capture, goal_log, iphone, kit, phone, update
 from .config import Config
 from .context import Context
 from .modules import PAGES
 
 WEB = Path(__file__).resolve().parent / "web"
 PARAM = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+PACKAGE_ROUTE = re.compile(r"^/capture/v1/packages/([^/]+)$")
+SMALL_BODY = 64 * 1024
 mimetypes.add_type("text/javascript", ".js")
 mimetypes.add_type("image/svg+xml", ".svg")
 
@@ -39,7 +45,42 @@ def to_json(data: Any) -> bytes:
     return json.dumps(data, ensure_ascii=False, separators=(",", ":"), default=str).encode("utf-8")
 
 
-def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: None):
+class Updater:
+    """``POST /api/update``: install the newest version in the background, then start this server again."""
+
+    def __init__(self, cfg: Config):
+        self.cfg = cfg
+        self.running = False
+        self.last: Optional[Dict[str, Any]] = None
+        self.lock = threading.Lock()
+
+    def start(self) -> bool:
+        with self.lock:
+            if self.running:
+                return False
+            self.running = True
+        threading.Thread(target=self._run, daemon=True).start()
+        return True
+
+    def _run(self) -> None:
+        try:
+            self.last = update.apply(self.cfg)
+        finally:
+            self.running = False
+        if self.last.get("ok") and self.last.get("to") != __version__:
+            threading.Timer(1.0, restart).start()  # let the page read the result first
+
+
+def restart() -> None:
+    """Replace this process with a fresh one running the new code: same arguments, same port, same pid (so the Mac
+    app that started it keeps watching the same process)."""
+    sys.stdout.flush()
+    os.execv(sys.executable, [sys.executable, "-m", "healthaio", *sys.argv[1:]])
+
+
+def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: None, lan: bool = False):
+    updater = Updater(cfg)
+
     class Handler(BaseHTTPRequestHandler):
         server_version = "healthaio"
 
@@ -61,35 +102,84 @@ def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: No
             if self.command != "HEAD":
                 self.wfile.write(body)
 
+        def _json(self, status: int, data: Any) -> None:
+            self._send(status, to_json(data), "application/json; charset=utf-8")
+
+        # ------------------------------------------------ who is asking
+
+        def _local(self) -> bool:
+            return phone.is_loopback(self.client_address[0])
+
+        def _bearer(self) -> Optional[str]:
+            value = self.headers.get("Authorization", "")
+            return value[7:].strip() if value[:7].lower() == "bearer " else None
+
+        def _cookie(self) -> Optional[str]:
+            try:
+                jar = SimpleCookie(self.headers.get("Cookie", ""))
+            except Exception:
+                return None
+            morsel = jar.get("healthaio_read")
+            return morsel.value if morsel else None
+
+        def _gate(self) -> bool:
+            """Refuse anyone outside this computer, the home network and Tailscale, and any request whose Host is
+            not this computer's address (a rebound DNS name). Answers 403 itself and returns False."""
+            if not phone.allowed_source(self.client_address[0]) or not phone.host_ok(self.headers.get("Host")):
+                self._json(403, {"error": "this server only answers this computer and your own network"})
+                return False
+            return True
+
+        def _reader(self) -> bool:
+            if self._local():
+                return True
+            token = self._cookie() or self._bearer()
+            if phone.authenticate(cfg, token, "read"):
+                return True
+            self._json(401, {"error": "pair this device first (healthaio pair on the computer)"})
+            return False
+
+        def _device(self) -> Any:
+            """The paired device behind a capture token; {} for this computer itself; None (after answering 401)."""
+            device = phone.authenticate(cfg, self._bearer(), "capture")
+            if device:
+                return device
+            if self._local() and not self._bearer():
+                return {}
+            self._json(401, {"error": "this device is not paired, or was unpaired; pair it again"})
+            return None
+
+        def _body(self, limit: int) -> Optional[bytes]:
+            if self.headers.get("Content-Type", "").split(";")[0].strip() != "application/json":
+                self._json(415, {"error": "send JSON"})
+                return None
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                length = -1
+            if not 0 < length <= limit:
+                self._json(413, {"error": f"expected a JSON body of at most {limit // 1024} KB"})
+                return None
+            return self.rfile.read(length)
+
+        # ------------------------------------------------ routes
+
         def do_HEAD(self) -> None:
             self.do_GET()
 
-        def _same_site(self) -> bool:
-            # only this app's own page may write: a page on any other site (or a DNS name pointed at this computer)
-            # sends another Origin or Host, and JSON forces the browser to ask first, which this server never answers
-            host = self.headers.get("Host", "")
-            name = host.rsplit(":", 1)[0] if not host.startswith("[") else host.split("]")[0] + "]"
-            return (name in ("127.0.0.1", "localhost", "[::1]", self.server.server_address[0])
-                    and self.headers.get("Origin") == f"http://{host}"
-                    and self.headers.get("Content-Type", "").split(";")[0].strip() == "application/json")
-
-        def do_POST(self) -> None:
-            if urlsplit(self.path).path != "/api/goals":
-                return self._send(404, to_json({"error": "nothing to write here"}), "application/json")
-            if not self._same_site():
-                return self._send(403, to_json({"error": "goals can only be changed from this app's own page"}), "application/json")
-            length = int(self.headers.get("Content-Length") or 0)
-            if not 0 < length <= 8192:
-                return self._send(413, to_json({"error": "expected a small JSON body"}), "application/json")
-            try:
-                entry = goal_log.from_browser(cfg, json.loads(self.rfile.read(length)), now())
-            except ValueError as error:  # GoalError, ConfigError and bad JSON are all ValueErrors
-                return self._send(400, to_json({"error": str(error)}), "application/json")
-            return self._send(200, to_json({"ok": True, "id": entry["id"]}), "application/json; charset=utf-8")
-
         def do_GET(self) -> None:
+            if not self._gate():
+                return
             url = urlsplit(self.path)
             path = url.path
+            if path.startswith("/capture/"):
+                return self._capture_get(path)
+            if not self._reader():
+                return
+            if path == "/api/version":
+                return self._json(200, update.cached(cfg))
+            if path == "/api/update":
+                return self._json(200, {"running": updater.running, "last": updater.last})
             if path.startswith("/api/"):
                 name = path[len("/api/"):]
                 if name not in ("settings", "kit") and name not in PAGES:
@@ -113,6 +203,104 @@ def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: No
                 kind += "; charset=utf-8"
             self._send(200, target.read_bytes(), kind, cache="no-cache")
 
+        def do_POST(self) -> None:
+            if not self._gate():
+                return
+            path = urlsplit(self.path).path
+            if path.startswith("/capture/"):
+                if self.headers.get("Origin"):  # the phone app sends none; a web page always does
+                    return self._json(403, {"error": "web pages cannot write here"})
+                return self._capture_post(path)
+            if path == "/api/update":
+                if not (self._local() and self._same_site()):
+                    return self._json(403, {"error": "updates can only be started from this computer's own page"})
+                if updater.start():
+                    return self._json(202, {"started": True})
+                return self._json(409, {"started": False, "error": "an update is already running"})
+            if path == "/api/goals":
+                return self._goals()
+            return self._json(404, {"error": "nothing to write here"})
+
+        def _same_site(self) -> bool:
+            # only this app's own page may write: a page on any other site sends another Origin (and a DNS name pointed
+            # at this computer was already refused by _gate), and JSON forces the browser to ask first, which this
+            # server never answers
+            host = self.headers.get("Host", "")
+            return (self.headers.get("Origin") == f"http://{host}"
+                    and self.headers.get("Content-Type", "").split(";")[0].strip() == "application/json")
+
+        def _goals(self) -> None:
+            # this computer's page, or the panel in a paired phone (it holds the read token for this dashboard)
+            if not self._same_site() or not (self._local() or phone.authenticate(cfg, self._cookie(), "read")):
+                return self._send(403, to_json({"error": "goals can only be changed from this app's own page"}), "application/json")
+            length = int(self.headers.get("Content-Length") or 0)
+            if not 0 < length <= 8192:
+                return self._send(413, to_json({"error": "expected a small JSON body"}), "application/json")
+            try:
+                entry = goal_log.from_browser(cfg, json.loads(self.rfile.read(length)), now())
+            except ValueError as error:  # GoalError, ConfigError and bad JSON are all ValueErrors
+                return self._send(400, to_json({"error": str(error)}), "application/json")
+            return self._send(200, to_json({"ok": True, "id": entry["id"]}), "application/json; charset=utf-8")
+
+        def _capture_get(self, path: str) -> None:
+            if path == "/capture/v1/hello":
+                return self._json(200, {"app": "healthaio", "protocol": 1, "version": __version__,
+                                        "timezone": cfg.timezone, "kinds": list(capture.KINDS),
+                                        "max_bytes": capture.MAX_BYTES, "lan": lan})
+            device = self._device()
+            if device is None:
+                return
+            match = PACKAGE_ROUTE.match(path)
+            if match:
+                try:
+                    return self._json(200, capture.lookup(cfg, match.group(1)))
+                except capture.CaptureError as error:
+                    return self._json(400, {"error": str(error)})
+            if path == "/capture/v1/status":
+                from .collect import latest
+                return self._json(200, {"version": __version__, "timezone": cfg.timezone, "device": device or None,
+                                        "latest": latest(cfg), "last_package": capture.last_receipt(cfg),
+                                        "update": update.cached(cfg), "iphone": iphone.status(cfg)})
+            if path == "/capture/v1/renew":
+                return self._json(200, iphone.status(cfg))
+            return self._json(404, {"error": "unknown route"})
+
+        def _capture_post(self, path: str) -> None:
+            if path == "/capture/v1/pair":
+                body = self._body(SMALL_BODY)
+                if body is None:
+                    return
+                try:
+                    data = json.loads(body)
+                    if not isinstance(data, dict):
+                        raise phone.PairingError("expected a JSON object")
+                    tokens = phone.pair(cfg, data.get("code"), data.get("device_name"), data.get("device_id"))
+                except phone.PairingError as error:
+                    return self._json(error.status, {"error": str(error)})
+                except ValueError:
+                    return self._json(400, {"error": "the body is not JSON"})
+                return self._json(200, {**tokens, "server": {"version": __version__, "timezone": cfg.timezone}})
+            device = self._device()
+            if device is None:
+                return
+            if path == "/capture/v1/packages":
+                body = self._body(capture.MAX_BYTES)
+                if body is None:
+                    return
+                try:
+                    status, receipt = capture.receive(cfg, body, device)
+                except capture.CaptureError as error:
+                    return self._json(error.status, {"ok": False, "error": str(error)})
+                return self._json(status, receipt)
+            if path == "/capture/v1/renew":
+                started = iphone.start_background(cfg)
+                if started["started"]:
+                    return self._json(202, started)
+                if started["reason"] == "running":
+                    return self._json(409, {"error": "a renewal is already running", "reason": "running"})
+                return self._json(503, {"error": "this computer cannot renew the app", "reason": started["reason"]})
+            return self._json(404, {"error": "unknown route"})
+
     return Handler
 
 
@@ -123,13 +311,37 @@ class Server(ThreadingHTTPServer):
     daemon_threads = True
 
 
+def _check_daily(cfg: Config) -> None:
+    """Ask GitHub for a newer version now and once a day (a no-op when [updates] check = false)."""
+    def run() -> None:
+        try:
+            update.check(cfg)
+        except Exception as error:  # an update check must never take the dashboard down
+            print(f"[healthaio] update check failed: {error!r}", file=sys.stderr)
+        timer = threading.Timer(timedelta(hours=24).total_seconds(), run)
+        timer.daemon = True
+        timer.start()
+    if update.enabled(cfg) and not cfg.demo:
+        threading.Thread(target=run, daemon=True).start()
+
+
 def serve(cfg: Config, host: str = "127.0.0.1", port: int = 8790,
-          now: Callable[[], Optional[datetime]] = lambda: None) -> None:
-    if host not in ("127.0.0.1", "localhost", "::1"):
+          now: Callable[[], Optional[datetime]] = lambda: None, lan: bool = False) -> None:
+    if lan:
+        host = "0.0.0.0"
+    elif host not in ("127.0.0.1", "localhost", "::1"):
         print(f"[healthaio] warning: listening on {host}; anyone who can reach this address can read your data.",
               file=sys.stderr)
-    httpd = Server((host, port), make_handler(cfg, now))
-    print(f"Health AIO on http://{'localhost' if host in ('127.0.0.1', '::1') else host}:{port}  (data: {cfg.data_dir})")
+    retried = capture.retry_pending(cfg)
+    if retried:
+        print(f"[healthaio] wrote {retried} waiting package(s) from the phone into the tables")
+    httpd = Server((host, port), make_handler(cfg, now, lan=lan))
+    print(f"Health AIO {__version__} on http://localhost:{port}  (data: {cfg.data_dir})")
+    if lan:
+        addresses = phone.local_addresses()
+        print("Phones can connect after pairing (healthaio pair): "
+              + (", ".join(f"http://{a}:{port}" for a in addresses) or "no network address found"))
+    _check_daily(cfg)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

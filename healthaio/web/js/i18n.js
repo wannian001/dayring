@@ -7,6 +7,9 @@ const DICT = {
     "ui.prev_day": "Previous day", "ui.next_day": "Next day", "ui.back_today": "Back to today",
     "ui.how": "How this is worked out", "ui.list_sep": ", ", "ui.loading": "Loading…", "ui.error": "Could not load this page",
     "ui.error_hint": "Check that the server is running and the data folder is readable.",
+    "upd.available": "Health AIO {latest} is available (you have {current}).", "upd.notes": "What's new", "upd.install": "Update now", "upd.later": "Later",
+    "upd.elsewhere": "Update it on the computer: Update in the Mac app, or healthaio update.", "upd.manual": "This copy can't update itself; run healthaio update in a terminal to see why.",
+    "upd.running": "Updating…", "upd.restarting": "Updated. Restarting…", "upd.failed": "The update did not finish: {message}",
     "ui.computed": "Computed {time}", "ui.static_gap": "The demo site does not go back this far", "ui.static_gap_hint": "The online demo has the last two weeks pre-rendered. Run Health AIO on your computer to browse any date.", "ui.back_latest": "Back to the latest", "ui.no_data": "No data yet",
 
     "today.title": "Today", "today.looking_back": "Looking back at {day}",
@@ -70,6 +73,9 @@ const DICT = {
     "ui.prev_day": "前一天", "ui.next_day": "后一天", "ui.back_today": "回到今天",
     "ui.how": "怎么算的", "ui.list_sep": "、", "ui.loading": "正在读取…", "ui.error": "这一页没读出来",
     "ui.error_hint": "看一下服务有没有在跑、数据目录能不能读。",
+    "upd.available": "Health AIO {latest} 可以更新了（你现在是 {current}）。", "upd.notes": "看看改了什么", "upd.install": "现在更新", "upd.later": "以后再说",
+    "upd.elsewhere": "在电脑上更新：Mac App 里点「更新」，或运行 healthaio update。", "upd.manual": "这份副本不能自己更新，在终端运行 healthaio update 看原因。",
+    "upd.running": "正在更新…", "upd.restarting": "更新好了，正在重启…", "upd.failed": "更新没完成：{message}",
     "ui.computed": "{time} 算的", "ui.static_gap": "演示站没有这么早的日子", "ui.static_gap_hint": "在线演示只预先算好了最近两周。在自己电脑上运行 Health AIO 可以看任意一天。", "ui.back_latest": "回到最近", "ui.no_data": "还没有数据",
 
     "today.title": "今天", "today.looking_back": "回看 {day}",

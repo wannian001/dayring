@@ -68,8 +68,9 @@ COMPUTER_CAP = 45 * 60.0
 PLATFORMS = {1: "tablet", 2: "phone", 3: "mac"}
 CATEGORY_FILE = "screen_categories.json"
 FDA_MESSAGE = ("cannot read Screen Time data: the app running this command needs Full Disk Access. "
-               "Open System Settings > Privacy & Security > Full Disk Access, turn it on for your "
-               "terminal (Terminal, iTerm, VS Code, ...), restart that app and run the import again.")
+               "Open System Settings > Privacy & Security > Full Disk Access and turn it on for the Health AIO "
+               "Mac app (mac/README.md), which then collects every few hours by itself; or for your terminal "
+               "(Terminal, iTerm, VS Code, ...), restart that app and run the import again.")
 
 
 class ScreenTimeError(RuntimeError):

@@ -1,0 +1,332 @@
+{
+ "schema": "healthaio-capture-v1",
+ "package_id": "ios-2F1C0B9E-7A41-4C55-9D7B-2B0C3F6E5A10",
+ "kind": "health",
+ "created_at": "2026-10-13T21:05:11+11:00",
+ "timezone": "Australia/Melbourne",
+ "device": {
+  "id": "8E0D3C4A-0000-4000-8000-000000000001",
+  "name": "iPhone",
+  "app_version": "0.3.0 (3)"
+ },
+ "window": {
+  "start_date": "2026-10-11",
+  "end_date": "2026-10-13",
+  "query_start": "2026-10-10 18:00:00 +1100",
+  "query_end": "2026-10-13 21:05:10 +1100",
+  "read_completed_at": "2026-10-13 21:05:10 +1100"
+ },
+ "records": [
+  {
+   "type": "HKCategoryTypeIdentifierSleepAnalysis",
+   "sourceName": "iPhone",
+   "device": "iPhone",
+   "startDate": "2026-10-10 23:10:00 +1100",
+   "endDate": "2026-10-11 07:20:00 +1100",
+   "value": "HKCategoryValueSleepAnalysisInBed"
+  },
+  {
+   "type": "HKCategoryTypeIdentifierSleepAnalysis",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-10 23:30:00 +1100",
+   "endDate": "2026-10-11 03:00:00 +1100",
+   "value": "HKCategoryValueSleepAnalysisAsleepCore",
+   "metadata": {
+    "HKTimeZone": "Australia/Melbourne"
+   }
+  },
+  {
+   "type": "HKCategoryTypeIdentifierSleepAnalysis",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-11 03:00:00 +1100",
+   "endDate": "2026-10-11 04:00:00 +1100",
+   "value": "HKCategoryValueSleepAnalysisAsleepDeep",
+   "metadata": {
+    "HKTimeZone": "Australia/Melbourne"
+   }
+  },
+  {
+   "type": "HKCategoryTypeIdentifierSleepAnalysis",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-11 04:00:00 +1100",
+   "endDate": "2026-10-11 07:00:00 +1100",
+   "value": "HKCategoryValueSleepAnalysisAsleepREM",
+   "metadata": {
+    "HKTimeZone": "Australia/Melbourne"
+   }
+  },
+  {
+   "type": "HKCategoryTypeIdentifierSleepAnalysis",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-12 00:30:00 +1100",
+   "endDate": "2026-10-12 07:30:00 +1100",
+   "value": "HKCategoryValueSleepAnalysisAsleepCore",
+   "metadata": {
+    "HKTimeZone": "Australia/Melbourne"
+   }
+  },
+  {
+   "type": "HKCategoryTypeIdentifierSleepAnalysis",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-12 23:40:00 +1100",
+   "endDate": "2026-10-13 06:40:00 +1100",
+   "value": "HKCategoryValueSleepAnalysisAsleepCore",
+   "metadata": {
+    "HKTimeZone": "Australia/Melbourne"
+   }
+  },
+  {
+   "type": "HKQuantityTypeIdentifierStepCount",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-11 09:00:00 +1100",
+   "endDate": "2026-10-11 10:00:00 +1100",
+   "value": "6000",
+   "unit": "count"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierStepCount",
+   "sourceName": "iPhone",
+   "device": "iPhone",
+   "startDate": "2026-10-11 09:00:00 +1100",
+   "endDate": "2026-10-11 10:00:00 +1100",
+   "value": "6500",
+   "unit": "count"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierRestingHeartRate",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-11 08:00:00 +1100",
+   "endDate": "2026-10-11 08:00:00 +1100",
+   "value": "58",
+   "unit": "count/min"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierHeartRateVariabilitySDNN",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-11 03:00:00 +1100",
+   "endDate": "2026-10-11 03:01:00 +1100",
+   "value": "44",
+   "unit": "ms"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierAppleExerciseTime",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-11 07:00:00 +1100",
+   "endDate": "2026-10-11 07:30:00 +1100",
+   "value": "12",
+   "unit": "min"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierActiveEnergyBurned",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-11 07:00:00 +1100",
+   "endDate": "2026-10-11 20:00:00 +1100",
+   "value": "520",
+   "unit": "kcal"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierBasalEnergyBurned",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-11 00:00:00 +1100",
+   "endDate": "2026-10-11 20:00:00 +1100",
+   "value": "1500",
+   "unit": "kcal"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierStepCount",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-12 09:00:00 +1100",
+   "endDate": "2026-10-12 10:00:00 +1100",
+   "value": "9000",
+   "unit": "count"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierStepCount",
+   "sourceName": "iPhone",
+   "device": "iPhone",
+   "startDate": "2026-10-12 09:00:00 +1100",
+   "endDate": "2026-10-12 10:00:00 +1100",
+   "value": "8800",
+   "unit": "count"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierRestingHeartRate",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-12 08:00:00 +1100",
+   "endDate": "2026-10-12 08:00:00 +1100",
+   "value": "58",
+   "unit": "count/min"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierHeartRateVariabilitySDNN",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-12 03:00:00 +1100",
+   "endDate": "2026-10-12 03:01:00 +1100",
+   "value": "44",
+   "unit": "ms"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierAppleExerciseTime",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-12 07:00:00 +1100",
+   "endDate": "2026-10-12 07:30:00 +1100",
+   "value": "30",
+   "unit": "min"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierActiveEnergyBurned",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-12 07:00:00 +1100",
+   "endDate": "2026-10-12 20:00:00 +1100",
+   "value": "520",
+   "unit": "kcal"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierBasalEnergyBurned",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-12 00:00:00 +1100",
+   "endDate": "2026-10-12 20:00:00 +1100",
+   "value": "1500",
+   "unit": "kcal"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierStepCount",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-13 09:00:00 +1100",
+   "endDate": "2026-10-13 10:00:00 +1100",
+   "value": "3000",
+   "unit": "count"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierRestingHeartRate",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-13 08:00:00 +1100",
+   "endDate": "2026-10-13 08:00:00 +1100",
+   "value": "58",
+   "unit": "count/min"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierHeartRateVariabilitySDNN",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-13 03:00:00 +1100",
+   "endDate": "2026-10-13 03:01:00 +1100",
+   "value": "44",
+   "unit": "ms"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierAppleExerciseTime",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-13 07:00:00 +1100",
+   "endDate": "2026-10-13 07:30:00 +1100",
+   "value": "12",
+   "unit": "min"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierActiveEnergyBurned",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-13 07:00:00 +1100",
+   "endDate": "2026-10-13 20:00:00 +1100",
+   "value": "520",
+   "unit": "kcal"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierBasalEnergyBurned",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-13 00:00:00 +1100",
+   "endDate": "2026-10-13 20:00:00 +1100",
+   "value": "1500",
+   "unit": "kcal"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierBodyMass",
+   "sourceName": "Health",
+   "device": "iPhone",
+   "startDate": "2026-10-12 07:45:00 +1100",
+   "endDate": "2026-10-12 07:45:00 +1100",
+   "value": "72.4",
+   "unit": "kg"
+  },
+  {
+   "type": "HKQuantityTypeIdentifierDietaryEnergyConsumed",
+   "sourceName": "MyFitnessPal",
+   "device": "iPhone",
+   "startDate": "2026-10-12 12:40:00 +1100",
+   "endDate": "2026-10-12 12:40:00 +1100",
+   "value": "640",
+   "unit": "kcal",
+   "metadata": {
+    "HKFoodMeal": "Lunch",
+    "HKFoodType": "Chicken salad"
+   }
+  },
+  {
+   "type": "HKQuantityTypeIdentifierDietaryProtein",
+   "sourceName": "MyFitnessPal",
+   "device": "iPhone",
+   "startDate": "2026-10-12 12:40:00 +1100",
+   "endDate": "2026-10-12 12:40:00 +1100",
+   "value": "38",
+   "unit": "g",
+   "metadata": {
+    "HKFoodMeal": "Lunch",
+    "HKFoodType": "Chicken salad"
+   }
+  }
+ ],
+ "workouts": [
+  {
+   "workoutActivityType": "HKWorkoutActivityTypeRunning",
+   "duration": "31.5",
+   "durationUnit": "min",
+   "sourceName": "Apple Watch",
+   "device": "Watch",
+   "startDate": "2026-10-12 07:00:00 +1100",
+   "endDate": "2026-10-12 07:34:00 +1100",
+   "events": [
+    {
+     "type": "HKWorkoutEventTypePause",
+     "date": "2026-10-12 07:10:00 +1100"
+    },
+    {
+     "type": "HKWorkoutEventTypeResume",
+     "date": "2026-10-12 07:12:30 +1100"
+    }
+   ],
+   "statistics": [
+    {
+     "type": "HKQuantityTypeIdentifierActiveEnergyBurned",
+     "sum": "286",
+     "unit": "kcal"
+    },
+    {
+     "type": "HKQuantityTypeIdentifierHeartRate",
+     "average": "148",
+     "unit": "count/min"
+    }
+   ]
+  }
+ ]
+}

@@ -37,6 +37,14 @@ Run `healthaio check` afterwards to see the tables the pages will read.
 The zip is read in place; there is no need to unzip it. The file is streamed, so even a
 multi-gigabyte export needs little memory.
 
+### Or let the iPhone app send it
+
+The iPhone app ([ios/README.md](../ios/README.md)) reads the same records on the phone and sends the
+last 3 days to `healthaio serve --lan` each time you open it. The server turns each package back into
+export XML and reads it with this importer, so the rows and every rule below are the same; only the
+days in the package's window are written. The protocol is [CAPTURE.md](CAPTURE.md). An export is still
+the way to bring in years of history at once.
+
 ### What it fills in
 
 `sleep_min`, `in_bed_min`, `sleep_start`, `sleep_end`, `hrv_ms` (SDNN), `resting_hr`, `steps`,
@@ -230,6 +238,11 @@ The folder is protected. The app you run the command in (Terminal, iTerm, VS Cod
 **Full Disk Access**: *System Settings* > *Privacy & Security* > *Full Disk Access*, turn it on
 for that app, quit and reopen it, then run the import again. Without it the importer stops with
 a message saying exactly this; it never writes an empty table.
+
+Better: give Full Disk Access to the **Health AIO Mac app** ([mac/README.md](../mac/README.md))
+instead of your terminal. It runs `healthaio collect` every 2 hours, and the import inherits the
+app's permission, so neither your terminal nor Python needs it. Since Biome keeps only about four
+weeks, that also means no gap is ever lost.
 
 ### iPhone and iPad
 

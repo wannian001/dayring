@@ -762,14 +762,20 @@ def read_export(path: Path, tz, sessions: Optional[List[Row]] = None,
                 meals: Optional[List[Row]] = None) -> Tuple[List[Row], Summary]:
     """Parse an export into validated body_daily rows (no file is written).
     Pass a list as ``sessions`` to also receive validated workouts rows, and as ``meals`` for meals rows."""
-    summary = Summary(table="body_daily", source=str(path))
     stream, archive = open_export(Path(path))
     try:
-        data, unknown_zones = collect(stream, tz)
+        return read_stream(stream, tz, str(path), sessions, meals)
     finally:
         stream.close()
         if archive is not None:
             archive.close()
+
+
+def read_stream(stream: IO[bytes], tz, source: str, sessions: Optional[List[Row]] = None,
+                meals: Optional[List[Row]] = None) -> Tuple[List[Row], Summary]:
+    """``read_export`` for XML that is already open: the phone app's packages come through here (capture.py)."""
+    summary = Summary(table="body_daily", source=source)
+    data, unknown_zones = collect(stream, tz)
     if data.export_at is None:
         summary.notes.append("export has no ExportDate; every day is marked complete")
     for name, count in sorted(unknown_zones.items()):
@@ -822,11 +828,21 @@ def import_apple_health(path: Path, cfg) -> Summary:
     sessions: List[Row] = []
     meals: List[Row] = []
     rows, summary = read_export(path, cfg.tz, sessions, meals)
+    return write_rows(cfg, rows, sessions, meals, summary)
+
+
+def write_rows(cfg, rows: List[Row], sessions: List[Row], meals: List[Row], summary: Summary,
+               window: Optional[Tuple[datetime, datetime]] = None) -> Summary:
+    """Merge what ``read_export`` / ``read_stream`` returned into the three tables.
+
+    An export holds each source's whole history, so a source's workouts and meals are replaced over the range the
+    export covers. A package from the phone covers only its ``window`` (local start, end): that range is used instead,
+    so a workout deleted on the phone inside the window also leaves the table."""
     target, total, notes = merge_write(cfg.data_dir, "body_daily", rows, combine=_combine)
     summary.path, summary.total = target, total
     summary.notes += notes
     if sessions:
-        first, last = min(r["start"] for r in sessions), max(r["start"] for r in sessions)
+        first, last = window or (min(r["start"] for r in sessions), max(r["start"] for r in sessions))
         sources = {r["source"] for r in sessions if r.get("source")}
         spans = [(r["start"], r["end"]) for r in sessions]
         end_column = TABLES["workouts"].column("end")
@@ -859,7 +875,7 @@ def import_apple_health(path: Path, cfg) -> Summary:
                              f"kept {counts['kept']} row(s) from other sources")
         summary.notes += wnotes
     if meals:
-        first, last = min(r["time"] for r in meals), max(r["time"] for r in meals)
+        first, last = window or (min(r["time"] for r in meals), max(r["time"] for r in meals))
         sources = {r["source"] for r in meals if r.get("source")}
         replaced = [0]
 

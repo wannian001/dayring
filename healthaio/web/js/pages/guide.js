@@ -1,5 +1,6 @@
 // Guide (#guide): how to use Proactive Health AIO, from the demo to your own data to a normal day with it.
-// Numbered steps in the order you meet them, in one card, each opening on a click; commands are the ones in the README's Quick start. The server only
+// Numbered steps in the order you meet them, in one card, each opening on a click; commands are the ones in the README's Quick start
+// and companion-app sections. The server only
 // names the page (modules/docs.py).
 import { esc } from "../charts.js";
 import { getLang, t } from "../i18n.js";
@@ -10,6 +11,7 @@ const CODE = {
   more: ["python3 -m healthaio import ics ~/Downloads/timetable.ics --kind class", "python3 -m healthaio import macos-screentime",
     "python3 -m healthaio import ai-logs", "python3 -m healthaio check"],
   serve: ["python3 -m healthaio serve"],
+  apps: ["mac/build.sh", "open \"mac/build/Health AIO.app\"", "python3 -m healthaio pair"],
 };
 
 const GUIDE = {
@@ -29,11 +31,15 @@ const GUIDE = {
       { h: "打开，设你的目标", body: [
         "在 <b>healthaio.toml</b> 里改一下时区，然后运行下面这行。",
         "目标在“目标”页直接设、随时改：几点睡着、每周练几次、饮食和屏幕的上限。每一项都可以不设，没设的页面照样显示事实，只是没有目标可比。"], code: "serve" },
+      { h: "让它自己跑：Mac App 和 iPhone App", body: [
+        "<b>Mac App</b> 在菜单栏里：给它“完全磁盘访问权限”后，每 2 小时自己采一次屏幕使用时间，看板一直开着；GitHub 上有新版本时会弹窗问你要不要更新。",
+        "<b>iPhone App</b> 用 Xcode 装到手机上（见 ios/README.md），在 Mac App 里点“配对 iPhone”扫二维码。之后每次打开，它把最近 3 天的 Apple 健康发到电脑，看板就在它的一个标签页里。",
+        "免费 Apple ID 签的 App 管 7 天：手机每天第一次打开时会检查，快到期就提醒你，点“现在续签”由电脑重新签好装上。"], code: "apps" },
       { h: "每天怎么用", body: [
         "<b>早上</b>打开“今天”：先看恢复（和你自己最近 28 天比），再看“今天该调整的”：训练、睡眠、饮食各最多一件，每件都写明依据的数字。",
         "想细看某一项，去“身体数据”（作息、运动、饮食、体重）或“时间与精力”（时间去向、AI 干活量、消耗）。",
         "<b>周末</b>看“每周复盘”：这一周和前四周并排放，不打分。",
-        "某项很久没更新，去“数据来源”页看是哪一路断了。它不实时同步：想看新数据时，再导出一次 Apple 健康，重新导入。"] },
+        "某项很久没更新，去“数据来源”页看是哪一路断了。装了 iPhone App，打开它就会把新数据发过来；没装的话，再导出一次 Apple 健康、重新导入。"] },
       { h: "怎么读这些数", body: [
         "<b>和你自己比，</b>不和人群比：“平常”是你自己前 28 天的中间一半。",
         "<b>缺的就是缺：</b>没记的一天不算成 0，记得少，回答就少，不会编。",
@@ -41,7 +47,9 @@ const GUIDE = {
         "<b>不是医疗建议：</b>建议都是日常习惯（早点睡、早点吃、练轻一点）；健康问题请找专业人士。"] },
       { h: "你的数据", body: [
         "数据是你电脑上一个文件夹里的普通 CSV 文件，导入工具写它们，看板只读。",
-        "服务只在本机（127.0.0.1）运行，不往任何地方发数据。它唯一会写的，是你在目标页设的目标：每次一行，记在 healthaio.toml 旁边的 goals.jsonl 里。"] },
+        "服务默认只在本机（127.0.0.1）运行。让手机连进来时，只认你配对过的设备，手机能发的只有 Apple 健康的样本。",
+        "页面唯一会写的，是你在目标页设的目标：每次一行，记在 healthaio.toml 旁边的 goals.jsonl 里。",
+        "唯一联网的是每天问一次 GitHub 有没有新版本，只带版本号；在 healthaio.toml 里写 [updates] check = false 就关掉。"] },
     ],
     history: "这个项目是怎么来的？看迭代记录（在作者的网站上）",
   },
@@ -61,11 +69,15 @@ const GUIDE = {
       { h: "Open it, set your goals", body: [
         "Set your timezone in <b>healthaio.toml</b>, then run the line below.",
         "Set goals right on the Goals page and change them any time: when to be asleep, how often to train, limits for food and screens. Each is optional; a page without its goal still shows the facts, just without a goal to compare with."], code: "serve" },
+      { h: "Let it run by itself: the Mac app and the iPhone app", body: [
+        "The <b>Mac app</b> lives in the menu bar. Once you give it Full Disk Access it collects Screen Time every 2 hours and keeps the dashboard running; when GitHub has a newer version it asks whether to update.",
+        "Install the <b>iPhone app</b> with Xcode (see ios/README.md) and scan the QR code from Pair iPhone in the Mac app. From then on, each time you open it, it sends the last 3 days of Apple Health to your computer, and the dashboard is one of its tabs.",
+        "An app signed with a free Apple ID lasts 7 days: the first time it opens each day the phone checks, reminds you when the end is near, and Renew now has your computer sign and install it again."], code: "apps" },
       { h: "A normal day with it", body: [
         "<b>In the morning</b>, open Today: first recovery (against your own last 28 days), then what to adjust today: at most one thing each for training, sleep and food, each with the numbers behind it.",
         "For a closer look, go to Body (sleep, exercise, food, weight) or Time & energy (where the time went, AI work, drain).",
         "<b>At the weekend</b>, open Weekly review: this week next to the four before it, with no scores.",
-        "If something has not updated for a while, Data sources shows which stream stopped. Nothing syncs live: for fresh data, export from Apple Health again and import it."] },
+        "If something has not updated for a while, Data sources shows which stream stopped. With the iPhone app, opening it sends the new data; without it, export from Apple Health again and import it."] },
       { h: "How to read the numbers", body: [
         "<b>You against you,</b> never a population: “normal” is the middle half of your own previous 28 days.",
         "<b>Missing stays missing:</b> a day you did not log is not a zero; a sparse log gives fewer answers, not made-up ones.",
@@ -73,7 +85,9 @@ const GUIDE = {
         "<b>Not medical advice:</b> the suggestions are everyday habits (sleep earlier, eat earlier, train lighter); for anything about your health, talk to a professional."] },
       { h: "Your data", body: [
         "Your data is plain CSV files in a folder on your computer. The importers write them; the dashboard only reads them.",
-        "The server listens only on this computer (127.0.0.1) and sends nothing anywhere. The one thing it writes is a goal you set on the Goals page: one line each, in goals.jsonl next to healthaio.toml."] },
+        "The server listens only on this computer (127.0.0.1) unless you let your phone in, and then only devices you paired; all a phone can send is Apple Health samples.",
+        "The one thing a page writes is a goal you set on the Goals page: one line each, in goals.jsonl next to healthaio.toml.",
+        "The one request to the internet is asking GitHub once a day whether there is a newer version, with nothing but the version number; [updates] check = false in healthaio.toml turns it off."] },
     ],
     history: "Where did this project come from? Read its history (on the author's site)",
   },

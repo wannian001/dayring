@@ -27,6 +27,8 @@ DEFAULT_DEVICES = ["phone", "tablet", "laptop", "desktop"]
 # A computer keeps its screen on while you are away; a phone or tablet locks itself. So when an AI agent app is in
 # front on a computer while another device is in use, the agent is working and you are on the other device.
 DEFAULT_COMPUTERS = ["laptop", "desktop"]
+COLLECT_SOURCES = ("macos-screentime", "ai-logs")
+DEFAULT_COLLECT = ["macos-screentime"]
 DEFAULT_AGENT_APPS = ["Claude", "ChatGPT", "Codex", "Cursor", "Windsurf", "Terminal", "iTerm2", "Warp", "Ghostty"]
 
 
@@ -136,6 +138,10 @@ class Config:
     # waiting for an answer
     goals_set: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     goals_proposed: List[Dict[str, Any]] = field(default_factory=list)
+    # [collect] sources: what `healthaio collect` (the Mac app, every few hours) imports by itself
+    collect_sources: List[str] = field(default_factory=lambda: list(DEFAULT_COLLECT))
+    # [updates] check: whether to ask GitHub once a day for a newer version (the app's only request to the internet)
+    check_updates: bool = True
 
     @property
     def tz(self):
@@ -239,6 +245,18 @@ def load(path: Optional[Path] = None, data_dir: Optional[Path] = None) -> Config
             if not isinstance(devices[key], list):
                 raise ConfigError(f"devices.{key} must be a list")
             setattr(cfg, key, [str(d) for d in devices[key]])
+
+    collect = raw.get("collect", {})
+    if collect.get("sources") is not None:
+        sources = collect["sources"]
+        if not isinstance(sources, list) or any(s not in COLLECT_SOURCES for s in sources):
+            raise ConfigError(f"collect.sources must be a list of {', '.join(COLLECT_SOURCES)}")
+        cfg.collect_sources = [str(s) for s in sources]
+    updates = raw.get("updates", {})
+    if updates.get("check") is not None:
+        if not isinstance(updates["check"], bool):
+            raise ConfigError("updates.check must be true or false")
+        cfg.check_updates = updates["check"]
 
     sleep = plan.get("sleep", {})
     cfg.sleep = SleepPlan(target_hours=_num(sleep.get("target_hours"), "plan.sleep.target_hours"),

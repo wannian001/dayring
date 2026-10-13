@@ -24,7 +24,7 @@ in one place, each compared with your own normal, and every morning, what to adj
 | **What people use now** | Wearable apps (Oura, WHOOP, Garmin Connect) turn their own device's data into a recovery score. Food loggers (MyFitnessPal, Cronometer) cover food. Screen Time covers screens. Apple Health stores almost everything but explains little. Cross-app trackers (Exist.io, Bearable) look for correlations between apps. |
 | **What that costs you** | Several apps and often several subscriptions; your history in several clouds; scores whose formula you cannot check; and you still do the joining-up yourself. |
 | **What this does instead** | One local app reads the exports you already have, compares every signal with *your own* last 28 days (not a population), keeps every goal in one file, and each morning names at most three things to adjust (one each for training, sleep and food) with the numbers behind each. Every rule is written down; nothing leaves the computer. |
-| **Trade-offs, on purpose** | No live sync: you import an Apple Health export (an iPhone companion is future work). Food needs a logging app that writes to Apple Health, or a CSV. The advice is a short list of fixed, explainable rules, not a model; it is about habits, not medical advice. A missing number stays missing, so a sparse log gives fewer answers, not made-up ones. |
+| **Trade-offs, on purpose** | No cloud and no background sync: the iPhone app sends Apple Health to your own computer, over your home network or Tailscale, while it is open; without it you import an Apple Health export. Food needs a logging app that writes to Apple Health, or a CSV. The advice is a short list of fixed, explainable rules, not a model; it is about habits, not medical advice. A missing number stays missing, so a sparse log gives fewer answers, not made-up ones. |
 
 ### The loop it runs
 
@@ -134,12 +134,39 @@ python3 -m healthaio goal list                        # values now, where each c
 python3 -m healthaio goal accept <id>                 # or decline <id>; set FIELD VALUE to set one yourself
 ```
 
+### The Mac app and the iPhone app
+
+Two small companion apps take the manual steps away. Both are built from this repository on your own Mac, and
+neither talks to anything but your own computer (and GitHub, once a day, to see whether there is a newer version).
+
+| | What it does | Get it |
+|---|---|---|
+| **Mac app** (menu bar) | Holds Full Disk Access, so Screen Time is collected every 2 hours (your iPhone and iPad too, with "Share across devices" on). Keeps the dashboard running. When a new version is out it pops up and, if you say so, installs it. Pairs the iPhone with a QR code, and re-signs the iPhone app. | `mac/build.sh`, then [mac/README.md](mac/README.md) |
+| **iPhone app** | Reads Apple Health (read only) and sends the last 3 days to your computer each time you open it; the dashboard is one of its tabs, so you can look while it sends. The first time it opens each day it checks whether its signature runs out soon (a free Apple ID signs for 7 days) or a newer version exists, and reminds you. | Xcode: [ios/README.md](ios/README.md) |
+
+```bash
+python3 -m healthaio serve --lan        # let your paired phone in (the Mac app does this for you)
+python3 -m healthaio pair               # an 8-digit code for the iPhone app, good for 10 minutes
+python3 -m healthaio collect            # Screen Time now (the Mac app runs it every 2 hours)
+python3 -m healthaio update             # is there a newer version on GitHub; install it
+python3 -m healthaio iphone renew       # re-sign and reinstall the iPhone app
+```
+
+How the phone and the computer talk, and what each side checks: [docs/CAPTURE.md](docs/CAPTURE.md).
+
 ### Your data stays on your computer
 
 - Data lives in plain CSV files in a folder you choose ([format](docs/DATA_FORMAT.md)). Importers write them
   ([how each importer works](docs/IMPORTERS.md)); the dashboard only reads them.
-- The server listens on `127.0.0.1` and sends nothing anywhere. The one thing it writes is a goal you set on the Goals
-  page: a line in `goals.jsonl` next to `healthaio.toml`, accepted only from the app's own page.
+- The server listens on `127.0.0.1`. With `--lan` it also answers your home network and Tailscale, and there only
+  the devices you paired: each holds its own tokens, the server keeps only their hashes, and `healthaio devices revoke`
+  cuts one off. What a phone may send is a package of Apple Health samples; it is kept as sent under `.healthaio/`
+  and written into the same CSV files. The iPhone app sends "Apple Watch" or "iPhone", never the names you gave your
+  devices.
+- The one thing a page can write is a goal you set on the Goals page: a line in `goals.jsonl` next to
+  `healthaio.toml`, accepted only from the app's own page (here, or the panel in your paired phone).
+- The one request to the internet is the daily update check: a call to the GitHub API that sends nothing but the
+  version number. `[updates] check = false` in healthaio.toml turns it off.
 - `build-static` (used for the demo site) refuses to run on your own data unless you pass a flag that says you mean to
   publish it.
 
@@ -167,6 +194,9 @@ importers ─▶ data/*.csv ─▶ store (checked against schema.py) ─▶ page
 python3 -m unittest discover -s tests      # runs on Python 3.9–3.13
 python3 -m healthaio page food --demo --today 2026-10-12
 ```
+
+The iPhone app has its own tests (`xcodebuild test`, see [ios/README.md](ios/README.md)); both sides read the example
+packages in `tests/fixtures/capture/`, so the protocol cannot drift on one side only.
 
 ### Not medical advice
 
@@ -200,7 +230,7 @@ repository contains none of that data.
 | **现在大家用什么** | 穿戴设备的 App（Oura、WHOOP、Garmin Connect）把自家设备的数据算成一个恢复分；记饮食的 App（MyFitnessPal、薄荷健康、Cronometer）只管吃；屏幕使用时间只管屏幕；Apple 健康几乎什么都存，但很少解释；跨 App 的追踪工具（Exist.io、Bearable）在不同 App 之间找相关。 |
 | **它们带来的负担** | 好几个 App、往往还有好几份订阅；你的历史散在好几家云上；分数怎么算的你查不到；最后把这些拼起来的还是你自己。 |
 | **这里的做法** | 一个本地的 App 读你手上已有的导出数据，每个信号都和**你自己**最近 28 天比（不和人群比），所有目标写在一个文件里；每天早上最多点出三件该调整的事（训练、睡眠、饮食各一件），每件都写明依据的数字。每条规则都写在明处，数据不出这台电脑。 |
-| **有意做的取舍** | 不实时同步：要导入一次 Apple 健康的导出包（iPhone 配套 App 是以后的事）。饮食要靠一个会写进 Apple 健康的记录 App，或者一份 CSV。建议是一小组固定、讲得清的规则，不是模型；管的是生活习惯，不是医疗建议。缺的数就是缺，记得少，得到的回答就少，而不是编出来的回答。 |
+| **有意做的取舍** | 不走云、不在后台同步：iPhone App 打开时把 Apple 健康的数据发到你自己的电脑上（家里的网络或 Tailscale）；不装它，也可以导入一次 Apple 健康的导出包。饮食要靠一个会写进 Apple 健康的记录 App，或者一份 CSV。建议是一小组固定、讲得清的规则，不是模型；管的是生活习惯，不是医疗建议。缺的数就是缺，记得少，得到的回答就少，而不是编出来的回答。 |
 
 ### 它跑的闭环
 
@@ -289,11 +319,31 @@ python3 -m healthaio goal list                        # 现在的值、各自从
 python3 -m healthaio goal accept <id>                 # 或 decline <id>；自己设用 set 字段 值
 ```
 
+### Mac App 和 iPhone App
+
+两个配套的小 App 把手动的步骤省掉。两个都在你自己的 Mac 上从这个仓库编出来，除了你自己的电脑什么都不连（另外每天问一次 GitHub 有没有新版本）。
+
+| | 做什么 | 怎么装 |
+|---|---|---|
+| **Mac App**（菜单栏） | 拿着“完全磁盘访问权限”，每 2 小时采一次屏幕使用时间（打开“跨设备共享”后，iPhone 和 iPad 的也在里面）。让看板一直开着。GitHub 上有新版本时弹窗提醒，你点更新就装上。用二维码配对 iPhone，也负责给 iPhone App 续签。 | `mac/build.sh`，然后看 [mac/README.md](mac/README.md) |
+| **iPhone App** | 只读 Apple 健康，每次打开把最近 3 天发到你的电脑；看板是它的一个标签页，发的同时也能看。每天第一次打开时检查签名是不是快到期了（免费 Apple ID 签一次管 7 天）、有没有新版本，有就提醒你。 | 用 Xcode：[ios/README.md](ios/README.md) |
+
+```bash
+python3 -m healthaio serve --lan        # 让配对过的手机连进来（Mac App 会替你开）
+python3 -m healthaio pair               # 给 iPhone App 的 8 位配对码，10 分钟内有效
+python3 -m healthaio collect            # 现在采一次屏幕使用时间（Mac App 每 2 小时自动采）
+python3 -m healthaio update             # GitHub 上有没有新版本，有就装上
+python3 -m healthaio iphone renew       # 给 iPhone App 续签并重新装上
+```
+
+手机和电脑之间怎么传、两边各检查什么：[docs/CAPTURE.md](docs/CAPTURE.md)。
+
 ### 数据只在你的电脑上
 
 - 数据是你指定文件夹里的普通 CSV（[格式](docs/DATA_FORMAT.md)）。导入工具写它们（[每个导入工具怎么工作](docs/IMPORTERS.md)），看板只读。
-- 服务只监听 `127.0.0.1`，不往任何地方发数据。它唯一会写的，是你在目标页设的目标：一行记在 `healthaio.toml` 旁边的
-  `goals.jsonl` 里，而且只接受这个应用自己页面发来的。
+- 服务只监听 `127.0.0.1`。加 `--lan` 后也接受家里的网络和 Tailscale，但只认你配对过的设备：每台设备有自己的令牌，服务器只存令牌的哈希，`healthaio devices revoke` 随时断开一台。手机能发的只有 Apple 健康的样本包，原样存在 `.healthaio/` 里，再写进同样的 CSV。iPhone App 只发“Apple Watch”“iPhone”这样的型号，从不发你给设备起的名字。
+- 页面唯一会写的，是你在目标页设的目标：一行记在 `healthaio.toml` 旁边的 `goals.jsonl` 里，而且只接受这个应用自己页面发来的（这台电脑上的，或者配对过的手机里的面板）。
+- 唯一联网的是每天一次的更新检查：问一次 GitHub API，除了版本号什么都不发。在 healthaio.toml 里写 `[updates] check = false` 就关掉。
 - `build-static`（演示站用的）遇到你自己的数据会拒绝运行，除非你加一个明确表示“我要公开”的参数。
 
 ### 怎么搭的
@@ -316,6 +366,8 @@ Apple 健康、.ics、        一张表一个文件，              今天、运
 python3 -m unittest discover -s tests      # Python 3.9–3.13 都能跑
 python3 -m healthaio page food --demo --today 2026-10-12
 ```
+
+iPhone App 有自己的测试（`xcodebuild test`，见 [ios/README.md](ios/README.md)）；两边读的是同一组示例包 `tests/fixtures/capture/`，协议改了一边，另一边的测试就会失败。
 
 ### 不是医疗建议
 

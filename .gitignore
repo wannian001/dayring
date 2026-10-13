@@ -28,3 +28,6 @@ dist/
 
 # demo-film production notes reference local paths; not published yet
 /video/
+
+# what the app keeps next to healthaio.toml: paired devices, packages from the phone, logs
+.healthaio/

@@ -8,6 +8,12 @@
     python -m healthaio import ...           # bring data in (Apple Health, .ics, Screen Time, any CSV)
     python -m healthaio kit json|export|check|lock  # the design kit: its manifest, a copy for another app, is a copy current
     python -m healthaio goal list|set|propose|accept|decline  # goals beyond healthaio.toml (also set on the Goals page)
+    python -m healthaio serve --lan          # let your paired iPhone in (home network or Tailscale)
+    python -m healthaio pair                 # open a code for the iPhone app;  devices [revoke ID|--all]
+    python -m healthaio collect              # run the automatic importers once (the Mac app does it every few hours)
+    python -m healthaio update [--check]     # is there a newer version on GitHub; install it
+    python -m healthaio iphone status|renew  # re-sign and reinstall the iPhone app (free Apple ID: every 7 days)
+    python -m healthaio status --json        # everything the Mac app shows, in one answer
 """
 import argparse
 import json
@@ -17,6 +23,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import List, Optional
 
+from . import __version__
 from . import config as config_mod
 from . import demo as demo_mod
 from .schema import TABLES, describe_markdown
@@ -47,6 +54,7 @@ def _now(args) -> Optional[datetime]:
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(prog="healthaio", description="A local-first dashboard for your day.")
     parser.add_argument("--config", help="path to healthaio.toml (default: ./healthaio.toml)")
+    parser.add_argument("--version", action="version", version=f"healthaio {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("serve", help="run the dashboard on this computer")
@@ -55,6 +63,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("--now", help="pretend the current time is YYYY-MM-DDTHH:MM")
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8790)
+    p.add_argument("--lan", action="store_true",
+                   help="also answer your home network and Tailscale (paired phones only; see docs/CAPTURE.md)")
 
     p = sub.add_parser("demo", help="write a demo folder you can open and edit")
     p.add_argument("--out", default="healthaio-demo")
@@ -93,6 +103,28 @@ def main(argv: Optional[List[str]] = None) -> int:
     for name in ("accept", "decline"):
         g = goal_sub.add_parser(name, help=f"{name} an open proposal by its id (see `goal list`)")
         g.add_argument("id")
+    p = sub.add_parser("pair", help="open an 8-digit code (10 minutes) for the iPhone app")
+    p.add_argument("--port", type=int, default=8790, help="the port `serve --lan` listens on")
+    p.add_argument("--json", action="store_true")
+    p = sub.add_parser("devices", help="paired phones; `devices revoke ID` or `devices revoke --all` cuts one off")
+    p.add_argument("action", nargs="?", choices=["revoke"])
+    p.add_argument("id", nargs="?")
+    p.add_argument("--all", action="store_true")
+    p.add_argument("--json", action="store_true")
+    p = sub.add_parser("collect", help="run the importers that work by themselves ([collect] sources)")
+    p.add_argument("--json", action="store_true")
+    p = sub.add_parser("status", help="last collection, paired phones, newest data, iPhone app signature, updates")
+    p.add_argument("--port", type=int, default=8790)
+    p.add_argument("--json", action="store_true")
+    p = sub.add_parser("update", help="check GitHub for a newer version and install it")
+    p.add_argument("--check", action="store_true", help="only say whether there is one")
+    p.add_argument("--force", action="store_true", help="ask GitHub now, not the answer from the last 20 hours")
+    p.add_argument("--yes", action="store_true", help="install without asking")
+    p.add_argument("--json", action="store_true")
+    p = sub.add_parser("iphone", help="the iPhone app: when its signature runs out, and renewing it")
+    p.add_argument("action", choices=["status", "renew"])
+    p.add_argument("--device", help="devicectl identifier of the iPhone (default: the paired one)")
+    p.add_argument("--json", action="store_true")
     p = sub.add_parser("page", help="print one page's JSON (for scripts and assistants)")
     p.add_argument("name")
     p.add_argument("param", nargs="?")
@@ -124,16 +156,24 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.command == "import":
         if importers_cli is None:
             sys.exit("importers are not installed")
-        return importers_cli.run(args, _config(args))
+        cfg = _config(args)
+        from .state import write_lock
+        with write_lock(cfg):
+            return importers_cli.run(args, cfg)
+    if args.command == "update":
+        return _update(args)
 
     cfg = _config(args)
     if args.command == "goal":
         from . import goal_log
         return goal_log.run(args, cfg)
+    done = _phone_commands(args, cfg)
+    if done is not None:
+        return done
     if args.command == "serve":
         from .server import serve
         fixed = _now(args)
-        serve(cfg, host=args.host, port=args.port, now=lambda: fixed)
+        serve(cfg, host=args.host, port=args.port, now=lambda: fixed, lan=args.lan)
         return 0
     if args.command == "build-static":
         if not (cfg.demo or args.publish_own):
@@ -159,6 +199,94 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print(f"  line {problem.line}, {problem.column}: {problem.message}")
         return 1 if bad else 0
     return 0
+
+
+def _print(data, as_json: bool, text: str) -> None:
+    print(json.dumps(data, ensure_ascii=False, indent=1, default=str) if as_json else text)
+
+
+def _update(args) -> int:
+    from . import update
+    path = Path(args.config) if args.config else config_mod.find_config(Path.cwd())
+    cfg = config_mod.load(path) if path else None
+    info = update.check(cfg, force=args.force or not args.check)
+    if args.check or not info["update_available"]:
+        state = (f"{info['latest']} is available (you have {info['current']}): {info['url']}" if info["update_available"]
+                 else f"{info['current']} is the newest version" + (f" ({info['reason']})" if info.get("reason") else ""))
+        _print(info, args.json, state)
+        return 0
+    if not args.yes:
+        if args.json or not sys.stdin.isatty():
+            sys.exit("add --yes to install without asking")
+        print(f"Health AIO {info['latest']} is available (you have {info['current']}).\n{info['notes'][:600]}")
+        if input("Install it now? [y/N] ").strip().lower() not in ("y", "yes"):
+            return 0
+    result = update.apply(cfg)
+    lines = [result["message"]]
+    if result["changed"]["mac_app"]:
+        lines.append("The Mac app changed too: run mac/build.sh, then turn Full Disk Access on again for Health AIO.")
+    if result["changed"]["ios_app"]:
+        lines.append("The iPhone app changed too: `healthaio iphone renew` installs the new version.")
+    _print(result, args.json, "\n".join(lines))
+    return 0 if result["ok"] else 2
+
+
+def _phone_commands(args, cfg) -> Optional[int]:
+    """pair, devices, collect, status, iphone; None for any other command."""
+    from . import phone
+    if args.command == "pair":
+        import urllib.request
+        opened = phone.open_code(cfg)
+        urls = [f"http://{a}:{args.port}" for a in phone.local_addresses()]
+        hello = None
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{args.port}/capture/v1/hello", timeout=3) as answer:
+                hello = json.loads(answer.read())
+        except (OSError, ValueError):
+            pass
+        data = {**opened, "urls": urls, "link": phone.pair_link(urls[0], opened["code"]) if urls else None,
+                "server_running": hello is not None, "server_lan": bool(hello and hello.get("lan"))}
+        text = [f"Pairing code: {opened['code']}  (good for 10 minutes)",
+                *(f"  address: {u}" for u in urls), f"  link:    {data['link']}"]
+        if not data["server_lan"]:
+            text.append("Start the dashboard with `healthaio serve --lan` (or turn on \"Let my phone connect\" in the "
+                        "Mac app), so the phone can reach it.")
+        _print(data, args.json, "\n".join(text))
+        return 0
+    if args.command == "devices":
+        if args.action == "revoke":
+            if not (args.id or args.all):
+                sys.exit("say which device (its id from `healthaio devices`) or --all")
+            count = phone.revoke(cfg, args.id, everything=args.all)
+            _print({"ok": True, "revoked": count}, args.json, f"unpaired {count} device(s)")
+            return 0
+        found = phone.devices(cfg)
+        _print({"devices": found}, args.json, "\n".join(f"{d['id']}  {d['name']}  paired {d['paired_at']}  last seen "
+                                                       f"{d['last_seen'] or '-'}" for d in found) or "no paired devices")
+        return 0
+    if args.command == "collect":
+        from .collect import collect
+        result = collect(cfg)
+        _print(result, args.json, "\n".join(f"{s['name']}: {'ok' if s['ok'] else 'failed'}\n  "
+                                            + s["message"].replace("\n", "\n  ") for s in result["sources"]))
+        return 0 if result["ok"] else 2
+    if args.command == "status":
+        from .collect import status
+        data = status(cfg, args.port)
+        _print(data, True, "")  # the summary is for programs; people have the dashboard
+        return 0
+    if args.command == "iphone":
+        from . import iphone
+        if args.action == "status":
+            data = iphone.status(cfg)
+            last = data.get("last") or {}
+            _print(data, args.json, (f"can renew here" if data["can_renew"] else f"cannot renew here: {data['reason']}")
+                   + (f"; signature good until {last.get('expires_at')}" if last.get("expires_at") else ""))
+            return 0
+        result = iphone.renew(cfg, args.device)
+        _print(result, args.json, result["message"] + (f" (until {result['expires_at']})" if result.get("expires_at") else ""))
+        return 0 if result["ok"] else 2
+    return None
 
 
 if __name__ == "__main__":

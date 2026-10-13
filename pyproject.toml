@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "proactive-health-aio"
-version = "0.2.0"
+dynamic = ["version"]
 description = "Proactive health management, all in one, on your own computer: sleep, exercise, food, weight, screens and plans, each compared with your own normal, with what to adjust today."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -28,6 +28,9 @@ healthaio = "healthaio.__main__:main"
 [project.urls]
 Demo = "https://wannian001.github.io/proactive-health-aio/"
 Source = "https://github.com/wannian001/proactive-health-aio"
+
+[tool.setuptools.dynamic]
+version = { attr = "healthaio.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["healthaio*"]
