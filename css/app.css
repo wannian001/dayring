@@ -304,3 +304,136 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 .ex-bar span { flex: none; border-radius: 0; }
 .ex-note { color: var(--ink-2); line-height: 1.35; }
 .ex-day.future .ex-note { color: var(--ink-3); }
+
+/* ---- the reading pages under the menu (Guide, History) ---------------------------------------------------- */
+/* the menu's second list: labelled under the six items on a computer (icons only when folded); on a phone two small
+   links in the top row, so the tab bar keeps the six items of the health loop */
+.side-docs { display: flex; flex-direction: column; gap: 2px; }
+.side-docs .side-label { padding: 0 var(--s-3) var(--s-1); font-size: var(--t-xs); font-weight: 650; color: var(--ink-3); }
+.side-docs a {
+  display: flex; align-items: center; gap: var(--s-3); min-height: 36px; padding: 0 var(--s-3); border-radius: var(--r-md);
+  color: var(--ink-2); font-size: var(--t-sm); font-weight: 550; white-space: nowrap;
+}
+.side-docs a svg { width: 18px; height: 18px; flex: none; }
+.side-docs a:hover { background: var(--surface-2); color: var(--ink); text-decoration: none; }
+.side-docs a[aria-current="page"] { background: var(--accent-soft); color: var(--ink); font-weight: 650; }
+.side-docs a[aria-current="page"] svg { color: var(--accent); }
+@media (min-width: 900px) {
+  body > .side .side-docs { padding-top: var(--s-3); border-top: 1px solid var(--line); }
+  html.side-folded body > .side .side-docs .side-label, html.side-folded body > .side .side-docs a span { display: none; }
+  html.side-folded body > .side .side-docs a { width: 44px; min-height: 44px; justify-content: center; padding: 0; }
+}
+@media (max-width: 899px) {
+  body > .side .side-docs { flex-direction: row; gap: 2px; margin-left: auto; }
+  body > .side .side-docs .side-label { display: none; }
+  body > .side .side-docs a { min-height: 30px; padding: 0 var(--s-2); gap: 5px; font-size: var(--t-xs); }
+  body > .side .side-docs a svg { width: 16px; height: 16px; }
+}
+@media (max-width: 520px) { body > .side .side-docs a span { display: none; } }  /* a narrow phone: the two icons, named by their title */
+
+/* the pages: a reading column with cards, after the design summary page of Ready to Train? */
+.doc { display: grid; gap: var(--s-4); max-width: 1120px; }
+.doc p { margin: 0; }
+.doc-note {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2) var(--s-4);
+  padding: var(--s-3) var(--s-4); border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--line);
+  font-size: var(--t-sm); color: var(--ink-2);
+}
+.doc-note p { max-width: 82ch; }
+.doc-link { border: 0; background: none; padding: 0; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.doc-link:hover { text-decoration: underline; }
+.doc-section { margin: var(--s-4) 0 0; padding-top: var(--s-4); border-top: 1px solid var(--line); font-size: var(--t-xl); font-weight: 700; letter-spacing: -.01em; }
+.doc-section:first-of-type { border-top: 0; padding-top: 0; }
+.doc-h { margin: 0; font-size: var(--t-lg); font-weight: 700; line-height: 1.3; text-wrap: balance; }
+.doc-n { display: inline-block; min-width: 1.5em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.doc-small { font-size: var(--t-sm); color: var(--ink-3); max-width: 90ch; }
+
+/* three cards on what it is */
+.doc-brief { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); align-items: start; }
+@media (max-width: 1180px) { .doc-brief { grid-template-columns: minmax(0, 1fr); } }
+.doc-card { margin: 0; }
+.doc-card h3 { display: flex; align-items: baseline; margin: 0 0 var(--s-2); font-size: var(--t-md); font-weight: 680; }
+.doc-card ul { margin: 0; padding-left: 1.1em; display: grid; gap: var(--s-2); font-size: var(--t-sm); line-height: 1.6; }
+.doc-card li::marker { color: var(--ink-3); }
+.doc-try { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-3); align-items: baseline; margin-top: var(--s-3) !important; font-size: var(--t-sm); }
+.doc-try span { color: var(--ink-3); }
+.doc-try a { font-weight: 600; }
+
+/* the sample brief beside the year axis */
+.doc-glance { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: var(--s-6); align-items: center; margin-top: var(--s-2); }
+@media (max-width: 900px) { .doc-glance { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); } }
+.doc-sample { margin: 0; display: grid; gap: var(--s-2); }
+.doc-sample figcaption { font-size: var(--t-xs); color: var(--ink-3); }
+.doc-bubble {
+  display: grid; gap: 2px; padding: var(--s-3) var(--s-4); border-radius: 16px 16px 16px 4px; background: var(--surface);
+  border: 1px solid var(--line); box-shadow: var(--shadow); font-size: var(--t-sm); line-height: 1.6; overflow-wrap: anywhere;
+}
+.doc-bubble .gap { height: 6px; }
+.doc-bubble .time { justify-self: end; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+/* the year, drawn to real days */
+.doc-axis { display: grid; gap: var(--s-2); min-width: 0; }
+.doc-ticks { position: relative; height: 1.2rem; font-size: var(--t-xs); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.doc-ticks span { position: absolute; top: 0; white-space: nowrap; }
+.doc-ribbon { position: relative; height: 22px; border-radius: 6px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--line); }
+.doc-ribbon .seg { position: absolute; top: 0; bottom: 0; box-shadow: inset -2px 0 0 var(--surface-2); }
+.doc-ribbon .word { background: var(--line-2); }
+.doc-ribbon .web { background: var(--c-focus); min-width: 4px; }
+.doc-ribbon .pause { background: repeating-linear-gradient(135deg, var(--line-2) 0 3px, transparent 3px 7px); }
+.doc-ribbon .step1, .doc-ribbon .step2, .doc-ribbon .step3 { background: var(--c-sleep); }
+.doc-ribbon .step1 { opacity: .45; } .doc-ribbon .step2 { opacity: .72; }
+.doc-marks { position: relative; height: 4.6rem; overflow: hidden; }
+.doc-marks button {
+  position: absolute; top: 0; display: flex; align-items: flex-end; padding: 0 0 0 5px; border: 0; border-left: 1px solid var(--ink-3);
+  background: none; color: var(--ink); font: inherit; font-size: var(--t-xs); font-weight: 600; white-space: nowrap; line-height: 1.2; cursor: pointer;
+}
+.doc-marks button:hover { color: var(--accent); }
+.doc-marks .r1 { height: 1.45rem; } .doc-marks .r2 { height: 2.95rem; } .doc-marks .r3 { height: 4.45rem; }
+
+/* each generation: its name and dates beside wanted → examples → found / changed */
+.doc-gens { display: grid; gap: var(--s-4); margin-top: var(--s-2); }
+.doc-gen { display: grid; grid-template-columns: 10rem minmax(0, 1fr); gap: var(--s-5); scroll-margin-top: var(--s-4); }
+@media (max-width: 720px) { .doc-gen { grid-template-columns: minmax(0, 1fr); gap: var(--s-3); } }
+.doc-meta { display: grid; align-content: start; gap: 2px; font-size: var(--t-xs); color: var(--ink-3); }
+.doc-gen-code { font-size: var(--t-lg); font-weight: 700; color: var(--accent); line-height: 1.3; }
+.doc-body { display: grid; gap: var(--s-3); min-width: 0; }
+.doc-aim { font-size: var(--t-sm); color: var(--ink-2); line-height: 1.65; max-width: 80ch; }
+.doc-aim b { color: var(--ink); }
+.doc-stage { display: grid; gap: var(--s-3); padding-top: var(--s-4); border-top: 1px dashed var(--line-2); }
+.doc-stage:first-of-type { padding-top: var(--s-1); border-top: 0; }
+.doc-stage h3 { margin: 0; font-size: var(--t-md); font-weight: 700; }
+.doc-when { margin-left: var(--s-2); font-size: var(--t-xs); font-weight: 500; color: var(--ink-3); }
+.doc-ex { display: grid; gap: var(--s-2); }
+.doc-ex-head { font-size: var(--t-xs); font-weight: 650; color: var(--ink-3); letter-spacing: .04em; }
+.doc-ex ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
+.doc-ex li, .doc-step { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr); gap: var(--s-3); align-items: baseline; font-size: var(--t-sm); line-height: 1.6; }
+.doc-ex li p, .doc-step p { max-width: 80ch; }
+.doc-ver { font-size: var(--t-xs); font-weight: 600; color: var(--accent); text-align: center; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.doc-pair { display: grid; gap: var(--s-2); padding: var(--s-3) var(--s-4); border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--line); }
+.doc-tag { font-size: var(--t-xs); font-weight: 650; text-align: center; padding: 1px 0; border-radius: 6px; }
+.doc-tag.find { background: var(--line); color: var(--ink); }
+.doc-tag.fix { background: var(--accent-soft); color: var(--accent); }
+
+/* lessons, and what is not done yet */
+.doc-lessons { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); }
+@media (max-width: 860px) { .doc-lessons { grid-template-columns: minmax(0, 1fr); } }
+.doc-lesson { margin: 0; display: grid; gap: var(--s-2); align-content: start; }
+.doc-lesson h3 { display: flex; align-items: baseline; margin: 0; font-size: var(--t-md); font-weight: 680; }
+.doc-lesson p { font-size: var(--t-sm); line-height: 1.6; color: var(--ink-2); }
+.doc-notyet { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); max-width: 90ch; }
+.doc-notyet li { padding-left: var(--s-3); border-left: 3px solid var(--watch); font-size: var(--t-sm); line-height: 1.6; color: var(--ink-2); }
+.doc-notyet b { color: var(--watch-ink); }
+.doc-source { margin-top: var(--s-2) !important; }
+
+/* the guide: numbered steps, commands in a scrolling box */
+.doc-guide { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); align-items: start; }
+@media (max-width: 1000px) { .doc-guide { grid-template-columns: minmax(0, 1fr); } }
+.doc-guide-step { margin: 0; display: grid; gap: var(--s-2); min-width: 0; }
+/* a step's title is the card's first h2: not the kit's small label row (.card > h2), a title read left to right */
+.doc-guide-step > .doc-h { display: flex; align-items: baseline; justify-content: flex-start; gap: 0; margin: 0; font-size: var(--t-md); font-weight: 700; color: var(--ink); letter-spacing: 0; }
+.doc-guide-step p { font-size: var(--t-sm); line-height: 1.65; color: var(--ink-2); max-width: 80ch; }
+.doc-guide-step p b { color: var(--ink); }
+.doc-code {
+  margin: var(--s-1) 0 0; padding: var(--s-3); border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--line);
+  overflow-x: auto; font-family: var(--mono); font-size: var(--t-xs); line-height: 1.7; color: var(--ink);
+}

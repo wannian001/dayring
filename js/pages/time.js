@@ -7,9 +7,9 @@
 // and is left out of its average and normal. Devices at once (each device counting its own minutes) has its
 // own card; its two measures, screens at once (a ratio, kept in hundredths) and the longest stretch on one thing,
 // are candidates of "what changed" like the rest.
-import { bullet, draw, esc, lanes } from "../charts.js?v=a1a20d3f3d";
-import { day, device, dur, getLang, num, shortDay, t, weekdayShort, wtype } from "../i18n.js?v=a1a20d3f3d";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=a1a20d3f3d";
+import { bullet, draw, esc, lanes } from "../charts.js?v=f86d36d39c";
+import { day, device, dur, getLang, num, shortDay, t, weekdayShort, wtype } from "../i18n.js?v=f86d36d39c";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=f86d36d39c";
 
 const ORDER = ["sleep", "exercise", "calendar", "screen"];  // the lanes, in the same order in both lane charts
 const TILES = ["screen", "fun", "focus", "communication", "exercise", "calendar", "sleep", "not_recorded"];  // every candidate has a tile
