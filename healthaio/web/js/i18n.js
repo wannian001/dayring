@@ -857,6 +857,16 @@ Object.assign(DICT.zh, {
   "kitdoc.keptDots": "一串日子画成一排点，每 7 天留一点空：实心 = 做到了，空心圈 = 没做到，短横 = 那天没有记录。",
 });
 
+// ---- the reading pages under the menu (their own words are in pages/guide.js and history-content.js) ----
+Object.assign(DICT.en, {
+  "nav.about": "About this project", "nav.guide": "Guide", "nav.history": "History",
+  "doc.other_lang": "阅读中文版",
+});
+Object.assign(DICT.zh, {
+  "nav.about": "关于这个项目", "nav.guide": "使用说明", "nav.history": "迭代记录",
+  "doc.other_lang": "Read in English",
+});
+
 const WEEKDAY = { en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], zh: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"] };
 const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 

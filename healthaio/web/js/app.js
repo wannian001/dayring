@@ -11,6 +11,8 @@ import drain from "./pages/drain.js";
 import exercise from "./pages/exercise.js";
 import food from "./pages/food.js";
 import goals from "./pages/goals.js";
+import guide from "./pages/guide.js";
+import historyPage from "./pages/history.js";  // not `history`: that would hide window.history (replaceState)
 import kit from "./pages/kit.js";
 import review from "./pages/review.js";
 import sleep from "./pages/sleep.js";
@@ -19,7 +21,7 @@ import today from "./pages/today.js";
 import week from "./pages/week.js";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
-const PAGES = { today, week, body, sleep, exercise, food, time, ai, drain, goals, review, data, kit };
+const PAGES = { today, week, body, sleep, exercise, food, time, ai, drain, goals, review, data, kit, guide, history: historyPage };
 // the menu follows the loop of managing your health: today's state and what to adjust, the body (sleep, exercise,
 // food, weight), behaviour (where the time goes, AI work, drain), the plan (goals, schedule), the review, the data
 const NAV = ["today", "body", "time", "plan", "review", "data"];
@@ -35,6 +37,11 @@ const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === pag
 const ALIAS = { attention: "time", plan: "goals" };  // old links keep working
 // each menu item's glyph (icons.js)
 const NAV_ICON = { today: "sun", body: "heart", time: "walk", plan: "target", review: "list", data: "database" };
+// the reading pages sit under the menu, apart from the health loop: how to use the app, and how the personal
+// system it comes from changed over a year. On a phone they are two small links in the top row, so the tab bar
+// keeps the six items of the loop.
+const DOCS = ["guide", "history"];
+const DOC_ICON = { guide: "communication", history: "clock" };
 const store = {
   get(key) { try { return localStorage.getItem(`healthaio.${key}`); } catch { return null; } },
   set(key, value) { try { localStorage.setItem(`healthaio.${key}`, value); } catch { /* private mode */ } },
@@ -42,7 +49,7 @@ const store = {
 let settings = { title: "Health AIO", locale: "en", demo: false };
 // the kit's charts write their words and numbers with this app's i18n (charts.js imports nothing)
 setFormat({ t, dur, clock, shortDay, measure, toDate, wtype });
-const footer = () => `<footer class="foot"><a href="#kit">${t("kit.link")}</a></footer>`;
+const footer = () => `<footer class="foot">${DOCS.map((p) => `<a href="#${p}">${t(`nav.${p}`)}</a>`).join("")}<a href="#kit">${t("kit.link")}</a></footer>`;
 
 const ICON = {
   logo: `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="var(--c-band)" stroke-width="5"/><path d="M16 3.5a12.5 12.5 0 0 1 11.8 8.3" fill="none" stroke="var(--c-sleep)" stroke-width="5" stroke-linecap="round"/><path d="M28.3 18.5a12.5 12.5 0 0 1-6.6 9.1" fill="none" stroke="var(--c-focus)" stroke-width="5" stroke-linecap="round"/><path d="M17.5 28.4a12.5 12.5 0 0 1-9.7-3.7" fill="none" stroke="var(--c-fun)" stroke-width="5" stroke-linecap="round"/></svg>`,
@@ -77,6 +84,8 @@ function header(active) {
       <button class="side-fold" id="fold" type="button" aria-label="${esc(t("ui.fold"))}" title="${esc(t("ui.fold"))}">${icon("sidebar", 18)}</button>
     </div>
     <nav class="side-nav" aria-label="Pages">${items}</nav>
+    <nav class="side-docs" aria-label="${esc(t("nav.about"))}"><span class="side-label">${t("nav.about")}</span>${DOCS.map((p) =>
+      `<a href="#${p}" title="${esc(t(`nav.${p}`))}" ${p === active ? 'aria-current="page"' : ""}>${icon(DOC_ICON[p], 18)}<span>${t(`nav.${p}`)}</span></a>`).join("")}</nav>
     <div class="side-tools">
       ${settings.demo ? `<span class="demo-badge" title="${esc(t("ui.demo"))}">${t("ui.demo")}</span>` : ""}
       <button class="tool" id="lang" type="button" aria-label="Language">${t("ui.lang")}</button>
