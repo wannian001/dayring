@@ -69,6 +69,7 @@ PHONE_ON_THE_SIDE = [("social", "Instagram", 4), ("social", "Reddit", 3), ("soci
 # the week before deadlines: group chats about the work, open beside it
 CRUNCH_SIDE = [("communication", "WhatsApp", 5), ("communication", "Messages", 1), ("social", "Instagram", 1)]
 AGENT_APPS = ("Claude", "Terminal")  # an agent can run on its own here while Sam is on another device
+EDITOR_AGENT = {"VS Code": 0.7, "RStudio": 0.25}  # how often a session in the editor has an agent working in it
 
 
 def _hm(text: str) -> time:
@@ -329,6 +330,58 @@ class Sam:
                     t += timedelta(minutes=rng.uniform(3, 9) if busy else rng.uniform(5, 14))
         return out
 
+    # ---- AI agents ---------------------------------------------------------------------------
+    def ai(self, sessions: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
+        """Claude Code and Codex for Sam (ai_work, ai_prompts): whenever Sam is in Claude or the terminal on the
+        laptop, and in most coding sessions in VS Code (the agent in the editor), an instruction every few minutes,
+        each followed by a few minutes of the agent working (it keeps going when Sam picks up the phone); now and
+        then a second session at once; some nights a scheduled task."""
+        rng = random.Random(SEED + 13)
+        work: List[Dict] = []
+        prompts: Dict[tuple, float] = {}
+
+        def code(n: int) -> str:
+            return f"demo{n:06d}"
+
+        def stretch(start: datetime, minutes: float, tool: str, session: str, who: str) -> None:
+            end = start + timedelta(minutes=minutes)
+            calls = max(2.0, round(minutes * rng.uniform(2, 5)))
+            work.append({"start": start.replace(second=0, microsecond=0), "end": (end + timedelta(seconds=59)).replace(second=0, microsecond=0),
+                         "tool": tool, "session": session, "started_by": who, "minutes": round(minutes, 2),
+                         "calls": calls, "output_tokens": round(calls * rng.uniform(300, 1200))})
+
+        n = 0
+        for s in sessions:
+            if s["device"] != "laptop" or not (s["app"] in AGENT_APPS or (s["app"] in EDITOR_AGENT and rng.random() < EDITOR_AGENT[s["app"]])):
+                continue
+            length = (s["end"] - s["start"]).total_seconds() / 60
+            if length < 4:
+                continue
+            n += 1
+            tool = "claude_code" if s["app"] == "Claude" or rng.random() < 0.7 else "codex"
+            session = code(n)
+            t = s["start"] + timedelta(minutes=rng.uniform(0.3, 1.5))
+            while t < s["end"]:
+                key = (t.replace(second=0, microsecond=0), tool, session)
+                prompts[key] = prompts.get(key, 0) + 1
+                busy = rng.uniform(3, 13)
+                stretch(t + timedelta(seconds=20), busy, tool, session, "you")
+                t += timedelta(minutes=busy + rng.uniform(1, 6))  # reading what it did, then the next ask
+            if rng.random() < 0.25:  # a second session at once: the other agent on another part of the work
+                n += 1
+                other = "codex" if tool == "claude_code" else "claude_code"
+                start = s["start"] + timedelta(minutes=rng.uniform(1, 4))
+                prompts[(start.replace(second=0, microsecond=0), other, code(n))] = 1
+                stretch(start + timedelta(seconds=30), min(length, rng.uniform(8, 30)), other, code(n), "you")
+        for k in range(SCREEN_DAYS - 1, 0, -1):  # some nights a scheduled task (a nightly summary)
+            if rng.random() < 0.45:
+                n += 1
+                night = datetime.combine(self.today - timedelta(days=k), time(2, 10)) + timedelta(minutes=rng.uniform(0, 20))
+                stretch(night, rng.uniform(5, 14), "claude_code", code(n), "scheduled")
+        rows = [{"time": t, "tool": tool, "session": session, "started_by": "you", "count": float(c)}
+                for (t, tool, session), c in prompts.items() if t <= self.now]
+        return [w for w in work if w["end"] <= self.now + timedelta(minutes=1) or w["start"] < self.now], rows
+
 
 def demo_config(today: date) -> str:
     shift = today - timedelta(days=12)
@@ -385,7 +438,11 @@ def generate(out: Path, today: Optional[date] = None, now: Optional[datetime] = 
     write_table(data, "events", events)
     write_table(data, "deadlines", sam.deadlines())
     write_table(data, "workouts", sam.workouts)
-    write_table(data, "screen_sessions", sam.screen(body, events))
+    sessions = sam.screen(body, events)
+    write_table(data, "screen_sessions", sessions)
+    work, prompts = sam.ai(sessions)
+    write_table(data, "ai_work", work)
+    write_table(data, "ai_prompts", prompts)
     config = out / "dayring.toml"
     config.write_text(demo_config(today), encoding="utf-8")
     return config

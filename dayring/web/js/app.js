@@ -4,6 +4,7 @@ import { get, isStatic } from "./api.js";
 import { installTooltip, esc, setFormat } from "./charts.js";
 import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js";
 import { icon } from "./icons.js";
+import ai from "./pages/ai.js";
 import body from "./pages/body.js";
 import data from "./pages/data.js";
 import drain from "./pages/drain.js";
@@ -15,10 +16,10 @@ import today from "./pages/today.js";
 import week from "./pages/week.js";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
-const PAGES = { today, week, body, sleep, time, drain, review, data, kit };
+const PAGES = { today, week, body, sleep, time, ai, drain, review, data, kit };
 const NAV = ["today", "week", "body", "time", "drain", "review", "data"];
 // a menu item that holds several pages shows a small switch above the page title
-const GROUPS = { body: [["body", "nav.weight"], ["sleep", "nav.sleep_tab"]] };
+const GROUPS = { body: [["body", "nav.weight"], ["sleep", "nav.sleep_tab"]], time: [["time", "nav.time_tab"], ["ai", "nav.ai"]] };
 const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) => p === page)) || page;
 // a page inside a group is titled by its own tab (Weight, Sleep), not by the group
 const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;

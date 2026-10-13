@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import Any, Callable, Dict, List, Optional
 
 from ..context import Context
-from . import body, data, drain, review, sleep, time, today, week
+from . import ai, body, data, drain, review, sleep, time, today, week
 
 PAGES: Dict[str, Callable[..., Dict[str, Any]]] = {
     "today": lambda ctx, param=None: today.build(ctx, day=param),
@@ -11,6 +11,7 @@ PAGES: Dict[str, Callable[..., Dict[str, Any]]] = {
     "body": lambda ctx, param=None: body.build(ctx, day=param),
     "sleep": lambda ctx, param=None: sleep.build(ctx, day=param),
     "time": lambda ctx, param=None: time.build(ctx, day=param),
+    "ai": lambda ctx, param=None: ai.build(ctx, day=param),
     "drain": lambda ctx, param=None: drain.build(ctx, day=param),
     "review": lambda ctx, param=None: review.build(ctx, week=param),
     "data": lambda ctx, param=None: data.build(ctx, day=param),
@@ -30,4 +31,6 @@ def static_params(name: str, ctx: Context) -> List[Optional[str]]:
         return [None] + [(ctx.today - timedelta(days=k)).isoformat() for k in range(1, 30)]
     if name == "time":
         return time.static_params(ctx)
+    if name == "ai":
+        return ai.static_params(ctx)
     return [None]

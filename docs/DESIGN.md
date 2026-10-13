@@ -133,9 +133,22 @@ matters, and says when the evidence is softer (entertainment).
 - The week stack-up check (at least 3 nights under 7 hours and at least 3 training days) moved here from Today;
   Today keeps a two-line summary that links to this page.
 
+## The AI work page
+
+A page of the Time item: how much AI agents worked for you, on how many instructions, next to your own focused
+work. The same 7 whole days and the same "your normal" as the Time page. Four numbers and two ratios: AI work a
+day (sessions you started; scheduled tasks and scripts on their own), instructions a day, AI work per instruction
+and AI work over your focused work (both from the 7 days' totals). Usage is input, not output: an agent going in
+circles adds minutes too, so the AI numbers keep no better or worse colour; only your focused work keeps the Time
+page's direction. AI work is drawn in focus blue stripes, "work, done for you", instead of a sixth data colour:
+no further hue passes the colour-vision checks against the five already in use. Below the tiles: AI and your
+day by the hour (sleep, screens, AI working, your instructions, one 0–24 axis), the last 30 days, and what came
+out 7 days at a time (deadlines marked submitted or done, with the focused work and AI work of those days
+divided among them).
+
 ## Menu
 
-Today · Week · Body (Weight, Sleep) · Time · Drain · Review · Data, in a sidebar on the left from 900 px (the
+Today · Week · Body (Weight, Sleep) · Time (Where it went, AI work) · Drain · Review · Data, in a sidebar on the left from 900 px (the
 browser already takes height at the top and bottom, so the menu takes width instead). The sidebar folds to a 64 px
 column of icons with the button at its top; folded, the logo unfolds it, and the choice is remembered in this
 browser. A menu item that holds more than one page lists its pages under it while one of them is open; folded or

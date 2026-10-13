@@ -27,6 +27,7 @@ weeks, how am I doing today?
 | **Body** · Weight | Weight as a 7-day average inside the corridor your plan allows, the weekly rate, and the long view. |
 | **Body** · Sleep | 21 nights on one axis, last week against the week before, and an optional wake-time plan that moves the alarm earlier one step after each on-time morning. |
 | **Time** | Where did the time go, and what changed? Sleep, workouts, calendar blocks and screens (phone, tablet and laptop counted once when they overlap), each measured from its own record and compared with your normal (a day with the middle half of the 28 days before it, the 7 days with your usual 7-day averages). The top names the biggest change, counted only when it is clearly outside your normal (say, more entertainment & social), not the biggest activity; each day gets an icon for its own change, or a check when it was a usual day, plus its screen and exercise minutes. Time no record covers is shown as not recorded. By hour, by app, over 30 days. **Devices at once** counts every device on its own instead: device time, screens at once (device time over clock time; 1.3× means using 1.3 screens at a time on average), the longest stretch on one thing, and each device by hour. An AI agent left working on the laptop while you are on your phone is not counted as you. Both can be named as what changed. |
+| **Time** · AI work | How much did AI agents work for you, on how many instructions, next to your own focused work? Claude Code and Codex logs on this computer (times and counts only, never what was said): AI work a day, instructions, AI work per instruction and AI work over your own focus, each against your normal; AI and your day by the hour; and what came out, 7 days at a time (deadlines you marked done, and the focus and AI work each took). Usage is input, not output, so the AI numbers are never coloured better or worse. |
 | **Drain** | What has been quietly wearing you down over the last 7 days? Seven signals (resting heart rate, HRV, the time you fall asleep, sleep-timing spread, screens in the hour before sleep, entertainment & social, app switching), each against your normal and, where you set one, your plan, plus whether short nights and hard training stacked up. No total score. |
 | **Review** | One week of facts next to the four weeks before it. No scores, no judging. |
 | **Data** | What arrived each day for 90 days, which files have unreadable rows, how to import more. |
@@ -42,6 +43,10 @@ weeks, how am I doing today?
 <p>
   <img src="docs/images/drain.png" width="49%" alt="Drain page, light mode">
   <img src="docs/images/drain-zh.png" width="49%" alt="Drain page in Chinese, dark mode">
+</p>
+<p>
+  <img src="docs/images/ai.png" width="49%" alt="AI work page, light mode">
+  <img src="docs/images/ai-zh.png" width="49%" alt="AI work page in Chinese, dark mode">
 </p>
 
 English and Chinese, light and dark (it follows your system), phone and desktop. On a computer the menu is a sidebar on the left that folds to a column of icons; on a phone it is a tab bar at the bottom.
@@ -86,6 +91,7 @@ cp examples/dayring.example.toml dayring.toml     # timezone, plans, devices
 python3 -m dayring import apple-health ~/Downloads/export.zip
 python3 -m dayring import ics ~/Downloads/timetable.ics --kind class
 python3 -m dayring import macos-screentime        # macOS only, experimental
+python3 -m dayring import ai-logs                 # Claude Code and Codex: times and counts only
 python3 -m dayring check                           # which rows could not be read
 python3 -m dayring serve
 ```
@@ -155,6 +161,7 @@ my real watch, phone and laptop data; it takes its look from the design kit here
 | **身体** · 体重 | 体重 7 天平均是不是在计划允许的走廊里、每周降多少、长期走势。 |
 | **身体** · 作息 | 21 晚画在同一根轴上，这周和上周比；可选的起床前移计划：每按时起一天，闹钟往前挪一步。 |
 | **时间** | 时间都去哪了，和平常比变了什么？睡眠、训练、日程和屏幕（手机、平板、电脑同一时刻只算一次）各按自己的记录算，各自和你的平常比（单独一天和它之前 28 天的中间一半比，这 7 天和你平常的 7 天平均比）。最上面写的是明显超出平常的变化里最大的那一项（比如娱乐社交多了），而不是占得最多的那一项；每天一个图标标出当天的变化，平常的一天打个勾，下面写当天的屏幕时间和运动分钟。哪项记录都没覆盖的时间写成“没有记录”。按小时、按应用、最近 30 天。**几台同时用**则是每台设备各算各的：几台加起来的时间、叠加倍数（几台加起来 ÷ 钟表时间，1.3 倍就是平均同时用着 1.3 块屏幕）、最长一段只做一件事，以及每台设备按小时的分布。电脑上 AI 代理自己在干活、你在用手机的时间，不算成你的。这两项也会被写成“变了什么”。 |
+| **时间** · AI 干活量 | AI 代理替你干了多少、你下了多少指令，和你自己专注做事放在一起看。读这台电脑上 Claude Code 和 Codex 的日志（只读时刻和条数，绝不读说了什么）：每天 AI 工时、指令条数、每条指令换来的工时、AI 对你自己专注的倍数，各和你的平常比；AI 和你的一天按小时排开；再按每 7 天看做成了什么（你标了完成的截止事项）、每件花了多少专注和 AI 工时。用量是投入不是产出，所以 AI 的几项不分好坏。 |
 | **消耗** | 最近 7 天哪些东西在悄悄耗你？七个信号（静息心率、HRV、入睡时刻、作息波动、睡前一小时屏幕、娱乐和社交、应用切换），各自跟你的平常比，定了计划的再跟计划比；另外看这一周睡眠不足和高强度训练有没有叠在一起。不打总分。 |
 | **复盘** | 一周的事实和之前四周并排。不打分，不评价。 |
 | **数据** | 90 天里每天到了什么数据、哪些文件有读不出的行、怎么继续导入。 |
@@ -166,6 +173,10 @@ my real watch, phone and laptop data; it takes its look from the design kit here
 <p>
   <img src="docs/images/drain-zh.png" width="49%" alt="消耗页，深色">
   <img src="docs/images/today-dark.png" width="49%" alt="今天页，英文，深色">
+</p>
+<p>
+  <img src="docs/images/ai-zh.png" width="49%" alt="AI 干活量页，深色">
+  <img src="docs/images/ai.png" width="49%" alt="AI 干活量页，英文，浅色">
 </p>
 
 界面中英双语，浅色和深色（默认跟随系统），手机和电脑都能用。电脑上菜单是左边的侧栏，能收成一列图标；手机上是底部的标签栏。
@@ -198,6 +209,7 @@ cp examples/dayring.example.toml dayring.toml     # 时区、计划、设备
 python3 -m dayring import apple-health ~/Downloads/export.zip
 python3 -m dayring import ics ~/Downloads/timetable.ics --kind class
 python3 -m dayring import macos-screentime        # 只限 macOS，试验性
+python3 -m dayring import ai-logs                 # Claude Code 和 Codex：只读时刻和条数
 python3 -m dayring check                           # 看哪些行读不出
 python3 -m dayring serve
 ```

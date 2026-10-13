@@ -112,6 +112,8 @@ class Table:
 SCREEN_CATEGORIES = ("work", "learning", "communication", "entertainment", "social", "other")
 EVENT_KINDS = ("class", "work", "training", "personal", "other")
 DEADLINE_STATUS = ("todo", "submitted", "done")
+AI_TOOLS = ("claude_code", "codex", "other")
+AI_STARTED_BY = ("you", "scheduled", "script")
 
 TABLES: Dict[str, Table] = {t.name: t for t in (
     Table(
@@ -210,6 +212,41 @@ TABLES: Dict[str, Table] = {t.name: t for t in (
             Column("weight_pct", "number", "Share of the course grade, percent. Empty if it is not graded.", low=0, high=100),
             Column("status", "text", "Where it stands.", choices=DEADLINE_STATUS),
             Column("note", "text", "Format, length, group size, anything you want to see next to it."),
+        ),
+    ),
+    Table(
+        name="ai_work",
+        doc="Stretches when an AI coding agent was working for you: model calls of one session no more than "
+            "5 minutes apart. Several sessions at once each count, like several people working. Only times, "
+            "counts and model token totals; never what was said. A tool busy for over 5 minutes between two "
+            "calls is missed, so it is a lower bound.",
+        key=("start", "tool", "session"),
+        interval=("start", "end"),
+        sources=("Claude Code and Codex logs on this computer (dayring import ai-logs)", "any CSV with these columns"),
+        columns=(
+            Column("start", "datetime", "First call of the stretch (local time, rounded down to the minute).", required=True),
+            Column("end", "datetime", "Last call of the stretch (local time, rounded up to the minute).", required=True),
+            Column("tool", "text", "Which agent.", required=True, choices=AI_TOOLS),
+            Column("session", "text", "A short code for the session (a hash, never the tool's own id).", required=True),
+            Column("started_by", "text", "Who started the session: you, a scheduled task or a script "
+                   "(claude -p, codex exec). Only yours count as your AI work.", required=True, choices=AI_STARTED_BY),
+            Column("minutes", "number", "Minutes of work inside the stretch (exact; start and end are rounded).",
+                   required=True, low=0),
+            Column("calls", "number", "Model calls in the stretch.", low=0),
+            Column("output_tokens", "number", "Tokens the model wrote in the stretch.", low=0),
+        ),
+    ),
+    Table(
+        name="ai_prompts",
+        doc="The instructions you typed to an AI coding agent, counted per minute. Only the time; never the text.",
+        key=("time", "tool", "session"),
+        sources=("Claude Code and Codex logs on this computer (dayring import ai-logs)", "any CSV with these columns"),
+        columns=(
+            Column("time", "datetime", "The minute (local time).", required=True),
+            Column("tool", "text", "Which agent.", required=True, choices=AI_TOOLS),
+            Column("session", "text", "A short code for the session (a hash, never the tool's own id).", required=True),
+            Column("started_by", "text", "Who started the session.", required=True, choices=AI_STARTED_BY),
+            Column("count", "number", "Instructions in that minute.", required=True, low=1),
         ),
     ),
 )}

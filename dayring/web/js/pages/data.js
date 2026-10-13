@@ -31,6 +31,7 @@ export default {
           <pre class="code">python -m dayring import apple-health export.zip
 python -m dayring import ics timetable.ics --kind class
 python -m dayring import macos-screentime
+python -m dayring import ai-logs
 python -m dayring import csv deadlines my.csv \\
   --map "Due=due,Task=title,Course=group"
 python -m dayring check</pre>

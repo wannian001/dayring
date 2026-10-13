@@ -150,7 +150,7 @@ Each of these is shown in the gallery. Components (kit.css): `.sr`, `.top`, `.br
 | `RING_CATS` (js/charts.js) | The screen groups of the ring, inside out: [key, the categories it adds up, colour]. |
 | `ICON_KEYS` (js/icons.js) | The names icon() knows, in drawing order. |
 | `icon(key, size = 20)` (js/icons.js) | The icon for key at size px (an unknown key draws the dashed clock of "not recorded"). |
-| `COLOR` (js/icons.js) | The colour each icon is drawn in: its data colour, ink-3 for not recorded, ink-2 for the check and the two devices-at-once measures; the menu glyphs take the text colour. |
+| `COLOR` (js/icons.js) | The colour each icon is drawn in: its data colour (ai: focus blue, work done for you), ink-3 for not recorded, ink-2 for the check and the two devices-at-once measures; the menu glyphs take the text colour. |
 | `STATE_ICON` (js/icons.js) | The 12px glyphs inside a state chip: good = a tick, bad = an exclamation mark. |
 
 ### Using the kit in another app
@@ -195,6 +195,7 @@ changed files under a version that is not newer.
 
 | version | date | change |
 |---|---|---|
+| 1.3.0 | 2026-10-13 | `lanes` rows take `fmt` (a row's values in its own unit, such as a count of instructions); `.legend .key i.hatch` takes its stripes from `color` (ink unless set), so a hatch part in another colour has a matching key; icon `ai` (focus blue: AI agents working for you, the AI work page). AI work is drawn as focus blue stripes rather than a new data colour: the five data hues leave no step that passes the colour-vision checks against all of them |
 | 1.2.0 | 2026-10-13 | `.side`: the menu as a left sidebar from 900px that folds to a 64px icon rail (`html.side-folded`) and a bottom tab bar below that (`.top` and `.nav` stay for apps with a top bar); with a sidebar open, `.subnav` hides (its pages are listed in the sidebar); `lanes` parts take `{ hatch: true }` (diagonal stripes of the part's colour, keyed by `.legend .key i.hatch`) and a row's stacked parts never run past its top; icons `ratio` and `single` (the Time page's devices at once) and the menu glyphs `sun`, `heart`, `clock`, `battery`, `list`, `database`, `sidebar` |
 | 1.1.0 | 2026-10-13 | `formatDuration` (the default `unitFmt` of `stackedColumns` and `lanes`) and `stackedColumns`' `minutes` option (minutes tick on round hours: 0 / 2h / 4h, not 3h 20m); `dayRing` defaults to the exported `RING_CATS`; `setFormat()` keeps the English default for a word the app's `t()` lacks; `stackedColumns` names its limit in a key under the axis instead of over the columns; the labels of `timeChart`'s reference lines and `ladderChart`'s goal go over the marks with a halo; `blockColumns`, `stackedColumns` and `ladderChart` leave out labels evenly when neighbours would run into each other, and keep the first and last inside the chart; `sleepWindows` puts its hour labels 2, 4 or 6 hours apart, whichever leaves room; `.stepper` pills never break inside (the row wraps); kit.css spacing written with the space tokens (no pixel changes) |
 | 1.0.0 | 2026-10-13 | First kit: tokens.css (with `--halo` and `--on-watch` added), kit.css split out of app.css, charts.js without the i18n.js import (`setFormat()`), `rangeStrip`, `trendLine`, `legendKey` and `blockColumns` moved in from the Drain and Week pages, `toneColor`, `STATE_ICON` and `ICON_KEYS` |
@@ -317,7 +318,7 @@ dayring 身兼两职：它是一个本地优先看板的公开展示，也是一
 | `RING_CATS` (js/charts.js) | 环上屏幕时间的分组，从里往外：[键、合并的类别、颜色]。 |
 | `ICON_KEYS` (js/icons.js) | icon() 认得的名字，按画的顺序。 |
 | `icon(key, size = 20)` (js/icons.js) | 画 size 像素大小的 key 图标（不认得的 key 画“没有记录”的虚线钟）。 |
-| `COLOR` (js/icons.js) | 每个图标的颜色：它的数据颜色，“没有记录”用 ink-3，勾和“几台同时用”的两项用 ink-2；菜单图标跟文字颜色。 |
+| `COLOR` (js/icons.js) | 每个图标的颜色：它的数据颜色（ai 用专注蓝：替你做的事），“没有记录”用 ink-3，勾和“几台同时用”的两项用 ink-2；菜单图标跟文字颜色。 |
 | `STATE_ICON` (js/icons.js) | 状态标签里的 12 像素小图：good = 勾，bad = 感叹号。 |
 
 ### 用到别的应用里
@@ -337,6 +338,7 @@ dayring 身兼两职：它是一个本地优先看板的公开展示，也是一
 
 | 版本 | 日期 | 改了什么 |
 |---|---|---|
+| 1.3.0 | 2026-10-13 | `lanes` 的行可以带 `fmt`（这一行的值用自己的单位写，比如指令条数）；`.legend .key i.hatch` 的斜纹改用 `color`（默认墨色），别的颜色的 hatch 部分也有对得上的图例；新图标 `ai`（专注蓝：替你干活的 AI 代理，AI 干活量页）。AI 工时画成专注蓝斜纹，而不是新加一种数据颜色：现有五种数据色之外，已经找不到跟它们都能通过色盲校验的颜色 |
 | 1.2.0 | 2026-10-13 | 新增 `.side`：900 像素以上是左侧栏，能收成 64 像素的图标条（`html.side-folded`），更窄时是底部标签栏（`.top` 和 `.nav` 留给用顶栏的应用）；有侧栏时 `.subnav` 隐藏（它的几页已经列在侧栏里）；`lanes` 的部分可以带 `{ hatch: true }`（用这部分的颜色画斜纹，图例是 `.legend .key i.hatch`），一行里叠起来的部分不再超出这一行的顶；新图标 `ratio`、`single`（时间页的“几台同时用”）和菜单图标 `sun`、`heart`、`clock`、`battery`、`list`、`database`、`sidebar` |
 | 1.1.0 | 2026-10-13 | 新增 `formatDuration`（`stackedColumns` 和 `lanes` 的 `unitFmt` 默认用它）和 `stackedColumns` 的 `minutes` 选项（分钟按整点的小时标刻度：0 / 2h / 4h，不再是 3h 20m）；`dayRing` 默认用导出的 `RING_CATS`；应用的 `t()` 不认得的词，`setFormat()` 之后照写英文默认值；`stackedColumns` 的上限名字写在坐标轴下面的图例里，不再压在柱子上；`timeChart` 参考线和 `ladderChart` 目标的文字带一圈底色、压在标记上面；`blockColumns`、`stackedColumns` 和 `ladderChart` 相邻标签会撞在一起时均匀地省掉一些，头尾的标签不出图；`sleepWindows` 的整点标签按放得下的空间隔 2、4 或 6 小时；`.stepper` 的胶囊不在中间断行（整排换行）；kit.css 的间距改用间距变量（像素不变） |
 | 1.0.0 | 2026-10-13 | 第一版：tokens.css（新增 `--halo` 和 `--on-watch`），从 app.css 拆出 kit.css，charts.js 不再导入 i18n.js（改用 `setFormat()`），把消耗页和本周页里的 `rangeStrip`、`trendLine`、`legendKey`、`blockColumns` 搬进来，新增 `toneColor`、`STATE_ICON`、`ICON_KEYS` |

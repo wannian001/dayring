@@ -213,10 +213,10 @@ main { max-width: 1320px; margin: 0 auto; padding: var(--s-6) var(--s-6) var(--s
 /* @component .dot An 8px round colour swatch, coloured inline. */
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
 
-/* @component .legend A wrapping row of .key items; .key i is a 10px swatch coloured inline, .key i.hatch the stripes of a lanes() hatch part (legendKey() draws mark-shaped keys). */
+/* @component .legend A wrapping row of .key items; .key i is a 10px swatch coloured inline, .key i.hatch the stripes of a lanes() hatch part in its color (ink unless set) (legendKey() draws mark-shaped keys). */
 .key { display: inline-flex; align-items: center; gap: 6px; font-size: var(--t-xs); color: var(--ink-2); }
 .key i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
-.key i.hatch { background: repeating-linear-gradient(-45deg, var(--ink) 0 1.4px, transparent 1.4px 3.6px); box-shadow: inset 0 0 0 .8px var(--ink); }
+.key i.hatch { color: var(--ink); background: repeating-linear-gradient(-45deg, currentColor 0 1.4px, transparent 1.4px 3.6px); box-shadow: inset 0 0 0 .8px currentColor; }
 .legend { display: flex; gap: var(--s-4); flex-wrap: wrap; }
 
 /* @component .ring The box for dayRing(): square, 360px at most, centred over its legend in a .ring-wrap. */

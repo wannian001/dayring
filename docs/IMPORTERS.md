@@ -9,6 +9,7 @@ into your data directory (the `data_dir` in `dayring.toml`). Nothing is uploaded
 | `dayring import apple-health PATH` | Apple Health `export.zip`, `export.xml` or the unzipped folder | `body_daily.csv`, `workouts.csv` |
 | `dayring import ics PATH [--kind K]` | any iCalendar `.ics` file | `events.csv` |
 | `dayring import macos-screentime [--days N]` | macOS Screen Time data on this Mac (experimental) | `screen_sessions.csv` |
+| `dayring import ai-logs [--days N]` | Claude Code and Codex logs on this computer (times and counts only) | `ai_work.csv`, `ai_prompts.csv` |
 | `dayring import csv TABLE PATH --map ...` | any CSV with your own column names | any table |
 
 Each command prints how many rows it imported, their date range, the file it wrote and any
@@ -264,6 +265,53 @@ are replaced. Older rows (which Biome may no longer have) and rows of other devi
 - Device kinds are inferred from Biome's device list; an old or unknown device is `other`.
 - Older Macs that store the stream in the previous file format (SEGB v1) are reported, not read.
 - Times use your configured timezone, also for days you spent elsewhere.
+
+---
+
+## Claude Code and Codex (AI agents)
+
+```sh
+python -m dayring import ai-logs                     # everything the logs hold
+python -m dayring import ai-logs --days 30
+python -m dayring import ai-logs --claude-dir ~/other/.claude/projects --codex-dir ~/other/.codex/sessions
+```
+
+This reads the logs the two coding agents keep on this computer, read-only: Claude Code in
+`~/.claude/projects/` (the terminal and the desktop app's Code tab both write there) and Codex in
+`~/.codex/sessions/` and `~/.codex/archived_sessions/`. It feeds the **AI work** page (under Time).
+
+### What it keeps, and what it never reads
+
+Only times, the tool, a hashed session code, who started the session, the number of model calls
+and the tokens the model wrote. **Never** the text of an instruction or a reply, file contents,
+commands, paths or project names. Chats on claude.ai or in the ChatGPT app leave no log on this
+computer and are not counted.
+
+### How the numbers are made
+
+- **AI work.** Within one session, two model calls no more than 5 minutes apart mean the agent was
+  working in between; a longer gap is the agent waiting for you. Each stretch of such calls is one
+  row of `ai_work.csv` with its exact working minutes; `start` and `end` are rounded outward to the
+  minute. A subagent's calls count into its parent session. Several sessions at once each count,
+  like several people working, so an hour can hold more than 60 minutes of AI work. A tool that
+  runs for more than 5 minutes between two calls is missed: AI work is a lower bound.
+- **Who started it.** A Claude Code session whose first prompt is a scheduled task is `scheduled`;
+  one run by `claude -p` is `script`, and so is `codex exec`. The rest are `you`. Only yours count
+  as your AI work on the page; the others are shown on their own.
+- **Instructions** (`ai_prompts.csv`, counted per minute). Claude Code: a message marked as typed by
+  a person (not a tool result, a reminder or a subagent's brief). Codex: the start of each turn.
+- A model call split over several log records counts once.
+
+### Re-importing
+
+For each tool, existing rows from the first stretch (or instruction) this import saw onward are
+replaced. Claude Code keeps about 30 days of logs, so import every few weeks: older rows stay in the
+CSV after the logs are gone.
+
+### Limitations
+
+- Only these two agents. Others can be written in the same two tables with `dayring import csv`.
+- The log formats are the tools' own and undocumented; a tool update may change them.
 
 ---
 

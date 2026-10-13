@@ -256,3 +256,10 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 .stack-hours-title { margin: var(--s-5) 0 var(--s-2); flex-wrap: wrap; row-gap: 6px; }
 /* the gallery's sample of the sidebar: a framed column as wide as the real one */
 .kit-side { max-width: 232px; padding: var(--s-4) var(--s-3); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+
+/* ---- ai: five tiles: one row when there is room, else two columns with the last one wide, one on phones ---- */
+.act-tiles.ai-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.act-tiles.ai-tiles .ai-tile:last-child { grid-column: span 2; }
+@media (min-width: 1280px) { .act-tiles.ai-tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); } .act-tiles.ai-tiles .ai-tile:last-child { grid-column: auto; } }
+@media (max-width: 660px) { .act-tiles.ai-tiles { grid-template-columns: minmax(0, 1fr); } .act-tiles.ai-tiles .ai-tile:last-child { grid-column: auto; } }
+.act-tiles.ai-tiles .act-tile .label { flex-direction: row; flex-wrap: wrap; align-items: flex-start; row-gap: 4px; }

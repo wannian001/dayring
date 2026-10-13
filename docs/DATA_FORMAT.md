@@ -109,3 +109,34 @@ Key: `due`, `title`. Typical sources: typed by hand; a course or project tracker
 | `status` | text |  | Where it stands. One of: `todo`, `submitted`, `done`. |
 | `note` | text |  | Format, length, group size, anything you want to see next to it. |
 
+## `ai_work.csv`
+
+Stretches when an AI coding agent was working for you: model calls of one session no more than 5 minutes apart. Several sessions at once each count, like several people working. Only times, counts and model token totals; never what was said. A tool busy for over 5 minutes between two calls is missed, so it is a lower bound.
+
+Key: `start`, `tool`, `session`. Typical sources: Claude Code and Codex logs on this computer (dayring import ai-logs); any CSV with these columns.
+
+| column | type | required | meaning |
+|---|---|---|---|
+| `start` | datetime | yes | First call of the stretch (local time, rounded down to the minute). |
+| `end` | datetime | yes | Last call of the stretch (local time, rounded up to the minute). |
+| `tool` | text | yes | Which agent. One of: `claude_code`, `codex`, `other`. |
+| `session` | text | yes | A short code for the session (a hash, never the tool's own id). |
+| `started_by` | text | yes | Who started the session: you, a scheduled task or a script (claude -p, codex exec). Only yours count as your AI work. One of: `you`, `scheduled`, `script`. |
+| `minutes` | number | yes | Minutes of work inside the stretch (exact; start and end are rounded). |
+| `calls` | number |  | Model calls in the stretch. |
+| `output_tokens` | number |  | Tokens the model wrote in the stretch. |
+
+## `ai_prompts.csv`
+
+The instructions you typed to an AI coding agent, counted per minute. Only the time; never the text.
+
+Key: `time`, `tool`, `session`. Typical sources: Claude Code and Codex logs on this computer (dayring import ai-logs); any CSV with these columns.
+
+| column | type | required | meaning |
+|---|---|---|---|
+| `time` | datetime | yes | The minute (local time). |
+| `tool` | text | yes | Which agent. One of: `claude_code`, `codex`, `other`. |
+| `session` | text | yes | A short code for the session (a hash, never the tool's own id). |
+| `started_by` | text | yes | Who started the session. One of: `you`, `scheduled`, `script`. |
+| `count` | number | yes | Instructions in that minute. |
+
