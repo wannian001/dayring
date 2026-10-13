@@ -18,6 +18,7 @@ import re
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -689,6 +690,77 @@ class DemoTimePage(unittest.TestCase):
             if p["next"]:
                 with self.subTest(param=param):
                     self.assertIn(p["next"], rendered, f"#time/{p['next']} is not pre-rendered")
+
+    def test_trend_card_covers_the_days_up_to_the_shown_day(self):
+        # stimulation and focus, averaged: TREND_DAYS consecutive days ending on the page's last day, each
+        # 7-day average over the days in it with screen time, and the 28-day levels over the same values
+        series = time_page.trend_series(Context(self.cfg, now=NOW))
+        for param in (None, "2026-09-27"):
+            p = self.page(param)
+            tr = p["trend"]
+            with self.subTest(param=param):
+                self.assertEqual(tr["to"], p["day"])
+                self.assertEqual(sorted(tr["series"]), sorted(time_page.TREND_KEYS))
+                for key, s in tr["series"].items():
+                    values = series[key]
+                    dates = [date.fromisoformat(d["date"]) for d in s["days"]]
+                    self.assertEqual(len(dates), time_page.TREND_DAYS)
+                    self.assertEqual(dates[0].isoformat(), tr["from"])
+                    self.assertTrue(all((b - a).days == 1 for a, b in zip(dates, dates[1:])))
+                    for d, row in zip(dates, s["days"]):
+                        self.assertEqual(row["value"], values.get(d))
+                        week = [values[d - timedelta(days=j)] for j in range(7) if d - timedelta(days=j) in values]
+                        if len(week) >= time_page.WEEK_MIN_DAYS:
+                            self.assertAlmostEqual(row["avg7"], sum(week) / len(week))
+                        else:
+                            self.assertIsNone(row["avg7"])
+                        if row["band"]:
+                            self.assertLessEqual(row["band"]["q1"], row["band"]["q3"])
+                    end = dates[-1]
+                    recent = [values[end - timedelta(days=k)] for k in range(28) if end - timedelta(days=k) in values]
+                    self.assertEqual(s["recent"]["n"], len(recent))
+                    self.assertAlmostEqual(s["recent"]["avg"], sum(recent) / len(recent))
+                    self.assertEqual(s["before"]["to"], (end - timedelta(days=28)).isoformat())
+                self.assertTrue(all(v >= 0 for v in walk(tr) if isinstance(v, (int, float))))
+
+    def test_trend_strings_exist_in_both_languages(self):
+        i18n = (ROOT / "healthaio" / "web" / "js" / "i18n.js").read_text(encoding="utf-8")
+        keys = ["trend.title", "trend.note", "trend.key", "trend.rule", "trend.level", "trend.level_one",
+                "trend.level_none", "trend.h", "trend.m"]
+        keys += [f"trend.{k}" for k in time_page.TREND_KEYS] + [f"trend.{k}_what" for k in time_page.TREND_KEYS]
+        for key in keys:
+            self.assertEqual(i18n.count(f'"{key}"'), 2, key)  # English and Chinese
+        self.assertNotIn("多巴胺均", i18n)  # dopamine is named as an idea people use, never as a measured value
+
+
+class TrendAverages(unittest.TestCase):
+    """The averages card on made-up values: a day without screen time is missing, never zero."""
+
+    def build(self, values):
+        with mock.patch.object(time_page, "trend_series", return_value={"fun": values, "longest_focus": {}}):
+            return time_page.trend(None, date(2026, 10, 11))
+
+    def test_a_day_without_screen_time_is_left_out_not_zero(self):
+        last = date(2026, 10, 11)
+        values = {last - timedelta(days=k): 300.0 for k in range(60) if k not in (1, 2, 3)}  # 8–10 Oct have none
+        tr = self.build(values)
+        days = {d["date"]: d for d in tr["series"]["fun"]["days"]}
+        for k in (1, 2, 3):
+            self.assertIsNone(days[(last - timedelta(days=k)).isoformat()]["value"])
+        self.assertEqual(days[last.isoformat()]["avg7"], 300.0)  # 4 of the 7 days, not dragged towards 0
+        self.assertEqual(tr["series"]["fun"]["recent"], {"from": "2026-09-14", "to": "2026-10-11", "n": 25, "avg": 300.0})
+        self.assertIsNone(tr["series"]["longest_focus"]["recent"]["avg"])
+
+    def test_too_few_days_give_no_average(self):
+        last = date(2026, 10, 11)
+        tr = self.build({last - timedelta(days=k): 100.0 for k in range(0, 28, 2)})  # 14 of the last 28 days
+        self.assertEqual(tr["series"]["fun"]["recent"]["avg"], 100.0)
+        self.assertIsNone(tr["series"]["fun"]["before"]["avg"])  # nothing before them
+        tr = self.build({last - timedelta(days=k): 100.0 for k in range(0, 26, 2)})  # 13 days: too few
+        self.assertIsNone(tr["series"]["fun"]["recent"]["avg"])
+        days = tr["series"]["fun"]["days"]
+        self.assertEqual(days[-1]["avg7"], 100.0)  # the 7 days ending on 11 Oct hold 4 with a value (11, 9, 7, 5 Oct)
+        self.assertIsNone(days[-2]["avg7"])  # the 7 ending on 10 Oct hold only 3: too few for an average
 
 
 class AppleHealthWorkouts(unittest.TestCase):

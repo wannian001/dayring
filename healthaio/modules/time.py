@@ -300,6 +300,61 @@ def _stale(ctx: Context, time: Dict[date, TimeDay], span_to: date) -> List[Dict[
     return out
 
 
+# ---- stimulation and focus, averaged ------------------------------------------------------------
+# What people call "dopamine tolerance" cannot be measured by a phone or a watch. The card shows the
+# behaviour around it instead, side by side and never as cause and effect: the minutes in entertainment
+# and social apps, and the day's longest focus stretch.
+TREND_DAYS = 90   # the card looks back this far
+TREND_KEYS = ("fun", "longest_focus")
+LEVEL_DAYS = 28   # the line above each chart: the daily average of the last 28 days and of the 28 before them,
+LEVEL_MIN = 14    # each from at least this many days with screen time
+
+
+def trend_series(ctx: Context) -> Dict[str, stats.Series]:
+    """Daily values for the card, only on whole days with screen time: entertainment & social minutes
+    (screens counted once across devices) and the longest focus stretch (context._longest: work and
+    learning apps, a pause of up to STRETCH_GAP_MIN minutes does not end it). A day without screen time
+    is missing, never zero."""
+    time, screen = ctx.time_days(), ctx.screen_days()
+    out: Dict[str, stats.Series] = {k: {} for k in TREND_KEYS}
+    for d in data_days(ctx):
+        fun = time[d].totals()["fun"]
+        if fun is None or d not in screen:
+            continue
+        out["fun"][d] = fun
+        out["longest_focus"][d] = screen[d].longest_focus
+    return out
+
+
+def _level(values: stats.Series, end: date) -> Dict[str, Any]:
+    days = [end - timedelta(days=k) for k in range(LEVEL_DAYS)]
+    have = [values[d] for d in days if d in values]
+    return {"from": iso(days[-1]), "to": iso(end), "n": len(have),
+            "avg": sum(have) / len(have) if len(have) >= LEVEL_MIN else None}
+
+
+def trend(ctx: Context, last: date) -> Dict[str, Any]:
+    """The TREND_DAYS days ending on ``last``. Per day: its value, the average of the 7 days ending on it
+    (at least WEEK_MIN_DAYS of them with screen time) and your normal for that average (typical_week, the
+    band the tiles use). Per measure: the daily average of the last LEVEL_DAYS days and of the LEVEL_DAYS
+    before them."""
+    first = last - timedelta(days=TREND_DAYS - 1)
+    series = {}
+    for key, values in trend_series(ctx).items():
+        days = []
+        for k in range(TREND_DAYS):
+            d = first + timedelta(days=k)
+            week = [values[d - timedelta(days=j)] for j in range(SPAN) if d - timedelta(days=j) in values]
+            band = typical_week(values, d - timedelta(days=SPAN - 1))
+            days.append({"date": iso(d), "value": values.get(d),
+                         "avg7": sum(week) / len(week) if len(week) >= WEEK_MIN_DAYS else None,
+                         "band": {"q1": band["q1"], "q3": band["q3"]} if band else None})
+        series[key] = {"days": days, "recent": _level(values, last),
+                       "before": _level(values, last - timedelta(days=LEVEL_DAYS))}
+    return {"from": iso(first), "to": iso(last), "days": TREND_DAYS, "level_days": LEVEL_DAYS,
+            "level_min": LEVEL_MIN, "series": series}
+
+
 def data_days(ctx: Context) -> List[date]:
     """Every whole day (today is not over) that has a record of its own, oldest first."""
     return sorted(d for d, td in ctx.time_days().items() if d < ctx.today and td.admitted)
@@ -334,7 +389,7 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
     later = [d for d in every if d > last]
     return {**base, "day": iso(last), "empty": False, "span": span,
             "baseline_days": stats.BASELINE_DAYS, "baseline_min": stats.MIN_BASELINE,
-            "history": history, "devices_order": ctx.cfg.devices,
+            "history": history, "trend": trend(ctx, last), "devices_order": ctx.cfg.devices,
             "limits": {"fun_max_min": plan.entertainment_max_hours * 60 if plan.entertainment_max_hours else None,
                        "focus_min_min": plan.work_min_hours * 60 if plan.work_min_hours else None},
             "prev": iso(before[-1]) if before else None,
