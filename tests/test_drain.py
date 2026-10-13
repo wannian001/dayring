@@ -267,7 +267,8 @@ class DrainWords(unittest.TestCase):
     def test_english_lists_read_as_sentences(self):
         html = self.render("en", "today", "2026-10-07")  # the 7 days to 6 Oct, with three signals worse than normal
         self.assertIn("Worse than your normal: resting heart rate, screens in the hour before sleep, app switching", html)
-        self.assertIn("Against your plan: falling asleep later than planned by", html)
+        # Today keeps one line per part; the plan comparison is on the Drain page for the same 7 days
+        self.assertIn("Against your plan: falling asleep later than planned by", self.render("en", "drain", "2026-10-06"))
         self.assertIn("跟计划比：入睡时刻比计划晚", self.render("zh", "drain", None))
         self.assertIn("，娱乐和社交比上限多", self.render("zh", "drain", None))  # clauses take a comma, not 、
 

@@ -128,7 +128,7 @@ Each of these is shown in the gallery. Components (kit.css): `.sr`, `.top`, `.br
 | `rangeStrip(row, { width, height = 30, pad = 10 })` | One value on its own scale: band = normal (q1–q3), tick = median, dot = the value, dashed tick = a plan or limit. |
 | `trendLine(points, { width, height = 34, tip = () => "" })` | A short line through a few averages (eight weeks, say) with an end dot; missing points are bridged; needs two. |
 | `legendKey(kind)` | A legend key drawn the way its mark is drawn: "normal" (band), "median", "now" (dot), "plan" (dashed tick), "weeks" (trend). |
-| `dayRing(ring, { size = 360, center = "", centerSub = "", cats = RING_CATS })` | A 24-hour clock, midnight at the top: sleep outside, calendar and workouts in the middle, screen minutes per hour inside. |
+| `dayRing(ring, { size = 360, center = "", centerSub = "", cats = RING_CATS })` | A 24-hour clock, midnight at the top: sleep outside, workouts and (faint, as context) the calendar in the middle, screen minutes per hour inside. |
 | `interval(row, domain, { width, height = 26, flip = false })` | A difference with its 95% interval against a zero line; right = a better next day (flip mirrors it). |
 | `dayDots(series, { width, height = 30 })` | One circle per day: filled = done, hollow = 0, dashed = no record; the day of the month under each. |
 | `timeChart(layers, { width, height = 240, first, last, unit = "", fmt = (v) => String(v), yPad = 0.15, maxGap = 7 })` | A date axis with a shaded corridor, faint daily points, a line that breaks after maxGap days and dashed reference lines. |
@@ -199,6 +199,7 @@ changed files under a version that is not newer.
 
 | version | date | change |
 |---|---|---|
+| 1.4.1 | 2026-10-13 | `dayRing` draws calendar blocks faint (classes at 30%, other blocks at 18%): the calendar is context for the day, workouts on the same track stay in full |
 | 1.4.0 | 2026-10-13 | For the health pages (Exercise, Food, Goals): tokens `--c-exercise-2` and `--c-exercise-3`, lighter steps of exercise that tell kinds of training apart by lightness (cardio, walking), never by a new hue; `mealTimeline` (meals by time of day, with the hours before sleep striped) and `keptDots` (days a goal was kept); icons `food` (ink-2: food has no data colour), `target` and `walk` (the Plan and Behaviour menu items); the comments name the kit Health AIO |
 | 1.3.0 | 2026-10-13 | `lanes` rows take `fmt` (a row's values in its own unit, such as a count of instructions); `.legend .key i.hatch` takes its stripes from `color` (ink unless set), so a hatch part in another colour has a matching key; icon `ai` (focus blue: AI agents working for you, the AI work page). AI work is drawn as focus blue stripes rather than a new data colour: the five data hues leave no step that passes the colour-vision checks against all of them |
 | 1.2.0 | 2026-10-13 | `.side`: the menu as a left sidebar from 900px that folds to a 64px icon rail (`html.side-folded`) and a bottom tab bar below that (`.top` and `.nav` stay for apps with a top bar); with a sidebar open, `.subnav` hides (its pages are listed in the sidebar); `lanes` parts take `{ hatch: true }` (diagonal stripes of the part's colour, keyed by `.legend .key i.hatch`) and a row's stacked parts never run past its top; icons `ratio` and `single` (the Time page's devices at once) and the menu glyphs `sun`, `heart`, `clock`, `battery`, `list`, `database`, `sidebar` |
@@ -301,7 +302,7 @@ Health AIO 身兼两职：它是一个本地优先看板的公开展示，也是
 | `rangeStrip(row, { width, height = 30, pad = 10 })` | 一个值画在它自己的刻度上：色带 = 平常（q1–q3），竖线 = 中间值，圆点 = 这个值，虚线竖线 = 计划或上限。 |
 | `trendLine(points, { width, height = 34, tip = () => "" })` | 穿过几个平均值（比如八周）的短线，末端一个圆点；缺的点直接连过去；至少要两个点。 |
 | `legendKey(kind)` | 和标记画法一样的图例："normal"（色带）、"median"、"now"（圆点）、"plan"（虚线竖线）、"weeks"（走势）。 |
-| `dayRing(ring, { size = 360, center = "", centerSub = "", cats = RING_CATS })` | 24 小时的钟，午夜在最上面：外圈睡眠，中圈日程和训练，里圈每小时的屏幕分钟。 |
+| `dayRing(ring, { size = 360, center = "", centerSub = "", cats = RING_CATS })` | 24 小时的钟，午夜在最上面：外圈睡眠，中圈训练和画得很淡的日程（日程只当背景），里圈每小时的屏幕分钟。 |
 | `interval(row, domain, { width, height = 26, flip = false })` | 一个差值和它的 95% 区间，对着零线画；右边 = 第二天更好（flip 左右翻转）。 |
 | `dayDots(series, { width, height = 30 })` | 一天一个圆：实心 = 做了，空心 = 0，虚线 = 没有记录；下面写几号。 |
 | `timeChart(layers, { width, height = 240, first, last, unit = "", fmt = (v) => String(v), yPad = 0.15, maxGap = 7 })` | 日期轴：一条阴影走廊、淡淡的每日点、隔 maxGap 天以上就断开的线，加几条虚线参考线。 |
@@ -347,6 +348,7 @@ Health AIO 身兼两职：它是一个本地优先看板的公开展示，也是
 
 | 版本 | 日期 | 改了什么 |
 |---|---|---|
+| 1.4.1 | 2026-10-13 | `dayRing` 把日程画淡（课 30%、其他安排 18%）：日程只是一天的背景，同一圈上的训练照旧画满 |
 | 1.4.0 | 2026-10-13 | 为健康页（运动、饮食、目标）新增：变量 `--c-exercise-2`、`--c-exercise-3`，运动洋红的两档浅色，按深浅区分训练种类（有氧、步行），不加新色相；`mealTimeline`（一天里什么时候吃，睡前几小时画斜纹）和 `keptDots`（目标哪几天做到了）；图标 `food`（用 ink-2：饮食没有自己的数据颜色）、`target` 和 `walk`（菜单的计划和行为）；注释里的名字改成 Health AIO |
 | 1.3.0 | 2026-10-13 | `lanes` 的行可以带 `fmt`（这一行的值用自己的单位写，比如指令条数）；`.legend .key i.hatch` 的斜纹改用 `color`（默认墨色），别的颜色的 hatch 部分也有对得上的图例；新图标 `ai`（专注蓝：替你干活的 AI 代理，AI 干活量页）。AI 工时画成专注蓝斜纹，而不是新加一种数据颜色：现有五种数据色之外，已经找不到跟它们都能通过色盲校验的颜色 |
 | 1.2.0 | 2026-10-13 | 新增 `.side`：900 像素以上是左侧栏，能收成 64 像素的图标条（`html.side-folded`），更窄时是底部标签栏（`.top` 和 `.nav` 留给用顶栏的应用）；有侧栏时 `.subnav` 隐藏（它的几页已经列在侧栏里）；`lanes` 的部分可以带 `{ hatch: true }`（用这部分的颜色画斜纹，图例是 `.legend .key i.hatch`），一行里叠起来的部分不再超出这一行的顶；新图标 `ratio`、`single`（时间页的“几台同时用”）和菜单图标 `sun`、`heart`、`clock`、`battery`、`list`、`database`、`sidebar` |

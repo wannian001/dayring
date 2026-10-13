@@ -229,3 +229,28 @@ def late_meal_flags(ctx: Context, until: date) -> Dict[date, float]:
     0.0; days without a full log or a sleep that night are left out (unknown)."""
     gap_h = ctx.cfg.food.last_meal_gap_h
     return {d: float(x["gap_h"] >= gap_h) for d, x in food_days(ctx, until).items() if x["gap_h"] is not None}
+
+
+def summary(ctx: Context, day: date) -> Dict[str, Any]:
+    """The Today page's one line on food: the 7 days before ``day`` (logged days only) against [plan.food], and ``day``
+    so far. The same rules as the Food page, shorter."""
+    days = food_days(ctx, day)
+    window = [day - timedelta(days=k) for k in range(1, WINDOW + 1)]
+    logged = [days[d] for d in window if d in days and days[d]["full"]]
+    plan = ctx.cfg.food
+    protein = protein_target(ctx, day)["grams"]
+
+    def avg(key: str) -> Optional[float]:
+        values = [x[key] for x in logged if x.get(key) is not None]
+        return statistics.fmean(values) if len(values) >= MIN_WINDOW else None
+
+    kcal = avg("kcal")
+    known = [x for x in logged if x["late"] is not None]
+    today = days.get(day)
+    return {"ever": bool(days), "logged": len(logged), "days": WINDOW, "min_logged": MIN_WINDOW,
+            "kcal": kcal, "kcal_state": _plan_state(kcal, plan.kcal_min, plan.kcal_max),
+            "protein_g": avg("protein_g"), "protein_target": protein,
+            "protein_state": _plan_state(avg("protein_g"), protein, None),
+            "late": sum(1 for x in known if x["late"]), "late_known": len(known), "gap_h": plan.last_meal_gap_h,
+            "so_far": {"meals": len(today["meals"]), "kcal": today["kcal"], "protein_g": today["protein_g"]} if today else None}
+

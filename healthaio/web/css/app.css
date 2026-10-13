@@ -437,3 +437,78 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
   margin: var(--s-1) 0 0; padding: var(--s-3); border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--line);
   overflow-x: auto; font-family: var(--mono); font-size: var(--t-xs); line-height: 1.7; color: var(--ink);
 }
+
+/* ---- today: what to adjust, inside the morning card under the ring ---- */
+.today-todo { margin-top: var(--s-5); padding-top: var(--s-5); border-top: 1px solid var(--line); }
+
+/* ---- today: every part in one line (icon · name and sentence · small picture · state · open) ---- */
+.sum-rows { display: flex; flex-direction: column; }
+.sum-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) 200px 170px 56px; gap: var(--s-4); align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.sum-row:first-child { border-top: 0; padding-top: 2px; }
+.sum-icon { display: grid; place-items: center; }
+.sum-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: var(--t-sm); line-height: 1.45; }
+.sum-text b { font-size: var(--t-sm); }
+.sum-viz { min-width: 0; }
+.sum-state { display: flex; justify-content: flex-end; }
+.sum-state .chip { white-space: nowrap; }
+.sum-go { text-align: right; white-space: nowrap; }
+@media (max-width: 860px) {
+  .sum-row { grid-template-columns: 28px minmax(0, 1fr) auto; row-gap: 6px; align-items: start; }
+  .sum-icon { padding-top: 2px; }
+  .sum-viz { grid-column: 2 / -1; grid-row: 2; }
+  .sum-viz:empty { display: none; }
+  .sum-state { grid-column: 2 / -1; justify-content: flex-start; }
+  .sum-go { grid-column: 3; grid-row: 1; }
+}
+/* the lines and the adjustments are links as a whole: one tap opens the part's page */
+.sum-row { grid-template-columns: 28px 140px minmax(0, 1fr) 180px 150px 14px; color: var(--ink); text-decoration: none; border-radius: var(--r-sm); }
+.sum-row:hover { background: var(--surface-2); text-decoration: none; }
+.sum-name { font-size: var(--t-sm); font-weight: 650; }
+.sum-text { flex-direction: row; font-size: var(--t-md); font-weight: 600; }
+.sum-go { color: var(--ink-3); font-size: var(--t-lg); }
+.todo-item { color: var(--ink); text-decoration: none; }
+.todo-item:hover { background: var(--line); text-decoration: none; }
+@media (max-width: 860px) {
+  .sum-row { grid-template-columns: 28px minmax(0, 1fr) auto; }
+  .sum-name { grid-column: 2; grid-row: 1; }
+  .sum-text { grid-column: 2 / -1; grid-row: 2; }
+  .sum-viz { grid-row: 3; }
+  .sum-state { grid-column: 3; grid-row: 1; justify-content: flex-end; }
+  .sum-go { display: none; }
+}
+.sum-row { padding-left: 8px; padding-right: 8px; }
+
+/* ---- tabs inside a card (pages/tabs.js): the switch on its own row, a short note above each panel ---- */
+.tabs-seg { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; margin: 0 0 var(--s-4); }
+.tab-note { margin: 0 0 var(--s-3); }
+.tab-panel[hidden] { display: none; }
+
+/* ---- time: the daily averages under what changed, in the same card ---- */
+.time-avg { margin-top: var(--s-5); padding-top: var(--s-5); border-top: 1px solid var(--line); }
+.ex-tiles { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.food-panel { max-width: 640px; }
+
+/* ---- sleep: the last 7 nights against the 7 before, four numbers over the chart ---- */
+.sleep-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); margin-bottom: var(--s-4); }
+@media (max-width: 640px) { .sleep-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sleep-fact { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: var(--r-md); background: var(--surface-2); }
+.sleep-fact b { font-size: var(--t-lg); }
+
+/* ---- guide and history: titles in view, text one click away ---- */
+.doc-folds { list-style: none; margin: 0; padding: 0; }
+.doc-folds > li { border-top: 1px solid var(--line); }
+.doc-folds > li:first-child { border-top: 0; }
+.doc-folds summary { display: flex; align-items: baseline; gap: 2px; padding: 12px 0; cursor: pointer; font-size: var(--t-md); font-weight: 650; list-style: none; }
+.doc-folds summary::-webkit-details-marker { display: none; }
+.doc-folds summary::after { content: "›"; margin-left: auto; color: var(--ink-3); transition: transform .15s var(--ease); }
+.doc-folds details[open] > summary::after { transform: rotate(90deg); }
+.doc-folds details > :not(summary) { margin-left: 2rem; }
+.doc-folds details p { font-size: var(--t-sm); line-height: 1.7; color: var(--ink-2); max-width: 80ch; }
+.doc-folds details[open] { padding-bottom: var(--s-3); }
+.doc-lessons-card { margin-top: var(--s-2); }
+.doc-fold > summary { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); cursor: pointer; list-style: none; }
+.doc-fold > summary::-webkit-details-marker { display: none; }
+.doc-fold > summary .doc-h { margin: 0; }
+.doc-open { flex: none; font-size: var(--t-xs); color: var(--accent); }
+.doc-fold[open] .doc-open { display: none; }
+.doc-fold[open] > summary { margin-bottom: var(--s-3); }

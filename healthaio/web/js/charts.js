@@ -239,7 +239,7 @@ function arc(cx, cy, r0, r1, m0, m1) {
 }
 const minuteOf = (iso) => { const d = toDate(iso); return d.getHours() * 60 + d.getMinutes(); };
 
-// A 24-hour clock, midnight at the top: sleep outside, calendar and workouts in the middle, screen minutes per hour inside.
+// A 24-hour clock, midnight at the top: sleep outside, workouts and (faint, as context) the calendar in the middle, screen minutes per hour inside.
 export function dayRing(ring, { size = 360, center = "", centerSub = "", cats = RING_CATS }) {
   const c = size / 2, s = size / 360;
   const R = { label: 172 * s, sleep: [150 * s, 162 * s], events: [130 * s, 144 * s], screen: [58 * s, 122 * s] };
@@ -271,10 +271,10 @@ export function dayRing(ring, { size = 360, center = "", centerSub = "", cats = 
       r = r1;
     });
   });
-  // events
+  // events: the calendar is context for the day, so it is drawn faint; workouts on the same track are drawn in full
   (ring.events || []).forEach((e) => {
     const m0 = minuteOf(e.start), m1 = Math.max(m0 + 8, e.end.slice(0, 10) > e.start.slice(0, 10) ? 1440 : minuteOf(e.end));
-    const op = e.kind === "class" ? 0.86 : 0.45;
+    const op = e.kind === "class" ? 0.3 : 0.18;
     parts.push(`<path d="${arc(c, c, R.events[0], R.events[1], m0 + 1, m1 - 1)}" fill="var(--c-event)" fill-opacity="${op}" data-tip="${esc(`${clock(e.start)}–${clock(e.end)} · ${e.title}`)}"/>`);
   });
   // workouts share the calendar track, in the exercise colour

@@ -1,5 +1,5 @@
 // Guide (#guide): how to use Proactive Health AIO, from the demo to your own data to a normal day with it.
-// Numbered steps in the order you meet them; commands are the ones in the README's Quick start. The server only
+// Numbered steps in the order you meet them, in one card, each opening on a click; commands are the ones in the README's Quick start. The server only
 // names the page (modules/docs.py).
 import { esc } from "../charts.js";
 import { getLang, t } from "../i18n.js";
@@ -84,12 +84,13 @@ const code = (key) => `<pre class="doc-code"><code>${CODE[key].map(esc).join("\n
 export default {
   render() {
     const c = GUIDE[getLang()] || GUIDE.en;
-    const steps = c.steps.map((s, i) => `<li class="card doc-guide-step"><h2 class="doc-h"><span class="doc-n">${i + 1}</span>${s.h}</h2>
-      ${s.body.map((p) => `<p>${p}</p>`).join("")}${s.code ? code(s.code) : ""}${s.after ? `<p>${s.after}</p>${code(s.code2)}` : ""}</li>`).join("");
+    // one card: every step's title in view, its text one click away; the first step is open
+    const steps = c.steps.map((s, i) => `<li><details${i === 0 ? " open" : ""}><summary><span class="doc-n">${i + 1}</span>${s.h}</summary>
+      ${s.body.map((p) => `<p>${p}</p>`).join("")}${s.code ? code(s.code) : ""}${s.after ? `<p>${s.after}</p>${code(s.code2)}` : ""}</details></li>`).join("");
     return `<div class="head"><div><h1>${c.title}</h1><div class="sub">${c.sub}</div></div></div>
       <div class="doc">
         <div class="doc-note"><p>${c.note}</p><button type="button" class="doc-link" id="doc-lang">${t("doc.other_lang")}</button></div>
-        <ol class="doc-guide">${steps}</ol>
+        <section class="card"><ol class="doc-folds doc-guide-steps">${steps}</ol></section>
         <p class="doc-try"><a href="#history">${c.history}</a></p>
       </div>`;
   },

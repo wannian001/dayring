@@ -105,10 +105,14 @@ def build(ctx: Context, week: Optional[str] = None) -> Dict[str, Any]:
                  "status": x.get("status") or "todo"} for x in deadlines
                 if end < x["due"].date() <= end + timedelta(days=7)]
     gaps = [iso(d) for d in this if d not in body or (body[d].get("sleep_min") is None and body[d].get("hrv_ms") is None)]
+    # what has tended to help the next day, over your whole history up to the end of this week (moved here from Today:
+    # it is a pattern across weeks, read when looking back, not a number for the morning)
+    from . import today as today_page
+    effects = today_page.effects(ctx, min(end, ctx.today))
     return {"page": "review", "week_start": iso(start), "week_end": iso(end), "today": iso(ctx.today), "now": iso(ctx.now),
             "partial": end >= ctx.today, "sections": sections, "planned_workouts": planned,
             "weight": {"avg": statistics.fmean(w_now) if w_now else None,
                        "prev_avg": statistics.fmean(w_prev) if w_prev else None, "days": len(w_now)},
             "due_this": sorted(due_this, key=lambda x: x["due"]), "due_next": sorted(due_next, key=lambda x: x["due"]),
-            "gaps": gaps, "prev": iso(start - timedelta(days=7)),
+            "gaps": gaps, "effects": effects, "prev": iso(start - timedelta(days=7)),
             "next": iso(start + timedelta(days=7)) if start + timedelta(days=7) <= ctx.today else None}

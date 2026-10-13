@@ -10,6 +10,16 @@ the app reads the pages for you: the Today page has to answer, in this order, ho
 today and why**, what is on, where did yesterday go, what has tended to help. Everything else is detail behind a
 "How this is worked out" fold.
 
+## A first look takes seconds
+
+The pages are read by someone who opens them for half a minute in the morning, often in their first week. So every
+page has the same shape: one sentence or one number that answers its question, the main chart, the rest of the
+detail in tabs inside one card, and one "How this is worked out" fold at the end. A line on Today carries a name, a
+number and a state, never a sentence; the sentence is on the page the line opens. Nothing is dropped to get there:
+what a page no longer shows sits in a tab, a fold, or on the one page that owns it (the next-day patterns moved from
+Today to Review, the night-by-night sleep checks to Goals, the workout list from Time to Exercise). The calendar is
+context, not a subject: one line on Today and a faint arc on the day ring; the list is on Schedule.
+
 ## What to adjust today
 
 At most three items, one each for training, sleep and food, each with the reason in numbers and a link to the page

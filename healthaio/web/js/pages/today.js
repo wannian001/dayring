@@ -1,85 +1,50 @@
-import { bullet, dayDots, dayRing, draw, esc, interval, RING_CATS, spark } from "../charts.js";
-import { clock, day, dur, inSentence, measure, num, pct, signed, t, weekdayShort, wtype } from "../i18n.js";
+// Today: one card for the morning (the day ring, how recovered you are, what is on, tonight, and what to adjust), then
+// every other part of your health in one line each. Numbers and a state only: the sentences that explain them live on
+// each part's own page, one click away, so a first look takes seconds.
+import { dayRing, draw, esc, RING_CATS, spark } from "../charts.js";
+import { clock, day, dur, measure, num, signed, t, wtype } from "../i18n.js";
 import { COLOR, icon, STATE_ICON } from "../icons.js";
 import { worseLine } from "./drain.js";
+import { helping } from "./effects.js";
 
 const shiftDay = (iso, n) => { const d = new Date(`${iso}T12:00:00`); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+const chip = (cls, text, glyph = "") => `<span class="chip ${cls}">${glyph}${esc(text)}</span>`;
+const SEP = () => t("today.sched_sep");
 
 function stateChip(m) {
-  if (m.partial) return `<span class="chip">${t("state.partial")}</span>`;
-  if (!m.state) return `<span class="chip">${t("state.none")}</span>`;
+  if (m.partial) return chip("", t("state.partial"));
+  if (!m.state) return chip("", t("state.none"));
   const cls = m.tone === "good" ? "good" : m.tone === "bad" ? "bad" : "";
-  return `<span class="chip ${cls}">${STATE_ICON[m.tone] || ""}${t(`state.${m.state}`)}</span>`;
+  return chip(cls, t(`state.${m.state}`), STATE_ICON[m.tone] || "");
 }
 
-function tile(m, i, extraNote = "") {
-  const band = m.band ? t("band", { low: measure(m.band.q1, m.unit), high: measure(m.band.q3, m.unit) }) : "";
-  return `<div class="tile">
-    <div class="label"><span>${t(`metric.${m.key}`)}</span>${stateChip(m)}</div>
-    <div class="value">${esc(measure(m.value, m.unit))}</div>
-    <div class="bul" data-i="${i}"></div>
-    <div class="spk" data-i="${i}"></div>
-    <div class="note">${esc([extraNote, band].filter(Boolean).join(" · "))}</div>
-  </div>`;
-}
-
-function agendaHtml(a, isToday, workouts) {
-  const rows = [];
-  a.events.forEach((e) => rows.push({ sort: e.start, html: `<li><span class="when">${clock(e.start)}–${clock(e.end)}</span>
-    <span class="what"><b>${esc(e.title)}</b>${e.location ? `<span class="muted">${esc(e.location)}</span>` : ""}</span><span></span></li>` }));
-  a.deadlines.forEach((d) => {
-    const when = d.days_left <= 1 ? t(`today.days_left.${d.days_left}`) : t("today.days_left.n", { n: d.days_left });
-    rows.push({ sort: d.due, html: `<li><span class="when">${d.days_left === 0 ? clock(d.due) : `${weekdayShort(d.due)} ${clock(d.due)}`}</span>
-      <span class="what"><b>${esc(d.title)}</b><span class="muted">${esc([d.group, d.weight_pct ? t("today.graded", { pct: num(d.weight_pct) }) : t("today.ungraded")].filter(Boolean).join(" · "))}</span></span>
-      <span class="chip ${d.days_left <= 1 ? "watch" : ""}">${t("today.due", { when })}</span></li>` });
-  });
-  rows.sort((x, y) => (x.sort < y.sort ? -1 : 1));
-  const done = (workouts || []).map((w) => esc(t("today.trained", { what: wtype(w.type), d: dur((new Date(w.end) - new Date(w.start)) / 60000), time: clock(w.start) })));
-  const plan = a.training ? `<b>${esc(a.training)}</b>` : `<span class="muted">${t("today.rest")}</span>`;
-  const training = `<li class="training-row"><span class="when"><span class="workout-icon">${icon("exercise", 15)}</span>${t("today.training")}</span>
-    <span class="what">${done.length ? `<b>${done.join("<br>")}</b>${a.training ? `<span class="muted">${esc(t("week.planned", { what: a.training }))}</span>` : ""}` : plan}</span><span></span></li>`;
-  let tonight = "";
-  if (a.sleep && isToday) {
-    const last = a.sleep.last;
-    let line = "";
-    if (last) {
-      const result = last.on_time === true ? t("today.on_time") : last.on_time === false ? t("today.late") : t("today.unknown_morning");
-      line = `<p class="xs muted" style="margin:8px 0 0">${t("today.last_morning", { woke: last.woke ? clock(last.woke) : "—", alarm: last.alarm, result })}</p>`;
-    }
-    tonight = `<h2 class="section-title" style="margin-top:var(--s-5)">${t("today.tonight")}</h2>
-      <div class="tonight"><div><span>${t("today.phone_away")}</span><b>${clock(a.sleep.phone_away)}</b></div>
-      <div><span>${t("today.asleep_by")}</span><b>${clock(a.sleep.asleep_by)}</b></div>
-      <div><span>${t("today.alarm")}</span><b>${clock(a.sleep.alarm)}</b></div></div>${line}`;
+// ---- the morning card ------------------------------------------------------------------------------------------
+// the calendar is context for the day, not its subject: training in full, the calendar as a count
+function dayLines(p) {
+  const a = p.agenda;
+  const done = (p.ring.workouts || []).map((w) => t("today.trained_short", { what: wtype(w.type), d: dur((new Date(w.end) - new Date(w.start)) / 60000) }));
+  const training = done.length ? `<b>${esc(done.join(SEP()))}</b>` : a.training ? `<b>${esc(a.training)}</b>` : `<span class="muted">${t("today.rest")}</span>`;
+  const events = a.events.filter((e) => e.kind !== "training");
+  const parts = [events.length ? t("today.sched_events", { n: events.length }) : t("today.sched_none")];
+  if (a.deadlines.length) {
+    const first = a.deadlines[0];
+    parts.push(first.days_left <= 1 ? t("today.sched_due", { n: a.deadlines.length, when: t(`today.days_left.${first.days_left}`) })
+      : t("today.sched_due_in", { n: a.deadlines.length, d: first.days_left }));
   }
-  return `<h2 class="section-title">${t("today.agenda")}</h2>
-    <ul class="agenda">${rows.length ? rows.map((r) => r.html).join("") : `<li><span></span><span class="muted">${t("today.nothing")}</span><span></span></li>`}${training}</ul>${tonight}`;
+  return `<ul class="agenda">
+    <li class="training-row"><span class="when"><span class="workout-icon">${icon("exercise", 15)}</span>${t("today.training")}</span><span class="what">${training}</span><span></span></li>
+    <li><span class="when">${t("today.sched")}</span><span class="what"><a href="#week">${esc(parts.join(SEP()))}</a></span><span></span></li></ul>`;
 }
 
-function heroHtml(p) {
-  const r = p.recovery;
-  const ringLegend = `<div class="legend">
-    <span class="key"><i style="background:var(--c-sleep)"></i>${t("ring.sleep")}</span>
-    <span class="key"><i style="background:var(--c-event)"></i>${t("ring.events")}</span>
-    ${p.ring.workouts && p.ring.workouts.length ? `<span class="key"><i style="background:var(--c-exercise)"></i>${t("act.exercise")}</span>` : ""}
-    ${RING_CATS.map(([key, , color]) => `<span class="key"><i style="background:${color}"></i>${t(`cat.${key}`)}</span>`).join("")}</div>
-    <p class="xs muted" style="margin:0;text-align:center">${p.ring.screen_day ? t("ring.screen", { day: day(p.ring.screen_day) }) : ""}</p>`;
-  const chips = r.metrics.map((m) => `<span class="chip ${m.tone === "good" ? "good" : m.tone === "bad" ? "bad" : ""}">${t(`metric.${m.key}`)} · ${m.state ? t(`state.${m.state}`) : "—"}</span>`).join("");
-  const self = p.self
-    ? `<p class="small" style="margin:0"><b>${t("self.title")}</b> ${esc([p.self.energy != null ? t("self.energy", { v: num(p.self.energy) }) : "", p.self.focus != null ? t("self.focus", { v: num(p.self.focus) }) : "", p.self.note ? `“${p.self.note}”` : ""].filter(Boolean).join(" · "))}</p>`
-    : `<p class="xs muted" style="margin:0">${t("self.prompt")}</p>`;
-  const behind = r.days_behind > 1 ? `<p class="chip watch" style="height:auto;padding:4px 10px;white-space:normal">${t("recovery.behind", { n: r.days_behind, day: day(r.as_of) })}</p>` : "";
-  return `<section class="card span-12"><div class="hero">
-    <div class="ring-wrap"><div id="ring" style="width:100%;max-width:360px"></div>${ringLegend}</div>
-    <div class="stack" style="gap:var(--s-5)">
-      <div class="verdict"><span class="eyebrow">${t("recovery.eyebrow")}</span>
-        <p class="lede" style="font-size:var(--t-3xl);margin:0">${t(`recovery.${r.verdict}`)}</p>
-        <p class="small muted" style="margin:0">${r.as_of ? t("recovery.as_of", { day: day(r.as_of) }) : ""}</p>
-        <div class="row" style="gap:6px">${chips}</div>${self}${behind}</div>
-      <div>${agendaHtml(p.agenda, !p.looking_back, p.ring.workouts)}</div>
-    </div></div></section>`;
+function tonightHtml(p) {
+  const s = p.agenda.sleep;
+  if (!s || p.looking_back) return "";
+  return `<div class="tonight" style="margin-top:var(--s-4)"><div><span>${t("today.phone_away")}</span><b>${clock(s.phone_away)}</b></div>
+    <div><span>${t("today.asleep_by")}</span><b>${clock(s.asleep_by)}</b></div>
+    <div><span>${t("today.alarm")}</span><b>${clock(s.alarm)}</b></div></div>`;
 }
 
-// ---- what to adjust today: at most one thing each for training, sleep and food, with the reason and where it shows
+// ---- what to adjust today: at most one thing each for training, sleep and food; the reason in a few words
 const TODO_ICON = { training: "exercise", sleep: "sleep", food: "food" };
 
 function todoTitle(x) {
@@ -101,15 +66,15 @@ function todoTitle(x) {
 function todoWhy(x) {
   const w = x.why || {};
   switch (x.key) {
-    case "ease": return t("todo.why.ease", { list: (w.worse || []).map((k) => inSentence(t(`metric.${k}`))).join(t("drain.sep")) || "—" });
-    case "deload": return t("todo.why.deload", { a: dur(w.acute), c: dur(w.chronic) });
-    case "move": return t("todo.why.move", { left: dur(w.remaining), n: w.days_left, goal: dur(w.goal) });
-    case "strength": return t("todo.why.strength", { n: w.days_left });
-    case "asleep_by": return w.low ? t("todo.why.asleep_low", { alarm: clock(x.params.alarm) }) : t("todo.why.asleep_short", { d: dur(w.short_by), alarm: clock(x.params.alarm) });
-    case "phone_away": return w.drain ? t("todo.why.phone_drain") : t("todo.why.phone_last", { d: dur(w.last_night) });
-    case "late_meal": return t("todo.why.late_meal", { n: w.late, k: w.known, h: num(x.params.hours) });
-    case "protein": return t("todo.why.protein", { avg: num(w.avg_g), target: num(x.params.target_g), n: w.days });
-    case "kcal": return t("todo.why.kcal", { avg: num(w.avg), max: num(x.params.max), n: w.days });
+    case "ease": return t("todo.short.ease");
+    case "deload": return t("todo.short.deload");
+    case "move": return t("todo.short.move", { left: dur(w.remaining) });
+    case "strength": return t("todo.short.strength", { n: w.days_left });
+    case "asleep_by": return w.low ? t("todo.short.ease") : t("todo.short.asleep", { d: dur(w.short_by) });
+    case "phone_away": return w.drain ? t("todo.short.phone_drain") : t("todo.short.phone_last", { d: dur(w.last_night) });
+    case "late_meal": return t("todo.short.late_meal", { n: w.late, k: w.known });
+    case "protein": return t("todo.short.protein", { avg: num(w.avg_g), target: num(x.params.target_g) });
+    case "kcal": return t("todo.short.kcal", { avg: num(w.avg), max: num(x.params.max) });
     default: return "";
   }
 }
@@ -118,104 +83,116 @@ function todoHtml(p) {
   const a = p.actions;
   if (!a) return "";
   const body = a.steady ? `<p class="lede" style="font-size:var(--t-lg);margin:0">${t("todo.steady")}</p>`
-    : `<ol class="todo">${a.items.map((x) => `<li class="todo-item">
+    : `<ol class="todo">${a.items.map((x) => `<li><a class="todo-item" href="${x.link}">
         <span class="todo-icon" style="color:${COLOR[TODO_ICON[x.domain]] || "var(--ink-2)"}">${icon(TODO_ICON[x.domain], 20)}</span>
-        <div class="todo-body"><span class="eyebrow">${t(`todo.domain.${x.domain}`)}</span><b>${esc(todoTitle(x))}</b>
-          <span class="small muted">${esc(todoWhy(x))}</span><a class="small" href="${x.link}">${t(`todo.link.${x.domain}`)} →</a></div></li>`).join("")}</ol>`;
-  return `<section class="card span-12"><h2>${t("todo.title")}<span class="aside">${t("todo.aside")}</span></h2>${body}
-    <details class="how"><summary>${t("ui.how")}</summary><p>${t("todo.rule")}</p></details></section>`;
+        <span class="todo-body"><b>${esc(todoTitle(x))}</b><span class="small muted">${esc(todoWhy(x))}</span></span></a></li>`).join("")}</ol>`;
+  return `<div class="today-todo"><h2 class="section-title">${t("todo.title")}</h2>${body}
+    <details class="how"><summary>${t("ui.how")}</summary><p>${t("todo.rule")}</p></details></div>`;
 }
 
-function recoveryHtml(p) {
-  const sleep = p.recovery.metrics.find((m) => m.key === "sleep");
-  const tiles = p.recovery.metrics.map((m, i) => tile(m, i, m.key === "sleep" && sleep.start ? t("slept_from", { start: clock(sleep.start), end: clock(sleep.end) }) : "")).join("");
-  const act = p.activity.filter((m) => m.key !== "training");
-  const training = p.activity.find((m) => m.key === "training");
-  const actTiles = act.map((m, i) => tile(m, 10 + i, m.partial ? t("activity.partial") : "")).join("");
-  const trainTile = `<div class="tile"><div class="label"><span>${t("metric.training")}</span><span class="chip">${t("training.days", { n: training.value, k: 7 })}</span></div>
-    <div class="dots"></div>
-    <div class="note">${training.last ? esc(t("training.last", { type: wtype(training.last.type), min: dur(training.last.min) })) : t("training.none")}</div></div>`;
-  return `<section class="card"><h2>${t("recovery.title")}<span class="aside">${p.recovery.as_of ? day(p.recovery.as_of) : ""}</span></h2>
-    <div class="tiles aligned">${tiles}</div>
-    <div class="tiles" style="margin-top:var(--s-3)">${actTiles}${trainTile}</div>
-    <details class="how"><summary>${t("ui.how")}</summary><p>${t("recovery.rule")}</p></details></section>`;
+function morningHtml(p) {
+  const r = p.recovery;
+  const self = p.self && (p.self.energy != null || p.self.focus != null)
+    ? `<p class="small muted" style="margin:0">${esc(t("self.title"))}${t("today.colon")}${esc([p.self.energy != null ? t("self.energy", { v: num(p.self.energy) }) : "", p.self.focus != null ? t("self.focus", { v: num(p.self.focus) }) : ""].filter(Boolean).join(SEP()))}</p>` : "";
+  const behind = r.days_behind > 1 ? `<p class="chip watch" style="height:auto;padding:4px 10px;white-space:normal">${t("recovery.behind", { n: r.days_behind, day: day(r.as_of) })}</p>` : "";
+  const legend = `<div class="legend">
+    <span class="key"><i style="background:var(--c-sleep)"></i>${t("ring.sleep")}</span>
+    <span class="key"><i style="background:var(--c-exercise)"></i>${t("act.exercise")}</span>
+    <span class="key"><i style="background:var(--c-event);opacity:.3"></i>${t("act.calendar")}</span>
+    ${RING_CATS.map(([key, , color]) => `<span class="key"><i style="background:${color}"></i>${t(`cat.${key}`)}</span>`).join("")}</div>`;
+  return `<section class="card span-12"><div class="hero">
+    <div class="ring-wrap"><div id="ring" style="width:100%;max-width:360px"></div>${legend}</div>
+    <div class="stack" style="gap:var(--s-5)">
+      <div class="verdict"><span class="eyebrow" ${r.as_of ? `title="${esc(t("recovery.as_of", { day: day(r.as_of) }))}"` : ""}>${t("recovery.eyebrow")}</span>
+        <p class="lede" style="font-size:var(--t-3xl);margin:0">${t(`recovery.${r.verdict}`)}</p>${self}${behind}</div>
+      <div><h2 class="section-title">${t("today.title")}</h2>${dayLines(p)}${tonightHtml(p)}</div>
+    </div></div>${todoHtml(p)}</section>`;
 }
 
-function attentionHtml(p) {
+// ---- every part in one line: name, number, a small picture, a state; the whole line opens the part's page --------
+function line({ key, iconKey, name, text, viz = "", state = "", href }) {
+  return `<a class="sum-row" href="${href}">
+    <span class="sum-icon" style="color:${COLOR[iconKey] || "var(--ink-2)"}">${icon(iconKey, 18)}</span>
+    <span class="sum-name">${esc(name)}</span>
+    <span class="sum-text num">${esc(text)}</span>
+    <span class="sum-viz" data-viz="${key}">${viz}</span>
+    <span class="sum-state">${state}</span>
+    <span class="sum-go" aria-hidden="true">›</span></a>`;
+}
+
+function recoveryLines(p) {
+  const href = { sleep: "#sleep", hrv: "#drain", resting_hr: "#drain" };
+  return p.recovery.metrics.map((m) => line({ key: m.key, iconKey: m.key === "sleep" ? "sleep" : "heart", name: t(`metric.${m.key}`),
+    text: measure(m.value, m.unit), state: stateChip(m), href: href[m.key] })).join("");
+}
+
+function exerciseLine(p) {
+  const x = p.summary.exercise;
+  const name = t("sum.exercise_name");
+  if (!x.tracked) return line({ key: "exercise", iconKey: "exercise", name, text: t("sum.none"), href: "#exercise" });
+  const share = Math.min(100, (x.minutes / x.goal_min) * 100);
+  const cls = { met: "good", behind: "watch", missed: "bad" }[x.status] || "";
+  return line({ key: "exercise", iconKey: "exercise", name, text: `${dur(x.minutes)} / ${dur(x.goal_min)}`,
+    viz: `<span class="progress" style="margin:0;display:block"><span style="width:${share.toFixed(1)}%"></span></span>`,
+    state: chip(cls, t(`sum.ex.${x.status}`)), href: "#exercise" });
+}
+
+function foodLine(p) {
+  const f = p.summary.food;
+  const name = t("nav.food");
+  if (!f.ever) return line({ key: "food", iconKey: "food", name, text: t("sum.none"), href: "#food" });
+  if (f.logged < f.min_logged) return line({ key: "food", iconKey: "food", name, text: t("sum.food_few"), state: chip("", t("sum.food_few_chip")), href: "#food" });
+  const off = [];
+  if (f.protein_state === "below") off.push(t("sum.food_protein"));
+  if (f.late >= 2) off.push(t("sum.food_late", { n: f.late }));
+  if (f.kcal_state === "above" || f.kcal_state === "below") off.push(t(`sum.food_kcal_${f.kcal_state}`));
+  return line({ key: "food", iconKey: "food", name, text: off.length ? off.join(SEP()) : t("sum.food_ok"),
+    state: off.length ? chip("bad", t("sum.food_off"), STATE_ICON.bad) : chip("good", t("sum.food_within"), STATE_ICON.good), href: "#food" });
+}
+
+function screensLine(p) {
   const a = p.attention;
-  if (!a.day) return `<section class="card"><h2>${t("screens.title", { day: "—" })}</h2><div class="empty">${t("ui.no_data")}</div></section>`;
+  const name = t("sum.screens_name");
+  if (!a.day) return line({ key: "screens", iconKey: "screen", name, text: t("sum.none"), href: "#time" });
   const cats = a.by_category || {};
-  const total = a.total || 1;
   const bar = RING_CATS.map(([key, keys, color]) => {
     const minutes = keys.reduce((s, k) => s + (cats[k] || 0), 0);
     return minutes ? `<span style="flex:${minutes};background:${color}" data-tip="${esc(`${t(`cat.${key}`)} ${dur(minutes)}`)}"></span>` : "";
   }).join("");
-  const tiles = a.metrics.map((m, i) => tile(m, 20 + i)).join("");
-  const targets = (a.targets || []).map((g) => {
-    const label = t(`target.${g.key}`, { limit: dur(g.limit_min, { short: true }) });
-    const cls = g.met === true ? "good" : g.met === false ? "bad" : "";
-    return `<div class="row" style="justify-content:space-between"><span class="small">${label}</span>
-      <span class="row" style="gap:6px"><span class="chip ${cls}">${g.met === null ? "—" : t(g.met ? "target.met" : "target.missed")}</span>
-      <span class="xs muted">${t("target.week", { n: g.week_met, k: g.week_known })}</span></span></div>`;
-  }).join("");
-  return `<section class="card"><h2>${t("screens.title", { day: day(a.day) })}<span class="aside">${t("screens.total", { total: dur(a.total) })}</span></h2>
-    ${a.stale ? `<p class="chip watch" style="height:auto;padding:4px 10px;white-space:normal;margin:0 0 12px">${t("screens.stale", { n: a.days_behind })}</p>` : ""}
-    <div class="catbar" role="img" aria-label="${esc(t("screens.total", { total: dur(a.total) }))}">${bar}</div>
-    <div class="legend" style="margin:8px 0 14px">${RING_CATS.map(([key, keys, color]) => { const m = keys.reduce((s, k) => s + (cats[k] || 0), 0); return `<span class="key"><i style="background:${color}"></i>${t(`cat.${key}`)} ${dur(m)}</span>`; }).join("")}</div>
-    <div class="tiles two aligned">${tiles}</div>
-    ${targets ? `<div class="stack" style="margin-top:var(--s-4);gap:8px">${targets}</div>` : ""}
-    <p class="small" style="margin:var(--s-3) 0 0"><a href="#time">${t("screens.more")}</a></p>
-    <details class="how"><summary>${t("ui.how")}</summary><p>${t("screens.rule")}</p></details></section>`;
+  const bad = a.metrics.some((m) => m.tone === "bad"), good = a.metrics.some((m) => m.tone === "good");
+  const state = a.stale ? chip("watch", t("sum.stale", { n: a.days_behind })) : bad ? chip("bad", t("sum.screens_bad"), STATE_ICON.bad) : good ? chip("good", t("sum.screens_good"), STATE_ICON.good) : chip("", t("sum.screens_usual"));
+  return line({ key: "screens", iconKey: "screen", name, text: dur(a.total),
+    viz: `<span class="catbar" role="img" aria-label="${esc(dur(a.total))}" style="margin:0;display:flex">${bar}</span>`, state, href: "#time" });
 }
 
-function effectLabel(r) {
-  const p = r.params || {};
-  return t(`eff.${r.key}`, { min: num(p.min), hours: num(p.hours), clock: p.clock });
-}
-
-function effectsHtml(p) {
-  const e = p.effects;
-  const seg = e.outcomes.map((o, i) => `<button type="button" data-outcome="${o}" aria-pressed="${i === 0}">${t(`out.${o}`)}</button>`).join("");
-  return `<section class="card"><h2>${t("effects.title")}<span class="seg" role="group" aria-label="${esc(t("effects.outcome"))}">${seg}</span></h2>
-    <div class="effects" id="effects"></div>
-    <details class="how"><summary>${t("ui.how")}</summary><p>${t("effects.rule")}</p></details></section>`;
-}
-
-function effectRows(e, outcome) {
-  const rows = e.rows[outcome] || [];
-  const unit = e.units[outcome];
-  const sign = e.better[outcome] === "lower" ? -1 : 1;  // plotted so that right = a better next day
-  const domain = Math.max(0.5, ...rows.filter((r) => r.status === "ok").map((r) => Math.max(Math.abs(r.low), Math.abs(r.high))));
-  const fmt = (v) => (unit === "%" ? signed(v, 1, "%") : signed(v, 1, unit === "bpm" ? ` ${t("unit.bpm")}` : ` ${t("unit.points")}`));
-  const head = `<div class="effect effect-head" aria-hidden="true"><span>${t("effects.col.what")}</span>
-    <span class="axis"><span>${t("effects.col.worse")}</span><span>${t("effects.col.better")}</span></span><span>${t("effects.col.diff")}</span></div>`;
-  return head + rows.map((r, i) => {
-    const ok = r.status === "ok";
-    const good = ok && sign * r.diff > 0;
-    const verdict = !ok ? `<span class="xs muted">${t("eff.too_few")}</span>`
-      : `<span class="chip ${r.detected ? (good ? "good" : "bad") : ""}">${t(r.detected ? "eff.detected" : "eff.not_detected")}</span>`;
-    const read = ok ? t(`eff.read.${outcome}.${r.diff >= 0 ? "higher" : "lower"}`, { v: num(Math.abs(r.diff), 1) }) : "";
-    const range = ok ? t("eff.range", { low: fmt(r.low), high: fmt(r.high) }) : "";
-    return `<div class="effect" ${ok ? `data-tip="${esc(`${read} · ${range}`)}"` : ""}>
-      <div class="what">${esc(effectLabel(r))}<span>${t("eff.days", { yes: r.yes_days, no: r.no_days })}</span></div>
-      <div class="ivl" data-i="${i}" data-domain="${domain}" data-sign="${sign}"></div>
-      <div class="verdict-cell">${verdict}${ok ? `<span class="xs muted read">${esc(read)}</span>` : ""}</div>
-      ${ok ? `<span class="sr">${esc(`${read}, ${range}`)}</span>` : ""}</div>`;
-  }).join("");
-}
-
-function drainHtml(p) {
+function drainLine(p) {
   const d = p.drain;
-  if (!d) return "";
-  const worse = worseLine(d.worse, d.compared, d.signals);
-  const plan = d.plan_off.length ? t("drain.plan_some", { list: d.plan_off.map((r) => `${inSentence(t(`drain.item.${r.key}`))}${t(`drain.plan.over.${r.key}`, { d: dur(r.over) })}`).join(t("drain.plan_sep")) }) : "";
-  // the Drain page for the same 7 days as this card (the latest window when this is today)
+  // the Drain page for the same 7 days as this line (the latest window when this is today)
   const more = p.looking_back ? `#drain/${d.window.to}` : "#drain";
-  return `<section class="card"><h2>${t("today.drain")}<span class="aside">${day(d.window.from, { weekday: false })} – ${day(d.window.to, { weekday: false })}</span></h2>
-    <p class="lede" style="font-size:var(--t-lg)">${esc(worse)}</p>
-    ${plan ? `<p class="small" style="margin:0 0 8px;color:var(--ink-2)">${esc(plan)}</p>` : ""}
-    ${d.strain ? `<p class="chip watch" style="height:auto;padding:4px 10px;white-space:normal">${t("week.strain")}</p>` : ""}
-    <p class="small" style="margin:var(--s-3) 0 0"><a href="${more}">${t("today.drain_more")}</a></p></section>`;
+  const state = d.strain ? chip("watch", t("sum.strain")) : d.worse.length ? chip("bad", t("sum.drain_n", { n: d.worse.length }), STATE_ICON.bad) : d.compared ? chip("good", t("sum.drain_ok"), STATE_ICON.good) : "";
+  return line({ key: "drain", iconKey: "battery", name: t("sum.drain_name"), text: worseLine(d.worse, d.compared, d.signals), state, href: more });
+}
+
+function weightLine(p) {
+  const w = p.summary.weight;
+  const name = t("nav.weight");
+  if (!w) return line({ key: "weight", iconKey: "heart", name, text: t("sum.none"), href: "#body" });
+  const cls = w.status === "on_track" || w.status === "reached" ? "good" : w.status ? "watch" : "";
+  return line({ key: "weight", iconKey: "heart", name,
+    text: [`${num(w.avg7, 1)} kg`, w.rate_pct != null ? t("goals.rate", { v: signed(w.rate_pct, 1) }) : ""].filter(Boolean).join(SEP()),
+    state: w.status ? chip(cls, t(`body.status.${w.status}`)) : "", href: "#body" });
+}
+
+function patternLine(p) {
+  const found = helping(p.effects);
+  const words = found.map((r) => t(`eff.short.${r.key}`, { min: num(r.params?.min), hours: num(r.params?.hours), clock: r.params?.clock }));
+  return line({ key: "patterns", iconKey: "check", name: t("sum.patterns"), text: words.length ? words.join(SEP()) : t("sum.patterns_none"), href: "#review" });
+}
+
+function linesHtml(p) {
+  return `<section class="card span-12"><h2>${t("sum.title")}</h2>
+    <div class="sum-rows">${recoveryLines(p)}${exerciseLine(p)}${foodLine(p)}${screensLine(p)}${drainLine(p)}${weightLine(p)}${patternLine(p)}</div>
+    <details class="how"><summary>${t("ui.how")}</summary><p>${t("recovery.rule")}</p><p>${t("screens.rule")}</p><p>${t("sum.rule")}</p></details></section>`;
 }
 
 export default {
@@ -224,28 +201,16 @@ export default {
     const stepper = `<div class="stepper"><a href="#today/${prev}">‹ ${t("ui.prev_day")}</a>
       ${p.looking_back ? `<a href="${next === p.today ? "#today" : `#today/${next}`}">${t("ui.next_day")} ›</a><a href="#today">${t("ui.back_today")}</a>` : `<span aria-disabled="true">${t("ui.next_day")} ›</span>`}</div>`;
     return `<div class="head"><div><h1>${p.looking_back ? t("today.looking_back", { day: day(p.day) }) : t("today.title")}</h1>
-      <div class="sub">${day(p.day)} · ${t("ui.computed", { time: clock(p.now) })}</div></div>${stepper}</div>
-      <div class="grid">${heroHtml(p)}${todoHtml(p)}<div class="col span-7">${recoveryHtml(p)}${effectsHtml(p)}</div><div class="col span-5">${attentionHtml(p)}${drainHtml(p)}</div></div>`;
+      <div class="sub">${day(p.day)}</div></div>${stepper}</div>
+      <div class="grid">${morningHtml(p)}${linesHtml(p)}</div>`;
   },
   mount(root, p) {
     const ringBox = root.querySelector("#ring");
     const now = p.ring.now ? clock(p.ring.now) : clock(p.ring.sleep?.end);
     draw(ringBox, (w) => dayRing(p.ring, { size: Math.max(260, Math.min(360, w)), center: now, centerSub: p.ring.now ? t("ring.now") : day(p.day) }));
-    const metrics = { ...Object.fromEntries(p.recovery.metrics.map((m, i) => [i, m])),
-      ...Object.fromEntries(p.activity.filter((m) => m.key !== "training").map((m, i) => [10 + i, m])),
-      ...Object.fromEntries(p.attention.metrics.map((m, i) => [20 + i, m])) };
-    root.querySelectorAll(".spk").forEach((el) => { const m = metrics[el.dataset.i]; draw(el, (w) => spark(m.series, m.band, { width: w, unit: m.unit, tone: m.tone })); });
-    root.querySelectorAll(".bul").forEach((el) => { const m = metrics[el.dataset.i]; draw(el, (w) => bullet(m.value, m.band, { width: w, unit: m.unit, tone: m.tone })); });
-    const training = p.activity.find((m) => m.key === "training");
-    draw(root.querySelector(".dots"), (w) => dayDots(training.series, { width: w }));
-    const box = root.querySelector("#effects");
-    const show = (outcome) => {
-      box.innerHTML = effectRows(p.effects, outcome);
-      const rows = p.effects.rows[outcome] || [];
-      box.querySelectorAll(".ivl").forEach((el) => draw(el, (w) => interval(rows[el.dataset.i], Number(el.dataset.domain), { width: w, flip: el.dataset.sign === "-1" })));
-      root.querySelectorAll("[data-outcome]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.outcome === outcome)));
-    };
-    root.querySelectorAll("[data-outcome]").forEach((b) => { b.onclick = () => show(b.dataset.outcome); });
-    if (p.effects.outcomes.length) show(p.effects.outcomes[0]);
+    p.recovery.metrics.forEach((m) => {
+      const el = root.querySelector(`.sum-viz[data-viz="${m.key}"]`);
+      if (el) draw(el, (w) => spark(m.series, m.band, { width: w, height: 30, unit: m.unit, tone: m.tone }));
+    });
   },
 };

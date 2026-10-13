@@ -1,7 +1,7 @@
 // History (#history): how the author's own personal system, which this project was taken out of, changed over a
 // year. Laid out like the design summary page of Ready to Train?: three cards on what it is first, then the year
-// drawn to real days, then each generation as "wanted → examples → found / changed", the lessons and what is not
-// done yet. Words in ../history-content.js; the server only names the page (modules/docs.py).
+// drawn to real days, then each generation as "wanted → examples → found / changed" (folded under its title),
+// the lessons (one card, each opens on a click) and what is not done yet. Words in ../history-content.js; the server only names the page (modules/docs.py).
 import { esc } from "../charts.js";
 import { getLang, t } from "../i18n.js";
 import { AXIS, HISTORY } from "../history-content.js";
@@ -38,9 +38,10 @@ function generation(c, g) {
   const body = g.stages
     ? g.stages.map((s) => `<section class="doc-stage"><h3>${s.title}<span class="doc-when">${s.when}</span></h3>${part(c, s)}</section>`).join("")
     : part(c, g);
+  // each generation shows its title; what it wanted, the examples and what was found and changed open on a click
   return `<article class="card doc-gen" id="${g.id}">
       <div class="doc-meta"><span class="doc-gen-code">${g.code}</span><span>${g.name}</span><span class="num">${g.dates}</span>${g.extra ? `<span>${g.extra}</span>` : ""}</div>
-      <div class="doc-body"><h2 class="doc-h">${g.title}</h2>${body}</div></article>`;
+      <details class="doc-body doc-fold"><summary><h2 class="doc-h">${g.title}</h2><span class="doc-open">${t("doc.open")}</span></summary>${body}</details></article>`;
 }
 
 export default {
@@ -61,7 +62,7 @@ export default {
         </div>
         <div class="doc-gens">${c.gens.map((g) => generation(c, g)).join("")}</div>
         <h2 class="doc-section">${c.lessonsTitle}</h2>
-        <ol class="doc-lessons">${c.lessons.map(([h, p], i) => `<li class="card doc-lesson"><h3><span class="doc-n">${i + 1}</span>${h}</h3><p>${p}</p></li>`).join("")}</ol>
+        <section class="card doc-lessons-card"><ol class="doc-folds">${c.lessons.map(([h, p], i) => `<li><details><summary><span class="doc-n">${i + 1}</span>${h}</summary><p>${p}</p></details></li>`).join("")}</ol></section>
         <p class="doc-small">${c.smallLessons}</p>
         <h2 class="doc-section">${c.notyetTitle}</h2>
         <ul class="doc-notyet">${c.notyet.map(([b, rest]) => `<li><b>${b}</b>${rest ? ` ${rest}` : ""}</li>`).join("")}</ul>
@@ -73,7 +74,13 @@ export default {
     if (lang) lang.onclick = () => document.querySelector("#lang")?.click();  // the menu's switch: remembers it and redraws
     const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
     el.querySelectorAll("[data-to]").forEach((b) => {
-      b.onclick = () => el.querySelector(`#${b.dataset.to}`)?.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+      b.onclick = () => {
+        const gen = el.querySelector(`#${b.dataset.to}`);
+        if (!gen) return;
+        const fold = gen.querySelector("details");
+        if (fold) fold.open = true;  // open the generation first, so the scroll lands on its text, not a closed title
+        gen.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+      };
     });
   },
 };

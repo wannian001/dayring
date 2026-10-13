@@ -281,7 +281,8 @@ class Words(unittest.TestCase):
     def test_workout_types_have_chinese_names(self):
         for kind in ("strength training", "walking", "running", "cycling", "workout"):
             self.assertIn(f"wtype.{kind}", self.strings, kind)
-        self.assertIn("wtype(", self.pages["time.js"])
+        # the pages that name a workout: Exercise lists them (the Time page's list moved there), Today names today's
+        self.assertIn("wtype(", self.pages["exercise.js"])
         self.assertIn("wtype(", self.pages["today.js"])
 
 

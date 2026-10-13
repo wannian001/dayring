@@ -258,7 +258,27 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
         "week": week_load(ctx, picked),
         "drain": drain_card,
         "ring": ring(ctx, picked, att["day"]),
+        "summary": summary(ctx, picked),
         "effects": effects(ctx, picked),
+    }
+
+
+def summary(ctx: Context, day: date) -> Dict[str, Any]:
+    """One line each for the parts of the day the other pages own: the week's exercise, the last 7 days of food and
+    the weight trend (recovery, screens and drain are in the payload already)."""
+    from . import body as body_page
+    from . import exercise as exercise_page
+    week = exercise_page.week_status(ctx, day)
+    goal = exercise_page.goal(ctx.cfg)
+    weight = body_page.build(ctx, iso(day))
+    plan = weight["plan"]
+    return {
+        "exercise": {"minutes": week["minutes"], "goal_min": goal["weekly_min"], "source": goal["source"],
+                     "strength_days": week["strength_days"], "strength_goal": goal["strength_days"],
+                     "remaining_min": week["remaining_min"], "days_left": week["days_left"], "status": week["status"],
+                     "is_current": week["is_current"], "tracked": bool(exercise_page.active_minutes(ctx, day))},
+        "food": food_page.summary(ctx, day),
+        "weight": {**weight["latest"], "plan": plan} if weight["points"] else None,
     }
 
 
