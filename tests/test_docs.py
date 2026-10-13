@@ -1,4 +1,4 @@
-"""The reading pages under the menu: Overview (#project), Guide (#guide) and History (#history)."""
+"""The reading pages under the menu: Overview (#project) and Guide (#guide); History is a link to the author's site."""
 import json
 import re
 import shutil
@@ -36,8 +36,17 @@ class Menu(unittest.TestCase):
         for glyph in glyphs.values():
             self.assertRegex(ICONS, rf"\b{glyph}: '<", glyph)  # an icon the kit draws
         self.assertIn('class="side-docs"', APP)
-        self.assertIn("history: historyPage", APP)  # never a top-level `history`: it would hide window.history
-        self.assertNotRegex(APP, r"import history from")
+
+    def test_history_is_a_link_to_the_authors_site_not_part_of_this_repository(self):
+        # it quotes the personal system this project comes from, so it is not published with the code
+        self.assertFalse((WEB / "js" / "history-content.js").exists())
+        self.assertFalse((WEB / "js" / "pages" / "history.js").exists())
+        self.assertNotIn("history", PAGES)
+        self.assertNotIn("history", docs.DOC_PAGES)
+        self.assertIn('const OUTSIDE = { history: "doc.history_url" };', APP)
+        self.assertIn('target="_blank" rel="noopener"', APP)
+        urls = re.findall(r'"doc\.history_url": "([^"]+)"', I18N)
+        self.assertEqual(sorted(urls), ["https://tangjiakuo.top/demo/aio-history/", "https://tangjiakuo.top/demo/aio-history/en/"])
 
     def test_every_word_in_both_languages(self):
         for key in ("nav.about", "nav.project", "nav.guide", "nav.history", "doc.other_lang"):
@@ -50,8 +59,7 @@ const [web, lang, page] = process.argv.slice(1);
 const i18n = await import(`${web}/js/i18n.js`);
 i18n.setLang(lang);
 const mod = (await import(`${web}/js/pages/${page}.js`)).default;
-const { HISTORY, AXIS } = await import(`${web}/js/history-content.js`);
-process.stdout.write(JSON.stringify({ html: mod.render({ page }), history: HISTORY, axis: AXIS }));
+process.stdout.write(JSON.stringify({ html: mod.render({ page }) }));
 """
 
 
@@ -64,13 +72,10 @@ class Words(unittest.TestCase):
         return json.loads(out.stdout)
 
     def test_pages_render_in_both_languages(self):
-        for lang, guide_title, history_title in (("en", "Guide", "History"), ("zh", "使用说明", "迭代记录")):
-            self.assertIn(f"<h1>{guide_title}</h1>", self.render(lang, "guide")["html"])
-            html = self.render(lang, "history")["html"]
-            self.assertIn(f"<h1>{history_title}</h1>", html)
-            self.assertEqual(len(re.findall(r'class="card doc-gen"', html)), 4)  # four generations
-            self.assertEqual(len(re.findall(r'<button type="button" class="r\d" data-to="g\d"', html)), 4)
-            self.assertNotRegex(html, r'href="#g\d"')  # the app routes on the hash: in-page jumps are buttons
+        for lang, title in (("en", "Guide"), ("zh", "使用说明")):
+            html = self.render(lang, "guide")["html"]
+            self.assertIn(f"<h1>{title}</h1>", html)
+            self.assertIn("https://tangjiakuo.top/demo/aio-history/", html)  # where the project came from: a link out
 
     def test_the_overview_says_the_same_things_in_both_languages(self):
         shapes = []
@@ -82,29 +87,8 @@ class Words(unittest.TestCase):
         self.assertEqual(shapes[0], shapes[1])
         self.assertEqual(shapes[0][:3], [3, 5, 4])  # three cards, the five steps of the loop, four folds
 
-    def test_the_two_languages_say_the_same_things(self):
-        h = self.render("en", "history")["history"]
-
-        def shape(c):
-            gens = []
-            for g in c["gens"]:
-                parts = g.get("stages") or [g]
-                gens.append([(len(p["examples"]), len(p["pairs"])) for p in parts])
-            return gens, len(c["cards"]), [len(x["items"]) for x in c["cards"]], len(c["lessons"]), len(c["notyet"]), len(c["axisLabels"]), len(c["sample"]["lines"])
-
-        self.assertEqual(shape(h["zh"]), shape(h["en"]))
-        self.assertEqual(len(self.render("en", "history")["axis"]["marks"]), len(h["en"]["axisLabels"]))
-
-    def test_the_year_axis_is_drawn_to_real_days(self):
-        html = self.render("en", "history")["html"]
-        lefts = [float(x) for x in re.findall(r'class="seg \w+" style="left:([\d.]+)%', html)]
-        widths = [float(x) for x in re.findall(r'class="seg \w+" style="left:[\d.]+%;width:([\d.]+)%', html)]
-        self.assertEqual(lefts[0], 0.0)
-        self.assertAlmostEqual(lefts[-1] + widths[-1], 100.0, places=1)  # the last span ends on the last day
-        self.assertEqual(lefts, sorted(lefts))
-
     def test_no_personal_data_on_the_pages(self):
-        text = "".join((WEB / "js" / f).read_text(encoding="utf-8") for f in ("history-content.js", "pages/guide.js", "pages/project.js"))
+        text = "".join((WEB / "js" / f).read_text(encoding="utf-8") for f in ("pages/guide.js", "pages/project.js"))
         for leak in ("/Users/", "Data/raw", "Vault/", "kg", "bpm", " ms", "MAE"):
             self.assertNotIn(leak, text, leak)
 

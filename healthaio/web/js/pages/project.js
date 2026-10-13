@@ -1,6 +1,7 @@
 // Overview (#project): what Proactive Health AIO is, who it is for, the problem it answers and how, then the
 // comparison with what people use now, the trade-offs, what comes next and who made it (each opening on a click).
 // The same facts as the README's "Why it exists", shorter. The server only names the page (modules/docs.py).
+// History is not in this repository: it quotes the personal system it comes from, so it lives on the author's site.
 import { esc } from "../charts.js";
 import { getLang, t } from "../i18n.js";
 
@@ -39,10 +40,10 @@ const PROJECT = {
         "<b>iPhone 伴侣 App：</b>省掉手动导出。"] },
       { h: "谁做的、怎么做的", items: [
         "分工：需求、取舍和验收是我；代码由 AI 编程工具（Claude Code、Codex）写。",
-        "它来自我自己用了一年的个人系统，四代迭代见“迭代记录”。",
+        "它来自我自己用了一年的个人系统，四代迭代见“迭代记录”（在我的网站上）。",
         "Python 标准库，不用装别的包；颜色、组件和图表是一套带版本号的设计套件；每条规则都有测试。"] },
     ],
-    links: [[REPO, "GitHub 仓库"], ["#guide", "使用说明"], ["#history", "迭代记录"], ["#kit", "设计套件"]],
+    links: [[REPO, "GitHub 仓库"], ["#guide", "使用说明"], ["history", "迭代记录"], ["#kit", "设计套件"]],
   },
   en: {
     title: "Overview", sub: "What it is, who it is for, and how it differs from what people use now",
@@ -76,10 +77,10 @@ const PROJECT = {
         "<b>An iPhone companion:</b> no more manual exports."] },
       { h: "Who made it, and how", items: [
         "Who did what: the needs, the trade-offs and the acceptance checks are mine; the code was written by AI coding tools (Claude Code, Codex).",
-        "It comes from the personal system I have used for a year; its four generations are in History.",
+        "It comes from the personal system I have used for a year; its four generations are in History (on my own site).",
         "Python's standard library, nothing else to install; colours, components and charts are one versioned design kit; every rule has tests."] },
     ],
-    links: [[REPO, "GitHub repository"], ["#guide", "Guide"], ["#history", "History"], ["#kit", "Design kit"]],
+    links: [[REPO, "GitHub repository"], ["#guide", "Guide"], ["history", "History"], ["#kit", "Design kit"]],
   },
 };
 
@@ -96,7 +97,12 @@ export default {
     const cards = c.cards.map((card, i) => `<section class="card doc-card"><h3><span class="doc-n">${"ABC"[i]}</span>${card.h}</h3>
       <ul>${card.items.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></section>`).join("");
     const loop = c.loop.map(([name, what, page, label]) => `<li><b>${name}</b><span>${what}</span><a href="#${page}">${label} ›</a></li>`).join("");
-    const links = c.links.map(([href, label]) => `<a href="${href}"${href.startsWith("http") ? ' target="_blank" rel="noopener"' : ""}>${label} ›</a>`).join("");
+    // History is on the author's own site, one page per language
+    const links = c.links.map(([to, label]) => {
+      const href = to === "history" ? t("doc.history_url") : to;
+      const out = href.startsWith("http");
+      return `<a href="${esc(href)}"${out ? ' target="_blank" rel="noopener"' : ""}>${label} ${out ? "↗" : "›"}</a>`;
+    }).join("");
     return `<div class="head"><div><h1>${c.title}</h1><div class="sub">${c.sub}</div></div></div>
       <div class="doc">
         <div class="doc-note"><p>${c.note}</p><button type="button" class="doc-link" id="doc-lang">${t("doc.other_lang")}</button></div>

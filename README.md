@@ -46,7 +46,7 @@ in one place, each compared with your own normal, and every morning, what to adj
 | **Data sources** | | What arrived each day for 90 days (sleep, HRV, steps, weight, screens, food log, …), which files have unreadable rows, how to import more. |
 | *About this project* | Overview | What it is, who it is for, the problem it answers, how it compares with what people use now, the trade-offs and what comes next. |
 | | Guide | How to use it: look around the demo, install it, bring in your Apple Health export, set your goals, and what to open each day. |
-| | History | Where this project comes from: the personal system it was taken out of, over a year and four generations (Word draft, Word rebuild, web, phone app with scheduled AI messages), what each one found and what changed. |
+| | [History ↗](https://tangjiakuo.top/demo/aio-history/en/) | Where this project comes from: the personal system it was taken out of, over a year and four generations, what each one found and what changed. It quotes that personal system, so it lives on the author's own site; the menu links out to it. |
 
 <p>
   <img src="docs/images/exercise.png" width="49%" alt="Exercise page, light mode">
@@ -62,7 +62,7 @@ in one place, each compared with your own normal, and every morning, what to adj
 </p>
 
 English and Chinese, light and dark (it follows your system), phone and desktop. On a computer the menu is a sidebar
-on the left that folds to a column of icons; on a phone it is a tab bar at the bottom. Guide and History sit under the menu (on a phone, two small icons in the top row).
+on the left that folds to a column of icons; on a phone it is a tab bar at the bottom. Overview, Guide and a link to History sit under the menu (on a phone, small icons in the top row).
 
 ### How it decides what to say
 
@@ -222,7 +222,7 @@ repository contains none of that data.
 | **数据来源** | | 90 天里每天到了什么数据（睡眠、HRV、步数、体重、屏幕、饮食记录……）、哪些文件有读不出的行、怎么继续导入。 |
 | *关于这个项目* | 项目说明 | 它是什么、为谁做、解决什么问题、和现在常用的比、有意的取舍、接下来做什么。 |
 | | 使用说明 | 怎么用：先看演示，装到自己电脑上，导入 Apple 健康的导出包，设目标，以及每天该看哪里。 |
-| | 迭代记录 | 这个项目的来历：它是从作者自己用了一年的个人系统里抽出来的；那个系统换了四代（Word 手稿、Word 重构、网页版、手机 App 加 AI 定时推送），每一代发现了什么、改了什么。 |
+| | [迭代记录 ↗](https://tangjiakuo.top/demo/aio-history/) | 这个项目的来历：它是从作者自己用了一年的个人系统里抽出来的；那个系统换了四代，每一代发现了什么、改了什么。它引了那个个人系统里的内容，所以放在作者自己的网站上，菜单里是一个指过去的链接。 |
 
 <p>
   <img src="docs/images/exercise-zh.png" width="49%" alt="运动页，深色">
@@ -237,7 +237,7 @@ repository contains none of that data.
   <img src="docs/images/sleep-zh.png" width="49%" alt="作息页，深色">
 </p>
 
-界面中英双语，浅色和深色（默认跟随系统），手机和电脑都能用。电脑上菜单是左边的侧栏，能收成一列图标；手机上是底部的标签栏。使用说明和迭代记录在菜单下面（手机上是顶栏的两个小图标）。
+界面中英双语，浅色和深色（默认跟随系统），手机和电脑都能用。电脑上菜单是左边的侧栏，能收成一列图标；手机上是底部的标签栏。项目说明、使用说明和迭代记录的链接在菜单下面（手机上是顶栏的小图标）。
 
 ### 它怎么判断
 

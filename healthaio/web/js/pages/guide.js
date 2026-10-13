@@ -43,7 +43,7 @@ const GUIDE = {
         "数据是你电脑上一个文件夹里的普通 CSV 文件，导入工具写它们，看板只读。",
         "服务只在本机（127.0.0.1）运行，不往任何地方发数据。它唯一会写的，是你在目标页设的目标：每次一行，记在 healthaio.toml 旁边的 goals.jsonl 里。"] },
     ],
-    history: "这个项目是怎么来的？看迭代记录 ›",
+    history: "这个项目是怎么来的？看迭代记录（在作者的网站上）",
   },
   en: {
     title: "Guide", sub: "From the demo, to your own data, to a normal day with it",
@@ -75,7 +75,7 @@ const GUIDE = {
         "Your data is plain CSV files in a folder on your computer. The importers write them; the dashboard only reads them.",
         "The server listens only on this computer (127.0.0.1) and sends nothing anywhere. The one thing it writes is a goal you set on the Goals page: one line each, in goals.jsonl next to healthaio.toml."] },
     ],
-    history: "Where did this project come from? Read the history ›",
+    history: "Where did this project come from? Read its history (on the author's site)",
   },
 };
 
@@ -91,7 +91,7 @@ export default {
       <div class="doc">
         <div class="doc-note"><p>${c.note}</p><button type="button" class="doc-link" id="doc-lang">${t("doc.other_lang")}</button></div>
         <section class="card"><ol class="doc-folds doc-guide-steps">${steps}</ol></section>
-        <p class="doc-try"><a href="#history">${c.history}</a></p>
+        <p class="doc-try"><a href="${esc(t("doc.history_url"))}" target="_blank" rel="noopener">${c.history} ↗</a></p>
       </div>`;
   },
   mount(el) {

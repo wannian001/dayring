@@ -877,13 +877,15 @@ Object.assign(DICT.zh, {
   "kitdoc.keptDots": "一串日子画成一排点，每 7 天留一点空：实心 = 做到了，空心圈 = 没做到，短横 = 那天没有记录。",
 });
 
-// ---- the reading pages under the menu (their own words are in pages/guide.js and history-content.js) ----
+// ---- the reading pages under the menu (their own words are in pages/project.js and guide.js; History is on the author's site) ----
 Object.assign(DICT.en, {
   "nav.about": "About this project", "nav.project": "Overview", "nav.guide": "Guide", "nav.history": "History",
+  "doc.history_url": "https://tangjiakuo.top/demo/aio-history/en/",
   "doc.other_lang": "阅读中文版",
 });
 Object.assign(DICT.zh, {
   "nav.about": "关于这个项目", "nav.project": "项目说明", "nav.guide": "使用说明", "nav.history": "迭代记录",
+  "doc.history_url": "https://tangjiakuo.top/demo/aio-history/",
   "doc.other_lang": "Read in English",
 });
 

@@ -21,7 +21,6 @@ PAGES: Dict[str, Callable[..., Dict[str, Any]]] = {
     # the reading pages under the menu: no numbers, only which page it is
     "project": lambda ctx, param=None: docs.build(ctx, "project"),
     "guide": lambda ctx, param=None: docs.build(ctx, "guide"),
-    "history": lambda ctx, param=None: docs.build(ctx, "history"),
 }
 
 
