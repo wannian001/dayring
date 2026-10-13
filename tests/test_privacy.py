@@ -18,7 +18,8 @@ PATTERNS = {
 }
 # where a pattern may appear because the text is about the pattern itself
 ALLOWED = {("healthaio/phone.py", "a Tailscale address"), ("tests/test_phone.py", "a Tailscale address"),
-           ("docs/CAPTURE.md", "a Tailscale address"), ("tests/test_privacy.py", "an Apple team id")}
+           ("docs/CAPTURE.md", "a Tailscale address"), ("tests/test_privacy.py", "an Apple team id"),
+           ("tests/test_collect.py", "an Apple team id")}
 NEVER_TRACKED = ("ios/Local.xcconfig", ".healthaio/", "healthaio.toml", "data/")
 
 

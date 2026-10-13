@@ -1,0 +1,1436 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "8-digit code": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "8 位配对码"
+          }
+        }
+      }
+    },
+    "A package is still waiting for your computer. Check it below before sending more.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还有一个数据包在等电脑确认。先在下面查看它，再发送新的。"
+          }
+        }
+      }
+    },
+    "A package keeps its id and exact contents until your computer confirms it is in your tables. Only one waits at a time.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在电脑确认已写入表格之前，数据包会一直保持原来的编号和内容。同一时间只会有一个在等待。"
+          }
+        }
+      }
+    },
+    "AI work": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 工作"
+          }
+        }
+      }
+    },
+    "About": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关于"
+          }
+        }
+      }
+    },
+    "Address, e.g. 192.168.1.20:8790": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "地址，例如 192.168.1.20:8790"
+          }
+        }
+      }
+    },
+    "Allow reading Apple Health": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许读取 Apple 健康"
+          }
+        }
+      }
+    },
+    "Allow reminders": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许提醒"
+          }
+        }
+      }
+    },
+    "An app you build yourself runs for 7 days with a free Apple ID, a year with a paid developer account. The app checks once a day and reminds you two days before.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自己编译安装的 App，用免费 Apple ID 签名能用 7 天，用付费开发者账号能用一年。App 每天检查一次，到期前两天提醒你。"
+          }
+        }
+      }
+    },
+    "An app you build yourself stops opening when its signature runs out: after 7 days with a free Apple ID. Health AIO reminds you the day before, and when a new version is out. Nothing else.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自己编译安装的 App 在签名到期后就打不开了：免费 Apple ID 是 7 天。Health AIO 会在到期前一天、以及有新版本时提醒你，不发别的通知。"
+          }
+        }
+      }
+    },
+    "Apple Health": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 健康"
+          }
+        }
+      }
+    },
+    "Apple Health could not be read": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法读取 Apple 健康"
+          }
+        }
+      }
+    },
+    "Apple Health could not be read: %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法读取 Apple 健康：%@"
+          }
+        }
+      }
+    },
+    "Apple Health is not available on this device.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台设备不支持 Apple 健康。"
+          }
+        }
+      }
+    },
+    "Asked (iOS does not tell apps which types you allowed)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已询问（iOS 不会告诉 App 你允许了哪些类型）"
+          }
+        }
+      }
+    },
+    "Asking your computer…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在询问电脑…"
+          }
+        }
+      }
+    },
+    "Calendar": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日程"
+          }
+        }
+      }
+    },
+    "Can't reach your computer": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连不上你的电脑"
+          }
+        }
+      }
+    },
+    "Can't reach your computer. Check that the phone is on the same Wi-Fi or on Tailscale, and that healthaio serve --lan is running.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连不上你的电脑。请确认手机和电脑在同一个 Wi-Fi 上或都连着 Tailscale，并且电脑上正在运行 healthaio serve --lan。"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
+          }
+        }
+      }
+    },
+    "Capture": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "采集"
+          }
+        }
+      }
+    },
+    "Catch up 14 days": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "补传 14 天"
+          }
+        }
+      }
+    },
+    "Catching up: package %lld of %lld…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在补传：第 %1$lld 个，共 %2$lld 个…"
+          }
+        }
+      }
+    },
+    "Check and retry": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查并重试"
+          }
+        }
+      }
+    },
+    "Check now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即检查"
+          }
+        }
+      }
+    },
+    "Checked": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查时间"
+          }
+        }
+      }
+    },
+    "Daily body (sleep, steps, heart)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每日身体数据（睡眠、步数、心率）"
+          }
+        }
+      }
+    },
+    "Days": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日期"
+          }
+        }
+      }
+    },
+    "Debug": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "调试"
+          }
+        }
+      }
+    },
+    "Discard": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "丢弃"
+          }
+        }
+      }
+    },
+    "Discard this package": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "丢弃这个数据包"
+          }
+        }
+      }
+    },
+    "Discard this package?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "丢弃这个数据包？"
+          }
+        }
+      }
+    },
+    "Enter the address your computer printed (an IP address, a .local or a .ts.net name) and the 8-digit code.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入电脑上显示的地址（IP 地址、.local 或 .ts.net 名称）和 8 位配对码。"
+          }
+        }
+      }
+    },
+    "Health AIO": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health AIO"
+          }
+        }
+      }
+    },
+    "Health AIO %@ is available; renewing installs it.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health AIO %@ 已发布，续签时会一起装上。"
+          }
+        }
+      }
+    },
+    "Health AIO on GitHub": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub 上的 Health AIO"
+          }
+        }
+      }
+    },
+    "Health AIO only reads. iOS asks once; to change your answer later, open the Health app, tap your picture, then Apps.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health AIO 只读取数据。iOS 只会问一次；之后想改，打开“健康” App，轻点你的头像，再进入“App”。"
+          }
+        }
+      }
+    },
+    "Health AIO will send your health data to %@.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health AIO 会把你的健康数据发送到 %@。"
+          }
+        }
+      }
+    },
+    "Health AIO will send your health data to %@. This replaces the current pairing.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health AIO 会把你的健康数据发送到 %@。这会替换现在的配对。"
+          }
+        }
+      }
+    },
+    "Health AIO's signature runs out in %lld days.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health AIO 的签名还有 %lld 天到期。"
+          }
+        }
+      }
+    },
+    "Health AIO's signature runs out today.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health AIO 的签名今天到期。"
+          }
+        }
+      }
+    },
+    "Health AIO's signature runs out tomorrow.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health AIO 的签名明天到期。"
+          }
+        }
+      }
+    },
+    "Health AIO's signature runs out tomorrow. Open the app and tap Renew, or run healthaio iphone renew on your Mac.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health AIO 的签名明天到期。打开 App 点“现在续签”，或在 Mac 上运行 healthaio iphone renew。"
+          }
+        }
+      }
+    },
+    "How the phone and computer talk": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手机和电脑怎样通信"
+          }
+        }
+      }
+    },
+    "In your tables": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已写入表格"
+          }
+        }
+      }
+    },
+    "Is the phone on the same Wi-Fi as your computer, or on Tailscale? Is healthaio serve --lan running there?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手机和电脑在同一个 Wi-Fi 上吗？或者都连着 Tailscale？电脑上在运行 healthaio serve --lan 吗？"
+          }
+        }
+      }
+    },
+    "Last package": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上一个数据包"
+          }
+        }
+      }
+    },
+    "Last read": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上一次读取"
+          }
+        }
+      }
+    },
+    "Latest days on your computer": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑上的最新日期"
+          }
+        }
+      }
+    },
+    "Latest on GitHub": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub 最新版本"
+          }
+        }
+      }
+    },
+    "Meals": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "饮食"
+          }
+        }
+      }
+    },
+    "No answer": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有回应"
+          }
+        }
+      }
+    },
+    "No package has reached your computer yet.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有数据包送到电脑。"
+          }
+        }
+      }
+    },
+    "No pairing code is open on your computer. Run healthaio pair there, then try again within 10 minutes.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑上没有打开的配对码。请在电脑上运行 healthaio pair，然后在 10 分钟内重试。"
+          }
+        }
+      }
+    },
+    "Not asked yet": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没询问"
+          }
+        }
+      }
+    },
+    "Not available on this device": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台设备不支持"
+          }
+        }
+      }
+    },
+    "Not checked yet. Pull down to check.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没检查。下拉即可检查。"
+          }
+        }
+      }
+    },
+    "Not now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以后再说"
+          }
+        }
+      }
+    },
+    "Not paired yet": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有配对"
+          }
+        }
+      }
+    },
+    "Not received": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑没收到"
+          }
+        }
+      }
+    },
+    "Not sent yet.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没发送。"
+          }
+        }
+      }
+    },
+    "Not sent: a package is still waiting": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有发送：还有数据包在等待"
+          }
+        }
+      }
+    },
+    "Not today": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天不再提醒"
+          }
+        }
+      }
+    },
+    "Nothing in Apple Health for these days": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 健康里这几天没有数据"
+          }
+        }
+      }
+    },
+    "Nothing new since the last read": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "和上次读取相比没有新内容"
+          }
+        }
+      }
+    },
+    "Nothing read yet.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有读取过。"
+          }
+        }
+      }
+    },
+    "Nothing waiting.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有等待中的数据包。"
+          }
+        }
+      }
+    },
+    "Notifications are off for Health AIO in iOS Settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS 设置里关闭了 Health AIO 的通知。"
+          }
+        }
+      }
+    },
+    "On your Mac, run: healthaio iphone renew": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Mac 上运行：healthaio iphone renew"
+          }
+        }
+      }
+    },
+    "On your computer run healthaio pair (or Pair iPhone… in the Mac app), then point the iPhone Camera at the QR code. Or type the address and code it shows. The phone must be on the same Wi-Fi or on Tailscale.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在电脑上运行 healthaio pair（或在 Mac App 里选“配对 iPhone…”），再用 iPhone 相机扫二维码；也可以手动输入它显示的地址和配对码。手机需要和电脑在同一个 Wi-Fi 上，或都连着 Tailscale。"
+          }
+        }
+      }
+    },
+    "One notification the day before the signature runs out, at 10:00, and one when a new version is out.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "签名到期前一天 10:00 提醒一次，有新版本时再提醒一次。"
+          }
+        }
+      }
+    },
+    "Only a Mac can sign iPhone apps, and your computer is not a Mac.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只有 Mac 能给 iPhone App 签名，而你的电脑不是 Mac。"
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开设置"
+          }
+        }
+      }
+    },
+    "Open iOS Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 iOS 设置"
+          }
+        }
+      }
+    },
+    "Pair": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配对"
+          }
+        }
+      }
+    },
+    "Pair this phone with your computer to see your dashboard here.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把这台手机和电脑配对后，就能在这里看到你的面板。"
+          }
+        }
+      }
+    },
+    "Pair with this computer?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "和这台电脑配对？"
+          }
+        }
+      }
+    },
+    "Pair with your computer first, in Settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请先在“设置”里和电脑配对。"
+          }
+        }
+      }
+    },
+    "Pair with your computer in Settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在“设置”里和电脑配对。"
+          }
+        }
+      }
+    },
+    "Paired as": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已配对"
+          }
+        }
+      }
+    },
+    "Panel": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "面板"
+          }
+        }
+      }
+    },
+    "Paste pairing link": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "粘贴配对链接"
+          }
+        }
+      }
+    },
+    "Read only. To change what Health AIO may read, open the Health app, tap your picture, then Apps.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只读取。想更改 Health AIO 能读取的内容，打开“健康” App，轻点你的头像，再进入“App”。"
+          }
+        }
+      }
+    },
+    "Reading Apple Health…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在读取 Apple 健康…"
+          }
+        }
+      }
+    },
+    "Records": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记录"
+          }
+        }
+      }
+    },
+    "Refused": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "被拒绝"
+          }
+        }
+      }
+    },
+    "Releases": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本发布"
+          }
+        }
+      }
+    },
+    "Remind me before the signature runs out": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "签名到期前提醒我"
+          }
+        }
+      }
+    },
+    "Reminders": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提醒"
+          }
+        }
+      }
+    },
+    "Reminders before the app stops opening": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 App 打不开之前提醒你"
+          }
+        }
+      }
+    },
+    "Renew now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "现在续签"
+          }
+        }
+      }
+    },
+    "Renewed.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已续签。"
+          }
+        }
+      }
+    },
+    "Renewing did not work.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "续签没有成功。"
+          }
+        }
+      }
+    },
+    "Result": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "结果"
+          }
+        }
+      }
+    },
+    "Screen time": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏幕使用时间"
+          }
+        }
+      }
+    },
+    "Send a sample package": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发送示例数据包"
+          }
+        }
+      }
+    },
+    "Sending to your computer…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在发送到电脑…"
+          }
+        }
+      }
+    },
+    "Sent as a package": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已作为数据包发送"
+          }
+        }
+      }
+    },
+    "Sent, but no answer came back. The app will ask your computer before sending anything else.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已发送，但没有收到回应。App 会先问过电脑，再发送别的。"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置"
+          }
+        }
+      }
+    },
+    "Signature valid until": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "签名有效期至"
+          }
+        }
+      }
+    },
+    "Since": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配对时间"
+          }
+        }
+      }
+    },
+    "Status": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状态"
+          }
+        }
+      }
+    },
+    "Stored": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已存储"
+          }
+        }
+      }
+    },
+    "Stored on your computer, but the rows could not be written. The computer tries again when healthaio serve restarts.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已存到电脑上，但没能写入表格。healthaio serve 重启时电脑会再试一次。"
+          }
+        }
+      }
+    },
+    "Stored on your computer, not yet in the tables.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已存到电脑上，还没写入表格。"
+          }
+        }
+      }
+    },
+    "Stored, not written": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已存储，未写入"
+          }
+        }
+      }
+    },
+    "Stored, not yet in the tables": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已存储，还没写入表格"
+          }
+        }
+      }
+    },
+    "Stored, rows not written": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已存储，未写入表格"
+          }
+        }
+      }
+    },
+    "Sync now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即同步"
+          }
+        }
+      }
+    },
+    "That code is not the one your computer shows. Check the 8 digits and try again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配对码和电脑上显示的不一致。请核对这 8 位数字后重试。"
+          }
+        }
+      }
+    },
+    "The app reads Apple Health and sends it to your computer only while it is open: about a second after you open it, and when you tap Sync now. Nothing goes through a cloud service.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 只在打开时读取 Apple 健康并发送到电脑：打开后约一秒自动读取一次，或在你点“立即同步”时读取。数据不经过任何云服务。"
+          }
+        }
+      }
+    },
+    "The clipboard has no pairing link. Copy the healthaio://pair… link your computer printed.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剪贴板里没有配对链接。请复制电脑上显示的 healthaio://pair… 链接。"
+          }
+        }
+      }
+    },
+    "The package could not be saved on the phone: %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "数据包没能保存在手机上：%@"
+          }
+        }
+      }
+    },
+    "The pairing may have been revoked. Pair again in Settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配对可能已被撤销。请在“设置”里重新配对。"
+          }
+        }
+      }
+    },
+    "The phone could not store the pairing safely. Try again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手机没能安全地保存配对信息。请重试。"
+          }
+        }
+      }
+    },
+    "The phone forgets the address and both keys. To cut it off on the computer as well, run healthaio devices revoke there.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手机会忘掉地址和两把密钥。如果也要在电脑上断开这台手机，请在电脑上运行 healthaio devices revoke。"
+          }
+        }
+      }
+    },
+    "The phone forgets this package. Your next read makes a new one with the same days.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手机会删掉这个数据包。下次读取时会为这些日期重新生成一个。"
+          }
+        }
+      }
+    },
+    "This app": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本 App"
+          }
+        }
+      }
+    },
+    "Try again": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试"
+          }
+        }
+      }
+    },
+    "Unknown (simulator or store build)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未知（模拟器或商店版本）"
+          }
+        }
+      }
+    },
+    "Unpair": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消配对"
+          }
+        }
+      }
+    },
+    "Unpair from this computer?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消和这台电脑的配对？"
+          }
+        }
+      }
+    },
+    "Version and signature": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本与签名"
+          }
+        }
+      }
+    },
+    "Waiting": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待中"
+          }
+        }
+      }
+    },
+    "Waiting to send": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待发送"
+          }
+        }
+      }
+    },
+    "When": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "时间"
+          }
+        }
+      }
+    },
+    "Workouts": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "体能训练"
+          }
+        }
+      }
+    },
+    "Your computer": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的电脑"
+          }
+        }
+      }
+    },
+    "Your computer already has a different package with this id.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑上已经有一个编号相同、内容不同的数据包。"
+          }
+        }
+      }
+    },
+    "Your computer answered with an error (HTTP %lld).": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑返回了错误（HTTP %lld）。"
+          }
+        }
+      }
+    },
+    "Your computer can sign the app again and install it on this phone.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的电脑可以重新签名这个 App，并安装到这台手机上。"
+          }
+        }
+      }
+    },
+    "Your computer cannot find the app's project (the ios folder of the Health AIO repository). Install healthaio from a copy of the repository.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑找不到这个 App 的工程（Health AIO 仓库里的 ios 文件夹）。请用仓库的副本安装 healthaio。"
+          }
+        }
+      }
+    },
+    "Your computer cannot renew the app right now.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑现在没法续签这个 App。"
+          }
+        }
+      }
+    },
+    "Your computer did not accept this phone. Pair again in Settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑没有接受这台手机。请在“设置”里重新配对。"
+          }
+        }
+      }
+    },
+    "Your computer did not let this phone in": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑没有让这台手机访问"
+          }
+        }
+      }
+    },
+    "Your computer does not know which Apple account signs the app. Copy ios/Local.example.xcconfig to ios/Local.xcconfig and put your bundle id and Team ID in it.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑不知道用哪个 Apple 账号签名。请把 ios/Local.example.xcconfig 复制为 ios/Local.xcconfig，并填上你的 bundle id 和 Team ID。"
+          }
+        }
+      }
+    },
+    "Your computer has never received it. Tap Check and retry to send the same package again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑从没收到过它。点“检查并重试”会把同一个数据包再发一次。"
+          }
+        }
+      }
+    },
+    "Your computer has no Xcode, so it cannot sign the app. Install Xcode from the Mac App Store and open it once.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑上没有 Xcode，没法签名。请从 Mac App Store 安装 Xcode 并打开一次。"
+          }
+        }
+      }
+    },
+    "Your computer is building and installing the app. iOS will close Health AIO once when the new copy is installed; open it again afterwards.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑正在编译并安装 App。新版本装好时 iOS 会关闭一次 Health AIO，之后重新打开即可。"
+          }
+        }
+      }
+    },
+    "Your computer refused this package. Discard it; the next read makes a new one.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑拒绝了这个数据包。请丢弃它，下次读取会生成新的。"
+          }
+        }
+      }
+    },
+    "Your computer runs": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑上的版本"
+          }
+        }
+      }
+    },
+    "Your computer sent an answer this app can't read. Update healthaio on the computer.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电脑返回的内容这个 App 读不懂。请更新电脑上的 healthaio。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

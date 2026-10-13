@@ -95,7 +95,9 @@ class Signature(unittest.TestCase):
                 (folder / "Local.xcconfig").write_text("HEALTHAIO_BUNDLE_ID = org.example.me.healthaio\nHEALTHAIO_TEAM =\n")
                 self.assertIsNone(iphone.team())
                 (folder / "Local.xcconfig").write_text("HEALTHAIO_TEAM = ABCDE12345\n")
-                self.assertEqual(iphone.team(), "ABCDE12345")
+                self.assertIsNone(iphone.team())  # the example's placeholder, copied unchanged
+                (folder / "Local.xcconfig").write_text("HEALTHAIO_TEAM = QWERT67890\n")
+                self.assertEqual(iphone.team(), "QWERT67890")
         finally:
             shutil.rmtree(folder, ignore_errors=True)
 

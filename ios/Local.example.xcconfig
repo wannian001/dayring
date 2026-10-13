@@ -1,0 +1,11 @@
+// Copy this file to Local.xcconfig (same folder) and fill in your own values.
+// Local.xcconfig is ignored by git, so your bundle id and Team ID never reach the repository.
+//
+// HEALTHAIO_BUNDLE_ID: any reverse-DNS name that is yours, for example com.yourname.healthaio.
+//   Apple ties a bundle id to one team, so pick one nobody else uses.
+// HEALTHAIO_TEAM: your Team ID (10 characters). Xcode shows it under Settings > Accounts > your Apple ID.
+//   A free Apple ID works: its "Personal Team" signs the app for 7 days, then `healthaio iphone renew`
+//   (or the app's Renew now button) signs it again. A paid developer account signs it for a year.
+
+HEALTHAIO_BUNDLE_ID = com.example.yourname.healthaio
+HEALTHAIO_TEAM = ABCDE12345

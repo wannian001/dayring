@@ -103,7 +103,8 @@ by hand and the same days sent by the app give the same rows.
 - Types the app reads: sleep analysis, steps, exercise minutes, resting heart rate, HRV (SDNN), body mass, active and
   resting energy, dietary energy, protein, carbohydrate, fat and fibre, and workouts. Units: `count`, `min`,
   `count/min`, `ms`, `kg`, `kcal`, `g`. Sleep values are the `HKCategoryValueSleepAnalysis…` names (InBed,
-  AsleepUnspecified, Awake, AsleepCore, AsleepDeep, AsleepREM).
+  AsleepUnspecified, Awake, AsleepCore, AsleepDeep, AsleepREM). The app also asks to read heart rate, because iOS
+  hides a workout's average heart rate without it; heart-rate samples themselves are never read or sent.
 - **No personal names.** Apple's own sources carry the name you gave your devices ("Sam's Apple Watch"). The app
   sends the product instead: `sourceName` "Apple Watch" or "iPhone", `device` "Watch" or "iPhone". Third-party app
   names (a food logger) are kept, since the merge rules need them.

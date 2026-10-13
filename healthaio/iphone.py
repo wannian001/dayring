@@ -38,7 +38,8 @@ def team() -> Optional[str]:
     if not local.is_file():
         return None
     match = re.search(r"^\s*HEALTHAIO_TEAM\s*=\s*([A-Z0-9]+)\s*$", local.read_text(encoding="utf-8"), re.M)
-    return match.group(1) if match else None
+    # ABCDE12345 is the placeholder in Local.example.xcconfig: copied unchanged, it is no team at all
+    return match.group(1) if match and match.group(1) != "ABCDE12345" else None
 
 
 def reason() -> Optional[str]:
