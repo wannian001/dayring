@@ -7,9 +7,9 @@
 // and is left out of its average and normal. Devices at once (each device counting its own minutes) has its
 // own card; its two measures, screens at once (a ratio, kept in hundredths) and the longest stretch on one thing,
 // are candidates of "what changed" like the rest.
-import { bullet, draw, esc, lanes } from "../charts.js?v=f86d36d39c";
-import { day, device, dur, getLang, num, shortDay, t, weekdayShort, wtype } from "../i18n.js?v=f86d36d39c";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=f86d36d39c";
+import { bullet, draw, esc, lanes, timeChart } from "../charts.js?v=150dddf82c";
+import { day, device, dur, getLang, num, shortDay, t, weekdayShort, wtype } from "../i18n.js?v=150dddf82c";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=150dddf82c";
 
 const ORDER = ["sleep", "exercise", "calendar", "screen"];  // the lanes, in the same order in both lane charts
 const TILES = ["screen", "fun", "focus", "communication", "exercise", "calendar", "sleep", "not_recorded"];  // every candidate has a tile
@@ -127,6 +127,32 @@ function stackHtml(p) {
     ${agent >= 1 ? `<p class="xs muted" style="margin:8px 0 0">${esc(t("time.agent_note", { v: dur(agent) }))}</p>` : ""}</section>`;
 }
 
+// stimulation and focus, averaged: what people call "dopamine tolerance" can't be measured, so the card shows
+// the behaviour around it, side by side and never as cause and effect (modules/time.py, trend)
+const TREND = [["fun", "fun", "var(--c-fun)"], ["longest_focus", "focus", "var(--c-focus)"]];
+const tenths = (v) => num(Math.round(v * 10) / 10, Math.round(v * 10) % 10 ? 1 : 0);
+// stimulation is drawn in hours, so the axis steps on round hours (1, 2, 5) rather than 100 minutes (1.7h)
+const TREND_SCALE = { fun: 1 / 60, longest_focus: 1 };
+const TREND_FMT = { fun: (v) => t("trend.h", { h: tenths(v) }), longest_focus: (v) => t("trend.m", { m: Math.round(v) }) };
+
+function trendHtml(p) {
+  const T = p.trend;
+  if (!T) return "";
+  const box = ([key, ico, color]) => {
+    const s = T.series[key], r = s.recent.avg, b = s.before.avg;
+    const level = r == null ? t("trend.level_none", { n: T.level_days, min: T.level_min })
+      : b == null ? t("trend.level_one", { n: T.level_days, v: dur(r) })
+      : t("trend.level", { n: T.level_days, v: dur(r), w: dur(b) });
+    return `<div style="--c-mark:${color};min-width:0">
+      <div class="section-title"><span class="act-name" style="color:${color}">${icon(ico, 16)}<span>${t(`trend.${key}`)}</span></span><span class="aside">${phrases(t(`trend.${key}_what`))}</span></div>
+      <p class="small" style="margin:2px 0 8px">${phrases(level)}</p>
+      <div id="trend-${key}" class="chart"></div></div>`;
+  };
+  return `<section class="card span-12"><h2>${t("trend.title")}<span class="aside">${phrases(t("trend.note"))}</span></h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:20px 32px">${TREND.map(box).join("")}</div>
+    <p class="xs muted" style="margin:10px 0 0">${esc(t("trend.key"))}</p></section>`;
+}
+
 function heroHtml(p) {
   const S = p.span;
   const top = S.standout;
@@ -201,10 +227,11 @@ export default {
         <section class="card span-12"><h2><span>${phrases(t("time.typical"))}</span><span class="aside legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}</span></h2><div id="hours" class="chart"></div></section>
         ${stackHtml(p)}
         <section class="card span-12"><h2>${t("time.history")}<span class="aside">${phrases(t("time.history_note"))}</span></h2><div id="history" class="chart"></div></section>
+        ${trendHtml(p)}
         <section class="card span-7"><h2>${t("time.apps")}<span class="aside">${t("time.apps_note")}</span></h2>${apps ? `<ul class="apps">${apps}</ul>
           <p class="xs muted" style="margin:10px 0 0">${t("time.devices")}: ${devices}</p>` : `<p class="muted small">${t("time.no_screens")}</p>`}</section>
         <section class="card span-5"><h2>${t("time.workouts")}<span class="aside">${t("time.workouts_note")}</span></h2>${workouts}</section>
-        <section class="card span-12"><details class="how" open><summary>${t("ui.how")}</summary><p>${esc(t("time.rule", { n: p.baseline_days, min: p.baseline_min }))}</p><p>${esc(t("time.rule_stack"))}</p></details></section>
+        <section class="card span-12"><details class="how" open><summary>${t("ui.how")}</summary><p>${esc(t("time.rule", { n: p.baseline_days, min: p.baseline_min }))}</p><p>${esc(t("time.rule_stack"))}</p>${p.trend ? `<p>${esc(t("trend.rule", { n: p.baseline_days, min: p.baseline_min, level: p.trend.level_days, lmin: p.trend.level_min, days: p.trend.days }))}</p>` : ""}</details></section>
       </div>`;
   },
   mount(root, p) {
@@ -253,5 +280,17 @@ export default {
       ...(extra.some((v) => v) ? [extraRow] : [])];
     const dayCols = H.map((d) => ({ label: shortDay(d.date), tip: day(d.date), shade: d.in_span }));
     draw(root.querySelector("#history"), (w) => lanes(dayRows(w), dayCols, { width: w, rowH: 58, labelW: labelW(w), labelEvery: Math.max(every(w, labelW(w), H.length, 44), w < 560 ? 7 : 3) }));
+    const T = p.trend;
+    if (T) {
+      TREND.forEach(([key]) => {
+        const D = T.series[key].days, k = TREND_SCALE[key];
+        const layers = {
+          points: D.filter((d) => d.value != null).map((d) => ({ date: d.date, value: d.value * k })),
+          line: D.filter((d) => d.avg7 != null).map((d) => ({ date: d.date, value: d.avg7 * k })),
+          band: D.filter((d) => d.band).map((d) => ({ date: d.date, low: d.band.q1 * k, high: d.band.q3 * k })),
+        };
+        draw(root.querySelector(`#trend-${key}`), (w) => timeChart(layers, { width: w, height: 190, first: T.from, last: T.to, fmt: TREND_FMT[key], maxGap: 1 }));
+      });
+    }
   },
 };

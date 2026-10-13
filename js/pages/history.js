@@ -2,9 +2,9 @@
 // year. Laid out like the design summary page of Ready to Train?: three cards on what it is first, then the year
 // drawn to real days, then each generation as "wanted → examples → found / changed", the lessons and what is not
 // done yet. Words in ../history-content.js; the server only names the page (modules/docs.py).
-import { esc } from "../charts.js?v=f86d36d39c";
-import { getLang, t } from "../i18n.js?v=f86d36d39c";
-import { AXIS, HISTORY } from "../history-content.js?v=f86d36d39c";
+import { esc } from "../charts.js?v=150dddf82c";
+import { getLang, t } from "../i18n.js?v=150dddf82c";
+import { AXIS, HISTORY } from "../history-content.js?v=150dddf82c";
 
 const DAY = 86400000;
 const at = (iso) => Date.parse(`${iso}T00:00:00Z`);

@@ -1,8 +1,8 @@
 // Guide (#guide): how to use Proactive Health AIO, from the demo to your own data to a normal day with it.
 // Numbered steps in the order you meet them; commands are the ones in the README's Quick start. The server only
 // names the page (modules/docs.py).
-import { esc } from "../charts.js?v=f86d36d39c";
-import { getLang, t } from "../i18n.js?v=f86d36d39c";
+import { esc } from "../charts.js?v=150dddf82c";
+import { getLang, t } from "../i18n.js?v=150dddf82c";
 
 const CODE = {
   install: ["git clone https://github.com/wannian001/proactive-health-aio.git", "cd proactive-health-aio", "python3 -m healthaio serve --demo"],

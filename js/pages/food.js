@@ -1,8 +1,8 @@
 // Food: the last 7 logged days against your normal and your plan, when the last meal came before sleep, the
 // energy balance against the scale, and what an early dinner has gone with the next morning.
-import { draw, esc, interval, legendKey, mealTimeline, rangeStrip, trendLine } from "../charts.js?v=f86d36d39c";
-import { day, dur, inSentence, num, shortDay, signed, t } from "../i18n.js?v=f86d36d39c";
-import { STATE_ICON } from "../icons.js?v=f86d36d39c";
+import { draw, esc, interval, legendKey, mealTimeline, rangeStrip, trendLine } from "../charts.js?v=150dddf82c";
+import { day, dur, inSentence, num, shortDay, signed, t } from "../i18n.js?v=150dddf82c";
+import { STATE_ICON } from "../icons.js?v=150dddf82c";
 
 function fmt(unit, v) {
   if (v === null || v === undefined) return "—";

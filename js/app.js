@@ -1,24 +1,24 @@
 // Shell: the menu (a left sidebar that folds to icons, a bottom tab bar on phones), language and light/dark,
 // hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js?v=f86d36d39c";
-import { installTooltip, esc, setFormat } from "./charts.js?v=f86d36d39c";
-import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=f86d36d39c";
-import { icon } from "./icons.js?v=f86d36d39c";
-import ai from "./pages/ai.js?v=f86d36d39c";
-import body from "./pages/body.js?v=f86d36d39c";
-import data from "./pages/data.js?v=f86d36d39c";
-import drain from "./pages/drain.js?v=f86d36d39c";
-import exercise from "./pages/exercise.js?v=f86d36d39c";
-import food from "./pages/food.js?v=f86d36d39c";
-import goals from "./pages/goals.js?v=f86d36d39c";
-import guide from "./pages/guide.js?v=f86d36d39c";
-import historyPage from "./pages/history.js?v=f86d36d39c";  // not `history`: that would hide window.history (replaceState)
-import kit from "./pages/kit.js?v=f86d36d39c";
-import review from "./pages/review.js?v=f86d36d39c";
-import sleep from "./pages/sleep.js?v=f86d36d39c";
-import time from "./pages/time.js?v=f86d36d39c";
-import today from "./pages/today.js?v=f86d36d39c";
-import week from "./pages/week.js?v=f86d36d39c";
+import { get, isStatic } from "./api.js?v=150dddf82c";
+import { installTooltip, esc, setFormat } from "./charts.js?v=150dddf82c";
+import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=150dddf82c";
+import { icon } from "./icons.js?v=150dddf82c";
+import ai from "./pages/ai.js?v=150dddf82c";
+import body from "./pages/body.js?v=150dddf82c";
+import data from "./pages/data.js?v=150dddf82c";
+import drain from "./pages/drain.js?v=150dddf82c";
+import exercise from "./pages/exercise.js?v=150dddf82c";
+import food from "./pages/food.js?v=150dddf82c";
+import goals from "./pages/goals.js?v=150dddf82c";
+import guide from "./pages/guide.js?v=150dddf82c";
+import historyPage from "./pages/history.js?v=150dddf82c";  // not `history`: that would hide window.history (replaceState)
+import kit from "./pages/kit.js?v=150dddf82c";
+import review from "./pages/review.js?v=150dddf82c";
+import sleep from "./pages/sleep.js?v=150dddf82c";
+import time from "./pages/time.js?v=150dddf82c";
+import today from "./pages/today.js?v=150dddf82c";
+import week from "./pages/week.js?v=150dddf82c";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
 const PAGES = { today, week, body, sleep, exercise, food, time, ai, drain, goals, review, data, kit, guide, history: historyPage };

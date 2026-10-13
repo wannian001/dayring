@@ -1,8 +1,8 @@
 // Exercise: this week against the weekly goal, the last 7 days against your normal, load against recovery,
 // twelve weeks by kind, and how the body tends to answer each kind the next day.
-import { bullet, draw, esc, spark, stackedColumns } from "../charts.js?v=f86d36d39c";
-import { clock, day, dur, measure, num, shortDay, signed, t, weekdayShort, wtype } from "../i18n.js?v=f86d36d39c";
-import { STATE_ICON } from "../icons.js?v=f86d36d39c";
+import { bullet, draw, esc, spark, stackedColumns } from "../charts.js?v=150dddf82c";
+import { clock, day, dur, measure, num, shortDay, signed, t, weekdayShort, wtype } from "../i18n.js?v=150dddf82c";
+import { STATE_ICON } from "../icons.js?v=150dddf82c";
 
 // kinds of training share the exercise hue and differ in lightness; minutes outside any logged workout are grey
 export const KIND_PARTS = [["strength", "var(--c-exercise)"], ["cardio", "var(--c-exercise-2)"], ["walk", "var(--c-exercise-3)"], ["loose", "var(--c-other)"]];

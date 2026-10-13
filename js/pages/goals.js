@@ -1,8 +1,8 @@
 // Goals: every plan in one place and on how many days it was kept, grouped by part of life. A plan that is not
 // set is listed with the section of healthaio.toml that sets it. Counts, never streaks or scores.
-import { draw, esc, keptDots } from "../charts.js?v=f86d36d39c";
-import { day, dur, inSentence, num, shortDay, t } from "../i18n.js?v=f86d36d39c";
-import { icon } from "../icons.js?v=f86d36d39c";
+import { draw, esc, keptDots } from "../charts.js?v=150dddf82c";
+import { day, dur, inSentence, num, shortDay, t } from "../i18n.js?v=150dddf82c";
+import { icon } from "../icons.js?v=150dddf82c";
 
 const DOMAIN_ICON = { sleep: "sleep", exercise: "exercise", food: "food", body: "heart", screens: "screen" };
 const SOURCE = { plan: "goals.src.plan", guideline: "goals.src.who", rule: "goals.src.rule" };
