@@ -104,6 +104,7 @@ class Sam:
         self.rng = random.Random(SEED + today.toordinal())
         self.shift_start = today - timedelta(days=12)
         self.weight_start = today - timedelta(days=49)
+        self.weight_start_kg = 81.2  # set by body(): the weight the plan starts from, as generated
         self.semester_start = today - timedelta(days=70)
         self.semester_end = today + timedelta(days=40)
         self.workouts: List[Dict] = []
@@ -209,7 +210,10 @@ class Sam:
                 share = (self.now.hour * 60 + self.now.minute - 600) / 840
                 row.update(steps=round(steps * max(0.05, share)), exercise_min=round(exercise * max(0.0, share)),
                            active_kcal=round((250 + 0.035 * steps) * max(0.05, share)), basal_kcal=round(basal * self.now.hour / 24))
-            # weight: drifting before the plan, ~0.6% a week down after it
+            # weight: drifting before the plan, ~0.6% a week down after it. The plan starts from the weight as it is
+            # that day, so its corridor begins where the line does (the walk moves whenever the stream draws differ)
+            if day == self.weight_start:
+                self.weight_start_kg = round(weight, 1)
             if day < self.weight_start:
                 weight += rng.gauss(0.004, 0.09)
                 weighed = rng.random() < 0.3
@@ -463,7 +467,7 @@ class Sam:
         return [w for w in work if w["end"] <= self.now + timedelta(minutes=1) or w["start"] < self.now], rows
 
 
-def demo_config(today: date) -> str:
+def demo_config(today: date, start_kg: float = 81.2) -> str:
     shift = today - timedelta(days=12)
     weight = today - timedelta(days=49)
     training = "\n".join(f'{day} = "{text}"' for day, text in TRAINING.items())
@@ -492,7 +496,7 @@ grace_min = 15
 
 [plan.weight]
 start_date = "{weight.isoformat()}"
-start_kg = 81.2
+start_kg = {start_kg}
 target_kg = 75
 weekly_loss_pct = [0.5, 1.0]
 
@@ -535,7 +539,7 @@ def generate(out: Path, today: Optional[date] = None, now: Optional[datetime] = 
     write_table(data, "ai_work", work)
     write_table(data, "ai_prompts", prompts)
     config = out / "healthaio.toml"
-    config.write_text(demo_config(today), encoding="utf-8")
+    config.write_text(demo_config(today, sam.weight_start_kg), encoding="utf-8")
     # one proposal from an assistant, waiting on the Goals page (see goal_log): it changes nothing until accepted
     proposal = {"id": "5a3e0c1d", "at": f"{today.isoformat()}T08:30:00", "op": "propose", "by": "assistant",
                 "changes": {"screen.entertainment_max_hours": 2.5},

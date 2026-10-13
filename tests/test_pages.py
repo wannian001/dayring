@@ -162,6 +162,27 @@ class Server(unittest.TestCase):
             self.assertIn(caught.exception.code, (400, 404))
 
 
+class DemoWeightPlan(unittest.TestCase):
+    def test_the_plan_starts_from_the_weight_the_demo_generated(self):
+        # the corridor begins at start_kg: a fixed number drifts away from the random walk whenever the demo's
+        # random draws change, and the whole line then sits outside the plan it is keeping
+        for today in (TODAY, date(2026, 10, 13), date(2026, 11, 20)):
+            tmp = Path(tempfile.mkdtemp(prefix="healthaio-test-"))
+            try:
+                try:
+                    cfg = config.load(demo.generate(tmp, today))
+                except config.ConfigError:
+                    self.skipTest("needs Python 3.11+ or tomli")
+                now = datetime.combine(today, datetime.min.time()).replace(hour=18, minute=40)
+                ctx = Context(cfg, now=now)
+                start = cfg.weight.start_date
+                first = [r["weight_kg"] for r in ctx.store.rows("body_daily")
+                         if r.get("weight_kg") is not None and start <= r["date"] < start + timedelta(days=7)]
+                self.assertLess(abs(sum(first) / len(first) - cfg.weight.start_kg), 0.8, today)
+                self.assertEqual(PAGES["body"](ctx)["latest"]["status"], "on_track", today)
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)
+
 class StaticBuild(unittest.TestCase):
     def test_build(self):
         tmp = Path(tempfile.mkdtemp(prefix="healthaio-test-"))
