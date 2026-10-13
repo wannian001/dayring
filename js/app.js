@@ -1,36 +1,45 @@
 // Shell: the menu (a left sidebar that folds to icons, a bottom tab bar on phones), language and light/dark,
 // hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js?v=ad73753ded";
-import { installTooltip, esc, setFormat } from "./charts.js?v=ad73753ded";
-import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=ad73753ded";
-import { icon } from "./icons.js?v=ad73753ded";
-import ai from "./pages/ai.js?v=ad73753ded";
-import body from "./pages/body.js?v=ad73753ded";
-import data from "./pages/data.js?v=ad73753ded";
-import drain from "./pages/drain.js?v=ad73753ded";
-import kit from "./pages/kit.js?v=ad73753ded";
-import review from "./pages/review.js?v=ad73753ded";
-import sleep from "./pages/sleep.js?v=ad73753ded";
-import time from "./pages/time.js?v=ad73753ded";
-import today from "./pages/today.js?v=ad73753ded";
-import week from "./pages/week.js?v=ad73753ded";
+import { get, isStatic } from "./api.js?v=a1a20d3f3d";
+import { installTooltip, esc, setFormat } from "./charts.js?v=a1a20d3f3d";
+import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=a1a20d3f3d";
+import { icon } from "./icons.js?v=a1a20d3f3d";
+import ai from "./pages/ai.js?v=a1a20d3f3d";
+import body from "./pages/body.js?v=a1a20d3f3d";
+import data from "./pages/data.js?v=a1a20d3f3d";
+import drain from "./pages/drain.js?v=a1a20d3f3d";
+import exercise from "./pages/exercise.js?v=a1a20d3f3d";
+import food from "./pages/food.js?v=a1a20d3f3d";
+import goals from "./pages/goals.js?v=a1a20d3f3d";
+import kit from "./pages/kit.js?v=a1a20d3f3d";
+import review from "./pages/review.js?v=a1a20d3f3d";
+import sleep from "./pages/sleep.js?v=a1a20d3f3d";
+import time from "./pages/time.js?v=a1a20d3f3d";
+import today from "./pages/today.js?v=a1a20d3f3d";
+import week from "./pages/week.js?v=a1a20d3f3d";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
-const PAGES = { today, week, body, sleep, time, ai, drain, review, data, kit };
-const NAV = ["today", "week", "body", "time", "drain", "review", "data"];
-// a menu item that holds several pages shows a small switch above the page title
-const GROUPS = { body: [["body", "nav.weight"], ["sleep", "nav.sleep_tab"]], time: [["time", "nav.time_tab"], ["ai", "nav.ai"]] };
+const PAGES = { today, week, body, sleep, exercise, food, time, ai, drain, goals, review, data, kit };
+// the menu follows the loop of managing your health: today's state and what to adjust, the body (sleep, exercise,
+// food, weight), behaviour (where the time goes, AI work, drain), the plan (goals, schedule), the review, the data
+const NAV = ["today", "body", "time", "plan", "review", "data"];
+// a menu item that holds several pages shows a small switch above the page title and opens on its first page
+const GROUPS = {
+  body: [["sleep", "nav.sleep_tab"], ["exercise", "nav.exercise"], ["food", "nav.food"], ["body", "nav.weight"]],
+  time: [["time", "nav.time_tab"], ["ai", "nav.ai"], ["drain", "nav.drain"]],
+  plan: [["goals", "nav.goals"], ["week", "nav.schedule"]],
+};
 const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) => p === page)) || page;
 // a page inside a group is titled by its own tab (Weight, Sleep), not by the group
 const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;
-const ALIAS = { attention: "time" };  // old links keep working
+const ALIAS = { attention: "time", plan: "goals" };  // old links keep working
 // each menu item's glyph (icons.js)
-const NAV_ICON = { today: "sun", week: "calendar", body: "heart", time: "clock", drain: "battery", review: "list", data: "database" };
+const NAV_ICON = { today: "sun", body: "heart", time: "walk", plan: "target", review: "list", data: "database" };
 const store = {
-  get(key) { try { return localStorage.getItem(`dayring.${key}`); } catch { return null; } },
-  set(key, value) { try { localStorage.setItem(`dayring.${key}`, value); } catch { /* private mode */ } },
+  get(key) { try { return localStorage.getItem(`healthaio.${key}`); } catch { return null; } },
+  set(key, value) { try { localStorage.setItem(`healthaio.${key}`, value); } catch { /* private mode */ } },
 };
-let settings = { title: "dayring", locale: "en", demo: false };
+let settings = { title: "Health AIO", locale: "en", demo: false };
 // the kit's charts write their words and numbers with this app's i18n (charts.js imports nothing)
 setFormat({ t, dur, clock, shortDay, measure, toDate, wtype });
 const footer = () => `<footer class="foot"><a href="#kit">${t("kit.link")}</a></footer>`;
@@ -56,10 +65,11 @@ function header(active) {
   const top = document.querySelector(".side");
   const group = groupOf(active);
   // a menu item that holds several pages lists them under it while one of them is open
-  const items = NAV.filter((p) => PAGES[p]).map((p) => {
+  const items = NAV.filter((p) => PAGES[p] || GROUPS[p]).map((p) => {
     const here = p === group;
     const subs = here && GROUPS[p] ? GROUPS[p].map(([page, key]) => `<a class="side-sub" href="#${page}" ${page === active ? 'aria-current="page"' : ""}><span>${t(key)}</span></a>`).join("") : "";
-    return `<a href="#${p}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${t(`nav.${p}`)}</span></a>${subs}`;
+    const href = GROUPS[p] ? GROUPS[p][0][0] : p;
+    return `<a href="#${href}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${t(`nav.${p}`)}</span></a>${subs}`;
   }).join("");
   top.innerHTML = `
     <div class="side-head">
@@ -120,7 +130,7 @@ async function route() {
 }
 
 async function start() {
-  window.dayringStarted = true;  // index.html shows a reload message if this never runs
+  window.healthaioStarted = true;  // index.html shows a reload message if this never runs
   try { settings = { ...settings, ...(await get("settings")) }; } catch { /* defaults */ }
   setLang(query.get("lang") || store.get("lang") || settings.locale);
   applyLook();

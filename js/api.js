@@ -1,12 +1,12 @@
 // Live mode asks the local server (/api/today?day=...). Static mode (GitHub Pages demo) reads
-// pre-built files (api/today.json, api/today@2026-10-11.json) written by `dayring build-static`.
+// pre-built files (api/today.json, api/today@2026-10-11.json) written by `healthaio build-static`.
 const STATIC = document.documentElement.dataset.static === "true";
 const BUILD = document.documentElement.dataset.build || "";  // static builds stamp their data too, so caches never mix versions
 const cache = new Map();
 
 export function apiUrl(name, param) {
   if (STATIC) return `api/${name}${param ? `@${param}` : ""}.json${BUILD ? `?v=${BUILD}` : ""}`;
-  const key = { today: "day", week: "day", review: "week", time: "day", drain: "day" }[name] || "day";
+  const key = { review: "week" }[name] || "day";
   return `api/${name}${param ? `?${key}=${encodeURIComponent(param)}` : ""}`;
 }
 

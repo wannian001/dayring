@@ -1,8 +1,8 @@
-// dayring design kit: hand-drawn SVG charts. Part of the kit (see docs/DESIGN_KIT.md).
+// Health AIO design kit: hand-drawn SVG charts. Part of the kit (see docs/DESIGN_KIT.md).
 // Each chart is drawn at the real pixel width of its box and redrawn on resize (draw()), so text never
 // scales with the chart. Colours are CSS variables from tokens.css. This file imports nothing: words and
-// number formats come from the app through setFormat() (dayring hands over its i18n.js in app.js).
-// Convention: the comment line right above each export is its one-line doc (`dayring kit json` reads it).
+// number formats come from the app through setFormat() (Health AIO hands over its i18n.js in app.js).
+// Convention: the comment line right above each export is its one-line doc (`healthaio kit json` reads it).
 
 const has = (v) => v !== null && v !== undefined && !Number.isNaN(v);
 // Escapes text for HTML and SVG attributes and content.
@@ -19,6 +19,9 @@ export const CHART_WORDS = Object.freeze({
   "sleep.alarm_at": "alarm {alarm}", "sleep.no_record": "no record", "sleep.windows": "Last 21 nights", "sleep.final": "goal {alarm}",
   "sleep.woke_at": "woke {woke}", "sleep.ladder": "The alarm ladder",
   "data.mark.1": "has data", "data.mark.p": "partial", "data.mark.0": "nothing",
+  "food.timeline": "Meals by time of day", "food.not_logged": "not logged", "food.partly": "partly logged",
+  "food.before_sleep": "{h} before sleep", "food.asleep": "asleep {clock}",
+  "goal.kept": "kept", "goal.missed": "not kept",
 });
 const parseIso = (iso) => {
   const [d, time = "00:00"] = String(iso).split("T");
@@ -662,4 +665,71 @@ export function lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, la
   });
   const defs = [...hatches].map(([color, id]) => `<pattern id="${id}" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.6" height="4" fill="${color}"/></pattern>`).join("");
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${esc(rows.map((r) => r.label).join(", "))}">${defs ? `<defs>${defs}</defs>` : ""}${parts.join("")}</svg>`;
+}
+
+// ---- food and goals ------------------------------------------------------------------------------
+// One row per day on a 05:00–03:00 axis: awake from waking to falling asleep (sleep in violet at both ends), meals as dots sized by energy, the gapH hours before sleep striped; a meal inside them is ringed and its tooltip says how long before sleep it was. A day with status "none" is written as not logged; "partial" draws its meals faint.
+export function mealTimeline(days, { width, gapH = 3, rowH = 24 }) {
+  const m = { l: 64, r: 18, t: 22, b: 8 };
+  const x0 = 5 * 60, x1 = 27 * 60;  // minutes after the row's own midnight: 05:00 .. 03:00 the next day
+  const x = linear(x0, x1, m.l, width - m.r);
+  const h = m.t + m.b + days.length * rowH;
+  const clip = (v) => Math.max(x0, Math.min(x1, v));
+  const after = (iso, day) => (toDate(iso) - toDate(`${day}T00:00`)) / 60000;
+  const hatch = `meal-hatch-${++hatchIds}`;
+  const parts = [`<defs><pattern id="${hatch}" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.4" height="4" fill="var(--c-axis)"/></pattern></defs>`];
+  const room = (step) => (width - m.l - m.r) / ((x1 - x0) / step);
+  const labelStep = [180, 240, 360].find((step) => room(step) >= textWidth("00:00", 10.5) + 12) || 540;
+  for (let mm = 6 * 60; mm <= x1; mm += labelStep) {
+    const label = `${String((mm / 60) % 24).padStart(2, "0")}:00`;
+    parts.push(`<line x1="${x(mm).toFixed(1)}" x2="${x(mm).toFixed(1)}" y1="${m.t - 4}" y2="${h - m.b}" stroke="var(--c-grid)"/>
+      <text x="${x(mm).toFixed(1)}" y="${m.t - 9}" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">${label}</text>`);
+  }
+  const top = Math.max(1, ...days.flatMap((d) => (d.meals || []).map((meal) => meal.kcal || 0)));
+  days.forEach((d, i) => {
+    const cy = m.t + i * rowH + rowH / 2;
+    parts.push(`<text x="${m.l - 8}" y="${(cy + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-3)">${esc(shortDay(d.date))}</text>`);
+    if (d.status === "none") {
+      parts.push(`<text x="${x(x0 + 30).toFixed(1)}" y="${(cy + 4).toFixed(1)}" font-size="10.5" fill="var(--ink-3)">${esc(t("food.not_logged"))}</text>`);
+      return;
+    }
+    const wake = d.wake ? clip(after(d.wake, d.date)) : x0;
+    const fell = d.asleep ? after(d.asleep, d.date) : null;  // may fall past the axis: the striped hours still show
+    const asleep = fell === null ? x1 : clip(fell);
+    parts.push(`<rect x="${x(wake).toFixed(1)}" y="${(cy - 7).toFixed(1)}" width="${Math.max(0, x(asleep) - x(wake)).toFixed(1)}" height="14" rx="7" fill="var(--c-band)"/>`);
+    if (d.wake && wake > x0) parts.push(`<rect x="${x(x0).toFixed(1)}" y="${(cy - 2).toFixed(1)}" width="${(x(wake) - x(x0)).toFixed(1)}" height="4" rx="2" fill="var(--c-sleep)"/>`);
+    if (fell !== null) {
+      if (asleep < x1) parts.push(`<rect x="${x(asleep).toFixed(1)}" y="${(cy - 2).toFixed(1)}" width="${(x(x1) - x(asleep)).toFixed(1)}" height="4" rx="2" fill="var(--c-sleep)" data-tip="${esc(t("food.asleep", { clock: clock(d.asleep) }))}"/>`);
+      const z0 = clip(fell - gapH * 60);
+      if (asleep > z0) parts.push(`<rect x="${x(z0).toFixed(1)}" y="${(cy - 7).toFixed(1)}" width="${(x(asleep) - x(z0)).toFixed(1)}" height="14" fill="url(#${hatch})" pointer-events="none"/>`);
+    }
+    (d.meals || []).forEach((meal) => {
+      const at = after(meal.time, d.date);
+      if (at < x0 || at > x1) return;
+      const r = 2.5 + 5 * Math.sqrt((meal.kcal || top * 0.25) / top);
+      const gap = d.asleep ? (toDate(d.asleep) - toDate(meal.time)) / 60000 : null;
+      const late = gap !== null && gap >= 0 && gap < gapH * 60;
+      const tip = [clock(meal.time), meal.title, meal.kcal ? `${Math.round(meal.kcal)} kcal` : null, late ? t("food.before_sleep", { h: dur(gap) }) : null,
+        d.status === "partial" ? t("food.partly") : null].filter(Boolean).join(" · ");
+      parts.push(`<circle cx="${x(at).toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="var(--c-mark)" fill-opacity="${d.status === "partial" ? 0.35 : 0.9}"
+        stroke="${late ? "var(--off)" : "var(--halo)"}" stroke-width="${late ? 2.2 : 1.5}" data-tip="${esc(tip)}"/>`);
+    });
+  });
+  return `<svg viewBox="0 0 ${width} ${h}" width="${width}" height="${h}" role="img" aria-label="${esc(t("food.timeline"))}">${parts.join("")}</svg>`;
+}
+
+// A run of days as dots, a small gap after every 7th: filled = the goal was kept, a ring = not kept, a short dash = no record that day.
+export function keptDots(days, { width, height = 20 }) {
+  const n = Math.max(1, days.length), gap = 6, gaps = Math.floor((n - 1) / 7);
+  const slot = (width - gaps * gap) / n;
+  const r = Math.max(2.5, Math.min(5, slot / 2 - 1.5));
+  const cy = height / 2;
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${esc(`${days.filter((d) => d.met).length} / ${days.filter((d) => d.met !== null && d.met !== undefined).length}`)}">${days.map((d, i) => {
+    const cx = slot * i + slot / 2 + Math.floor(i / 7) * gap;
+    const word = d.met === true ? t("goal.kept") : d.met === false ? t("goal.missed") : t("ui.no_data");
+    const mark = d.met === true ? `<circle cx="${cx.toFixed(1)}" cy="${cy}" r="${r.toFixed(1)}" fill="var(--c-mark)"/>`
+      : d.met === false ? `<circle cx="${cx.toFixed(1)}" cy="${cy}" r="${(r - 0.8).toFixed(1)}" fill="none" stroke="var(--c-mark)" stroke-width="1.5"/>`
+        : `<line x1="${(cx - r + 1).toFixed(1)}" x2="${(cx + r - 1).toFixed(1)}" y1="${cy}" y2="${cy}" stroke="var(--line-2)" stroke-width="2" stroke-linecap="round"/>`;
+    return `<g data-tip="${esc(`${shortDay(d.date)} · ${word}`)}"><rect x="${(cx - slot / 2).toFixed(1)}" y="0" width="${slot.toFixed(1)}" height="${height}" fill="transparent"/>${mark}</g>`;
+  }).join("")}</svg>`;
 }

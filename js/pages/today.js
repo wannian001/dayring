@@ -1,7 +1,7 @@
-import { bullet, dayDots, dayRing, draw, esc, interval, RING_CATS, spark } from "../charts.js?v=ad73753ded";
-import { clock, day, dur, inSentence, measure, num, pct, signed, t, weekdayShort, wtype } from "../i18n.js?v=ad73753ded";
-import { icon, STATE_ICON } from "../icons.js?v=ad73753ded";
-import { worseLine } from "./drain.js?v=ad73753ded";
+import { bullet, dayDots, dayRing, draw, esc, interval, RING_CATS, spark } from "../charts.js?v=a1a20d3f3d";
+import { clock, day, dur, inSentence, measure, num, pct, signed, t, weekdayShort, wtype } from "../i18n.js?v=a1a20d3f3d";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=a1a20d3f3d";
+import { worseLine } from "./drain.js?v=a1a20d3f3d";
 
 const shiftDay = (iso, n) => { const d = new Date(`${iso}T12:00:00`); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 
@@ -77,6 +77,53 @@ function heroHtml(p) {
         <div class="row" style="gap:6px">${chips}</div>${self}${behind}</div>
       <div>${agendaHtml(p.agenda, !p.looking_back, p.ring.workouts)}</div>
     </div></div></section>`;
+}
+
+// ---- what to adjust today: at most one thing each for training, sleep and food, with the reason and where it shows
+const TODO_ICON = { training: "exercise", sleep: "sleep", food: "food" };
+
+function todoTitle(x) {
+  const q = x.params || {};
+  switch (x.key) {
+    case "ease": return q.planned ? t("todo.ease", { what: q.planned }) : t("todo.ease_rest");
+    case "deload": return t("todo.deload");
+    case "move": return t("todo.move", { d: dur(q.min) });
+    case "strength": return t("todo.strength", { n: q.left });
+    case "asleep_by": return t("todo.asleep_by", { clock: clock(q.clock) });
+    case "phone_away": return t("todo.phone_away", { clock: clock(q.clock) });
+    case "late_meal": return q.clock ? t("todo.late_meal", { clock: clock(q.clock) }) : t("todo.late_meal_h", { h: num(q.hours) });
+    case "protein": return t("todo.protein", { g: num(q.more_g) });
+    case "kcal": return t("todo.kcal", { kcal: num(q.max) });
+    default: return x.key;
+  }
+}
+
+function todoWhy(x) {
+  const w = x.why || {};
+  switch (x.key) {
+    case "ease": return t("todo.why.ease", { list: (w.worse || []).map((k) => inSentence(t(`metric.${k}`))).join(t("drain.sep")) || "—" });
+    case "deload": return t("todo.why.deload", { a: dur(w.acute), c: dur(w.chronic) });
+    case "move": return t("todo.why.move", { left: dur(w.remaining), n: w.days_left, goal: dur(w.goal) });
+    case "strength": return t("todo.why.strength", { n: w.days_left });
+    case "asleep_by": return w.low ? t("todo.why.asleep_low", { alarm: clock(x.params.alarm) }) : t("todo.why.asleep_short", { d: dur(w.short_by), alarm: clock(x.params.alarm) });
+    case "phone_away": return w.drain ? t("todo.why.phone_drain") : t("todo.why.phone_last", { d: dur(w.last_night) });
+    case "late_meal": return t("todo.why.late_meal", { n: w.late, k: w.known, h: num(x.params.hours) });
+    case "protein": return t("todo.why.protein", { avg: num(w.avg_g), target: num(x.params.target_g), n: w.days });
+    case "kcal": return t("todo.why.kcal", { avg: num(w.avg), max: num(x.params.max), n: w.days });
+    default: return "";
+  }
+}
+
+function todoHtml(p) {
+  const a = p.actions;
+  if (!a) return "";
+  const body = a.steady ? `<p class="lede" style="font-size:var(--t-lg);margin:0">${t("todo.steady")}</p>`
+    : `<ol class="todo">${a.items.map((x) => `<li class="todo-item">
+        <span class="todo-icon" style="color:${COLOR[TODO_ICON[x.domain]] || "var(--ink-2)"}">${icon(TODO_ICON[x.domain], 20)}</span>
+        <div class="todo-body"><span class="eyebrow">${t(`todo.domain.${x.domain}`)}</span><b>${esc(todoTitle(x))}</b>
+          <span class="small muted">${esc(todoWhy(x))}</span><a class="small" href="${x.link}">${t(`todo.link.${x.domain}`)} →</a></div></li>`).join("")}</ol>`;
+  return `<section class="card span-12"><h2>${t("todo.title")}<span class="aside">${t("todo.aside")}</span></h2>${body}
+    <details class="how"><summary>${t("ui.how")}</summary><p>${t("todo.rule")}</p></details></section>`;
 }
 
 function recoveryHtml(p) {
@@ -178,7 +225,7 @@ export default {
       ${p.looking_back ? `<a href="${next === p.today ? "#today" : `#today/${next}`}">${t("ui.next_day")} ›</a><a href="#today">${t("ui.back_today")}</a>` : `<span aria-disabled="true">${t("ui.next_day")} ›</span>`}</div>`;
     return `<div class="head"><div><h1>${p.looking_back ? t("today.looking_back", { day: day(p.day) }) : t("today.title")}</h1>
       <div class="sub">${day(p.day)} · ${t("ui.computed", { time: clock(p.now) })}</div></div>${stepper}</div>
-      <div class="grid">${heroHtml(p)}<div class="col span-7">${recoveryHtml(p)}${effectsHtml(p)}</div><div class="col span-5">${attentionHtml(p)}${drainHtml(p)}</div></div>`;
+      <div class="grid">${heroHtml(p)}${todoHtml(p)}<div class="col span-7">${recoveryHtml(p)}${effectsHtml(p)}</div><div class="col span-5">${attentionHtml(p)}${drainHtml(p)}</div></div>`;
   },
   mount(root, p) {
     const ringBox = root.querySelector("#ring");

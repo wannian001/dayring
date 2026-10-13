@@ -1,10 +1,10 @@
-/* dayring design kit: components. Part of the kit (see docs/DESIGN_KIT.md).
+/* Health AIO design kit: components. Part of the kit (see docs/DESIGN_KIT.md).
    Every colour comes from tokens.css, and so does every margin, padding and gap that is a step of the space scale
    (tests/test_kit.py checks both). Other sizes are plain numbers: the fixed heights of controls (30px pills, 24px
    chips), insets off the scale (2, 3, 5, 6, 9, 10, 14px), corners of 3, 4 and 6px and the demo badge's 11px type.
-   Nothing here names a dayring page.
-   Every group starts with a comment "@component <class> <one line>"; `dayring kit json` lists them and the
-   gallery (#kit) shows each one. Page-only rules live in the app's own stylesheet (dayring: app.css). */
+   Nothing here names a Health AIO page.
+   Every group starts with a comment "@component <class> <one line>"; `healthaio kit json` lists them and the
+   gallery (#kit) shows each one. Page-only rules live in the app's own stylesheet (Health AIO: app.css). */
 
 /* ---- base ---- */
 * { box-sizing: border-box; }

@@ -3,9 +3,9 @@
 // worse; only your focused work keeps the Time page's direction. AI work is drawn in focus blue stripes (work, done
 // for you), scheduled tasks and scripts in grey stripes, your instructions in ink. A day before the AI record shows
 // × (never 0); a day in between without AI use is a real zero.
-import { bullet, draw, esc, lanes } from "../charts.js?v=ad73753ded";
-import { day, dur, getLang, num, shortDay, t } from "../i18n.js?v=ad73753ded";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=ad73753ded";
+import { bullet, draw, esc, lanes } from "../charts.js?v=a1a20d3f3d";
+import { day, dur, getLang, num, shortDay, t } from "../i18n.js?v=a1a20d3f3d";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=a1a20d3f3d";
 
 const TILES = [  // key, icon, icon colour
   ["ai", "ai", COLOR.ai], ["prompts", "communication", "var(--ink-2)"], ["per_prompt", "ai", "var(--ink-2)"],
@@ -72,7 +72,7 @@ export default {
     const head = `<div class="head"><div><h1>${t("ai.title")}</h1>`;
     if (p.empty) {
       const back = p.next ? `<p class="small"><a href="${p.next === p.newest ? "#ai" : `#ai/${p.next}`}">${t("time.next")} ›</a></p>` : "";
-      return `${head}</div></div><div class="card"><div class="empty">${t("ai.empty")}</div><pre class="code">python3 -m dayring import ai-logs</pre>${back}</div>`;
+      return `${head}</div></div><div class="card"><div class="empty">${t("ai.empty")}</div><pre class="code">python3 -m healthaio import ai-logs</pre>${back}</div>`;
     }
     const S = p.span;
     const nextHref = p.next === p.newest ? "#ai" : `#ai/${p.next}`;

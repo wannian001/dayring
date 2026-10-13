@@ -1,13 +1,14 @@
-/* dayring design kit: tokens. Part of the kit (see docs/DESIGN_KIT.md); every colour in kit.css, charts.js and icons.js
+/* Health AIO design kit: tokens. Part of the kit (see docs/DESIGN_KIT.md); every colour in kit.css, charts.js and icons.js
    is one of these, and so is every spacing step in kit.css.
    Layout concept: a calm instrument panel — one day ring as the anchor, then rows of small,
    honest measurements, each compared with "your normal".
    Light mode uses graphite neutrals with a blue accent, dark mode dusk neutrals with a violet accent.
    Data colours follow the thing measured and keep the same hue in both modes, each mode with its own step
    (validated for colour-vision deficiency with the dataviz validator):
-   focus = blue, fun = orange, communication = aqua, other = grey, sleep = violet (own ring track).
+   focus = blue, fun = orange, communication = aqua, other = grey, sleep = violet (own ring track), exercise = magenta
+   (two lighter steps of it tell kinds of training apart by lightness, never by hue).
    Status colours are reserved for good / watch / off and always come with a word or icon.
-   A comment "[role]" starts each group; `dayring kit json` reads the roles from these comments. */
+   A comment "[role]" starts each group; `healthaio kit json` reads the roles from these comments. */
 
 :root {
   color-scheme: light;
@@ -57,6 +58,8 @@
   --c-sleep: #4a3aa7;
   --c-exercise: #bf3fa6;
   --c-exercise-ink: #a8318f;  /* exercise as text: >= 5.5:1 on every light surface */
+  --c-exercise-2: #da90cb;    /* lighter steps of exercise for kinds of training: cardio */
+  --c-exercise-3: #e7b6dd;    /* walking */
   --c-event: #161616;
   --c-band: rgba(22, 22, 22, .075);
   --c-grid: rgba(22, 22, 22, .07);
@@ -82,7 +85,7 @@
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .25);
     --header: rgba(11, 13, 19, .8);
     --seg-on: #353d50; --seg-on-edge: 0 0 0 1px rgba(236, 238, 245, .12);
-    --c-focus: #3987e5; --c-fun: #d95926; --c-comms: #199e70; --c-other: #5d6474; --c-sleep: #9085e9; --c-exercise: #cb4db2; --c-exercise-ink: #de78c8;
+    --c-focus: #3987e5; --c-fun: #d95926; --c-comms: #199e70; --c-other: #5d6474; --c-sleep: #9085e9; --c-exercise: #cb4db2; --c-exercise-ink: #de78c8; --c-exercise-2: #86397b; --c-exercise-3: #5d2d5c;
     --c-event: #eceef5; --c-band: rgba(236, 238, 245, .085); --c-grid: rgba(236, 238, 245, .07);
     --c-axis: rgba(236, 238, 245, .22); --c-mark: #eceef5;
     --good-ink: #4cc94c; --good-soft: rgba(12, 163, 12, .18);
@@ -99,7 +102,7 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .25);
   --header: rgba(11, 13, 19, .8);
   --seg-on: #353d50; --seg-on-edge: 0 0 0 1px rgba(236, 238, 245, .12);
-  --c-focus: #3987e5; --c-fun: #d95926; --c-comms: #199e70; --c-other: #5d6474; --c-sleep: #9085e9; --c-exercise: #cb4db2; --c-exercise-ink: #de78c8;
+  --c-focus: #3987e5; --c-fun: #d95926; --c-comms: #199e70; --c-other: #5d6474; --c-sleep: #9085e9; --c-exercise: #cb4db2; --c-exercise-ink: #de78c8; --c-exercise-2: #86397b; --c-exercise-3: #5d2d5c;
   --c-event: #eceef5; --c-band: rgba(236, 238, 245, .085); --c-grid: rgba(236, 238, 245, .07);
   --c-axis: rgba(236, 238, 245, .22); --c-mark: #eceef5;
   --good-ink: #4cc94c; --good-soft: rgba(12, 163, 12, .18);

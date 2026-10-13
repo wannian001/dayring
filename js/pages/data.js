@@ -1,5 +1,5 @@
-import { coverage, draw, esc } from "../charts.js?v=ad73753ded";
-import { clock, day, num, t } from "../i18n.js?v=ad73753ded";
+import { coverage, draw, esc } from "../charts.js?v=a1a20d3f3d";
+import { clock, day, num, t } from "../i18n.js?v=a1a20d3f3d";
 
 const STATUS = { ok: "good", stale: "watch", missing: "bad" };
 
@@ -28,13 +28,15 @@ export default {
           <thead><tr><th scope="col">${t("data.file")}</th><th scope="col">${t("data.rows")}</th><th scope="col">${t("data.modified")}</th><th scope="col"></th></tr></thead>
           <tbody>${tables}</tbody></table></div></section>
         <section class="card span-5"><h2>${t("data.import")}</h2><p class="small" style="margin-top:0">${t("data.import_lede")}</p>
-          <pre class="code">python -m dayring import apple-health export.zip
-python -m dayring import ics timetable.ics --kind class
-python -m dayring import macos-screentime
-python -m dayring import ai-logs
-python -m dayring import csv deadlines my.csv \\
+          <pre class="code">python -m healthaio import apple-health export.zip
+python -m healthaio import ics timetable.ics --kind class
+python -m healthaio import macos-screentime
+python -m healthaio import ai-logs
+python -m healthaio import csv deadlines my.csv \\
   --map "Due=due,Task=title,Course=group"
-python -m dayring check</pre>
+python -m healthaio import csv meals food-log.csv \\
+  --map "Date=time,Meal=meal,Calories=kcal"
+python -m healthaio check</pre>
           <p class="xs muted">${t("data.import_note")}</p>
           <p class="xs muted" style="margin:0"><a href="#kit">${t("kit.link")}</a> · ${t("kit.link_note")}</p></section>
       </div>`;

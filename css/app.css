@@ -1,4 +1,4 @@
-/* dayring's own page rules: layouts and pieces that belong to one page. The shared look (base, shell,
+/* Health AIO's own page rules: layouts and pieces that belong to one page. The shared look (base, shell,
    components) is the design kit in kit.css, which loads before this file. Colours come only from tokens.css. */
 
 /* ---- today: day ring + agenda ---- */
@@ -263,3 +263,44 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 @media (min-width: 1280px) { .act-tiles.ai-tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); } .act-tiles.ai-tiles .ai-tile:last-child { grid-column: auto; } }
 @media (max-width: 660px) { .act-tiles.ai-tiles { grid-template-columns: minmax(0, 1fr); } .act-tiles.ai-tiles .ai-tile:last-child { grid-column: auto; } }
 .act-tiles.ai-tiles .act-tile .label { flex-direction: row; flex-wrap: wrap; align-items: flex-start; row-gap: 4px; }
+
+/* ---- today: what to adjust (one card per kind, side by side; stacked on a phone) ---- */
+.todo { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--s-3); }
+.todo-item { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: var(--s-3); padding: var(--s-4); border-radius: var(--r-md); background: var(--surface-2); }
+.todo-icon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.todo-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.todo-body b { font-size: var(--t-md); line-height: 1.35; }
+.todo-body .small.muted { line-height: 1.45; }
+.todo-body a { margin-top: 2px; }
+
+/* ---- food: the two weekly rates side by side ---- */
+.food-balance { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); margin-bottom: var(--s-3); }
+.food-balance > div { display: flex; flex-direction: column; gap: 2px; padding: var(--s-3); border-radius: var(--r-md); background: var(--surface-2); }
+.food-balance b { font-size: var(--t-xl); line-height: 1.15; }
+
+/* ---- goals: one row per goal (name, 28 dots or weekly bars, the count) ---- */
+.goal-rows { display: flex; flex-direction: column; }
+.goal-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 12px 0; border-top: 1px solid var(--line); }
+.goal-row:first-child { border-top: 0; padding-top: 2px; }
+.goal-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--t-sm); }
+.goal-name .chip { height: 20px; font-size: 11px; padding: 0 7px; }
+.goal-unset .goal-name { flex-direction: column; align-items: flex-start; gap: 2px; color: var(--ink-3); }
+.goal-unset .goal-name b { font-weight: 550; }
+.goal-dots { max-width: 360px; }
+.goal-count { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: var(--t-sm); }
+.goal-weeks { display: flex; flex-direction: column; gap: 6px; }
+.goal-week { display: grid; grid-template-columns: 56px minmax(0, 1fr) 74px 24px; gap: 10px; align-items: center; }
+.goal-week .num { text-align: right; white-space: nowrap; }
+.goal-status { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* ---- exercise: the week as seven day cells ---- */
+.ex-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--s-2); }
+@media (max-width: 720px) { .ex-days { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ex-day { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: var(--r-md); background: var(--surface-2); min-width: 0; }
+.ex-day.is-today { box-shadow: inset 0 0 0 1px var(--accent); }
+.ex-day.future { background: none; box-shadow: inset 0 0 0 1px var(--line); }
+.ex-day b { font-size: var(--t-lg); }
+.ex-bar { display: flex; margin: 0; }
+.ex-bar span { flex: none; border-radius: 0; }
+.ex-note { color: var(--ink-2); line-height: 1.35; }
+.ex-day.future .ex-note { color: var(--ink-3); }

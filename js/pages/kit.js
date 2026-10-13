@@ -1,12 +1,12 @@
 // Design kit gallery (#kit): every token, component, chart and icon of the kit, read from its manifest
 // (/api/kit; api/kit.json on the static site) and drawn with made-up sample data. Not a menu item: the footer
 // of every page and the Data page link here. Every manifest entry needs a sample below (tests/test_kit.py).
-import { blockColumns, bullet, coverage, dayDots, dayRing, draw, esc, interval, ladderChart, lanes, legendKey, rangeStrip,
-  RING_CATS, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js?v=ad73753ded";
-import { dur, getLang, measure, num, shortDay, t } from "../i18n.js?v=ad73753ded";
-import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js?v=ad73753ded";
+import { blockColumns, bullet, coverage, dayDots, dayRing, draw, esc, interval, keptDots, ladderChart, lanes, legendKey, mealTimeline,
+  rangeStrip, RING_CATS, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js?v=a1a20d3f3d";
+import { dur, getLang, measure, num, shortDay, t } from "../i18n.js?v=a1a20d3f3d";
+import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js?v=a1a20d3f3d";
 
-const DOCS = "https://github.com/wannian001/dayring/blob/main/docs/DESIGN_KIT.md";
+const DOCS = "https://github.com/wannian001/proactive-health-aio/blob/main/docs/DESIGN_KIT.md";
 const SIZES = [13, 16, 28, 64];
 // a doc comes from the code comment (English); in Chinese the gallery's own translation, kitdoc.<name>, when there is one
 const docOf = (name, doc) => { if (getLang() !== "zh") return doc; const key = `kitdoc.${name}`; const zh = t(key); return zh === key ? doc : zh; };
@@ -68,6 +68,18 @@ const INTERVALS = [{ status: "ok", diff: 1.8, low: 0.5, high: 3.1, detected: tru
   { status: "few", key: "eff.too_few" }];
 const WEEKS8 = [44, 46, null, 45, 48, 47, 50, 52].map((value, i) => ({ value, to: iso(7 * (7 - i)) }));
 const COVER = [["data.s.sleep", "111111111p11111101111111p11111"], ["data.s.screen", "1111110000011111111111111p1111"]];
+// five days of meals: a late snack inside the striped hours, a day not logged, a day logged in part, today so far
+const meal = (k, hhmm, title, kcal) => ({ time: `${iso(k)}T${hhmm}`, title, kcal });
+const MEALS = [
+  { date: iso(4), status: "full", wake: `${iso(4)}T08:05`, asleep: `${iso(3)}T00:10`, meals: [meal(4, "08:40", "Oats", 360), meal(4, "12:50", "Rice bowl", 650), meal(4, "19:05", "Curry", 720)] },
+  { date: iso(3), status: "full", wake: `${iso(3)}T08:30`, asleep: `${iso(2)}T00:50`, meals: [meal(3, "12:30", "Pho", 520), meal(3, "18:50", "Pasta", 830), meal(3, "23:25", "Noodles", 420)] },
+  { date: iso(2), status: "none" },
+  { date: iso(1), status: "partial", wake: `${iso(1)}T09:10`, asleep: `${iso(0)}T00:05`, meals: [meal(1, "13:15", "Sushi", 540)] },
+  { date: iso(0), status: "today", wake: `${DAY}T07:20`, asleep: null, meals: [meal(0, "07:50", "Toast and eggs", 430), meal(0, "12:40", "Burrito", 760)] },
+];
+const KEPT = [[8, "1101111011110x1111011111011x"], [3, "0011010x01100101x01101000110"]].map(([h, marks], r) => ({
+  label: r === 0 ? ["goals.slept", { h }] : ["goals.last_meal", { h }],
+  days: [...marks].map((c, i) => ({ date: iso(27 - i), met: c === "x" ? null : c === "1" })) }));
 
 // ---- charts: each one drawn into a .chart box --------------------------------------------------------------
 const box = (id, extra = "") => `<div class="chart kit-draw" data-kit="${id}"${extra}></div>`;
@@ -112,6 +124,9 @@ const CHARTS = {
   ladderChart: { html: () => box("ladder"), draw: { ladder: (w) => ladderChart(LADDER, { width: w, final: "07:00" }) } },
   coverage: { html: () => `<div class="kit-rows">${COVER.map(([key], i) => `<div class="kit-rowlabel xs muted">${t(key)}</div><div class="cov">${box(`cov-${i}`)}</div>`).join("")}</div>`,
     draw: Object.fromEntries(COVER.map(([, marks], i) => [`cov-${i}`, (w) => coverage(marks, iso(29), { width: w })])) },
+  mealTimeline: { html: () => box("meals"), draw: { meals: (w) => mealTimeline(MEALS, { width: w, gapH: 3 }) } },
+  keptDots: { html: () => `<div class="kit-rows">${KEPT.map((row, i) => `<div class="kit-rowlabel xs muted">${esc(t(...row.label))}</div>${box(`kept-${i}`)}`).join("")}</div>`,
+    draw: Object.fromEntries(KEPT.map((row, i) => [`kept-${i}`, (w) => keptDots(row.days, { width: w })])) },
   lanes: { html: () => box("lanes"),
     draw: { lanes: (w) => {
       const labelW = w < 560 ? 92 : 150;
@@ -138,12 +153,12 @@ const SAMPLES = {
   ".sr": () => `<p class="small" style="margin:0">${t("kit.c.sr")}<span class="sr">${t("kit.c.sr_hidden")}</span></p>`,
   ".top": () => `<p class="small muted" style="margin:0">${t("kit.c.top")}</p>`,
   ".brand": () => `<p class="small muted" style="margin:0">${t("kit.c.brand")}</p>`,
-  ".nav": () => `<nav class="nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit" aria-current="page">${t("nav.today")}</a><a href="#kit">${t("nav.week")}</a><a href="#kit">${t("nav.time")}</a></nav>`,
+  ".nav": () => `<nav class="nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit" aria-current="page">${t("nav.today")}</a><a href="#kit">${t("nav.body")}</a><a href="#kit">${t("nav.time")}</a></nav>`,
   // drawn in place (not a child of <body>): the same menu as this page's, with a menu item open on its first page
-  ".side": () => `<p class="small muted" style="margin:0 0 10px">${t("kit.c.side")}</p><div class="kit-side side"><div class="side-head"><span class="brand"><span>dayring</span></span></div>
-    <nav class="side-nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit">${icon("sun", 18)}<span>${t("nav.today")}</span></a><a href="#kit">${icon("calendar", 18)}<span>${t("nav.week")}</span></a>
-      <a href="#kit" aria-current="page">${icon("heart", 18)}<span>${t("nav.body")}</span></a><a class="side-sub" href="#kit" aria-current="page"><span>${t("nav.weight")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.sleep_tab")}</span></a>
-      <a href="#kit">${icon("clock", 18)}<span>${t("nav.time")}</span></a></nav>
+  ".side": () => `<p class="small muted" style="margin:0 0 10px">${t("kit.c.side")}</p><div class="kit-side side"><div class="side-head"><span class="brand"><span>Health AIO</span></span></div>
+    <nav class="side-nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit">${icon("sun", 18)}<span>${t("nav.today")}</span></a>
+      <a href="#kit" aria-current="page">${icon("heart", 18)}<span>${t("nav.body")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.sleep_tab")}</span></a><a class="side-sub" href="#kit" aria-current="page"><span>${t("nav.exercise")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.food")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.weight")}</span></a>
+      <a href="#kit">${icon("walk", 18)}<span>${t("nav.time")}</span></a><a href="#kit">${icon("target", 18)}<span>${t("nav.plan")}</span></a></nav>
     <div class="side-tools"><button class="tool" type="button">${t("ui.lang")}</button><button class="tool" type="button" aria-label="${esc(t("ui.mode"))}">${icon("sleep", 15)}</button></div></div>`,
   ".tool": () => `<div class="tools"><button class="tool" type="button">${t("ui.lang")}</button><button class="tool" type="button" aria-label="${esc(t("ui.mode"))}">${icon("sleep", 15)}</button></div>`,
   ".demo-badge": () => `<span class="demo-badge">${t("ui.demo")}</span>`,
@@ -181,7 +196,7 @@ const SAMPLES = {
   table: () => `<div class="table-wrap"><table class="sectioned"><thead><tr><th></th><th scope="col">${t("review.this")}</th><th scope="col">${t("review.change")}</th></tr></thead>
     <tbody><tr class="sec"><th colspan="3" scope="rowgroup">${t("review.sec.sleep")}</th></tr><tr><th scope="row">${t("review.m.sleep_min")}</th><td class="num">${dur(452)}</td><td>${chip("good", `+${dur(22)}`)}</td></tr>
     <tr class="sec"><th colspan="3" scope="rowgroup">${t("review.sec.screens")}</th></tr><tr><th scope="row">${t("review.m.fun")}</th><td class="num">${dur(150)}</td><td>${chip("bad", `+${dur(35)}`)}</td></tr></tbody></table></div>`,
-  ".code": () => `<p class="small" style="margin:0 0 8px"><code>var(--accent)</code></p><pre class="code" style="margin:0">python3 -m dayring kit check DIR</pre>`,
+  ".code": () => `<p class="small" style="margin:0 0 8px"><code>var(--accent)</code></p><pre class="code" style="margin:0">python3 -m healthaio kit check DIR</pre>`,
   ".chart": () => `<p class="small muted" style="margin:0">${t("kit.c.chart")}</p>`,
   ".ph": () => `<p class="small" style="margin:0;max-width:16em">${t("kit.c.ph").split("|").map((x) => `<span class="ph">${esc(x)}</span>`).join("")}</p>`,
 };
@@ -257,7 +272,7 @@ function spaceScale(tokens) {
 function chartCell(c) {
   const sample = CHARTS[c.name];
   // the narrow charts fill two or three columns evenly; the ring, the day dots and the wide charts each take a row
-  const span = ["dayRing", "dayDots", "timeChart", "stackedColumns", "blockColumns", "sleepWindows", "ladderChart", "coverage", "lanes"].includes(c.name) ? " kit-full" : "";
+  const span = ["dayRing", "dayDots", "timeChart", "stackedColumns", "blockColumns", "sleepWindows", "ladderChart", "coverage", "lanes", "mealTimeline"].includes(c.name) ? " kit-full" : "";
   return `<article class="kit-cell${span}">
     <header><code class="kit-name">${esc(c.name)}</code><span class="chip">${t("kit.sample")}</span></header>
     <p class="kit-sig"><code>${esc(c.signature)}</code></p><p class="small kit-doc">${esc(docOf(c.name, c.doc))}</p>
@@ -295,8 +310,8 @@ export default {
         <section class="card span-12"><h2>${t("kit.icons")}<span class="aside">${t("kit.icons_note")}</span></h2><div class="kit-icons">${icons}</div>
           <div class="row" style="margin-top:var(--s-3);gap:6px"><span class="xs muted"><code>STATE_ICON</code></span>${chip("good", "good", STATE_ICON.good)}${chip("bad", "bad", STATE_ICON.bad)}</div></section>
         <section class="card span-12"><h2>${t("kit.use")}<span class="aside"><a href="${DOCS}">${t("kit.use.docs")}</a></span></h2>
-          <pre class="code kit-cmd">python3 -m dayring kit export ../my-app/static/kit
-python3 -m dayring kit check ../my-app/static/kit</pre>
+          <pre class="code kit-cmd">python3 -m healthaio kit export ../my-app/static/kit
+python3 -m healthaio kit check ../my-app/static/kit</pre>
           <ol class="small kit-steps">${["export", "load", "own", "check", "back"].map((k) => `<li>${t(`kit.use.${k}`)}</li>`).join("")}</ol></section>
       </div>`;
   },
