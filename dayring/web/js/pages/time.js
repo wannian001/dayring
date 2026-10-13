@@ -4,7 +4,9 @@
 // the biggest activity (screens would win every day); it names the biggest change that lies clearly
 // outside normal (`clear`, worked out in modules/time.py), and colours only those. Lanes may overlap;
 // unrecorded waking time is shown as such. A day without an activity's record shows "—" for it (never 0)
-// and is left out of its average and normal.
+// and is left out of its average and normal. Devices at once (each device counting its own minutes) has its
+// own card; its two measures, screens at once (a ratio, kept in hundredths) and the longest stretch on one thing,
+// are candidates of "what changed" like the rest.
 import { bullet, draw, esc, lanes } from "../charts.js";
 import { day, device, dur, getLang, num, shortDay, t, weekdayShort, wtype } from "../i18n.js";
 import { COLOR, icon, STATE_ICON } from "../icons.js";
@@ -18,11 +20,15 @@ const CAT_COLOR = { work: "var(--c-focus)", learning: "var(--c-focus)", entertai
 const keep = (text) => text.replace(/ /g, "\u00a0");  // one duration never breaks across lines ("4 小时 23 分")
 const toneCls = (tone) => (tone === "good" ? "good" : tone === "bad" ? "bad" : "");
 const shownTone = (c) => (c.clear ? c.tone : "neutral");  // green and red only for a clear change
-const dirWord = (c, kind) => t(`chg.${c.state === "high" ? (kind === "short" ? "up" : "more") : (kind === "short" ? "down" : "less")}`);
+// a value in its own unit: the stacking ratio is kept in hundredths (142 = 1.42×), everything else in minutes
+const ratio = (v) => (v == null ? "—" : t("time.ratio_v", { v: num(v / 100, 2) }));
+const fmt = (key, v) => (key === "ratio" ? ratio(v) : dur(v));
+const dirWord = (c, kind) => (c.key === "ratio" ? t(`chg.${c.state === "high" ? "higher" : "lower"}`)
+  : t(`chg.${c.state === "high" ? (kind === "short" ? "up" : "more") : (kind === "short" ? "down" : "less")}`));
 const listOf = (keys) => keys.map((k) => t(`chg.${k}`)).join(t("ui.list_sep"));
 // "normal 0m–0m" reads as a glitch: a normal that is one value is written once ("usually none" when 0)
-function bandLabel(b, { range = "band", one = "band_one", none = "time.band_none" } = {}, vars = {}) {
-  const low = keep(dur(b.q1)), high = keep(dur(b.q3));
+function bandLabel(b, { range = "band", one = "band_one", none = "time.band_none" } = {}, vars = {}, key = "") {
+  const low = keep(fmt(key, b.q1)), high = keep(fmt(key, b.q3));
   if (low !== high) return t(range, { ...vars, low, high });
   return Math.round(b.q3) === 0 ? t(none, vars) : t(one, { ...vars, low });
 }
@@ -50,16 +56,16 @@ function stateChip(m) {
   return `<span class="chip ${toneCls(tone)}">${STATE_ICON[tone] || ""}${t(`state.${m.state}`)}</span>`;
 }
 
-function tile(key, S, extra = [], body = "") {
+function tile(key, S, extra = [], body = "", cls = "") {
   const m = S.metrics[key];
-  const band = m.band ? bandLabel(m.band) : "";
+  const band = m.band ? bandLabel(m.band, {}, {}, key) : "";
   // each piece of the note wraps as a whole ("娱乐上限 3 小时" never leaves "时" alone on a line)
   const pieces = [band, knownNote(S, key), ...extra].filter(Boolean);
   const note = pieces.map((x, i) => `<span class="piece">${esc(x)}${i < pieces.length - 1 ? " ·" : ""}</span>`).join(" ");
   // four rows shared with the tiles beside it (CSS subgrid), so values and bullets line up across a row
-  return `<div class="tile act-tile${key === "screen" ? " act-wide" : ""}">
-    <div class="label"><span class="act-name" style="color:${COLOR[key]}">${icon(key, 16)}<span>${t(`act.${key}`)}</span></span>${stateChip(m)}</div>
-    <div class="act-value"><div class="value">${dur(m.value)}</div>${body}</div>
+  return `<div class="tile act-tile${key === "screen" ? " act-wide" : ""}${cls}">
+    <div class="label"><span class="act-name" style="color:${COLOR[key === "stacked" ? "screen" : key]}">${icon(key === "stacked" ? "screen" : key, 16)}<span>${t(`act.${key}`)}</span></span>${stateChip(m)}</div>
+    <div class="act-value"><div class="value">${fmt(key, m.value)}</div>${body}</div>
     <div class="bul" data-key="${key}"></div>
     <div class="note">${note}</div></div>`;
 }
@@ -80,7 +86,7 @@ function dayCell(d) {
   if (s) {
     mark = changeIcon(s.key, s.state, s.tone, 30);  // a day's standout is always a clear change
     label = t("time.day_label", { what: t(`chg.short.${s.key}`), dir: dirWord(s, "short") });
-    delta = `<b class="daycell-delta num ${toneCls(s.tone)}">${dur(Math.abs(s.delta))}</b>`;
+    delta = `<b class="daycell-delta num ${toneCls(s.tone)}">${fmt(s.key, Math.abs(s.delta))}</b>`;
   } else if (d.compared) {
     mark = `<span class="chg-icon" style="color:var(--ink-3)">${icon("check", 30)}</span>`;
     label = t("time.day_usual");
@@ -101,6 +107,26 @@ function staleNote(S) {
     : t("time.stale_none", { what: t(`act.${s.activity}`) }))}</p>`).join("");
 }
 
+// devices at once: device time, screens at once and the longest stretch on one thing, then device time by hour
+function stackHtml(p) {
+  const S = p.span, K = S.stack, A = S.avg;
+  if (!K) return "";
+  const byDevice = Object.entries(K.devices).sort((a, b) => b[1] - a[1]).map(([d, m]) => `${device(d)} ${dur(m)}`).join(" · ");
+  const best = K.best_single;
+  const tiles = [
+    tile("stacked", S, [t("time.stack_clock", { v: dur(A.screen) }), byDevice], "", " stack-tile"),
+    tile("ratio", S, A.stacked != null ? [t("time.ratio_note", { s: dur(A.stacked), c: dur(A.screen) })] : [], "", " stack-tile"),
+    tile("single", S, best ? [t("time.single_best", { d: dur(best.minutes), app: best.app, device: device(best.device), day: day(best.date), at: best.start })] : [], "", " stack-tile"),
+  ].join("");
+  const agent = Object.values(K.agent_by_hour).reduce((a, b) => a + b, 0);
+  return `<section class="card span-12"><h2>${t("time.stack")}<span class="aside">${phrases(t("time.stack_note"))}</span></h2>
+    <div class="tiles act-tiles stack-tiles">${tiles}</div>
+    <div class="section-title stack-hours-title"><span>${phrases(t("time.stack_hours"))}</span><span class="aside legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}
+      <span class="key"><i style="background:var(--c-axis)"></i>${t("time.key_clock")}</span><span class="key"><i class="hatch"></i>${t("time.key_extra")}</span></span></div>
+    <div id="stack-hours" class="chart"></div>
+    ${agent >= 1 ? `<p class="xs muted" style="margin:8px 0 0">${esc(t("time.agent_note", { v: dur(agent) }))}</p>` : ""}</section>`;
+}
+
 function heroHtml(p) {
   const S = p.span;
   const top = S.standout;
@@ -109,11 +135,11 @@ function heroHtml(p) {
   let mark, lede, sub, chips = "";
   if (top) {
     mark = changeIcon(top.key, top.state, top.tone, 56);
-    lede = t("time.change_line", { n: S.n, what: t(`chg.${top.key}`), dir: dirWord(top), d: keep(dur(Math.abs(top.delta))) });
-    sub = bandLabel(top.band, { range: "time.change_sub", one: "time.change_sub_one", none: "time.change_sub_none" }, { v: keep(dur(top.value)) });
+    lede = t(top.key === "ratio" ? "time.change_line_ratio" : "time.change_line", { n: S.n, what: t(`chg.${top.key}`), dir: dirWord(top), d: keep(fmt(top.key, Math.abs(top.delta))) });
+    sub = bandLabel(top.band, { range: "time.change_sub", one: "time.change_sub_one", none: "time.change_sub_none" }, { v: keep(fmt(top.key, top.value)) }, top.key);
     const others = S.changes.filter((c) => c.key !== top.key && c.clear);  // the same rule as the standout
     if (others.length) {
-      chips = `<div class="chg-also"><span class="xs muted">${t("time.also")}</span>${others.map((c) => `<span class="chip ${toneCls(c.tone)}">${icon(c.state === "high" ? "up" : "down", 12)}${esc(t("time.chip", { what: t(`act.${c.key}`), d: dur(Math.abs(c.delta)), dir: dirWord(c) }))}</span>`).join("")}</div>`;
+      chips = `<div class="chg-also"><span class="xs muted">${t("time.also")}</span>${others.map((c) => `<span class="chip ${toneCls(c.tone)}">${icon(c.state === "high" ? "up" : "down", 12)}${esc(t("time.chip", { what: t(`act.${c.key}`), d: fmt(c.key, Math.abs(c.delta)), dir: dirWord(c) }))}</span>`).join("")}</div>`;
     }
   } else if (compared.length) {
     mark = `<span class="chg-icon" style="color:${COLOR.check}">${icon("check", 56)}</span>`;
@@ -173,11 +199,12 @@ export default {
         ${heroHtml(p)}
         <section class="card span-12"><h2>${t("time.per_day")}<span class="aside">${t("time.vs_normal", { n: p.baseline_days })}</span></h2><div class="tiles act-tiles">${tiles}</div></section>
         <section class="card span-12"><h2><span>${phrases(t("time.typical"))}</span><span class="aside legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}</span></h2><div id="hours" class="chart"></div></section>
+        ${stackHtml(p)}
         <section class="card span-12"><h2>${t("time.history")}<span class="aside">${phrases(t("time.history_note"))}</span></h2><div id="history" class="chart"></div></section>
         <section class="card span-7"><h2>${t("time.apps")}<span class="aside">${t("time.apps_note")}</span></h2>${apps ? `<ul class="apps">${apps}</ul>
           <p class="xs muted" style="margin:10px 0 0">${t("time.devices")}: ${devices}</p>` : `<p class="muted small">${t("time.no_screens")}</p>`}</section>
         <section class="card span-5"><h2>${t("time.workouts")}<span class="aside">${t("time.workouts_note")}</span></h2>${workouts}</section>
-        <section class="card span-12"><details class="how" open><summary>${t("ui.how")}</summary><p>${esc(t("time.rule", { n: p.baseline_days, min: p.baseline_min }))}</p></details></section>
+        <section class="card span-12"><details class="how" open><summary>${t("ui.how")}</summary><p>${esc(t("time.rule", { n: p.baseline_days, min: p.baseline_min }))}</p><p>${esc(t("time.rule_stack"))}</p></details></section>
       </div>`;
   },
   mount(root, p) {
@@ -200,12 +227,30 @@ export default {
     const every = (w, labelW, n, px) => Math.max(1, Math.ceil(px / Math.max(1, (w - labelW - 8) / n)));  // labels never touch
     const labelW = (w) => (w < 560 ? 92 : 150);
     draw(root.querySelector("#hours"), (w) => lanes(hourRows, hourCols, { width: w, labelW: labelW(w), labelEvery: Math.max(every(w, labelW(w), 24, 26), w < 560 ? 6 : 3), showMax: false }));
+    const K = S.stack;
+    if (K) {
+      // one row per device in the priority order (others after), then all devices: the clock time and what devices at once add on top
+      const order = [...(p.devices_order || []).filter((d) => d in K.devices), ...Object.keys(K.devices).filter((d) => !(p.devices_order || []).includes(d)).sort()];
+      const devRows = order.map((d) => ({ key: d, label: device(d), sub: dur(K.devices[d]), parts: SCREEN_PARTS, max: 60,
+        values: K.by_hour.map((h) => h[d] || {}) }));
+      const totals = K.by_hour.map((h) => Object.values(h).reduce((s, parts) => s + Object.values(parts).reduce((a, b) => a + b, 0), 0));
+      const allMax = Math.max(60, ...totals);
+      const allRow = { key: "all", label: t("time.all_devices"), sub: t("chart.row_max", { v: dur(allMax) }), max: allMax,
+        parts: [["clock", "var(--c-axis)"], ["extra", "var(--ink)", { hatch: true }]],
+        values: totals.map((m, h) => ({ clock: K.clock_by_hour[h], extra: Math.max(0, m - K.clock_by_hour[h]) })) };
+      draw(root.querySelector("#stack-hours"), (w) => lanes([...devRows, allRow], hourCols, { width: w, labelW: labelW(w), labelEvery: Math.max(every(w, labelW(w), 24, 26), w < 560 ? 6 : 3), showMax: false }));
+    }
     const H = p.history;
     const val = (key) => H.map((d) => { const v = d.totals?.[key]; return v == null ? null : key === "screen" ? d.totals : { [key]: v }; });
     const peak = (key) => Math.max(30, ...H.map((d) => d.totals?.[key] ?? 0));
     const limit = p.limits.fun_max_min;
-    const dayRows = (w) => ORDER.map((key) => ({ key, label: t(`act.${key}`), parts: ROW[key].parts, values: val(key), max: peak(key),
-      ...(key === "screen" && limit ? { limit, limitLabel: t(w < 560 ? "time.limit_short" : "time.fun_limit", { v: dur(limit, { short: true }) }) } : {}) }));
+    // devices at once: the minutes several devices add beyond the clock, striped like the extra on the card above
+    const extra = H.map((d) => (d.totals?.stacked == null || d.totals?.screen == null ? null : { extra: Math.max(0, d.totals.stacked - d.totals.screen) }));
+    const extraRow = { key: "extra", label: t("time.extra_row"), sub: t("time.extra_sub"), parts: [["extra", "var(--ink)", { hatch: true }]], values: extra,
+      max: Math.max(30, ...extra.map((v) => v?.extra ?? 0)) };
+    const dayRows = (w) => [...ORDER.map((key) => ({ key, label: t(`act.${key}`), parts: ROW[key].parts, values: val(key), max: peak(key),
+      ...(key === "screen" && limit ? { limit, limitLabel: t(w < 560 ? "time.limit_short" : "time.fun_limit", { v: dur(limit, { short: true }) }) } : {}) })),
+      ...(extra.some((v) => v) ? [extraRow] : [])];
     const dayCols = H.map((d) => ({ label: shortDay(d.date), tip: day(d.date), shade: d.in_span }));
     draw(root.querySelector("#history"), (w) => lanes(dayRows(w), dayCols, { width: w, rowH: 58, labelW: labelW(w), labelEvery: Math.max(every(w, labelW(w), H.length, 44), w < 560 ? 7 : 3) }));
   },

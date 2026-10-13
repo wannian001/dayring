@@ -111,12 +111,13 @@ Colours, light and dark ("same" = the same value in both modes):
 - **One look per mode.** Light mode is graphite neutrals with a blue accent, dark mode dusk neutrals with a violet
   accent. The page follows the system setting; `data-mode="light"` or `"dark"` on `<html>` overrides it.
 - **Charts are otherwise ink and grey.** The "your normal" band is a faint fill (`--c-band`), a dashed line is a
-  plan or a limit, × is a day without a record, and a mark drawn over others gets a `--halo` ring in the colour
-  behind it (`--surface` on a card; `.tile` sets it to `--surface-2`).
+  plan or a limit, × is a day without a record, diagonal stripes are something added on top of the rest (a hatch
+  part of `lanes`, such as the minutes a second device adds beyond the clock), and a mark drawn over others gets a
+  `--halo` ring in the colour behind it (`--surface` on a card; `.tile` sets it to `--surface-2`).
 
 ### Components and charts
 
-Each of these is shown in the gallery. Components (kit.css): `.sr`, `.top`, `.brand`, `.nav`, `.tool`, `.demo-badge`, `.head`, `.stepper`, `.grid`, `.col`, `.card`, `.lede`, `.stack`, `.eyebrow`, `.hero-num`, `.chip`, `.dot`, `.legend`, `.ring`, `.agenda`, `.tonight`, `.tiles`, `.seg`, `.subnav`, `.how`, `.empty`, `.foot`, `.tip`, `.catbar`, `.hbar`, `.progress`, `.mark`, `.facts`, `table`, `.code`, `.chart`, `.ph`.
+Each of these is shown in the gallery. Components (kit.css): `.sr`, `.top`, `.brand`, `.nav`, `.side`, `.tool`, `.demo-badge`, `.head`, `.stepper`, `.grid`, `.col`, `.card`, `.lede`, `.stack`, `.eyebrow`, `.hero-num`, `.chip`, `.dot`, `.legend`, `.ring`, `.agenda`, `.tonight`, `.tiles`, `.seg`, `.subnav`, `.how`, `.empty`, `.foot`, `.tip`, `.catbar`, `.hbar`, `.progress`, `.mark`, `.facts`, `table`, `.code`, `.chart`, `.ph`.
 
 | function | what it draws |
 |---|---|
@@ -134,7 +135,7 @@ Each of these is shown in the gallery. Components (kit.css): `.sr`, `.top`, `.br
 | `sleepWindows(nights, { width, target = null, rowH = 18 })` | One bar per night on a 20:00–14:00 axis, the alarm as an ink tick over it, an optional dashed target window. |
 | `ladderChart(ladder, { width, height = 200, final })` | The alarm as a step line (earlier = higher) with wake dots, green on time and red late, and the goal dashed. |
 | `coverage(marks, first, { width, height = 16 })` | One cell per day from first: "1" = has data, "p" = partial, anything else = nothing. |
-| `lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true })` | One row per activity with columns over hours or days, each row on its own scale; × = no record, dashed = a limit. |
+| `lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true })` | One row per activity with columns over hours or days, each row on its own scale; × = no record, dashed = a limit, stripes = a hatch part. |
 
 | helper | does |
 |---|---|
@@ -149,7 +150,7 @@ Each of these is shown in the gallery. Components (kit.css): `.sr`, `.top`, `.br
 | `RING_CATS` (js/charts.js) | The screen groups of the ring, inside out: [key, the categories it adds up, colour]. |
 | `ICON_KEYS` (js/icons.js) | The names icon() knows, in drawing order. |
 | `icon(key, size = 20)` (js/icons.js) | The icon for key at size px (an unknown key draws the dashed clock of "not recorded"). |
-| `COLOR` (js/icons.js) | The colour each icon is drawn in: its data colour, ink-3 for not recorded, ink-2 for the check. |
+| `COLOR` (js/icons.js) | The colour each icon is drawn in: its data colour, ink-3 for not recorded, ink-2 for the check and the two devices-at-once measures; the menu glyphs take the text colour. |
 | `STATE_ICON` (js/icons.js) | The 12px glyphs inside a state chip: good = a tick, bad = an exclamation mark. |
 
 ### Using the kit in another app
@@ -194,6 +195,7 @@ changed files under a version that is not newer.
 
 | version | date | change |
 |---|---|---|
+| 1.2.0 | 2026-10-13 | `.side`: the menu as a left sidebar from 900px that folds to a 64px icon rail (`html.side-folded`) and a bottom tab bar below that (`.top` and `.nav` stay for apps with a top bar); with a sidebar open, `.subnav` hides (its pages are listed in the sidebar); `lanes` parts take `{ hatch: true }` (diagonal stripes of the part's colour, keyed by `.legend .key i.hatch`) and a row's stacked parts never run past its top; icons `ratio` and `single` (the Time page's devices at once) and the menu glyphs `sun`, `heart`, `clock`, `battery`, `list`, `database`, `sidebar` |
 | 1.1.0 | 2026-10-13 | `formatDuration` (the default `unitFmt` of `stackedColumns` and `lanes`) and `stackedColumns`' `minutes` option (minutes tick on round hours: 0 / 2h / 4h, not 3h 20m); `dayRing` defaults to the exported `RING_CATS`; `setFormat()` keeps the English default for a word the app's `t()` lacks; `stackedColumns` names its limit in a key under the axis instead of over the columns; the labels of `timeChart`'s reference lines and `ladderChart`'s goal go over the marks with a halo; `blockColumns`, `stackedColumns` and `ladderChart` leave out labels evenly when neighbours would run into each other, and keep the first and last inside the chart; `sleepWindows` puts its hour labels 2, 4 or 6 hours apart, whichever leaves room; `.stepper` pills never break inside (the row wraps); kit.css spacing written with the space tokens (no pixel changes) |
 | 1.0.0 | 2026-10-13 | First kit: tokens.css (with `--halo` and `--on-watch` added), kit.css split out of app.css, charts.js without the i18n.js import (`setFormat()`), `rangeStrip`, `trendLine`, `legendKey` and `blockColumns` moved in from the Drain and Week pages, `toneColor`, `STATE_ICON` and `ICON_KEYS` |
 
@@ -278,11 +280,11 @@ dayring 身兼两职：它是一个本地优先看板的公开展示，也是一
 - **色弱检查。** 专注、娱乐、沟通两两之间在两种模式下都通过（最差 CVD ΔE 9.2）。睡眠在红色盲下和专注太像，所以从不挨着放：它有自己的一圈、一条泳道和一张图。运动可以挨着睡眠（最差 ΔE 8.4）。
 - **状态色只表示状态，而且总配文字或图标。** 好、留意、偏了各有一个填充色（图上的标记）、一个字色（文字）和一个浅底（标签底色）。填充色两种模式故意一样，字色和浅底各有一档。写在“留意”色块上的字用 `--on-watch`。类名是 `.good`、`.watch`、`.bad`（`.bad` 用 off 那组颜色）。
 - **每种模式一套样子。** 浅色是石墨中性色加蓝色强调，深色是暮蓝中性色加紫色强调。默认跟随系统；`<html>` 上的 `data-mode="light"` 或 `"dark"` 可以改。
-- **其余的图只用墨色和灰色。** “你的平常”是一条淡色带（`--c-band`），虚线表示计划或上限，× 表示那天没有记录；压在别的东西上的标记有一圈 `--halo`，颜色和它背后的底一样（卡片上是 `--surface`，`.tile` 里改成 `--surface-2`）。
+- **其余的图只用墨色和灰色。** “你的平常”是一条淡色带（`--c-band`），虚线表示计划或上限，× 表示那天没有记录，斜纹表示叠在其余部分上面多出来的东西（`lanes` 的 hatch 部分，比如第二台设备比钟表多出来的分钟）；压在别的东西上的标记有一圈 `--halo`，颜色和它背后的底一样（卡片上是 `--surface`，`.tile` 里改成 `--surface-2`）。
 
 ### 组件和图表
 
-下面每一项在展示页上都有。组件（kit.css）：`.sr`, `.top`, `.brand`, `.nav`, `.tool`, `.demo-badge`, `.head`, `.stepper`, `.grid`, `.col`, `.card`, `.lede`, `.stack`, `.eyebrow`, `.hero-num`, `.chip`, `.dot`, `.legend`, `.ring`, `.agenda`, `.tonight`, `.tiles`, `.seg`, `.subnav`, `.how`, `.empty`, `.foot`, `.tip`, `.catbar`, `.hbar`, `.progress`, `.mark`, `.facts`, `table`, `.code`, `.chart`, `.ph`。
+下面每一项在展示页上都有。组件（kit.css）：`.sr`, `.top`, `.brand`, `.nav`, `.side`, `.tool`, `.demo-badge`, `.head`, `.stepper`, `.grid`, `.col`, `.card`, `.lede`, `.stack`, `.eyebrow`, `.hero-num`, `.chip`, `.dot`, `.legend`, `.ring`, `.agenda`, `.tonight`, `.tiles`, `.seg`, `.subnav`, `.how`, `.empty`, `.foot`, `.tip`, `.catbar`, `.hbar`, `.progress`, `.mark`, `.facts`, `table`, `.code`, `.chart`, `.ph`。
 
 | 函数 | 画什么 |
 |---|---|
@@ -300,7 +302,7 @@ dayring 身兼两职：它是一个本地优先看板的公开展示，也是一
 | `sleepWindows(nights, { width, target = null, rowH = 18 })` | 20:00–14:00 的轴上一晚一根条，闹钟是压在条上的一道墨色竖线，可加虚线目标框。 |
 | `ladderChart(ladder, { width, height = 200, final })` | 闹钟画成台阶线（越早越高），醒来的点按时为绿、晚了为红，目标是虚线。 |
 | `coverage(marks, first, { width, height = 16 })` | 从 first 起一天一格："1" = 有数据，"p" = 不全，其他 = 没有。 |
-| `lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true })` | 一种活动一行，列是小时或日子，每行有自己的刻度；× = 没有记录，虚线 = 上限。 |
+| `lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true })` | 一种活动一行，列是小时或日子，每行有自己的刻度；× = 没有记录，虚线 = 上限，斜纹 = hatch 部分。 |
 
 | 辅助 | 做什么 |
 |---|---|
@@ -315,7 +317,7 @@ dayring 身兼两职：它是一个本地优先看板的公开展示，也是一
 | `RING_CATS` (js/charts.js) | 环上屏幕时间的分组，从里往外：[键、合并的类别、颜色]。 |
 | `ICON_KEYS` (js/icons.js) | icon() 认得的名字，按画的顺序。 |
 | `icon(key, size = 20)` (js/icons.js) | 画 size 像素大小的 key 图标（不认得的 key 画“没有记录”的虚线钟）。 |
-| `COLOR` (js/icons.js) | 每个图标的颜色：它的数据颜色，“没有记录”用 ink-3，勾用 ink-2。 |
+| `COLOR` (js/icons.js) | 每个图标的颜色：它的数据颜色，“没有记录”用 ink-3，勾和“几台同时用”的两项用 ink-2；菜单图标跟文字颜色。 |
 | `STATE_ICON` (js/icons.js) | 状态标签里的 12 像素小图：good = 勾，bad = 感叹号。 |
 
 ### 用到别的应用里
@@ -335,5 +337,6 @@ dayring 身兼两职：它是一个本地优先看板的公开展示，也是一
 
 | 版本 | 日期 | 改了什么 |
 |---|---|---|
+| 1.2.0 | 2026-10-13 | 新增 `.side`：900 像素以上是左侧栏，能收成 64 像素的图标条（`html.side-folded`），更窄时是底部标签栏（`.top` 和 `.nav` 留给用顶栏的应用）；有侧栏时 `.subnav` 隐藏（它的几页已经列在侧栏里）；`lanes` 的部分可以带 `{ hatch: true }`（用这部分的颜色画斜纹，图例是 `.legend .key i.hatch`），一行里叠起来的部分不再超出这一行的顶；新图标 `ratio`、`single`（时间页的“几台同时用”）和菜单图标 `sun`、`heart`、`clock`、`battery`、`list`、`database`、`sidebar` |
 | 1.1.0 | 2026-10-13 | 新增 `formatDuration`（`stackedColumns` 和 `lanes` 的 `unitFmt` 默认用它）和 `stackedColumns` 的 `minutes` 选项（分钟按整点的小时标刻度：0 / 2h / 4h，不再是 3h 20m）；`dayRing` 默认用导出的 `RING_CATS`；应用的 `t()` 不认得的词，`setFormat()` 之后照写英文默认值；`stackedColumns` 的上限名字写在坐标轴下面的图例里，不再压在柱子上；`timeChart` 参考线和 `ladderChart` 目标的文字带一圈底色、压在标记上面；`blockColumns`、`stackedColumns` 和 `ladderChart` 相邻标签会撞在一起时均匀地省掉一些，头尾的标签不出图；`sleepWindows` 的整点标签按放得下的空间隔 2、4 或 6 小时；`.stepper` 的胶囊不在中间断行（整排换行）；kit.css 的间距改用间距变量（像素不变） |
 | 1.0.0 | 2026-10-13 | 第一版：tokens.css（新增 `--halo` 和 `--on-watch`），从 app.css 拆出 kit.css，charts.js 不再导入 i18n.js（改用 `setFormat()`），把消耗页和本周页里的 `rangeStrip`、`trendLine`、`legendKey`、`blockColumns` 搬进来，新增 `toneColor`、`STATE_ICON`、`ICON_KEYS` |

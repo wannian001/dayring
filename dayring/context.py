@@ -30,6 +30,36 @@ class ScreenDay:
 
 ACTIVITIES = ("sleep", "exercise", "calendar", "screen")  # the Time page's lanes, in display order
 SCREEN_PARTS = ("focus", "fun", "communication", "other")
+PART_OF = {"work": "focus", "learning": "focus", "entertainment": "fun", "social": "fun",
+           "communication": "communication", "other": "other"}
+# devices at once (Context.stack_days): what a day's totals carry besides the activities
+STACK_KEYS = ("stacked", "ratio", "single", "agent")
+
+
+@dataclass
+class StackDay:
+    """Devices at once: each device in use counts its own minute, so an hour on the laptop with the phone
+    in hand is up to two hours of device time. Two things are taken out first (Context.stack_days): an AI
+    agent app in front on a computer while another device is in use (the agent works, you are elsewhere),
+    and one app open on several devices at the same minute (one thing, counted on the first device in the
+    priority list). ``ratio`` is device time over clock time: 1.0 means one screen at a time."""
+    day: date
+    clock: float = 0.0                 # screen minutes counted once (ScreenDay.total)
+    stacked: float = 0.0               # device minutes left after the two deductions
+    multi: float = 0.0                 # minutes with two or more things left
+    agent: float = 0.0                 # agent minutes taken out
+    by_device: Dict[str, float] = field(default_factory=dict)
+    by_part: Dict[str, float] = field(default_factory=dict)
+    by_hour: List[Dict[str, Dict[str, float]]] = field(default_factory=lambda: [dict() for _ in range(24)])  # device -> part
+    agent_by_hour: List[float] = field(default_factory=lambda: [0.0] * 24)
+    single: float = 0.0                # the longest stretch on one thing (one app, one device, nothing else in use)
+    single_app: Optional[str] = None
+    single_device: Optional[str] = None
+    single_start: Optional[int] = None  # minute of the day it started
+
+    @property
+    def ratio(self) -> Optional[float]:
+        return self.stacked / self.clock if self.clock else None
 CALENDAR_KINDS = ("class", "work", "personal", "other")  # planned training is not counted; workouts are
 
 
@@ -48,6 +78,7 @@ class TimeDay:
     by_hour: List[Dict[str, float]] = field(default_factory=lambda: [dict() for _ in range(24)])
     untimed_exercise: float = 0.0  # workout minutes known only as a daily total (no start time)
     has_screen: bool = False
+    stack: Optional["StackDay"] = None  # devices at once, on a day with screen time
     has_body: bool = False         # body_daily has a row dated this day
     known: Dict[str, bool] = field(default_factory=lambda: {a: False for a in ACTIVITIES})
     length: int = 1440             # real minutes in this day: 1380 or 1500 when the clocks change
@@ -83,6 +114,12 @@ class TimeDay:
         # "not recorded" needs the two records that cover most of a day: without the night or the
         # screens, the gap would only measure what is missing
         out["not_recorded"] = self.unrecorded if self.known["sleep"] and self.known["screen"] else None
+        # devices at once; the ratio is kept in hundredths (1.42 = 142) so it rounds and compares like minutes
+        st = self.stack if self.known["screen"] else None
+        out["stacked"] = st.stacked if st else None
+        out["ratio"] = st.ratio * 100 if st and st.ratio is not None else None
+        out["single"] = st.single if st else None
+        out["agent"] = st.agent if st else None
         return out
 
 
@@ -145,6 +182,7 @@ class Context:
             self.tz = None
         self.now = now or datetime.now(self.tz).replace(tzinfo=None)
         self._screen: Optional[Dict[date, ScreenDay]] = None
+        self._stack: Optional[Dict[date, StackDay]] = None
         self._time: Optional[Dict[date, TimeDay]] = None
         self._lengths: Dict[date, int] = {}
 
@@ -193,6 +231,77 @@ class Context:
         self._screen = out
         return out
 
+    # ---- devices at once ------------------------------------------------------------------------
+    def stack_days(self) -> Dict[date, StackDay]:
+        """Each device's own minutes (see StackDay). Within one device a minute belongs to the session
+        that started first, as with the clock count."""
+        if self._stack is not None:
+            return self._stack
+        rank = {name: i for i, name in enumerate(self.cfg.devices)}
+        order = lambda dev: (rank.get(dev, len(rank)), dev)  # noqa: E731
+        computers = set(self.cfg.computers)
+        agents = {a.casefold() for a in self.cfg.agent_apps}
+        use: Dict[date, Dict[int, Dict[str, tuple]]] = {}
+        for row in sorted(self.store.rows("screen_sessions"), key=lambda r: r["start"]):
+            if row["end"] <= row["start"]:
+                continue
+            for day, minute, hour in _minutes(row["start"], row["end"], self.tz):
+                use.setdefault(day, {}).setdefault(minute, {}).setdefault(row["device"], (row["app"], row["category"], hour))
+        screen = self.screen_days()
+        out: Dict[date, StackDay] = {}
+        for day, minutes in use.items():
+            st = StackDay(day=day, clock=screen[day].total if day in screen else 0.0)
+            runs: Dict[tuple, list] = {}  # (device, app) -> [run, gap, start]
+            best = (0.0, None, None, None)
+            for minute in range(min(minutes), max(minutes) + 1):
+                devs = minutes.get(minute, {})
+                keep = dict(devs)
+                if len(devs) >= 2:
+                    away = [d for d, (app, _, _) in devs.items() if d in computers and app.casefold() in agents]
+                    if len(away) < len(devs):  # someone is on another device: the agents work without you
+                        for d in away:
+                            hour = devs[d][2]
+                            del keep[d]
+                            st.agent += 1
+                            st.agent_by_hour[hour] += 1
+                    seen = set()
+                    for d in sorted(keep, key=order):  # one app on several devices is one thing
+                        name = keep[d][0].casefold()
+                        if name in seen:
+                            del keep[d]
+                        seen.add(name)
+                st.stacked += len(keep)
+                if len(keep) >= 2:
+                    st.multi += 1
+                for d, (app, cat, hour) in keep.items():
+                    part = PART_OF.get(cat, "other")
+                    st.by_device[d] = st.by_device.get(d, 0.0) + 1
+                    st.by_part[part] = st.by_part.get(part, 0.0) + 1
+                    slot = st.by_hour[hour].setdefault(d, {})
+                    slot[part] = slot.get(part, 0.0) + 1
+                # the longest stretch on one thing: a pause or something else of up to STRETCH_GAP_MIN minutes does not end it
+                only = (next(iter(keep)), keep[next(iter(keep))][0]) if len(keep) == 1 else None
+                for key in list(runs):
+                    run = runs[key]
+                    if key == only:
+                        run[0] += 1 + run[1]
+                        run[1] = 0
+                    elif run[1] < STRETCH_GAP_MIN:
+                        run[1] += 1
+                    else:
+                        del runs[key]
+                        continue
+                    if run[0] > best[0]:
+                        best = (float(run[0]), key[1], key[0], run[2])
+                if only is not None and only not in runs:
+                    runs[only] = [1, 0, minute]
+                    if best[0] < 1:
+                        best = (1.0, only[1], only[0], minute)
+            st.single, st.single_app, st.single_device, st.single_start = best
+            out[day] = st
+        self._stack = out
+        return out
+
     def time_days(self) -> Dict[date, TimeDay]:
         """Sleep, exercise, calendar and screen minutes for every calendar day that has any of them,
         with what is known for each day (see TimeDay)."""
@@ -237,11 +346,12 @@ class Context:
         for e in self.store.rows("events"):
             if e["kind"] in CALENDAR_KINDS and e["end"] > e["start"]:
                 mark("calendar", e["start"], e["end"])
-        parts = {"work": "focus", "learning": "focus", "entertainment": "fun", "social": "fun",
-                 "communication": "communication", "other": "other"}
+        parts = PART_OF
+        stack = self.stack_days()
         for day, sd in self.screen_days().items():
             td = get(day)
             td.has_screen = True
+            td.stack = stack.get(day)
             for minute, cat in sd.minutes.items():
                 td.minutes["screen"].add(minute)
                 part = parts.get(cat, "other")

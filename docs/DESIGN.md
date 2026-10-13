@@ -32,7 +32,10 @@ the top, the daily-average tiles, the typical day, the last 30 days) uses the sa
   `sleep_end`). Exercise = workouts with a start and an end (`workouts.csv`; a paused workout counts its minutes moving); a day known only by its daily
   `workout_min` adds to the totals but cannot be placed in the hours. Calendar = blocks of kind class, work,
   personal and other; planned training is left out because the workout itself counts. Screens = app sessions,
-  counted once across devices.
+  counted once across devices. The one exception is the **Devices at once** card, which says so in its title row:
+  there each device counts its own minutes (an agent app on a computer while another device is in use, and one app
+  on several devices at once, are taken out first), so the stacking ratio (device time over clock time) and the
+  longest stretch on one thing can be compared with your normal and named as what changed like the rest.
 - **Days are calendar days.** Every activity is cut at midnight, sleep included, so a night counts partly in
   each day (the Sleep page files the whole night under the morning you woke up instead). Workouts, screens
   and the calendar are in the configured timezone; Apple Health sleep times are in the zone you slept in, so
@@ -132,9 +135,13 @@ matters, and says when the evidence is softer (entertainment).
 
 ## Menu
 
-Today · Week · Body (Weight, Sleep) · Time · Drain · Review · Data. A menu item that holds more than one page shows
-a small switch under the menu, above the page title; the menu item stays highlighted on both, and each page is
-titled by its own tab (Weight, Sleep).
+Today · Week · Body (Weight, Sleep) · Time · Drain · Review · Data, in a sidebar on the left from 900 px (the
+browser already takes height at the top and bottom, so the menu takes width instead). The sidebar folds to a 64 px
+column of icons with the button at its top; folded, the logo unfolds it, and the choice is remembered in this
+browser. A menu item that holds more than one page lists its pages under it while one of them is open; folded or
+on a phone, those pages are a small switch above the page title instead, and each page is titled by its own tab
+(Weight, Sleep). On a phone the menu is a tab bar at the bottom, with the logo, language and light/dark in a row
+above the page.
 
 ## Colour
 

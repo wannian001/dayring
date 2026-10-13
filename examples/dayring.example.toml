@@ -10,6 +10,10 @@ title = "dayring"
 [devices]
 # When two devices are in use at the same minute, the first one in this list counts.
 priority = ["phone", "tablet", "laptop", "desktop"]
+# For "devices at once" (the Time page): a computer keeps its screen on while you are away, so an AI agent
+# app in front on one of these while another device is in use counts as the agent working, not as you.
+computers = ["laptop", "desktop"]
+agent_apps = ["Claude", "ChatGPT", "Codex", "Cursor", "Windsurf", "Terminal", "iTerm2", "Warp", "Ghostty"]
 
 [plan.sleep]
 target_hours = 8

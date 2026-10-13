@@ -218,7 +218,9 @@ If *Screen Time* > *Share across devices* is on, your iPhone and iPad send their
 this Mac, and they are imported too. Devices are named `laptop` / `desktop` (this Mac; override
 with `--device`), `phone`, `tablet` and `mac` (another Mac), from Biome's own device list. A
 second device of the same kind becomes `phone-2`, and so on. Put the names in the order you
-want in `[devices] priority` in `dayring.toml`.
+want in `[devices] priority` in `dayring.toml`. If you renamed a computer, list it in
+`[devices] computers` too, so the Time page's devices-at-once card can tell an AI agent left
+working on it (an app in `[devices] agent_apps`) from you.
 
 ### How sessions are built
 

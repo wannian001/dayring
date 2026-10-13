@@ -11,10 +11,11 @@
   <link rel="stylesheet" href="css/kit.css">
   <link rel="stylesheet" href="css/app.css">
   <script>
-    // apply a saved light/dark choice before first paint so the page does not flash
+    // apply a saved light/dark choice and a folded sidebar before first paint so the page does not flash
     try {
       var m = new URLSearchParams(location.search).get("mode") || localStorage.getItem("dayring.mode");
       if (m === "light" || m === "dark") document.documentElement.dataset.mode = m;
+      if (localStorage.getItem("dayring.side") === "folded") document.documentElement.classList.add("side-folded");
     } catch (e) {}
   </script>
   <script>
@@ -31,7 +32,7 @@
   <script type="module" src="js/app.js" onerror="dayringFailed()"></script>
 </head>
 <body>
-  <header class="top"><div class="top-in"></div></header>
+  <header class="side"></header>
   <main aria-live="polite"><p class="muted">Loading…</p></main>
 </body>
 </html>

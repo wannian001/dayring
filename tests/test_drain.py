@@ -265,7 +265,7 @@ class DrainWords(unittest.TestCase):
         self.assertIn('href="#today">Next day', self.render("en", "today", "2026-10-11").replace(" ›", ""))
 
     def test_english_lists_read_as_sentences(self):
-        html = self.render("en", "today", "2026-10-05")
+        html = self.render("en", "today", "2026-10-07")  # the 7 days to 6 Oct, with two signals worse than normal
         self.assertIn("Worse than your normal: screens in the hour before sleep, app switching", html)
         self.assertIn("Against your plan: falling asleep later than planned by", html)
         self.assertIn("跟计划比：入睡时刻比计划晚", self.render("zh", "drain", None))

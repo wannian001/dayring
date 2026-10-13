@@ -24,6 +24,10 @@ except ModuleNotFoundError:  # pragma: no cover
 
 WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 DEFAULT_DEVICES = ["phone", "tablet", "laptop", "desktop"]
+# A computer keeps its screen on while you are away; a phone or tablet locks itself. So when an AI agent app is in
+# front on a computer while another device is in use, the agent is working and you are on the other device.
+DEFAULT_COMPUTERS = ["laptop", "desktop"]
+DEFAULT_AGENT_APPS = ["Claude", "ChatGPT", "Codex", "Cursor", "Windsurf", "Terminal", "iTerm2", "Warp", "Ghostty"]
 
 
 class ConfigError(ValueError):
@@ -97,6 +101,8 @@ class Config:
     title: str = "dayring"
     demo: bool = False
     devices: List[str] = field(default_factory=lambda: list(DEFAULT_DEVICES))
+    computers: List[str] = field(default_factory=lambda: list(DEFAULT_COMPUTERS))
+    agent_apps: List[str] = field(default_factory=lambda: list(DEFAULT_AGENT_APPS))
     sleep: SleepPlan = field(default_factory=SleepPlan)
     wake_shift: Optional[WakeShift] = None
     weight: Optional[WeightPlan] = None
@@ -196,9 +202,14 @@ def load(path: Optional[Path] = None, data_dir: Optional[Path] = None) -> Config
                  demo=bool(main.get("demo", False)))
     if cfg.locale not in ("en", "zh"):
         raise ConfigError("dayring.locale must be en or zh")
-    devices = raw.get("devices", {}).get("priority")
-    if devices:
-        cfg.devices = [str(d) for d in devices]
+    devices = raw.get("devices", {})
+    if devices.get("priority"):
+        cfg.devices = [str(d) for d in devices["priority"]]
+    for key in ("computers", "agent_apps"):
+        if devices.get(key) is not None:
+            if not isinstance(devices[key], list):
+                raise ConfigError(f"devices.{key} must be a list")
+            setattr(cfg, key, [str(d) for d in devices[key]])
 
     sleep = plan.get("sleep", {})
     cfg.sleep = SleepPlan(target_hours=_num(sleep.get("target_hours"), "plan.sleep.target_hours"),

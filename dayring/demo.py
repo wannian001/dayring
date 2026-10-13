@@ -63,6 +63,12 @@ APPS = {  # category: [(device, app, weight)]
     "social": [("phone", "Instagram", 4), ("phone", "Reddit", 3), ("phone", "X", 2), ("phone", "TikTok", 2)],
     "other": [("laptop", "Finder", 2), ("phone", "Maps", 1), ("phone", "Banking", 1), ("laptop", "Settings", 1)],
 }
+# a second device in use at the same time (Sam.overlaps): what the phone does while the laptop or tablet is on
+PHONE_ON_THE_SIDE = [("social", "Instagram", 4), ("social", "Reddit", 3), ("social", "TikTok", 2),
+                     ("communication", "WhatsApp", 3), ("communication", "Messages", 1)]
+# the week before deadlines: group chats about the work, open beside it
+CRUNCH_SIDE = [("communication", "WhatsApp", 5), ("communication", "Messages", 1), ("social", "Instagram", 1)]
+AGENT_APPS = ("Claude", "Terminal")  # an agent can run on its own here while Sam is on another device
 
 
 def _hm(text: str) -> time:
@@ -274,6 +280,53 @@ class Sam:
                 out.append({"start": t, "end": end, "device": device, "app": app, "category": category})
                 gap = rng.expovariate(1 / 7) if rng.random() < 0.8 else rng.uniform(20, 75)  # meals, walks, away
                 t = end + timedelta(minutes=gap)
+        return out + self.overlaps(out)
+
+    def overlaps(self, sessions: List[Dict]) -> List[Dict]:
+        """A second device at the same time, on top of the one-at-a-time sessions above (its own random
+        stream, so those stay the same): the phone while a video plays on the tablet, the phone while an
+        agent runs on the laptop, quick checks during work (more of them in the week before deadlines),
+        and now and then the same video left open on the laptop too (one thing on two devices)."""
+        rng = random.Random(SEED + 12)
+        out: List[Dict] = []
+
+        def side(start: datetime, end: datetime, device: str = "phone", pick=PHONE_ON_THE_SIDE) -> None:
+            if end - start < timedelta(minutes=1):
+                return
+            category, app, _ = rng.choices(pick, [w for _, _, w in pick])[0]
+            out.append({"start": start, "end": end, "device": device, "app": app, "category": category})
+
+        for s in sessions:
+            length = (s["end"] - s["start"]).total_seconds() / 60
+            if length < 6 or s["device"] == "phone":
+                continue
+            crunch = (self.today - s["start"].date()).days < 7  # deadlines in the coming days: more phone checks
+            if s["device"] == "laptop" and s["app"] in AGENT_APPS and rng.random() < 0.75:
+                start = s["start"] + timedelta(minutes=length * rng.uniform(0.1, 0.3))  # set the agent going, then scroll
+                end = start + timedelta(minutes=length * rng.uniform(0.45, 0.65))
+                if rng.random() < 0.6:
+                    side(start, end)
+                else:
+                    side(start, end, "tablet", [("entertainment", "YouTube", 3), ("entertainment", "Netflix", 1)])
+            elif s["device"] == "tablet" and s["category"] == "entertainment" and rng.random() < 0.8:
+                t = s["start"] + timedelta(minutes=rng.uniform(1, 6))
+                while t < s["end"] - timedelta(minutes=3):  # scrolling the phone with a video on
+                    end = min(s["end"], t + timedelta(minutes=rng.uniform(4, 14)))
+                    side(t, end)
+                    t = end + timedelta(minutes=rng.uniform(3, 12))
+                if s["app"] == "YouTube" and rng.random() < 0.15:  # the same video open on the laptop too
+                    out.append({"start": s["start"], "end": s["start"] + timedelta(minutes=min(length, rng.uniform(5, 15))),
+                                "device": "laptop", "app": "YouTube", "category": "entertainment"})
+            elif s["device"] == "laptop" and s["category"] in ("work", "learning", "entertainment"):
+                busy = crunch and s["category"] != "entertainment"
+                chance = 0.45 if s["category"] == "entertainment" else 0.9 if busy else 0.4
+                t = s["start"] + timedelta(minutes=rng.uniform(2, 8))
+                while t < s["end"] - timedelta(minutes=2):
+                    if rng.random() < chance:
+                        end = min(s["end"], t + timedelta(minutes=rng.uniform(3, 12) if busy else rng.uniform(2, 9)))
+                        side(t, end, pick=CRUNCH_SIDE if busy else PHONE_ON_THE_SIDE)
+                        t = end
+                    t += timedelta(minutes=rng.uniform(3, 9) if busy else rng.uniform(5, 14))
         return out
 
 

@@ -170,7 +170,8 @@ TABLES: Dict[str, Table] = {t.name: t for t in (
     Table(
         name="screen_sessions",
         doc="Foreground app sessions across your devices. Overlaps between devices are allowed; "
-            "dayring counts wall-clock time once, preferring the device order in dayring.toml. "
+            "dayring counts wall-clock time once, preferring the device order in dayring.toml "
+            "(the Time page's devices-at-once card counts each device on its own). "
             "`end` must be after `start`.",
         key=("start", "device", "app"),
         interval=("start", "end"),

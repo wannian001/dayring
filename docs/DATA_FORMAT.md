@@ -68,7 +68,7 @@ Key: `date`. Typical sources: typed by hand; an assistant that writes this file 
 
 ## `screen_sessions.csv`
 
-Foreground app sessions across your devices. Overlaps between devices are allowed; dayring counts wall-clock time once, preferring the device order in dayring.toml. `end` must be after `start`.
+Foreground app sessions across your devices. Overlaps between devices are allowed; dayring counts wall-clock time once, preferring the device order in dayring.toml (the Time page's devices-at-once card counts each device on its own). `end` must be after `start`.
 
 Key: `start`, `device`, `app`. Typical sources: macOS Screen Time / Biome (dayring import macos-screentime); RescueTime or ActivityWatch CSV; any CSV with these columns.
 

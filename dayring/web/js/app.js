@@ -1,7 +1,9 @@
-// Shell: header, language and light/dark, hash routing (#today, #today/2026-10-11).
+// Shell: the menu (a left sidebar that folds to icons, a bottom tab bar on phones), language and light/dark,
+// hash routing (#today, #today/2026-10-11).
 import { get, isStatic } from "./api.js";
 import { installTooltip, esc, setFormat } from "./charts.js";
 import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js";
+import { icon } from "./icons.js";
 import body from "./pages/body.js";
 import data from "./pages/data.js";
 import drain from "./pages/drain.js";
@@ -21,6 +23,8 @@ const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) =
 // a page inside a group is titled by its own tab (Weight, Sleep), not by the group
 const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;
 const ALIAS = { attention: "time" };  // old links keep working
+// each menu item's glyph (icons.js)
+const NAV_ICON = { today: "sun", week: "calendar", body: "heart", time: "clock", drain: "battery", review: "list", data: "database" };
 const store = {
   get(key) { try { return localStorage.getItem(`dayring.${key}`); } catch { return null; } },
   set(key, value) { try { localStorage.setItem(`dayring.${key}`, value); } catch { /* private mode */ } },
@@ -43,23 +47,40 @@ function applyLook() {
   if (mode === "light" || mode === "dark") root.dataset.mode = mode; else delete root.dataset.mode;
 }
 
+// the sidebar folds to an icon rail on desktop (remembered in this browser; index.html applies it before first paint)
+const folded = () => document.documentElement.classList.contains("side-folded");
+const wide = () => matchMedia("(min-width: 900px)").matches;
+
 function header(active) {
-  const top = document.querySelector(".top-in");
+  const top = document.querySelector(".side");
+  const group = groupOf(active);
+  // a menu item that holds several pages lists them under it while one of them is open
+  const items = NAV.filter((p) => PAGES[p]).map((p) => {
+    const here = p === group;
+    const subs = here && GROUPS[p] ? GROUPS[p].map(([page, key]) => `<a class="side-sub" href="#${page}" ${page === active ? 'aria-current="page"' : ""}><span>${t(key)}</span></a>`).join("") : "";
+    return `<a href="#${p}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${t(`nav.${p}`)}</span></a>${subs}`;
+  }).join("");
   top.innerHTML = `
-    <a class="brand" href="#today">${ICON.logo}<span>${esc(settings.title)}</span></a>
-    <nav class="nav" aria-label="Pages">${NAV.filter((p) => PAGES[p]).map((p) => `<a href="#${p}" ${p === groupOf(active) ? 'aria-current="page"' : ""}>${t(`nav.${p}`)}</a>`).join("")}</nav>
-    <div class="tools">
+    <div class="side-head">
+      <a class="brand" href="#today">${ICON.logo}<span>${esc(settings.title)}</span></a>
+      <button class="side-fold" id="fold" type="button" aria-label="${esc(t("ui.fold"))}" title="${esc(t("ui.fold"))}">${icon("sidebar", 18)}</button>
+    </div>
+    <nav class="side-nav" aria-label="Pages">${items}</nav>
+    <div class="side-tools">
       ${settings.demo ? `<span class="demo-badge" title="${esc(t("ui.demo"))}">${t("ui.demo")}</span>` : ""}
       <button class="tool" id="lang" type="button" aria-label="Language">${t("ui.lang")}</button>
       <button class="tool" id="mode" type="button" aria-label="${esc(t("ui.mode"))}" title="${esc(t("ui.mode"))}">${ICON.moon}</button>
     </div>`;
-  // on a narrow phone the nav scrolls sideways (its scrollbar is hidden): keep the current page's tab in view
-  const nav = top.querySelector(".nav"), current = nav.querySelector("[aria-current]");
-  if (current && nav.scrollWidth > nav.clientWidth) {
-    const n = nav.getBoundingClientRect(), c = current.getBoundingClientRect();
-    if (c.right > n.right) nav.scrollLeft += c.right - n.right + 12;
-    else if (c.left < n.left) nav.scrollLeft -= n.left - c.left + 12;
-  }
+  // folded, the logo unfolds the sidebar instead of opening Today
+  const brand = top.querySelector(".brand");
+  const label = () => {
+    if (folded() && wide()) { brand.title = t("ui.unfold"); brand.setAttribute("aria-label", t("ui.unfold")); }
+    else { brand.removeAttribute("title"); brand.removeAttribute("aria-label"); }
+  };
+  const setFold = (on) => { document.documentElement.classList.toggle("side-folded", on); store.set("side", on ? "folded" : "open"); label(); };
+  label();
+  top.querySelector("#fold").onclick = () => { setFold(true); brand.focus(); };
+  brand.onclick = (e) => { if (folded() && wide()) { e.preventDefault(); setFold(false); top.querySelector("#fold").focus(); } };
   top.querySelector("#lang").onclick = () => { const next = getLang() === "zh" ? "en" : "zh"; store.set("lang", next); setLang(next); route(); };
   top.querySelector("#mode").onclick = () => {
     const dark = document.documentElement.dataset.mode ? document.documentElement.dataset.mode === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;

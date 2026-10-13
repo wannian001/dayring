@@ -595,9 +595,12 @@ export function coverage(marks, first, { width, height = 16 }) {
 }
 
 // ---- lanes: one row per activity, columns over hours or days, each row on its own scale -------------
-// rows: [{key, label, sub, parts: [[partKey, color]], values: [{partKey: minutes} | null], max, limit, limitLabel}]
+// rows: [{key, label, sub, parts: [[partKey, color, {hatch}]], values: [{partKey: minutes} | null], max, limit, limitLabel}]
 // cols: [{label, tip, shade}]. showMax: write each row's top value under its name (off when every row has the same scale)
-// One row per activity with columns over hours or days, each row on its own scale; × = no record, dashed = a limit.
+// A part with {hatch: true} is drawn in diagonal stripes of its colour: something on top of the rest, such as the
+// minutes several devices add beyond the clock. .legend .key i.hatch is its key.
+let hatchIds = 0;
+// One row per activity with columns over hours or days, each row on its own scale; × = no record, dashed = a limit, stripes = a hatch part.
 export function lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true }) {
   const top = 4, axis = 20;
   const plotW = width - labelW - 8;
@@ -605,6 +608,12 @@ export function lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, la
   const bw = Math.max(2, Math.min(22, slot - 2));
   const height = top + rows.length * (rowH + gap) + axis;
   const parts = [];
+  const hatches = new Map();  // colour -> pattern id, unique on the page (several charts share one document)
+  const fillOf = (color, opts) => {
+    if (!opts?.hatch) return color;
+    if (!hatches.has(color)) hatches.set(color, `lanes-hatch-${++hatchIds}`);
+    return `url(#${hatches.get(color)})`;
+  };
   rows.forEach((row, r) => {
     const y0 = top + r * (rowH + gap), base = y0 + rowH;
     parts.push(`<text x="0" y="${y0 + 16}" font-size="12.5" font-weight="650" fill="var(--ink)">${esc(row.label)}</text>`);
@@ -620,11 +629,12 @@ export function lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, la
         return;
       }
       let y = base;
-      row.parts.forEach(([key, color]) => {
+      row.parts.forEach(([key, color, opts]) => {
         const m = v[key] || 0;
         if (m <= 0) return;
-        const h = Math.min(rowH - 2, m * scale);
-        parts.push(`<rect x="${(cx - bw / 2).toFixed(1)}" y="${(y - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0.8, h - 1).toFixed(1)}" rx="1.5" fill="${color}"/>`);
+        const h = Math.min(y - y0 - 2, m * scale);
+        if (h <= 0) return;
+        parts.push(`<rect x="${(cx - bw / 2).toFixed(1)}" y="${(y - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0.8, h - 1).toFixed(1)}" rx="1.5" fill="${fillOf(color, opts)}"${opts?.hatch ? ` stroke="${color}" stroke-width=".8"` : ""}/>`);
         y -= h;
       });
       const total = row.parts.reduce((s, [key]) => s + (v[key] || 0), 0);
@@ -649,5 +659,6 @@ export function lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, la
     if (i % labelEvery) return;
     parts.push(`<text x="${(labelW + slot * i + slot / 2).toFixed(1)}" y="${yAxis}" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">${esc(c.label)}</text>`);
   });
-  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${esc(rows.map((r) => r.label).join(", "))}">${parts.join("")}</svg>`;
+  const defs = [...hatches].map(([color, id]) => `<pattern id="${id}" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.6" height="4" fill="${color}"/></pattern>`).join("");
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${esc(rows.map((r) => r.label).join(", "))}">${defs ? `<defs>${defs}</defs>` : ""}${parts.join("")}</svg>`;
 }

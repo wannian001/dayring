@@ -20,6 +20,12 @@ A single day is compared with the middle half of the 28 days before it (stats.ty
 shown are compared by their daily average with your usual 7-day averages (typical_week): an average of
 7 days moves much less than one day does, so a band of single days would let a week with no exercise or
 no classes at all read as normal.
+
+Devices at once (context.StackDay) adds two candidates. The stacking ratio (device time over clock time;
+using more screens at once is worse) is kept in hundredths and needs 0.1 (a day) or 0.05 (7 days) outside
+its band; to rank it against minutes, its change is turned into the minutes it means at that clock screen
+time (0.2 more over 6 hours of screens = 72 minutes more device time). The longest stretch on one thing
+(longer is better) is minutes like the rest. Clock time stays the page's measure everywhere else.
 """
 import math
 import statistics
@@ -27,27 +33,29 @@ from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
 
 from .. import stats
-from ..context import ACTIVITIES, SCREEN_PARTS, Context, TimeDay, iso
+from ..context import ACTIVITIES, SCREEN_PARTS, STACK_KEYS, Context, TimeDay, iso
 
 SPAN = 7
 HISTORY = 30
 TOP_APPS = 12
-KEYS = ACTIVITIES + SCREEN_PARTS + ("not_recorded",)
+KEYS = ACTIVITIES + SCREEN_PARTS + ("not_recorded",) + STACK_KEYS
 HOUR_KEYS = ("sleep", "exercise", "calendar") + SCREEN_PARTS
 STALE = ("sleep", "exercise", "screen")  # records that arrive by import and can fall behind
 SAME_WORKOUT_GAP_MIN = 60  # stretches of one workout split by a pause are listed as one
 
 # What "what changed" may name, in the order that breaks ties. The screen total is not one of them:
 # it is the biggest every day, and its parts (fun, focus, communication) say what actually moved.
-CANDIDATES = ("fun", "focus", "communication", "exercise", "calendar", "sleep")
-NORMAL_KEYS = CANDIDATES + ("screen", "not_recorded")  # the tiles also show these two against their normal
+CANDIDATES = ("fun", "focus", "communication", "exercise", "calendar", "sleep", "ratio", "single")
+NORMAL_KEYS = CANDIDATES + ("screen", "not_recorded", "stacked")  # the tiles also show these against their normal
 BETTER = {"fun": "lower", "focus": "higher", "communication": "none", "exercise": "higher", "calendar": "none",
-          "sleep": "higher", "screen": "none", "not_recorded": "none"}
+          "sleep": "higher", "screen": "none", "not_recorded": "none", "stacked": "none", "ratio": "lower", "single": "higher"}
 STANDOUT_MIN = 1.0      # a change counts when it lies at least one band width outside normal
 DAY_MIN_WIDTH = 30      # minutes: a single day's band counts as at least this wide when measuring,
 SPAN_MIN_WIDTH = 15     # minutes a day: and a 7-day average's band as at least this wide,
 MIN_WIDTH_SHARE = 0.10  # or a tenth of the usual value if larger, so a few minutes off a steady habit are no change
 WEEK_MIN_DAYS = 4       # a 7-day average in the normal needs at least this many days with the record
+RATIO_DAY_MIN_WIDTH = 10  # hundredths: the stacking ratio's band counts as at least 0.1 wide for a day,
+RATIO_SPAN_MIN_WIDTH = 5  # and 0.05 for a 7-day average (no tenth-of-usual rule: 1.0 is its floor, not 0)
 
 
 def _owner(key: str) -> str:
@@ -81,13 +89,48 @@ def _average(days: List[date], ctx: Context) -> Dict[str, Any]:
     for (_, device, _), minutes in apps.items():
         devices[device] = devices.get(device, 0.0) + minutes
     longest = sum(sd.longest_focus for sd in sd_have) / n_screen if sd_have else None
+    # the span's ratio is its device time over its clock time, so it agrees with the two hours printed beside it
+    if avg["stacked"] is not None and avg["screen"]:
+        avg["ratio"] = avg["stacked"] / avg["screen"] * 100
     exercise = [t["exercise"] for t in totals if t["exercise"] is not None]
     return {"from": iso(days[0]), "to": iso(days[-1]), "n": len(have), "avg": avg, "known": counts, "by_hour": hours,
             "apps": [{"app": a, "device": dv, "category": c, "minutes": m}
                      for (a, dv, c), m in sorted(apps.items(), key=lambda kv: -kv[1])[:TOP_APPS]],
-            "devices": devices, "longest_focus": longest,
+            "devices": devices, "longest_focus": longest, "stack": _stack(have),
             "exercise_days": sum(1 for v in exercise if v > 0), "exercise_known": len(exercise),
             "untimed_exercise": any(td.untimed_exercise for td in have)}
+
+
+def _stack(have: List[TimeDay]) -> Optional[Dict[str, Any]]:
+    """Devices at once over the shown days whose screen record is whole: device minutes per hour, device
+    and screen part, agent minutes taken out, and the single longest stretch on one thing."""
+    days = [td for td in have if td.known["screen"] and td.stack is not None]
+    if not days:
+        return None
+    n = len(days)
+    devices: Dict[str, float] = {}
+    hours: List[Dict[str, Dict[str, float]]] = [dict() for _ in range(24)]
+    agent_hours = [0.0] * 24
+    for td in days:
+        st = td.stack
+        for dev, m in st.by_device.items():
+            devices[dev] = devices.get(dev, 0.0) + m / n
+        for h in range(24):
+            agent_hours[h] += st.agent_by_hour[h] / n
+            for dev, parts in st.by_hour[h].items():
+                slot = hours[h].setdefault(dev, {})
+                for part, m in parts.items():
+                    slot[part] = slot.get(part, 0.0) + m / n
+    clock_hours = [sum(td.by_hour[h].get(p, 0.0) for td in days for p in SCREEN_PARTS) / n for h in range(24)]
+    top = max(days, key=lambda td: (td.stack.single, td.day))
+    st = top.stack
+    best = None
+    if st.single:
+        start = st.single_start % 1440
+        best = {"minutes": st.single, "app": st.single_app, "device": st.single_device, "date": iso(top.day),
+                "start": f"{start // 60:02d}:{start % 60:02d}"}
+    return {"n": n, "devices": devices, "by_hour": hours, "clock_by_hour": clock_hours, "agent_by_hour": agent_hours,
+            "multi": sum(td.stack.multi for td in days) / n, "best_single": best}
 
 
 # ---- what changed, compared with your normal ----------------------------------------------------
@@ -121,15 +164,40 @@ def typical_week(values: stats.Series, first: date) -> Optional[Dict[str, float]
     return {"median": median, "q1": q1, "q3": q3, "days": len(means)}
 
 
+def typical_week_ratio(stacked: stats.Series, clock: stats.Series, first: date) -> Optional[Dict[str, float]]:
+    """Your normal for the stacking ratio of 7 days: like typical_week, but each 7 days' ratio is their
+    device time over their clock time (the way the shown days' ratio is worked out), in hundredths."""
+    ratios = []
+    for k in range(1, stats.BASELINE_DAYS + 1):
+        end = first - timedelta(days=k)
+        week = [end - timedelta(days=j) for j in range(SPAN)]
+        both = [d for d in week if d in stacked and d in clock]
+        screen = sum(clock[d] for d in both)
+        if len(both) >= WEEK_MIN_DAYS and screen > 0:
+            ratios.append(sum(stacked[d] for d in both) / screen * 100)
+    if len(ratios) < stats.MIN_BASELINE:
+        return None
+    q1, median, q3 = statistics.quantiles(ratios, n=4, method="inclusive")
+    return {"median": median, "q1": q1, "q3": q3, "days": len(ratios)}
+
+
+def min_width(key: str, span: bool) -> float:
+    """The least band width for measuring how far outside its band a value lies (see score)."""
+    if key == "ratio":
+        return RATIO_SPAN_MIN_WIDTH if span else RATIO_DAY_MIN_WIDTH
+    return SPAN_MIN_WIDTH if span else DAY_MIN_WIDTH
+
+
 def _whole(minutes: Optional[float]) -> Optional[float]:
     """Whole minutes, rounded the way the page prints them (half up), so a chip never says "above
     normal" about a value that reads the same as the top of its normal."""
     return None if minutes is None else float(math.floor(minutes + 0.5))
 
 
-def score(value: Optional[float], band: Optional[Dict[str, float]], min_width: float) -> float:
+def score(value: Optional[float], band: Optional[Dict[str, float]], min_width: float,
+          share: float = MIN_WIDTH_SHARE) -> float:
     """How far ``value`` lies outside the normal band, in band widths (the width counts as at least
-    ``min_width`` minutes or a tenth of the median); 0 inside it or when unknown."""
+    ``min_width`` minutes or ``share`` of the median); 0 inside it or when unknown."""
     if value is None or band is None:
         return 0.0
     if value > band["q3"]:
@@ -138,17 +206,21 @@ def score(value: Optional[float], band: Optional[Dict[str, float]], min_width: f
         outside = band["q1"] - value
     else:
         return 0.0
-    return outside / max(band["q3"] - band["q1"], min_width, MIN_WIDTH_SHARE * band["median"])
+    return outside / max(band["q3"] - band["q1"], min_width, share * band["median"])
 
 
-def compare(key: str, value: Optional[float], band: Optional[Dict[str, float]], min_width: float) -> Dict[str, Any]:
-    """``value`` against ``band`` in whole minutes. ``clear`` = far enough outside to count as a change."""
+def compare(key: str, value: Optional[float], band: Optional[Dict[str, float]], min_width: float,
+            clock: Optional[float] = None) -> Dict[str, Any]:
+    """``value`` against ``band`` in whole minutes (whole hundredths for the ratio). ``clear`` = far enough
+    outside to count as a change. ``size`` is the change in minutes, which ranks the changes: for the
+    ratio, the device minutes it means at ``clock`` minutes of screens."""
     v = _whole(value)
     b = {k: _whole(band[k]) for k in ("q1", "median", "q3")} if band is not None else None
     state = stats.classify(v, b)
-    s = score(v, b, min_width)
-    return {"key": key, "value": value, "band": band, "state": state,
-            "delta": value - band["median"] if state is not None else None,
+    s = score(v, b, min_width, 0.0 if key == "ratio" else MIN_WIDTH_SHARE)
+    delta = value - band["median"] if state is not None else None
+    size = None if delta is None else abs(delta) / 100 * (clock or 0.0) if key == "ratio" else abs(delta)
+    return {"key": key, "value": value, "band": band, "state": state, "delta": delta, "size": size,
             "score": s, "clear": s >= STANDOUT_MIN, "tone": stats.tone(state, BETTER[key])}
 
 
@@ -156,7 +228,7 @@ def ranked(changes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """The clear changes first, biggest in minutes first; then the rest, furthest outside first.
     Ties keep the order of CANDIDATES."""
     order = {k: i for i, k in enumerate(CANDIDATES)}
-    return sorted(changes, key=lambda c: (not c["clear"], -abs(c["delta"]) if c["clear"] else -c["score"],
+    return sorted(changes, key=lambda c: (not c["clear"], -c["size"] if c["clear"] else -c["score"],
                                           order.get(c["key"], len(order))))
 
 
@@ -168,10 +240,10 @@ def standout(changes: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
 
 def _day(td: TimeDay, series: Dict[str, stats.Series]) -> Dict[str, Any]:
     totals = td.totals()
-    changes = [compare(k, totals[k], stats.typical(series[k], td.day), DAY_MIN_WIDTH) for k in CANDIDATES]
+    changes = [compare(k, totals[k], stats.typical(series[k], td.day), min_width(k, False), clock=totals["screen"]) for k in CANDIDATES]
     best = standout(changes)
     return {"date": iso(td.day), "totals": totals, "minutes_in_day": td.length,
-            "standout": {k: best[k] for k in ("key", "value", "band", "state", "delta", "score", "tone")} if best else None,
+            "standout": {k: best[k] for k in ("key", "value", "band", "state", "delta", "size", "score", "tone")} if best else None,
             "compared": sum(1 for c in changes if c["state"] is not None)}
 
 
@@ -181,7 +253,11 @@ def _span_changes(span: Dict[str, Any], first: date, series: Dict[str, stats.Ser
     metrics = {}
     for k in NORMAL_KEYS:
         enough = span["known"][k] * 2 >= span["n"]
-        m = compare(k, span["avg"][k], typical_week(series[k], first) if enough else None, SPAN_MIN_WIDTH)
+        band = None
+        if enough:
+            band = (typical_week_ratio(series["stacked"], series["screen"], first) if k == "ratio"
+                    else typical_week(series[k], first))
+        m = compare(k, span["avg"][k], band, min_width(k, True), clock=span["avg"]["screen"])
         m.update(known=span["known"][k], few=not enough)
         metrics[k] = m
     changes = ranked([metrics[k] for k in CANDIDATES])

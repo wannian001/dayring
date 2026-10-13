@@ -24,7 +24,7 @@ from pathlib import Path
 from dayring import config, demo
 from dayring.config import Config
 from dayring import stats
-from dayring.context import ACTIVITIES, SCREEN_PARTS, Context
+from dayring.context import ACTIVITIES, SCREEN_PARTS, STACK_KEYS, Context
 from dayring.importers import apple_health
 from dayring.modules import PAGES, static_params
 from dayring.modules import time as time_page
@@ -290,12 +290,13 @@ class WhatChanged(FolderCase):
         self.assertTrue(all(c["score"] == 0 for c in span["changes"]))
         self.assertEqual({c["key"]: c["state"] for c in span["changes"]},
                          {"fun": "normal", "focus": "normal", "communication": "normal", "sleep": "normal",
-                          "exercise": "normal", "calendar": None})  # no calendar file: not compared
-        self.assertEqual(span["compared"], 5)
+                          "exercise": "normal", "calendar": None,  # no calendar file: not compared
+                          "ratio": "normal", "single": "normal"})  # one device: always one screen at a time
+        self.assertEqual(span["compared"], 7)
         for d in span["days"]:
             self.assertIsNone(d["standout"], d["date"])
             # the last day's evening belongs to tonight's sleep, not recorded yet: sleep is not compared
-            self.assertEqual(d["compared"], 4 if d["date"] == "2026-10-11" else 5, d["date"])
+            self.assertEqual(d["compared"], 6 if d["date"] == "2026-10-11" else 7, d["date"])
 
     def test_a_varied_usual_week_stays_quiet(self):
         # the same random habits every day: each day lands outside the middle half of something about
@@ -452,7 +453,7 @@ class WhatChanged(FolderCase):
                    time_page.compare("fun", 130.0, band, 15)]
         self.assertEqual(time_page.standout(changes)["key"], "exercise")
         self.assertIsNone(time_page.standout([time_page.compare("fun", 130.0, band, 15)]))
-        self.assertEqual(time_page.CANDIDATES, ("fun", "focus", "communication", "exercise", "calendar", "sleep"))
+        self.assertEqual(time_page.CANDIDATES, ("fun", "focus", "communication", "exercise", "calendar", "sleep", "ratio", "single"))
 
 
 class DemoTimePage(unittest.TestCase):
@@ -496,8 +497,12 @@ class DemoTimePage(unittest.TestCase):
             self.assertIn(length, (1380, 1440, 1500), d["date"])
             lanes = [tot[a] for a in ACTIVITIES if tot[a] is not None]
             for key, value in tot.items():
-                if value is not None:
+                if value is not None and key not in STACK_KEYS:  # device time may add up to more than the day
                     self.assertLessEqual(value, length, (d["date"], key))
+            if tot["stacked"] is not None:  # every minute on a screen has at least one device left after the deductions
+                self.assertGreaterEqual(tot["stacked"], tot["screen"], d["date"])
+                self.assertAlmostEqual(tot["ratio"], tot["stacked"] / tot["screen"] * 100, msg=d["date"])
+                self.assertLessEqual(tot["single"], tot["screen"], d["date"])
             self.assertIsNotNone(tot["screen"], d["date"])  # the demo has screen time every day
             self.assertAlmostEqual(tot["screen"], sum(tot[k] for k in SCREEN_PARTS), msg=d["date"])
             if tot["not_recorded"] is not None:
@@ -521,19 +526,25 @@ class DemoTimePage(unittest.TestCase):
         for key in avg:
             values = [d["totals"][key] for d in span["days"] if d["totals"][key] is not None]
             self.assertEqual(span["known"][key], len(values), (label, key))
-            if values:  # each average is over the days that have that record, never padded with zeros
+            if key == "ratio":  # the span's device time over its clock time, so it agrees with the two hours beside it
+                self.assertAlmostEqual(avg[key], avg["stacked"] / avg["screen"] * 100, msg=label)
+            elif values:  # each average is over the days that have that record, never padded with zeros
                 self.assertAlmostEqual(avg[key], sum(values) / len(values), msg=(label, key))
             else:
                 self.assertIsNone(avg[key], (label, key))
         self.assertAlmostEqual(avg["screen"], sum(avg[k] for k in SCREEN_PARTS), msg=label)
 
-        # what changed: every candidate once, the clear changes first (biggest in minutes first), then the
-        # rest (furthest outside first); the standout is the first clear one, the screen total never one
+        # what changed: every candidate once, the clear changes first (biggest in minutes first; the ratio by the
+        # device minutes it means at that screen time), then the rest (furthest outside first); the standout is
+        # the first clear one, the screen total never one
         changes = span["changes"]
         self.assertEqual(sorted(c["key"] for c in changes), sorted(time_page.CANDIDATES), label)
         clear = [c for c in changes if c["clear"]]
         self.assertEqual(changes[:len(clear)], clear, label)
-        self.assertEqual([abs(c["delta"]) for c in clear], sorted((abs(c["delta"]) for c in clear), reverse=True), label)
+        for c in clear:
+            minutes = abs(c["delta"]) / 100 * avg["screen"] if c["key"] == "ratio" else abs(c["delta"])
+            self.assertAlmostEqual(c["size"], minutes, msg=(label, c["key"]))
+        self.assertEqual([c["size"] for c in clear], sorted((c["size"] for c in clear), reverse=True), label)
         rest = [c["score"] for c in changes[len(clear):]]
         self.assertEqual(rest, sorted(rest, reverse=True), label)
         for c in changes:

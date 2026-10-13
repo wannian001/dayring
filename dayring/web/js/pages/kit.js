@@ -119,6 +119,9 @@ const CHARTS = {
         { label: t("act.sleep"), sub: dur(460), parts: [["sleep", "var(--c-sleep)"]], max: 60, values: SCREEN.map((_, h) => ({ sleep: h < 7 ? 60 : h === 7 ? 20 : h === 23 ? 20 : 0 })) },
         { label: t("act.exercise"), sub: dur(45), parts: [["exercise", "var(--c-exercise)"]], max: 60, values: SCREEN.map((_, h) => ({ exercise: h === 17 ? 30 : h === 18 ? 15 : 0 })) },
         { label: t("act.screen"), sub: dur(SCREEN.reduce((s, hr) => s + Object.values(hr).reduce((a, b) => a + b, 0), 0)), parts: SCREEN_PARTS, max: 60, values: SCREEN.map(groupOf) },
+        // a hatch part: the minutes a second device adds on top of the clock (the Time page's devices at once)
+        { label: t("time.all_devices"), sub: t("time.key_extra"), max: 90, parts: [["clock", "var(--c-axis)"], ["extra", "var(--ink)", { hatch: true }]],
+          values: SCREEN.map((hr, h) => ({ clock: Object.values(hr).reduce((a, b) => a + b, 0), extra: [0, 0, 0, 0, 0, 0, 0, 0, 4, 10, 0, 12, 20, 6, 0, 8, 10, 0, 15, 0, 25, 30, 20, 10][h] })) },
       ];
       return lanes(rows, SCREEN.map((_, h) => ({ label: pad(h), tip: `${pad(h)}:00` })), { width: w, labelW, labelEvery: w < 560 ? 6 : 3, showMax: false });
     } } },
@@ -136,6 +139,12 @@ const SAMPLES = {
   ".top": () => `<p class="small muted" style="margin:0">${t("kit.c.top")}</p>`,
   ".brand": () => `<p class="small muted" style="margin:0">${t("kit.c.brand")}</p>`,
   ".nav": () => `<nav class="nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit" aria-current="page">${t("nav.today")}</a><a href="#kit">${t("nav.week")}</a><a href="#kit">${t("nav.time")}</a></nav>`,
+  // drawn in place (not a child of <body>): the same menu as this page's, with a menu item open on its first page
+  ".side": () => `<p class="small muted" style="margin:0 0 10px">${t("kit.c.side")}</p><div class="kit-side side"><div class="side-head"><span class="brand"><span>dayring</span></span></div>
+    <nav class="side-nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit">${icon("sun", 18)}<span>${t("nav.today")}</span></a><a href="#kit">${icon("calendar", 18)}<span>${t("nav.week")}</span></a>
+      <a href="#kit" aria-current="page">${icon("heart", 18)}<span>${t("nav.body")}</span></a><a class="side-sub" href="#kit" aria-current="page"><span>${t("nav.weight")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.sleep_tab")}</span></a>
+      <a href="#kit">${icon("clock", 18)}<span>${t("nav.time")}</span></a></nav>
+    <div class="side-tools"><button class="tool" type="button">${t("ui.lang")}</button><button class="tool" type="button" aria-label="${esc(t("ui.mode"))}">${icon("sleep", 15)}</button></div></div>`,
   ".tool": () => `<div class="tools"><button class="tool" type="button">${t("ui.lang")}</button><button class="tool" type="button" aria-label="${esc(t("ui.mode"))}">${icon("sleep", 15)}</button></div>`,
   ".demo-badge": () => `<span class="demo-badge">${t("ui.demo")}</span>`,
   ".head": () => `<div class="head" style="margin:0"><div><h1>${t("kit.c.head")}</h1><div class="sub">${t("kit.c.head_sub")}</div></div>${SAMPLES[".stepper"]()}</div>`,
