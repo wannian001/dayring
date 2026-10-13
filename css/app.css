@@ -486,3 +486,22 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 .doc-folds details > :not(summary) { margin-left: 2rem; }
 .doc-folds details p { font-size: var(--t-sm); line-height: 1.7; color: var(--ink-2); max-width: 80ch; }
 .doc-folds details[open] { padding-bottom: var(--s-3); }
+
+/* the update notice above the page (update.js) */
+.upd { margin-bottom: var(--s-4); }
+.upd-how { display: block; margin-top: 2px; font-size: var(--t-xs); color: var(--ink-3); }
+.upd-actions { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-4); }
+.upd-actions[hidden] { display: none; }
+
+/* inside the iPhone app (?app=1) the app's own tab bar is at the bottom, so on a phone the page's menu moves up into
+   the header, as a row of icons under the title, instead of stacking a second bar above the app's */
+@media (max-width: 899px) {
+  html.in-app body:has(> .side) { padding-bottom: 0; }
+  html.in-app body > .side { position: sticky; top: 0; z-index: 20; flex-wrap: wrap; row-gap: 0; background: var(--header);
+    backdrop-filter: saturate(1.4) blur(18px); -webkit-backdrop-filter: saturate(1.4) blur(18px); }
+  html.in-app body > .side .side-nav { position: static; order: 3; flex-basis: 100%; padding: 0; border-top: 0;
+    background: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  html.in-app body > .side .side-nav a { min-height: 44px; gap: 2px; font-size: 10px; }
+  html.in-app body > .side .side-nav a svg { width: 19px; height: 19px; }
+  html.in-app body > .side .side-nav a[aria-current="page"] { color: var(--accent); }
+}

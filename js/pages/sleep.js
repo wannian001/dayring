@@ -1,6 +1,6 @@
-import { draw, esc, ladderChart, sleepWindows } from "../charts.js?v=260bf4b694";
-import { clock, dur, t } from "../i18n.js?v=260bf4b694";
-import { mountTabs, tabs } from "./tabs.js?v=260bf4b694";
+import { draw, esc, ladderChart, sleepWindows } from "../charts.js?v=c807d708f4";
+import { clock, dur, t } from "../i18n.js?v=c807d708f4";
+import { mountTabs, tabs } from "./tabs.js?v=c807d708f4";
 
 // the last 7 nights against the 7 before, as four small numbers over the chart
 function compare(key, now, before, fmt) {

@@ -2,8 +2,8 @@
 // comparison with what people use now, the trade-offs, what comes next and who made it (each opening on a click).
 // The same facts as the README's "Why it exists", shorter. The server only names the page (modules/docs.py).
 // History is not in this repository: it quotes the personal system it comes from, so it lives on the author's site.
-import { esc } from "../charts.js?v=260bf4b694";
-import { getLang, t } from "../i18n.js?v=260bf4b694";
+import { esc } from "../charts.js?v=c807d708f4";
+import { getLang, t } from "../i18n.js?v=c807d708f4";
 
 const REPO = "https://github.com/wannian001/proactive-health-aio";
 

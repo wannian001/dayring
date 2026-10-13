@@ -1,8 +1,8 @@
 // "What has tended to help the next day": one row per condition, the next day's HRV, resting heart rate or self-rated
 // energy on days after doing it against days after not, with its 95% interval. Shared by the Review page (the whole
 // list) and the Today page (one summary line that links to it).
-import { draw, esc, interval } from "../charts.js?v=260bf4b694";
-import { num, signed, t } from "../i18n.js?v=260bf4b694";
+import { draw, esc, interval } from "../charts.js?v=c807d708f4";
+import { num, signed, t } from "../i18n.js?v=c807d708f4";
 
 export function effectLabel(r) {
   const p = r.params || {};

@@ -1,6 +1,6 @@
-import { esc } from "../charts.js?v=260bf4b694";
-import { clock, day, dur, measure, num, signed, t } from "../i18n.js?v=260bf4b694";
-import { effectsHtml, mountEffects } from "./effects.js?v=260bf4b694";
+import { esc } from "../charts.js?v=c807d708f4";
+import { clock, day, dur, measure, num, signed, t } from "../i18n.js?v=c807d708f4";
+import { effectsHtml, mountEffects } from "./effects.js?v=c807d708f4";
 
 function fmt(m, v) {
   if (v == null) return "—";

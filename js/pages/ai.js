@@ -3,10 +3,10 @@
 // worse; only your focused work keeps the Time page's direction. AI work is drawn in focus blue stripes (work, done
 // for you), scheduled tasks and scripts in grey stripes, your instructions in ink. A day before the AI record shows
 // × (never 0); a day in between without AI use is a real zero.
-import { bullet, draw, esc, lanes } from "../charts.js?v=260bf4b694";
-import { day, dur, getLang, num, shortDay, t } from "../i18n.js?v=260bf4b694";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=260bf4b694";
-import { mountTabs, tabs } from "./tabs.js?v=260bf4b694";
+import { bullet, draw, esc, lanes } from "../charts.js?v=c807d708f4";
+import { day, dur, getLang, num, shortDay, t } from "../i18n.js?v=c807d708f4";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=c807d708f4";
+import { mountTabs, tabs } from "./tabs.js?v=c807d708f4";
 
 const TILES = [  // key, icon, icon colour
   ["ai", "ai", COLOR.ai], ["prompts", "communication", "var(--ink-2)"], ["per_prompt", "ai", "var(--ink-2)"],

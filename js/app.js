@@ -1,24 +1,25 @@
 // Shell: the menu (a left sidebar that folds to icons, a bottom tab bar on phones), language and light/dark,
 // hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js?v=260bf4b694";
-import { installTooltip, esc, setFormat } from "./charts.js?v=260bf4b694";
-import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=260bf4b694";
-import { icon } from "./icons.js?v=260bf4b694";
-import ai from "./pages/ai.js?v=260bf4b694";
-import body from "./pages/body.js?v=260bf4b694";
-import data from "./pages/data.js?v=260bf4b694";
-import drain from "./pages/drain.js?v=260bf4b694";
-import exercise from "./pages/exercise.js?v=260bf4b694";
-import food from "./pages/food.js?v=260bf4b694";
-import goals from "./pages/goals.js?v=260bf4b694";
-import guide from "./pages/guide.js?v=260bf4b694";
-import kit from "./pages/kit.js?v=260bf4b694";
-import project from "./pages/project.js?v=260bf4b694";
-import review from "./pages/review.js?v=260bf4b694";
-import sleep from "./pages/sleep.js?v=260bf4b694";
-import time from "./pages/time.js?v=260bf4b694";
-import today from "./pages/today.js?v=260bf4b694";
-import week from "./pages/week.js?v=260bf4b694";
+import { get, isStatic } from "./api.js?v=c807d708f4";
+import { installTooltip, esc, setFormat } from "./charts.js?v=c807d708f4";
+import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=c807d708f4";
+import { icon } from "./icons.js?v=c807d708f4";
+import { loadUpdate, mountUpdate, updateNote } from "./update.js?v=c807d708f4";
+import ai from "./pages/ai.js?v=c807d708f4";
+import body from "./pages/body.js?v=c807d708f4";
+import data from "./pages/data.js?v=c807d708f4";
+import drain from "./pages/drain.js?v=c807d708f4";
+import exercise from "./pages/exercise.js?v=c807d708f4";
+import food from "./pages/food.js?v=c807d708f4";
+import goals from "./pages/goals.js?v=c807d708f4";
+import guide from "./pages/guide.js?v=c807d708f4";
+import kit from "./pages/kit.js?v=c807d708f4";
+import project from "./pages/project.js?v=c807d708f4";
+import review from "./pages/review.js?v=c807d708f4";
+import sleep from "./pages/sleep.js?v=c807d708f4";
+import time from "./pages/time.js?v=c807d708f4";
+import today from "./pages/today.js?v=c807d708f4";
+import week from "./pages/week.js?v=c807d708f4";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
 const PAGES = { today, week, body, sleep, exercise, food, time, ai, drain, goals, review, data, kit, project, guide };
@@ -61,6 +62,9 @@ const ICON = {
 };
 
 const query = new URLSearchParams(location.search);  // ?mode=light&lang=zh for shared links
+// ?app=1: the page is inside the iPhone app, which has its own tab bar at the bottom and its own update banner
+const inApp = query.get("app") === "1";
+if (inApp) document.documentElement.classList.add("in-app");
 let picked = null;  // the moon button's choice in this tab: wins over a ?mode= link, works without storage
 function applyLook() {
   const root = document.documentElement;
@@ -157,7 +161,8 @@ async function route() {
     document.title = `${t(titleKey(page))} · ${settings.title}`;
     const group = GROUPS[groupOf(page)];
     const sub = group ? `<nav class="subnav seg" aria-label="${esc(t(`nav.${groupOf(page)}`))}">${group.map(([p, key]) => `<a href="#${p}" ${p === page ? 'aria-current="page"' : ""}>${t(key)}</a>`).join("")}</nav>` : "";
-    main.innerHTML = sub + PAGES[page].render(data) + footer();
+    main.innerHTML = updateNote() + sub + PAGES[page].render(data) + footer();
+    mountUpdate(main);
     PAGES[page].mount?.(main, data);
   } catch (error) {
     const staticGap = isStatic && /^404/.test(error.message);  // the demo site only has a few pre-rendered dates
@@ -171,6 +176,7 @@ async function route() {
 async function start() {
   window.healthaioStarted = true;  // index.html shows a reload message if this never runs
   try { settings = { ...settings, ...(await get("settings")) }; } catch { /* defaults */ }
+  if (!isStatic && !inApp && !settings.demo) await loadUpdate();  // the server's answer from its daily check
   setLang(query.get("lang") || store.get("lang") || settings.locale);
   applyLook();
   installTooltip();
