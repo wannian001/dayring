@@ -199,6 +199,7 @@ changed files under a version that is not newer.
 
 | version | date | change |
 |---|---|---|
+| 1.5.0 | 2026-10-13 | `.side`: a menu item with pages opens and closes its list with a click: it ends in a `.side-caret` (turned down while open) and carries `aria-expanded`, and its `.side-sub` links are `[hidden]` while it is closed; the item stays highlighted while its list is closed. On the icon rail and the phone's tab bar the caret and the list stay hidden |
 | 1.4.1 | 2026-10-13 | `dayRing` draws calendar blocks faint (classes at 30%, other blocks at 18%): the calendar is context for the day, workouts on the same track stay in full |
 | 1.4.0 | 2026-10-13 | For the health pages (Exercise, Food, Goals): tokens `--c-exercise-2` and `--c-exercise-3`, lighter steps of exercise that tell kinds of training apart by lightness (cardio, walking), never by a new hue; `mealTimeline` (meals by time of day, with the hours before sleep striped) and `keptDots` (days a goal was kept); icons `food` (ink-2: food has no data colour), `target` and `walk` (the Plan and Behaviour menu items); the comments name the kit Health AIO |
 | 1.3.0 | 2026-10-13 | `lanes` rows take `fmt` (a row's values in its own unit, such as a count of instructions); `.legend .key i.hatch` takes its stripes from `color` (ink unless set), so a hatch part in another colour has a matching key; icon `ai` (focus blue: AI agents working for you, the AI work page). AI work is drawn as focus blue stripes rather than a new data colour: the five data hues leave no step that passes the colour-vision checks against all of them |
@@ -348,6 +349,7 @@ Health AIO 身兼两职：它是一个本地优先看板的公开展示，也是
 
 | 版本 | 日期 | 改了什么 |
 |---|---|---|
+| 1.5.0 | 2026-10-13 | `.side`：有子页的菜单项点一下展开或收起子页：末尾一个 `.side-caret`（展开时转向下），带 `aria-expanded`，收起时它的 `.side-sub` 带 `[hidden]`；收起时高亮落在这一项本身。图标条和手机底部标签栏上不显示箭头和子页 |
 | 1.4.1 | 2026-10-13 | `dayRing` 把日程画淡（课 30%、其他安排 18%）：日程只是一天的背景，同一圈上的训练照旧画满 |
 | 1.4.0 | 2026-10-13 | 为健康页（运动、饮食、目标）新增：变量 `--c-exercise-2`、`--c-exercise-3`，运动洋红的两档浅色，按深浅区分训练种类（有氧、步行），不加新色相；`mealTimeline`（一天里什么时候吃，睡前几小时画斜纹）和 `keptDots`（目标哪几天做到了）；图标 `food`（用 ink-2：饮食没有自己的数据颜色）、`target` 和 `walk`（菜单的计划和行为）；注释里的名字改成 Health AIO |
 | 1.3.0 | 2026-10-13 | `lanes` 的行可以带 `fmt`（这一行的值用自己的单位写，比如指令条数）；`.legend .key i.hatch` 的斜纹改用 `color`（默认墨色），别的颜色的 hatch 部分也有对得上的图例；新图标 `ai`（专注蓝：替你干活的 AI 代理，AI 干活量页）。AI 工时画成专注蓝斜纹，而不是新加一种数据颜色：现有五种数据色之外，已经找不到跟它们都能通过色盲校验的颜色 |

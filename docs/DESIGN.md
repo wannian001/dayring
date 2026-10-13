@@ -195,8 +195,10 @@ data. (An earlier menu mixed time (Today, Week) with topics (Time, Drain) and me
 per item reads more easily.) The menu sits in a sidebar on the left from 900 px (the
 browser already takes height at the top and bottom, so the menu takes width instead). The sidebar folds to a 64 px
 column of icons with the button at its top; folded, the logo unfolds it, and the choice is remembered in this
-browser. A menu item that holds more than one page lists its pages under it while one of them is open; folded or
-on a phone, those pages are a small switch above the page title instead, and each page is titled by its own tab
+browser. A menu item that holds more than one page opens and closes its list of pages with a click (a small arrow
+at its end turns down while open) instead of jumping to a page; the item you are in opens by itself, the others
+start closed. Folded or on a phone, the item opens its first page, its pages are a small switch above the page
+title instead, and each page is titled by its own tab
 (Weight, Sleep). On a phone the menu is a tab bar at the bottom, with the logo, language and light/dark in a row
 above the page.
 

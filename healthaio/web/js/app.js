@@ -68,15 +68,24 @@ function applyLook() {
 const folded = () => document.documentElement.classList.contains("side-folded");
 const wide = () => matchMedia("(min-width: 900px)").matches;
 
+// a menu item that holds several pages opens and closes its list with a click (in the full sidebar; on the icon
+// rail and the phone's tab bar it opens its first page). The item you arrive in opens by itself, the others start
+// closed on every visit.
+const openGroups = new Set();
+let lastGroup = null;
+const CARET = `<svg class="side-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m4.5 2.5 3.5 3.5-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
 function header(active) {
   const top = document.querySelector(".side");
   const group = groupOf(active);
-  // a menu item that holds several pages lists them under it while one of them is open
+  if (GROUPS[group] && group !== lastGroup) openGroups.add(group);
+  lastGroup = group;
   const items = NAV.filter((p) => PAGES[p] || GROUPS[p]).map((p) => {
     const here = p === group;
-    const subs = here && GROUPS[p] ? GROUPS[p].map(([page, key]) => `<a class="side-sub" href="#${page}" ${page === active ? 'aria-current="page"' : ""}><span>${t(key)}</span></a>`).join("") : "";
-    const href = GROUPS[p] ? GROUPS[p][0][0] : p;
-    return `<a href="#${href}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${t(`nav.${p}`)}</span></a>${subs}`;
+    if (!GROUPS[p]) return `<a href="#${p}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${t(`nav.${p}`)}</span></a>`;
+    const open = openGroups.has(p);
+    const subs = GROUPS[p].map(([page, key]) => `<a class="side-sub" data-in="${p}" href="#${page}" ${page === active ? 'aria-current="page"' : ""}${open ? "" : " hidden"}><span>${t(key)}</span></a>`).join("");
+    return `<a href="#${GROUPS[p][0][0]}" data-group="${p}" aria-expanded="${open}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${t(`nav.${p}`)}</span>${CARET}</a>${subs}`;
   }).join("");
   top.innerHTML = `
     <div class="side-head">
@@ -100,6 +109,16 @@ function header(active) {
   const setFold = (on) => { document.documentElement.classList.toggle("side-folded", on); store.set("side", on ? "folded" : "open"); label(); };
   label();
   top.querySelector("#fold").onclick = () => { setFold(true); brand.focus(); };
+  top.querySelectorAll("a[data-group]").forEach((a) => {
+    a.onclick = (e) => {
+      if (folded() || !wide()) return;  // no room for the list: the item opens its first page
+      e.preventDefault();
+      const g = a.dataset.group, open = !openGroups.has(g);
+      if (open) openGroups.add(g); else openGroups.delete(g);
+      a.setAttribute("aria-expanded", String(open));
+      top.querySelectorAll(`a.side-sub[data-in="${g}"]`).forEach((sub) => { sub.hidden = !open; });
+    };
+  });
   brand.onclick = (e) => { if (folded() && wide()) { e.preventDefault(); setFold(false); top.querySelector("#fold").focus(); } };
   top.querySelector("#lang").onclick = () => { const next = getLang() === "zh" ? "en" : "zh"; store.set("lang", next); setLang(next); route(); };
   top.querySelector("#mode").onclick = () => {

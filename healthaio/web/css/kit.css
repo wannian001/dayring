@@ -55,8 +55,9 @@ button { font: inherit; color: inherit; }
 
 /* @component .side The page menu beside the page: a left sidebar from 900px (232px; html.side-folded narrows it to a 64px icon rail), below that a bottom tab bar under a row with the brand and the tools. */
 /* Holds .side-head (.brand and a .side-fold button), .side-nav (links with an icon and a <span> label; a .side-sub
-   link is a page inside the item above it, listed while that item is current) and .side-tools. As a direct child
-   of <body> it is fixed in place; anywhere else (the gallery) it is a plain column. */
+   link is a page inside the item above it; an item with pages ends in a .side-caret and carries aria-expanded,
+   and its .side-sub links are [hidden] while it is closed) and .side-tools. As a direct child of <body> it is fixed
+   in place; anywhere else (the gallery) it is a plain column. */
 .side { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
 .side-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); padding: 0 6px; }
 .side-nav { display: flex; flex-direction: column; gap: 2px; }
@@ -69,8 +70,12 @@ button { font: inherit; color: inherit; }
 .side-nav a[aria-current="page"] { background: var(--accent-soft); color: var(--ink); font-weight: 650; }
 .side-nav a[aria-current="page"] svg { color: var(--accent); }
 .side-nav a.side-sub { min-height: 34px; padding-left: 42px; font-weight: 550; }
-/* an item whose pages are listed under it: only the current page is highlighted */
-.side-nav a[aria-current="page"]:has(+ .side-sub) { background: none; }
+.side-nav a.side-sub[hidden] { display: none; }
+/* an item that opens and closes its list of pages: a caret at the end, turned down while open */
+.side-nav a .side-caret, .side-nav a[aria-current="page"] .side-caret { width: 12px; height: 12px; margin-left: auto; color: var(--ink-3); transition: transform .15s var(--ease); }
+.side-nav a[aria-expanded="true"] .side-caret { transform: rotate(90deg); }
+/* an item whose pages are listed under it: only the current page is highlighted (closed, the item itself is) */
+.side-nav a[aria-current="page"]:has(+ .side-sub:not([hidden])) { background: none; }
 .side-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .side-fold {
   width: 32px; height: 32px; padding: 0; border: 0; border-radius: 9px; background: none; color: var(--ink-3); cursor: pointer;
@@ -93,7 +98,7 @@ button { font: inherit; color: inherit; }
   html.side-folded body > .side { width: 64px; align-items: center; padding: var(--s-5) var(--s-2) 14px; }
   html.side-folded body > .side .side-head { padding: 0; }
   html.side-folded body > .side .brand span, html.side-folded body > .side .side-nav a span,
-  html.side-folded body > .side .side-sub, html.side-folded body > .side .side-fold { display: none; }
+  html.side-folded body > .side .side-sub, html.side-folded body > .side .side-fold, html.side-folded body > .side .side-caret { display: none; }
   html.side-folded body > .side .brand { padding: 3px; border-radius: var(--r-sm); cursor: pointer; }
   html.side-folded body > .side .brand:hover { background: var(--surface-2); }
   html.side-folded body > .side .side-nav a { width: 44px; min-height: 44px; justify-content: center; padding: 0; }
@@ -120,7 +125,7 @@ button { font: inherit; color: inherit; }
   body > .side .side-nav a span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
   body > .side .side-nav a svg { width: 22px; height: 22px; }
   body > .side .side-nav a[aria-current="page"] { background: none; }
-  body > .side .side-sub { display: none; }
+  body > .side .side-sub, body > .side .side-caret { display: none; }
 }
 
 /* @component .tool A 30px outlined pill button (language, light / dark); a row of them sits in .tools. */
