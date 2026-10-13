@@ -1,13 +1,43 @@
 # Design notes
 
 The look itself (tokens, components, charts, icons) is the design kit: [DESIGN_KIT.md](DESIGN_KIT.md), shown on the
-gallery page `#kit`. This file is about what dayring's pages say and why.
+gallery page `#kit`. This file is about what Health AIO's pages say and why.
 
 ## Who it is for
 
-One person looking at their own data, usually in the morning and before bed. The page has to answer four
-questions in this order: how am I today, what is on, where did yesterday go, what has tended to help.
-Everything else is detail behind a "How this is worked out" fold.
+One person managing their own health from their own data, usually in the morning and before bed. Proactive means
+the app reads the pages for you: the Today page has to answer, in this order, how am I today, **what should I adjust
+today and why**, what is on, where did yesterday go, what has tended to help. Everything else is detail behind a
+"How this is worked out" fold.
+
+## What to adjust today
+
+At most three items, one each for training, sleep and food, each with the reason in numbers and a link to the page
+that shows them. Fixed rules (listed in `healthaio/modules/actions.py` and in the card's fold), checked in order
+within each kind: recovery below normal with training planned → take it easy; a load spike → rest; otherwise what
+the week's activity goal needs today, or a strength session when the days left barely fit. Sleep: recovery low or a
+short night → tonight's time to be asleep by; screens before sleep above normal → when to put the phone away. Food,
+over the last 7 logged days: late last meals → when to finish dinner; then protein under 90% of the target; then
+energy above the plan. Nothing off is said as "a steady day", never as invented advice. Items need the data behind
+them: no activity records, no "move more". No model, no score, and the card says it is not medical advice.
+
+## Exercise, Food and Goals
+
+- **Exercise** opens on the week against the weekly goal (your `[plan.exercise]`, or the WHO guideline of 150
+  active minutes and 2 strength days, named as such), as seven day cells whose bars split active minutes by kind of
+  training and whose future days show the training planned. Then the last 7 days against your normal (totals for
+  minutes and workouts, daily averages for steps and energy), load against recovery (7-day workout minutes over the
+  4 weeks before; above 1.3 with recovery not better than usual = ease off), 12 weeks by kind with the goal dashed,
+  and how HRV and resting heart rate answer each kind the next morning (medians, a description, not a test).
+- **Food** counts a day once two main meals are logged; fewer is shown, not averaged, and a day not logged is
+  unknown, never zero. Rows like the Drain page's (value, normal band, plan tick, 8 weekly averages) for energy,
+  protein, the hours from the last meal to sleep and fibre; the plan wins the colour, because the plan is the
+  point of the page. The last meal is judged night by night (two or more late nights = off the plan), not by its
+  average. Meals by time of day draw each day from waking to sleep with the hours before sleep striped. The energy
+  balance sets the weekly change the log implies against the scale and says both ways what a gap usually means.
+- **Goals** list every plan with 28 days of kept / not kept / no record and the count "n of the days with a
+  record". Weekly goals show the last four weeks as bars against the target. Unset plans are listed with their
+  `healthaio.toml` section. No streaks (they punish one missed day more than four kept ones reward), no total.
 
 ## Layout
 
@@ -21,7 +51,7 @@ Everything else is detail behind a "How this is worked out" fold.
 - **Two columns on desktop, one on phones.** HTML order is the phone priority order; the desktop grid only places
   it. Cards in a column stack so no card stretches over empty space.
 - Every chart is drawn at its real pixel width (redrawn on resize), so text never scales with the chart. The charts
-  live in the design kit (`dayring/web/js/charts.js`); pages only map their data onto them.
+  live in the design kit (`healthaio/web/js/charts.js`); pages only map their data onto them.
 
 ## The Time page: one rule
 
@@ -111,7 +141,7 @@ matters, and says when the evidence is softer (entertainment).
 
 - **Two judgements, never mixed.** Against your normal: the last 7 days' average against the middle half of the
   28 days before (sleep-timing spread against the range of the four 7-night blocks before, because a spread only
-  exists over a run of nights). Against your plan, only where `dayring.toml` sets one: falling asleep against
+  exists over a run of nights). Against your plan, only where `healthaio.toml` sets one: falling asleep against
   `plan.sleep.bedtime`, entertainment & social against `plan.screen.entertainment_max_hours`. A habit that was
   already bad reads as "within normal" and still shows up against the plan.
 - **No total score.** The signals have different units and different strength of evidence.
@@ -135,7 +165,7 @@ matters, and says when the evidence is softer (entertainment).
 
 ## The AI work page
 
-A page of the Time item: how much AI agents worked for you, on how many instructions, next to your own focused
+A page of the Behaviour item: how much AI agents worked for you, on how many instructions, next to your own focused
 work. The same 7 whole days and the same "your normal" as the Time page. Four numbers and two ratios: AI work a
 day (sessions you started; scheduled tasks and scripts on their own), instructions a day, AI work per instruction
 and AI work over your focused work (both from the 7 days' totals). Usage is input, not output: an agent going in
@@ -148,7 +178,11 @@ divided among them).
 
 ## Menu
 
-Today · Week · Body (Weight, Sleep) · Time (Where it went, AI work) · Drain · Review · Data, in a sidebar on the left from 900 px (the
+Today · Body (Sleep, Exercise, Food, Weight) · Behaviour (Where it went, AI work, Drain) · Plan (Goals, Schedule) ·
+Review · Data. The items follow the loop of managing your health, one axis each: today's state and adjustments, the
+body (what you do for it and what it shows), behaviour (where time and attention go), the plan, the look back, the
+data. (An earlier menu mixed time (Today, Week) with topics (Time, Drain) and meta pages (Review, Data); one axis
+per item reads more easily.) The menu sits in a sidebar on the left from 900 px (the
 browser already takes height at the top and bottom, so the menu takes width instead). The sidebar folds to a 64 px
 column of icons with the button at its top; folded, the logo unfolds it, and the choice is remembered in this
 browser. A menu item that holds more than one page lists its pages under it while one of them is open; folded or
@@ -159,8 +193,8 @@ above the page.
 ## Colour
 
 - The colour rules are the design kit's ([DESIGN_KIT.md](DESIGN_KIT.md#colour-rules)); the values are in
-  `dayring/web/css/tokens.css` and on the gallery page (`#kit`).
-- Two looks, no theme picker (`dayring/web/css/tokens.css`): **light mode** uses graphite neutrals with a blue
+  `healthaio/web/css/tokens.css` and on the gallery page (`#kit`).
+- Two looks, no theme picker (`healthaio/web/css/tokens.css`): **light mode** uses graphite neutrals with a blue
   accent, **dark mode** uses dusk neutrals (blue-black) with a violet accent. The page follows the system setting;
   the moon button overrides it and remembers the choice (a shared `?mode=` link sets the starting look; a click
   wins over it and drops it from the address). The chosen part of a switch (Weight / Sleep, the outcome switch on

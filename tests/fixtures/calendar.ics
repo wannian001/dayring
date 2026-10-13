@@ -1,6 +1,6 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//dayring//synthetic test calendar//EN
+PRODID:-//healthaio//synthetic test calendar//EN
 CALSCALE:GREGORIAN
 X-WR-CALNAME:Synthetic timetable (test data)
 BEGIN:VTIMEZONE

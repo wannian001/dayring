@@ -1,0 +1,39 @@
+"""Page registry: name -> build(ctx, param) returning a JSON-ready dict."""
+from datetime import timedelta
+from typing import Any, Callable, Dict, List, Optional
+
+from ..context import Context
+from . import ai, body, data, drain, exercise, food, goals, review, sleep, time, today, week
+
+PAGES: Dict[str, Callable[..., Dict[str, Any]]] = {
+    "today": lambda ctx, param=None: today.build(ctx, day=param),
+    "week": lambda ctx, param=None: week.build(ctx, day=param),
+    "body": lambda ctx, param=None: body.build(ctx, day=param),
+    "sleep": lambda ctx, param=None: sleep.build(ctx, day=param),
+    "time": lambda ctx, param=None: time.build(ctx, day=param),
+    "ai": lambda ctx, param=None: ai.build(ctx, day=param),
+    "drain": lambda ctx, param=None: drain.build(ctx, day=param),
+    "food": lambda ctx, param=None: food.build(ctx, day=param),
+    "exercise": lambda ctx, param=None: exercise.build(ctx, day=param),
+    "goals": lambda ctx, param=None: goals.build(ctx, day=param),
+    "review": lambda ctx, param=None: review.build(ctx, week=param),
+    "data": lambda ctx, param=None: data.build(ctx, day=param),
+}
+
+
+def static_params(name: str, ctx: Context) -> List[Optional[str]]:
+    """Which parameter values `healthaio build-static` pre-renders (a static site cannot compute)."""
+    if name == "today":
+        return [None] + [(ctx.today - timedelta(days=k)).isoformat() for k in range(1, 15)]
+    if name in ("week", "review"):
+        start = ctx.today - timedelta(days=ctx.today.weekday())
+        return [None] + [(start + timedelta(days=7 * k)).isoformat() for k in range(-4, 3)]
+    if name in ("drain", "food"):
+        # every end day of the last four weeks: the 7-day steps from the latest window, and the window each
+        # pre-rendered Today links to (the 7 days before that day), from which Earlier / Later step on
+        return [None] + [(ctx.today - timedelta(days=k)).isoformat() for k in range(1, 30)]
+    if name == "time":
+        return time.static_params(ctx)
+    if name == "ai":
+        return ai.static_params(ctx)
+    return [None]

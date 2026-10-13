@@ -14,11 +14,11 @@ import unittest
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
-from dayring.config import Config
-from dayring.context import Context
-from dayring.modules import review, static_params
-from dayring.modules import time as time_page
-from dayring.store import write_table
+from healthaio.config import Config
+from healthaio.context import Context
+from healthaio.modules import review, static_params
+from healthaio.modules import time as time_page
+from healthaio.store import write_table
 
 TZ = "Australia/Melbourne"
 
@@ -48,7 +48,7 @@ def screens(first: date, last: date, minutes: int = 480, category: str = "work")
 
 class Folder(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp(prefix="dayring-cov-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="healthaio-cov-"))
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
@@ -259,7 +259,7 @@ class Words(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         import re
-        root = Path(__file__).resolve().parent.parent / "dayring" / "web" / "js"
+        root = Path(__file__).resolve().parent.parent / "healthaio" / "web" / "js"
         cls.text = (root / "i18n.js").read_text(encoding="utf-8")
         cls.pages = {f.name: f.read_text(encoding="utf-8") for f in (root / "pages").glob("*.js")}
         cls.strings = {}

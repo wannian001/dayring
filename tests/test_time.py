@@ -1,6 +1,6 @@
 """The Time page: each activity measured from its own record, minute by minute.
 
-Rules under test (dayring/context.py, dayring/modules/time.py):
+Rules under test (healthaio/context.py, healthaio/modules/time.py):
 - a record that crosses midnight is split at midnight, minute by minute;
 - lanes may overlap (a class with the laptop open counts in both), but a minute is recorded once;
 - waking minutes that no record covers are "not recorded", never guessed;
@@ -21,15 +21,15 @@ import unittest
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from dayring import config, demo
-from dayring.config import Config
-from dayring import stats
-from dayring.context import ACTIVITIES, SCREEN_PARTS, STACK_KEYS, Context
-from dayring.importers import apple_health
-from dayring.modules import PAGES, static_params
-from dayring.modules import time as time_page
-from dayring.server import payload
-from dayring.store import Store, write_table
+from healthaio import config, demo
+from healthaio.config import Config
+from healthaio import stats
+from healthaio.context import ACTIVITIES, SCREEN_PARTS, STACK_KEYS, Context
+from healthaio.importers import apple_health
+from healthaio.modules import PAGES, static_params
+from healthaio.modules import time as time_page
+from healthaio.server import payload
+from healthaio.store import Store, write_table
 
 ROOT = Path(__file__).resolve().parent.parent
 TZ = "Australia/Melbourne"
@@ -59,7 +59,7 @@ class FolderCase(unittest.TestCase):
     """A fresh data folder per test; tables are written with the same writer the importers use."""
 
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp(prefix="dayring-time-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="healthaio-time-"))
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
@@ -459,12 +459,12 @@ class WhatChanged(FolderCase):
 class DemoTimePage(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.tmp = Path(tempfile.mkdtemp(prefix="dayring-time-demo-"))
+        cls.tmp = Path(tempfile.mkdtemp(prefix="healthaio-time-demo-"))
         try:
             cls.cfg = config.load(demo.generate(cls.tmp, TODAY, NOW))
         except config.ConfigError:  # Python 3.9/3.10 without tomli
             shutil.rmtree(cls.tmp, ignore_errors=True)
-            raise unittest.SkipTest("needs Python 3.11+ or tomli to read the demo dayring.toml")
+            raise unittest.SkipTest("needs Python 3.11+ or tomli to read the demo healthaio.toml")
         cls.latest = payload(cls.cfg, "time", None, NOW)
 
     @classmethod
@@ -733,7 +733,7 @@ class AppleHealthWorkouts(unittest.TestCase):
     ]
 
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp(prefix="dayring-time-ah-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="healthaio-time-ah-"))
         self.export = self.tmp / "export.xml"
         self.export.write_text(self.EXPORT, encoding="utf-8")
         self.cfg = Config(root=self.tmp, data_dir=self.tmp / "data", timezone=TZ)
@@ -785,7 +785,7 @@ class AttentionAlias(unittest.TestCase):
     """The page was called "attention"; old links (#attention, #attention/2026-10-04) must still open it."""
 
     def test_app_js_maps_attention_to_time(self):
-        text = (ROOT / "dayring" / "web" / "js" / "app.js").read_text(encoding="utf-8")
+        text = (ROOT / "healthaio" / "web" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertRegex(text, r'const ALIAS\s*=\s*\{[^}]*\battention\s*:\s*"time"')
         self.assertIn("ALIAS[raw]", text)  # route() resolves the alias before picking the page
         nav = re.search(r"const NAV\s*=\s*\[([^\]]*)\]", text)
@@ -794,13 +794,13 @@ class AttentionAlias(unittest.TestCase):
         self.assertNotIn('"attention"', nav.group(1))
 
     def test_no_leftovers_of_the_biggest_activity_and_the_week_before(self):
-        i18n = (ROOT / "dayring" / "web" / "js" / "i18n.js").read_text(encoding="utf-8")
+        i18n = (ROOT / "healthaio" / "web" / "js" / "i18n.js").read_text(encoding="utf-8")
         for key in ("time.top_line", "time.top_days", "time.no_top", "time.vs", "time.before", "time.same", "act.screen_lower"):
             self.assertNotIn(f'"{key}"', i18n, key)
-        page = (ROOT / "dayring" / "web" / "js" / "pages" / "time.js").read_text(encoding="utf-8")
+        page = (ROOT / "healthaio" / "web" / "js" / "pages" / "time.js").read_text(encoding="utf-8")
         for code in ("S.top", "p.before", "top_counts"):
             self.assertNotIn(code, page, code)
-        icons = (ROOT / "dayring" / "web" / "js" / "icons.js").read_text(encoding="utf-8")
+        icons = (ROOT / "healthaio" / "web" / "js" / "icons.js").read_text(encoding="utf-8")
         for key in time_page.CANDIDATES + ("check", "up", "down"):
             self.assertRegex(icons, rf"\b{key}: '<", key)
         for key in time_page.CANDIDATES:
@@ -810,9 +810,9 @@ class AttentionAlias(unittest.TestCase):
     def test_time_page_is_registered_and_named(self):
         self.assertIn("time", PAGES)
         self.assertNotIn("attention", PAGES)
-        i18n = (ROOT / "dayring" / "web" / "js" / "i18n.js").read_text(encoding="utf-8")
+        i18n = (ROOT / "healthaio" / "web" / "js" / "i18n.js").read_text(encoding="utf-8")
         self.assertEqual(i18n.count('"nav.time"'), 2)  # English and Chinese
-        for page in (ROOT / "dayring" / "web" / "js").rglob("*.js"):
+        for page in (ROOT / "healthaio" / "web" / "js").rglob("*.js"):
             self.assertNotIn('href="#attention', page.read_text(encoding="utf-8"), page.name)
 
 

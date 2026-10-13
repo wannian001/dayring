@@ -12,11 +12,11 @@ from datetime import date, datetime, timedelta
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-from dayring import config, demo, stats
-from dayring.context import Context
-from dayring.modules import PAGES, plans, static_params
-from dayring.server import make_handler, payload
-from dayring.store import write_table
+from healthaio import config, demo, stats
+from healthaio.context import Context
+from healthaio.modules import PAGES, plans, static_params
+from healthaio.server import make_handler, payload
+from healthaio.store import write_table
 
 TODAY = date(2026, 10, 12)
 NOW = datetime(2026, 10, 12, 18, 40)
@@ -36,11 +36,11 @@ def walk(value):
 class DemoPages(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.tmp = Path(tempfile.mkdtemp(prefix="dayring-test-"))
+        cls.tmp = Path(tempfile.mkdtemp(prefix="healthaio-test-"))
         try:
             cls.cfg = config.load(demo.generate(cls.tmp, TODAY, NOW))
         except config.ConfigError:  # Python 3.9/3.10 without tomli: same settings as JSON
-            raise unittest.SkipTest("needs Python 3.11+ or tomli to read the demo dayring.toml")
+            raise unittest.SkipTest("needs Python 3.11+ or tomli to read the demo healthaio.toml")
 
     @classmethod
     def tearDownClass(cls):
@@ -56,7 +56,7 @@ class DemoPages(unittest.TestCase):
                     self.assertTrue(math.isfinite(v), name)
 
     def test_demo_is_deterministic(self):
-        again = Path(tempfile.mkdtemp(prefix="dayring-test-"))
+        again = Path(tempfile.mkdtemp(prefix="healthaio-test-"))
         try:
             demo.generate(again, TODAY, NOW)
             for f in ("body_daily.csv", "screen_sessions.csv"):
@@ -88,7 +88,7 @@ class DemoPages(unittest.TestCase):
             self.assertEqual(b < a, bool(day["on_time"]) and a > 7 * 60 + 30)
 
     def test_screen_time_counts_overlap_once(self):
-        folder = Path(tempfile.mkdtemp(prefix="dayring-test-"))
+        folder = Path(tempfile.mkdtemp(prefix="healthaio-test-"))
         try:
             write_table(folder, "screen_sessions", [
                 {"start": datetime(2026, 1, 1, 10, 0), "end": datetime(2026, 1, 1, 11, 0), "device": "laptop", "app": "Docs", "category": "work"},
@@ -131,7 +131,7 @@ class Stats(unittest.TestCase):
 class Server(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.tmp = Path(tempfile.mkdtemp(prefix="dayring-test-"))
+        cls.tmp = Path(tempfile.mkdtemp(prefix="healthaio-test-"))
         try:
             cls.cfg = config.load(demo.generate(cls.tmp, TODAY, NOW))
         except config.ConfigError:
@@ -150,13 +150,13 @@ class Server(unittest.TestCase):
         return urllib.request.urlopen(f"http://127.0.0.1:{self.port}{path}", timeout=10)
 
     def test_pages_and_assets(self):
-        self.assertIn(b"dayring", self.get("/").read())
+        self.assertIn(b"Health AIO", self.get("/").read())
         self.assertEqual(json.loads(self.get("/api/today").read())["page"], "today")
         self.assertEqual(json.loads(self.get("/api/settings").read())["demo"], True)
         self.assertIn("javascript", self.get("/js/app.js").headers["Content-Type"])
 
     def test_rejects_traversal_and_bad_params(self):
-        for path in ("/../dayring.toml", "/%2e%2e/dayring.toml", "/api/nope", "/api/today?day=../../x"):
+        for path in ("/../healthaio.toml", "/%2e%2e/healthaio.toml", "/api/nope", "/api/today?day=../../x"):
             with self.assertRaises(urllib.error.HTTPError) as caught:
                 self.get(path)
             self.assertIn(caught.exception.code, (400, 404))
@@ -164,13 +164,13 @@ class Server(unittest.TestCase):
 
 class StaticBuild(unittest.TestCase):
     def test_build(self):
-        tmp = Path(tempfile.mkdtemp(prefix="dayring-test-"))
+        tmp = Path(tempfile.mkdtemp(prefix="healthaio-test-"))
         try:
             try:
                 cfg = config.load(demo.generate(tmp / "demo", TODAY, NOW))
             except config.ConfigError:
                 self.skipTest("needs Python 3.11+ or tomli")
-            from dayring.build_static import build
+            from healthaio.build_static import build
             out = build(cfg, tmp / "site", now=NOW)
             self.assertIn('data-static="true"', (out / "index.html").read_text())
             self.assertTrue((out / "api" / "today.json").is_file())

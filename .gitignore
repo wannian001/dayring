@@ -1,5 +1,9 @@
 # your own data never goes into git
 /data/
+/healthaio.toml
+/healthaio.json
+/healthaio-demo/
+# the project's name before it became Health AIO; old folders keep working, and stay out of git
 /dayring.toml
 /dayring.json
 /dayring-demo/

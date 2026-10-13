@@ -2,21 +2,21 @@
 
 Importers turn exports from other apps into the CSV tables described in
 [DATA_FORMAT.md](DATA_FORMAT.md). They only read the file you give them and only write
-into your data directory (the `data_dir` in `dayring.toml`). Nothing is uploaded.
+into your data directory (the `data_dir` in `healthaio.toml`). Nothing is uploaded.
 
 | command | source | writes |
 |---|---|---|
-| `dayring import apple-health PATH` | Apple Health `export.zip`, `export.xml` or the unzipped folder | `body_daily.csv`, `workouts.csv` |
-| `dayring import ics PATH [--kind K]` | any iCalendar `.ics` file | `events.csv` |
-| `dayring import macos-screentime [--days N]` | macOS Screen Time data on this Mac (experimental) | `screen_sessions.csv` |
-| `dayring import ai-logs [--days N]` | Claude Code and Codex logs on this computer (times and counts only) | `ai_work.csv`, `ai_prompts.csv` |
-| `dayring import csv TABLE PATH --map ...` | any CSV with your own column names | any table |
+| `healthaio import apple-health PATH` | Apple Health `export.zip`, `export.xml` or the unzipped folder | `body_daily.csv`, `workouts.csv`, `meals.csv` |
+| `healthaio import ics PATH [--kind K]` | any iCalendar `.ics` file | `events.csv` |
+| `healthaio import macos-screentime [--days N]` | macOS Screen Time data on this Mac (experimental) | `screen_sessions.csv` |
+| `healthaio import ai-logs [--days N]` | Claude Code and Codex logs on this computer (times and counts only) | `ai_work.csv`, `ai_prompts.csv` |
+| `healthaio import csv TABLE PATH --map ...` | any CSV with your own column names | any table |
 
 Each command prints how many rows it imported, their date range, the file it wrote and any
 problems (with line numbers where there is a line to point at). Importing again is safe:
 every importer merges with what is already there, as described below.
 
-Run `dayring check` afterwards to see the tables the pages will read.
+Run `healthaio check` afterwards to see the tables the pages will read.
 
 ---
 
@@ -31,7 +31,7 @@ Run `dayring check` afterwards to see the tables the pages will read.
 4. Run:
 
    ```sh
-   python -m dayring import apple-health ~/Downloads/export.zip
+   python -m healthaio import apple-health ~/Downloads/export.zip
    ```
 
 The zip is read in place; there is no need to unzip it. The file is streamed, so even a
@@ -40,15 +40,16 @@ multi-gigabyte export needs little memory.
 ### What it fills in
 
 `sleep_min`, `in_bed_min`, `sleep_start`, `sleep_end`, `hrv_ms` (SDNN), `resting_hr`, `steps`,
-`exercise_min`, `workout_min`, `workout_type`, `weight_kg` and `complete` in `body_daily.csv`, and one row
-per workout in `workouts.csv` with `start`, `end`, `type`, `source` and `kcal`.
+`exercise_min`, `workout_min`, `workout_type`, `active_kcal`, `basal_kcal`, `weight_kg` and `complete` in
+`body_daily.csv`; one row per workout in `workouts.csv` with `start`, `end`, `type`, `source`, `kcal` and
+`avg_hr`; and one row per meal in `meals.csv`, from what food-logging apps write into Health.
 
 How the numbers are made:
 
 - **Time zones.** Every time in the export is written with the UTC offset the phone had *when
   you exported*, not when the record was made. Records that carry the `HKTimeZone` metadata are
   converted to that zone, so a night abroad is filed under the day you woke up *there*; other
-  records use the `timezone` in `dayring.toml`. `sleep_start` and `sleep_end` are written in the
+  records use the `timezone` in `healthaio.toml`. `sleep_start` and `sleep_end` are written in the
   zone you slept in; workout times in `workouts.csv` are written in the configured timezone, like
   screen time and the calendar (see below).
 - **Sleep** is filed under the day you woke up. Sleep records closer than 60 minutes apart form
@@ -56,9 +57,11 @@ How the numbers are made:
   When the watch and the phone (or a sleep app) both recorded the same night, only the watch
   is used for asleep minutes, so the night is not counted twice. `sleep_start` and `sleep_end`
   are the first and last asleep moments of the main sleep.
-- **Steps and exercise minutes.** The watch and the phone both count the same walk. The watch
+- **Steps, exercise minutes and energy burned.** The watch and the phone both count the same walk. The watch
   is taken first; another source only counts for the part of its time span the watch did not
-  record (pro rata). Priority: Apple Watch, then other apps and wearables, then iPhone.
+  record (pro rata). Priority: Apple Watch, then other apps and wearables, then iPhone. The same rule makes
+  `active_kcal` (the Move ring's active energy) and `basal_kcal` (resting energy), kJ converted to kcal. The Food
+  page adds the two to set what you burned against what you logged.
 - **HRV** and **resting heart rate** are daily means; **weight** is the last reading of the day
   (pounds and stones are converted to kg).
 - **Workouts.** Durations are summed per day, but a workout that overlaps one already counted by
@@ -87,8 +90,19 @@ How the numbers are made:
   - *Odd dates.* Workouts dated before 2000 (exports carry epoch-0 junk) or after the export are
     left out; the summary says how many.
   - `kcal` is the workout's active energy (`ActiveEnergyBurned`, kJ converted), on the first
-    stretch. The Time page places exercise in the day from these rows; `workout_min` stays the
+    stretch. `avg_hr` is the workout's average heart rate when its statistics hold one (newer exports),
+    on every stretch. The Time page places exercise in the day from these rows; `workout_min` stays the
     daily total.
+- **Meals** (`meals.csv`). Food-logging apps (MyFitnessPal, Lose It!, Cronometer and others, once you allow them to
+  write to Health) save what you ate as dietary records: energy, protein, carbohydrate, fat and fibre, each stamped
+  with the time of the meal.
+  - *One meal.* Records that start in the same minute are one meal. When two apps wrote the same minute, the one with
+    more energy is kept, so one meal is never counted twice.
+  - *Which meal.* From a `meal` (or `HKFoodMeal`) metadata entry when the app wrote one, otherwise from the clock:
+    before 10:30 breakfast, before 15:00 lunch, 17:00 to 21:30 dinner, anything else a snack. The Food page counts a
+    day once two main meals are logged.
+  - *Units and names.* kJ become kcal, mg become g. `title` joins up to three `HKFoodType` names; `source` is the
+    app's name. Times are written in the configured timezone, like workouts.
 - **`complete`** is `0` for the day you exported (it was not over yet), `1` for all other days.
 
 ### Re-importing
@@ -103,16 +117,20 @@ shows them so you can fix them). Columns that are not in the schema are not kept
 `workouts.csv` works differently, because an export holds each source's whole workout history:
 existing rows from a source that appears in the export (its `sourceName`, e.g. your watch) and
 that start between the export's first and last workout are replaced by the export's workouts.
-Rows from any other source (typed by hand, mapped from Garmin or Strava with `dayring import
+Rows from any other source (typed by hand, mapped from Garmin or Strava with `healthaio import
 csv`) are kept, unless a row overlaps an imported workout by more than half of the shorter of the
 two: then it is the same workout and the copy is removed. Rows of the export's sources outside
 its range are kept too. The summary says how many rows were replaced, removed as copies and kept.
 An export without workouts leaves the file as it is.
 
+`meals.csv` follows the same idea: rows from a food app that is in the export and that fall between the export's
+first and last meal are replaced; a meal you typed by hand, or mapped from another app's CSV, is kept.
+
 ### Limitations
 
-- Only the columns above. Heart rate, VO2 max, daily active energy, stand hours and sleep stages
-  are not imported (a workout's own active energy is, as `kcal`).
+- Only the columns above. Heart rate through the day, VO2 max, stand hours, water, caffeine and sleep stages are
+  not imported (a workout's own active energy and average heart rate are, as `kcal` and `avg_hr`).
+- Meals are only as complete as your food log. A day you did not log is left out, never read as zero.
 - HRV is Apple's SDNN. If you also keep RMSSD from another app, keep it in a separate file:
   `hrv_ms` must hold one kind.
 - A source is recognised as a watch or a phone by its name or device (`Watch`, `iPhone`). A
@@ -126,13 +144,13 @@ An export without workouts leaves the file as it is.
 ## Calendars (.ics)
 
 ```sh
-python -m dayring import ics ~/Downloads/timetable.ics
-python -m dayring import ics ~/Downloads/gym.ics --kind training
+python -m healthaio import ics ~/Downloads/timetable.ics
+python -m healthaio import ics ~/Downloads/gym.ics --kind training
 ```
 
 ### Getting an .ics file
 
-dayring reads files, not URLs: download the file first.
+Health AIO reads files, not URLs: download the file first.
 
 - **Google Calendar** (web): *Settings* > *Import & export* > *Export* downloads a zip with one
   `.ics` per calendar. For a single calendar: *Settings* > the calendar under *Settings for my
@@ -198,8 +216,8 @@ delete the row.
 ## macOS Screen Time (experimental)
 
 ```sh
-python -m dayring import macos-screentime            # last 28 days
-python -m dayring import macos-screentime --days 7 --device laptop
+python -m healthaio import macos-screentime            # last 28 days
+python -m healthaio import macos-screentime --days 7 --device laptop
 ```
 
 This reads the foreground-app record that Screen Time itself is built on (Apple's "Biome"
@@ -219,7 +237,7 @@ If *Screen Time* > *Share across devices* is on, your iPhone and iPad send their
 this Mac, and they are imported too. Devices are named `laptop` / `desktop` (this Mac; override
 with `--device`), `phone`, `tablet` and `mac` (another Mac), from Biome's own device list. A
 second device of the same kind becomes `phone-2`, and so on. Put the names in the order you
-want in `[devices] priority` in `dayring.toml`. If you renamed a computer, list it in
+want in `[devices] priority` in `healthaio.toml`. If you renamed a computer, list it in
 `[devices] computers` too, so the Time page's devices-at-once card can tell an AI agent left
 working on it (an app in `[devices] agent_apps`) from you.
 
@@ -236,7 +254,7 @@ working on it (an app in `[devices] agent_apps`) from you.
 ### Categories
 
 `work`, `learning`, `communication`, `entertainment`, `social` or `other`, from
-`dayring/importers/screen_categories.json`, which lists common apps (by bundle id), app names and
+`healthaio/importers/screen_categories.json`, which lists common apps (by bundle id), app names and
 websites. To change or add entries, put a `screen_categories.json` with the same shape in your
 data directory; your entries win:
 
@@ -271,9 +289,9 @@ are replaced. Older rows (which Biome may no longer have) and rows of other devi
 ## Claude Code and Codex (AI agents)
 
 ```sh
-python -m dayring import ai-logs                     # everything the logs hold
-python -m dayring import ai-logs --days 30
-python -m dayring import ai-logs --claude-dir ~/other/.claude/projects --codex-dir ~/other/.codex/sessions
+python -m healthaio import ai-logs                     # everything the logs hold
+python -m healthaio import ai-logs --days 30
+python -m healthaio import ai-logs --claude-dir ~/other/.claude/projects --codex-dir ~/other/.codex/sessions
 ```
 
 This reads the logs the two coding agents keep on this computer, read-only: Claude Code in
@@ -310,7 +328,7 @@ CSV after the logs are gone.
 
 ### Limitations
 
-- Only these two agents. Others can be written in the same two tables with `dayring import csv`.
+- Only these two agents. Others can be written in the same two tables with `healthaio import csv`.
 - The log formats are the tools' own and undocumented; a tool update may change them.
 
 ---
@@ -318,13 +336,18 @@ CSV after the logs are gone.
 ## Any CSV (column mapping)
 
 ```sh
-python -m dayring import csv body_daily weights.csv --map 'Date=date,Weight (kg)=weight_kg'
-python -m dayring import csv body_daily scale.csv --map 'Day=date,Kilos=weight_kg' --date-format '%d/%m/%Y'
-python -m dayring import csv screen_sessions activitywatch.csv --map 'timestamp=start'
-python -m dayring import csv workouts my-runs.csv --map 'Began=start,Finished=end,Sport=type'
+python -m healthaio import csv body_daily weights.csv --map 'Date=date,Weight (kg)=weight_kg'
+python -m healthaio import csv body_daily scale.csv --map 'Day=date,Kilos=weight_kg' --date-format '%d/%m/%Y'
+python -m healthaio import csv screen_sessions activitywatch.csv --map 'timestamp=start'
+python -m healthaio import csv workouts my-runs.csv --map 'Began=start,Finished=end,Sport=type'
+python -m healthaio import csv meals food-log.csv --map 'Date=time,Meal=meal,Calories=kcal,Protein (g)=protein_g'
 ```
 
-- `--map 'Source=column,...'` renames your columns to the schema's (see `dayring schema`).
+A food app's CSV export usually has one row per meal (or per food) with a date but no clock time. Map the date to
+`time`: a time of exactly 00:00 is read as "a date without a time", so the meal counts for its own day and stays out
+of the last-meal timing. `meal` must be one of `breakfast`, `lunch`, `dinner`, `snack`, `drink` (any case).
+
+- `--map 'Source=column,...'` renames your columns to the schema's (see `healthaio schema`).
   Repeat `--map` as often as you like. Columns already named like the schema (any case) need
   no mapping; other columns are ignored and listed in the summary.
 - Every cell is checked against the schema (type, allowed values, plausible range). A row with a

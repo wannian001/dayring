@@ -4,9 +4,9 @@ import unittest
 from datetime import date, datetime
 from pathlib import Path
 
-from dayring.config import Config
-from dayring.importers import ics
-from dayring.store import Store
+from healthaio.config import Config
+from healthaio.importers import ics
+from healthaio.store import Store
 
 FIXTURE = Path(__file__).parent / "fixtures" / "calendar.ics"
 TZ = "Australia/Melbourne"

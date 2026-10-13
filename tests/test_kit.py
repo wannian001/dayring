@@ -15,12 +15,12 @@ from datetime import date, datetime
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-from dayring import config, demo, kit
-from dayring.__main__ import main
-from dayring.server import make_handler
+from healthaio import config, demo, kit
+from healthaio.__main__ import main
+from healthaio.server import make_handler
 
 ROOT = Path(__file__).resolve().parents[1]
-WEB = ROOT / "dayring" / "web"
+WEB = ROOT / "healthaio" / "web"
 TODAY = date(2026, 10, 12)
 NOW = datetime(2026, 10, 12, 18, 40)
 KIT_PATHS = [path for path, _ in kit.FILES]
@@ -43,7 +43,7 @@ class Manifest(unittest.TestCase):
         cls.m = kit.manifest()
 
     def test_lists_only_existing_files_with_their_hashes(self):
-        self.assertEqual(self.m["name"], "dayring-kit")
+        self.assertEqual(self.m["name"], "healthaio-kit")
         self.assertRegex(self.m["version"], r"^\d+\.\d+\.\d+$")
         self.assertEqual(self.m["version"], kit.KIT_VERSION)
         self.assertEqual([f["path"] for f in self.m["files"]], KIT_PATHS)
@@ -93,14 +93,14 @@ class Manifest(unittest.TestCase):
 
 
 class VersionLock(unittest.TestCase):
-    """A kit file never changes under the same KIT_VERSION: dayring/kit.lock.json holds the current version's hashes."""
+    """A kit file never changes under the same KIT_VERSION: healthaio/kit.lock.json holds the current version's hashes."""
 
     def test_the_lock_matches_the_kit_files_and_version(self):
         self.assertIsNone(kit.lock_problem())
         self.assertEqual(kit.read_lock()["version"], kit.KIT_VERSION)
 
     def test_a_changed_file_needs_a_new_version(self):
-        tmp = Path(tempfile.mkdtemp(prefix="dayring-kit-"))
+        tmp = Path(tempfile.mkdtemp(prefix="healthaio-kit-"))
         try:
             src, lock = tmp / "web", tmp / "kit.lock.json"
             for path in KIT_PATHS:
@@ -172,7 +172,7 @@ class Tokens(unittest.TestCase):
 
 class Isolation(unittest.TestCase):
     def test_kit_scripts_import_nothing(self):
-        # an app copies charts.js and icons.js alone: they may not reach for dayring's i18n.js or pages
+        # an app copies charts.js and icons.js alone: they may not reach for Health AIO's i18n.js or pages
         for path in ("js/charts.js", "js/icons.js"):
             text = read(path)
             self.assertNotRegex(text, r"(?m)^\s*import\b", path)
@@ -200,7 +200,7 @@ class Isolation(unittest.TestCase):
 
 class ExportCheck(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp(prefix="dayring-kit-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="healthaio-kit-"))
         self.src = self.tmp / "src"
         for path in KIT_PATHS:
             (self.src / path).parent.mkdir(parents=True, exist_ok=True)
@@ -237,7 +237,7 @@ class ExportCheck(unittest.TestCase):
     def test_a_changed_kit_file_makes_the_copy_outdated(self):
         kit.export(self.dest, self.src)
         with open(self.src / "js" / "charts.js", "a", encoding="utf-8") as f:
-            f.write("\n// a change in dayring after the export\n")
+            f.write("\n// a change in Health AIO after the export\n")
         statuses = self.statuses()
         self.assertEqual(statuses.pop("js/charts.js"), kit.OUTDATED)
         self.assertEqual(set(statuses.values()), {kit.UP_TO_DATE})
@@ -266,7 +266,7 @@ class ExportCheck(unittest.TestCase):
 
     def test_a_first_export_never_overwrites_a_file_it_did_not_write(self):
         (self.dest / "css").mkdir(parents=True)
-        own = "/* my hand-made kit.css, not from dayring */\n"
+        own = "/* my hand-made kit.css, not from healthaio */\n"
         (self.dest / "css" / "kit.css").write_text(own, encoding="utf-8")
         with self.assertRaises(kit.KitError) as raised:
             kit.export(self.dest, self.src)
@@ -368,8 +368,8 @@ class ExportCheck(unittest.TestCase):
         with contextlib.redirect_stdout(out):
             self.assertEqual(main(["kit", "check", str(self.tmp / "nowhere")]), 1)
         # the commands it tells the user to run work with the documented setup (no pip install)
-        self.assertIn("`python3 -m dayring kit export ", out.getvalue())
-        self.assertNotIn("`dayring kit", out.getvalue())
+        self.assertIn("`python3 -m healthaio kit export ", out.getvalue())
+        self.assertNotIn("`healthaio kit", out.getvalue())
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
             self.assertEqual(main(["kit", "lock"]), 0)  # the lock is current: nothing to write
@@ -378,7 +378,7 @@ class ExportCheck(unittest.TestCase):
 
 class Served(unittest.TestCase):
     def test_api_kit_is_the_manifest(self):
-        tmp = Path(tempfile.mkdtemp(prefix="dayring-kit-"))
+        tmp = Path(tempfile.mkdtemp(prefix="healthaio-kit-"))
         httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(config.Config(root=tmp, data_dir=tmp), lambda: NOW))
         threading.Thread(target=httpd.serve_forever, daemon=True).start()
         try:
@@ -392,13 +392,13 @@ class Served(unittest.TestCase):
             shutil.rmtree(tmp, ignore_errors=True)
 
     def test_static_build_writes_api_kit_json(self):
-        tmp = Path(tempfile.mkdtemp(prefix="dayring-kit-"))
+        tmp = Path(tempfile.mkdtemp(prefix="healthaio-kit-"))
         try:
             try:
                 cfg = config.load(demo.generate(tmp / "demo", TODAY, NOW))
             except config.ConfigError:
                 self.skipTest("needs Python 3.11+ or tomli")
-            from dayring.build_static import build
+            from healthaio.build_static import build
             with contextlib.redirect_stdout(io.StringIO()):
                 out = build(cfg, tmp / "site", now=NOW)
             self.assertEqual(json.loads((out / "api" / "kit.json").read_text(encoding="utf-8")), kit.manifest())
@@ -427,7 +427,7 @@ class Gallery(unittest.TestCase):
         self.assertIn('href="#kit"', self.app)  # the footer of every page
         self.assertIn('href="#kit"', read("js/pages/data.js"))
         self.assertEqual(self.i18n.count('"nav.kit"'), 2)  # English and Chinese
-        self.assertIn("setFormat(", self.app)  # the kit's charts get dayring's words
+        self.assertIn("setFormat(", self.app)  # the kit's charts get Health AIO's words
 
     def test_every_component_and_chart_has_a_sample(self):
         samples = set(re.findall(r'(?m)^  "?([^":\s]+)"?: \(\) =>', self.block("const SAMPLES = {")))
@@ -549,7 +549,7 @@ console.log(JSON.stringify({ nights, ring, lanes, words: Object.keys(charts.CHAR
 @unittest.skipUnless(shutil.which("node"), "needs node to render the gallery")
 class GalleryRenders(unittest.TestCase):
     def test_renders_in_both_languages_with_every_chart_drawn(self):
-        tmp = Path(tempfile.mkdtemp(prefix="dayring-kit-"))
+        tmp = Path(tempfile.mkdtemp(prefix="healthaio-kit-"))
         try:
             file = tmp / "kit.json"
             file.write_text(json.dumps(kit.manifest()), encoding="utf-8")

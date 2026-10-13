@@ -8,11 +8,11 @@ import unittest
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
-from dayring import config, demo, server
-from dayring.context import Context
-from dayring.modules import drain, static_params
-from dayring.server import payload
-from dayring.store import write_table
+from healthaio import config, demo, server
+from healthaio.context import Context
+from healthaio.modules import drain, static_params
+from healthaio.server import payload
+from healthaio.store import write_table
 
 TODAY = date(2026, 10, 12)
 NOW = datetime(2026, 10, 12, 18, 40)
@@ -74,7 +74,7 @@ def row(page, key):
 
 class DrainPage(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp(prefix="dayring-drain-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="healthaio-drain-"))
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
@@ -209,7 +209,7 @@ class DrainPage(unittest.TestCase):
                 self.assertIn(window_to, built)
 
 
-WEB = Path(__file__).resolve().parents[1] / "dayring" / "web"
+WEB = Path(__file__).resolve().parents[1] / "healthaio" / "web"
 RENDER = """
 import { readFileSync } from "node:fs";
 globalThis.document = { documentElement: { dataset: {} } };
@@ -227,7 +227,7 @@ class DrainWords(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tmp = Path(tempfile.mkdtemp(prefix="dayring-drain-words-"))
+        cls.tmp = Path(tempfile.mkdtemp(prefix="healthaio-drain-words-"))
         cls.cfg = config.load(demo.generate(cls.tmp / "demo", TODAY, NOW))
 
     @classmethod
@@ -265,18 +265,21 @@ class DrainWords(unittest.TestCase):
         self.assertIn('href="#today">Next day', self.render("en", "today", "2026-10-11").replace(" ›", ""))
 
     def test_english_lists_read_as_sentences(self):
-        html = self.render("en", "today", "2026-10-07")  # the 7 days to 6 Oct, with two signals worse than normal
-        self.assertIn("Worse than your normal: screens in the hour before sleep, app switching", html)
+        html = self.render("en", "today", "2026-10-07")  # the 7 days to 6 Oct, with three signals worse than normal
+        self.assertIn("Worse than your normal: resting heart rate, screens in the hour before sleep, app switching", html)
         self.assertIn("Against your plan: falling asleep later than planned by", html)
         self.assertIn("跟计划比：入睡时刻比计划晚", self.render("zh", "drain", None))
         self.assertIn("，娱乐和社交比上限多", self.render("zh", "drain", None))  # clauses take a comma, not 、
 
 
 class Menu(unittest.TestCase):
-    def test_menu_order_and_body_group(self):
-        app = (Path(__file__).resolve().parents[1] / "dayring" / "web" / "js" / "app.js").read_text(encoding="utf-8")
-        self.assertIn('const NAV = ["today", "week", "body", "time", "drain", "review", "data"];', app)
-        self.assertIn('body: [["body", "nav.weight"], ["sleep", "nav.sleep_tab"]]', app)
+    def test_menu_follows_the_health_loop(self):
+        # today, the body (sleep, exercise, food, weight), behaviour (time, AI work, drain), the plan, review, data
+        app = (Path(__file__).resolve().parents[1] / "healthaio" / "web" / "js" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('const NAV = ["today", "body", "time", "plan", "review", "data"];', app)
+        self.assertIn('body: [["sleep", "nav.sleep_tab"], ["exercise", "nav.exercise"], ["food", "nav.food"], ["body", "nav.weight"]]', app)
+        self.assertIn('time: [["time", "nav.time_tab"], ["ai", "nav.ai"], ["drain", "nav.drain"]]', app)
+        self.assertIn('plan: [["goals", "nav.goals"], ["week", "nav.schedule"]]', app)
 
 
 class Serve(unittest.TestCase):

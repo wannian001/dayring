@@ -1,11 +1,11 @@
 <div align="center">
 
-# The dayring design kit
+# The Health AIO design kit
 
-The colours, components, charts and icons every dayring page is built from, in four files another app can copy.<br>
-dayring 每一页用的颜色、组件、图表和图标，放在四个文件里，别的应用可以整套拷走。
+The colours, components, charts and icons every Health AIO page is built from, in four files another app can copy.<br>
+Health AIO 每一页用的颜色、组件、图表和图标，放在四个文件里，别的应用可以整套拷走。
 
-**[Gallery · 展示页](https://wannian001.github.io/dayring/#kit)** (every token, component and chart, drawn live · 每个变量、组件和图表现场画出来) &nbsp;·&nbsp; [English](#english) &nbsp;·&nbsp; [中文](#中文)
+**[Gallery · 展示页](https://wannian001.github.io/proactive-health-aio/#kit)** (every token, component and chart, drawn live · 每个变量、组件和图表现场画出来) &nbsp;·&nbsp; [English](#english) &nbsp;·&nbsp; [中文](#中文)
 
 </div>
 
@@ -13,15 +13,15 @@ dayring 每一页用的颜色、组件、图表和图标，放在四个文件里
 
 ### What it is, and what it is not
 
-dayring has two jobs. It is a public showcase of a local-first dashboard, and it is the source of one look: the
+Health AIO has two jobs. It is a public showcase of a local-first dashboard, and it is the source of one look: the
 design kit. Another app (the author's private system, say) copies the kit and keeps its own pages and features.
-Design flows one way, from dayring to the copies. Features flow the other way only when they are generic and can
+Design flows one way, from healthaio to the copies. Features flow the other way only when they are generic and can
 be shown with demo data.
 
 The kit **is**: the tokens of both modes, the base styles, the shell (header, menu, page column), the components,
 the SVG charts with their helpers, and the stroke icons. It is plain CSS and ES modules with no build step.
 
-The kit **is not**: dayring's page layouts (those stay in `dayring/web/css/app.css`), anything that computes data,
+The kit **is not**: Health AIO's page layouts (those stay in `healthaio/web/css/app.css`), anything that computes data,
 the words on a page (the app hands its own to the charts with `setFormat()`), or a theme picker. There is one look
 per mode.
 
@@ -34,13 +34,13 @@ data, each with its signature and one line on what it does. Locally it is <http:
 | file | role | holds |
 |---|---|---|
 | `css/tokens.css` | tokens | every custom property, light values on `:root`, dark values twice (system setting and the moon button), kept equal by a test |
-| `css/kit.css` | components | base styles, the shell and the components; every colour and every step of the space scale is a token (a few small sizes are plain numbers), and no rule names a dayring page |
+| `css/kit.css` | components | base styles, the shell and the components; every colour and every step of the space scale is a token (a few small sizes are plain numbers), and no rule names a Health AIO page |
 | `js/charts.js` | charts | the SVG charts and their helpers; imports nothing |
 | `js/icons.js` | icons | the stroke icons, their colours and the state-chip glyphs |
-| `kit.json` | manifest | written by `export` into the app's folder only (there is none in `dayring/web/`): version, every file's SHA-256 and size, the tokens, components and charts |
+| `kit.json` | manifest | written by `export` into the app's folder only (there is none in `healthaio/web/`): version, every file's SHA-256 and size, the tokens, components and charts |
 
-The four kit files' paths are relative to `dayring/web/`. The manifest is built from the files as they are on disk
-(`dayring/kit.py`): `python3 -m dayring kit json` prints it, the server answers it at `/api/kit`, and
+The four kit files' paths are relative to `healthaio/web/`. The manifest is built from the files as they are on disk
+(`healthaio/kit.py`): `python3 -m healthaio kit json` prints it, the server answers it at `/api/kit`, and
 `build-static` writes it to `api/kit.json` for the demo site. It reads three conventions in the files:
 
 - tokens.css: a comment `/* [role] … */` starts each group of tokens (type, space, radius, motion, neutral, accent,
@@ -79,6 +79,8 @@ Colours, light and dark ("same" = the same value in both modes):
 | `--c-sleep` | `#4a3aa7` | `#9085e9` | Sleep: its own ring track, lane and chart |
 | `--c-exercise` | `#bf3fa6` | `#cb4db2` | Logged workouts |
 | `--c-exercise-ink` | `#a8318f` | `#de78c8` | Workout minutes written as text |
+| `--c-exercise-2` | `#da90cb` | `#86397b` | A kind of training, one step lighter: cardio (the Exercise page) |
+| `--c-exercise-3` | `#e7b6dd` | `#5d2d5c` | A kind of training, lightest: walking and other workouts |
 | `--c-event` | `#161616` | `#eceef5` | Calendar blocks (ink, not a hue) |
 | `--c-band` | `rgba(22, 22, 22, .075)` | `rgba(236, 238, 245, .085)` | The “your normal” band and empty tracks |
 | `--c-grid` | `rgba(22, 22, 22, .07)` | `rgba(236, 238, 245, .07)` | Gridlines |
@@ -136,6 +138,8 @@ Each of these is shown in the gallery. Components (kit.css): `.sr`, `.top`, `.br
 | `ladderChart(ladder, { width, height = 200, final })` | The alarm as a step line (earlier = higher) with wake dots, green on time and red late, and the goal dashed. |
 | `coverage(marks, first, { width, height = 16 })` | One cell per day from first: "1" = has data, "p" = partial, anything else = nothing. |
 | `lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true })` | One row per activity with columns over hours or days, each row on its own scale; × = no record, dashed = a limit, stripes = a hatch part. |
+| `mealTimeline(days, { width, gapH = 3, rowH = 24 })` | One row per day on a 05:00–03:00 axis: awake from waking to falling asleep (sleep in violet at both ends), meals as dots sized by energy, the gapH hours before sleep striped; a meal inside them is ringed and its tooltip says how long before sleep it was. A day with status "none" is written as not logged; "partial" draws its meals faint. |
+| `keptDots(days, { width, height = 20 })` | A run of days as dots, a small gap after every 7th: filled = the goal was kept, a ring = not kept, a short dash = no record that day. |
 
 | helper | does |
 |---|---|
@@ -150,12 +154,12 @@ Each of these is shown in the gallery. Components (kit.css): `.sr`, `.top`, `.br
 | `RING_CATS` (js/charts.js) | The screen groups of the ring, inside out: [key, the categories it adds up, colour]. |
 | `ICON_KEYS` (js/icons.js) | The names icon() knows, in drawing order. |
 | `icon(key, size = 20)` (js/icons.js) | The icon for key at size px (an unknown key draws the dashed clock of "not recorded"). |
-| `COLOR` (js/icons.js) | The colour each icon is drawn in: its data colour (ai: focus blue, work done for you), ink-3 for not recorded, ink-2 for the check and the two devices-at-once measures; the menu glyphs take the text colour. |
+| `COLOR` (js/icons.js) | The colour each icon is drawn in: its data colour (ai: focus blue, work done for you), ink-3 for not recorded, ink-2 for the check, food (no data colour of its own) and the two devices-at-once measures; the menu glyphs take the text colour. |
 | `STATE_ICON` (js/icons.js) | The 12px glyphs inside a state chip: good = a tick, bad = an exclamation mark. |
 
 ### Using the kit in another app
 
-1. **Copy it.** `python3 -m dayring kit export path/to/app/static/kit` writes `css/tokens.css`, `css/kit.css`,
+1. **Copy it.** `python3 -m healthaio kit export path/to/app/static/kit` writes `css/tokens.css`, `css/kit.css`,
    `js/charts.js`, `js/icons.js` and `kit.json` there. It stops, unless you pass `--force`, rather than overwrite a
    file of the same name that no export put there, or a `kit.json` it did not write.
 2. **Load it first.** Link `kit/css/tokens.css`, then `kit/css/kit.css`, then your own stylesheets. Import the
@@ -172,29 +176,30 @@ Each of these is shown in the gallery. Components (kit.css): `.sr`, `.top`, `.br
    copied values, so a kit update reaches every page. kit.css styles `body`, links and generic classes (`.card`,
    `.chip`, `.tile`, `.grid`, `.row`, `.muted` …); if your app already uses those names for something else, load
    tokens.css and the scripts first and bring the components over one at a time.
-5. **Check after each dayring update.** `python3 -m dayring kit check path/to/app/static/kit` prints each file as
+5. **Check after each Health AIO update.** `python3 -m healthaio kit check path/to/app/static/kit` prints each file as
    *up to date*, *outdated* (the kit changed since the export), *modified locally* (the file differs from the hash
    recorded at export) or *missing*, and exits 0 only when every file is up to date.
 6. **Port local improvements back.** A file that is *modified locally* holds a change worth keeping or losing. Make
-   it in dayring (where the gallery shows it), bump `KIT_VERSION` and export again. `export` refuses to overwrite a
+   it in Health AIO (where the gallery shows it), bump `KIT_VERSION` and export again. `export` refuses to overwrite a
    modified copy unless you pass `--force`. A file an earlier export wrote that the kit no longer has is removed when
    it is untouched; when it was changed, `export --force` leaves it in place and `kit check` lists it until it is
    gone.
 
 ### Versioning
 
-`KIT_VERSION` in `dayring/kit.py` is a semantic version. Bump it on every change to any of the four kit files: the
+`KIT_VERSION` in `healthaio/kit.py` is a semantic version. Bump it on every change to any of the four kit files: the
 patch number for a value or drawing fix, the minor number for a new token, class, function or option, the major
 number for a rename or removal (an app that uses the old name breaks). The manifest carries the version and every
 file's hash, so `kit check` can tell a stale copy from an edited one.
 
-`dayring/kit.lock.json` records the hashes of the current version's files, and `tests/test_kit.py` fails when a kit
+`healthaio/kit.lock.json` records the hashes of the current version's files, and `tests/test_kit.py` fails when a kit
 file changes while `KIT_VERSION` stays the same. So a change goes: edit the file, bump `KIT_VERSION`, add a row to
-the table below (in both halves of this file), then run `python3 -m dayring kit lock`, which refuses to record
+the table below (in both halves of this file), then run `python3 -m healthaio kit lock`, which refuses to record
 changed files under a version that is not newer.
 
 | version | date | change |
 |---|---|---|
+| 1.4.0 | 2026-10-13 | For the health pages (Exercise, Food, Goals): tokens `--c-exercise-2` and `--c-exercise-3`, lighter steps of exercise that tell kinds of training apart by lightness (cardio, walking), never by a new hue; `mealTimeline` (meals by time of day, with the hours before sleep striped) and `keptDots` (days a goal was kept); icons `food` (ink-2: food has no data colour), `target` and `walk` (the Plan and Behaviour menu items); the comments name the kit Health AIO |
 | 1.3.0 | 2026-10-13 | `lanes` rows take `fmt` (a row's values in its own unit, such as a count of instructions); `.legend .key i.hatch` takes its stripes from `color` (ink unless set), so a hatch part in another colour has a matching key; icon `ai` (focus blue: AI agents working for you, the AI work page). AI work is drawn as focus blue stripes rather than a new data colour: the five data hues leave no step that passes the colour-vision checks against all of them |
 | 1.2.0 | 2026-10-13 | `.side`: the menu as a left sidebar from 900px that folds to a 64px icon rail (`html.side-folded`) and a bottom tab bar below that (`.top` and `.nav` stay for apps with a top bar); with a sidebar open, `.subnav` hides (its pages are listed in the sidebar); `lanes` parts take `{ hatch: true }` (diagonal stripes of the part's colour, keyed by `.legend .key i.hatch`) and a row's stacked parts never run past its top; icons `ratio` and `single` (the Time page's devices at once) and the menu glyphs `sun`, `heart`, `clock`, `battery`, `list`, `database`, `sidebar` |
 | 1.1.0 | 2026-10-13 | `formatDuration` (the default `unitFmt` of `stackedColumns` and `lanes`) and `stackedColumns`' `minutes` option (minutes tick on round hours: 0 / 2h / 4h, not 3h 20m); `dayRing` defaults to the exported `RING_CATS`; `setFormat()` keeps the English default for a word the app's `t()` lacks; `stackedColumns` names its limit in a key under the axis instead of over the columns; the labels of `timeChart`'s reference lines and `ladderChart`'s goal go over the marks with a halo; `blockColumns`, `stackedColumns` and `ladderChart` leave out labels evenly when neighbours would run into each other, and keep the first and last inside the chart; `sleepWindows` puts its hour labels 2, 4 or 6 hours apart, whichever leaves room; `.stepper` pills never break inside (the row wraps); kit.css spacing written with the space tokens (no pixel changes) |
@@ -206,11 +211,11 @@ changed files under a version that is not newer.
 
 ### 它是什么，不是什么
 
-dayring 身兼两职：它是一个本地优先看板的公开展示，也是一套外观的源头，也就是这个设计套件。别的应用（比如作者的私人系统）拷走这套文件，页面和功能各管各的。设计只朝一个方向流：从 dayring 流到各个拷贝。功能反过来流，只限通用、能用演示数据展示的那些。
+Health AIO 身兼两职：它是一个本地优先看板的公开展示，也是一套外观的源头，也就是这个设计套件。别的应用（比如作者的私人系统）拷走这套文件，页面和功能各管各的。设计只朝一个方向流：从 Health AIO 流到各个拷贝。功能反过来流，只限通用、能用演示数据展示的那些。
 
 套件**包括**：两种模式的变量、基础样式、外框（页头、菜单、页面栏）、组件、SVG 图表和辅助函数、线条图标。都是普通 CSS 和 ES 模块，不用构建。
 
-套件**不包括**：dayring 各页自己的布局（留在 `dayring/web/css/app.css`）、任何算数据的代码、页面上的文字（应用用 `setFormat()` 把自己的文字交给图表），也没有主题切换：每种模式只有一套样子。
+套件**不包括**：Health AIO 各页自己的布局（留在 `healthaio/web/css/app.css`）、任何算数据的代码、页面上的文字（应用用 `setFormat()` 把自己的文字交给图表），也没有主题切换：每种模式只有一套样子。
 
 展示页（`#kit`，不在菜单里；每一页底部都有链接）摆出每个变量的浅色值和深色值（不管现在是哪种模式）、每个组件的各种状态，并用编造的示例数据把每张图现场画出来，旁边写函数签名和一句说明。本地打开 <http://localhost:8790/#kit>。
 
@@ -219,12 +224,12 @@ dayring 身兼两职：它是一个本地优先看板的公开展示，也是一
 | 文件 | 作用 | 里面是什么 |
 |---|---|---|
 | `css/tokens.css` | 变量 | 所有自定义属性：浅色值写在 `:root` 上，深色值写两遍（跟随系统、月亮按钮各一遍），由测试保证两遍一样 |
-| `css/kit.css` | 组件 | 基础样式、外框和组件；所有颜色、所有间距档都用变量（少数小尺寸还是直接写的数），不提任何 dayring 页面 |
+| `css/kit.css` | 组件 | 基础样式、外框和组件；所有颜色、所有间距档都用变量（少数小尺寸还是直接写的数），不提任何 Health AIO 页面 |
 | `js/charts.js` | 图表 | SVG 图表和辅助函数；不导入任何文件 |
 | `js/icons.js` | 图标 | 线条图标、它们的颜色、状态标签里的小图 |
-| `kit.json` | 清单 | 只在 `export` 的目标目录里，`dayring/web/` 下没有：版本、每个文件的 SHA-256 和大小、变量、组件、图表 |
+| `kit.json` | 清单 | 只在 `export` 的目标目录里，`healthaio/web/` 下没有：版本、每个文件的 SHA-256 和大小、变量、组件、图表 |
 
-四个套件文件的路径都相对 `dayring/web/`。清单按磁盘上的文件现算（`dayring/kit.py`）：`python3 -m dayring kit json` 打出来，服务在 `/api/kit` 返回它，`build-static` 给演示站写成 `api/kit.json`。它读文件里的三条约定：
+四个套件文件的路径都相对 `healthaio/web/`。清单按磁盘上的文件现算（`healthaio/kit.py`）：`python3 -m healthaio kit json` 打出来，服务在 `/api/kit` 返回它，`build-static` 给演示站写成 `api/kit.json`。它读文件里的三条约定：
 
 - tokens.css：每组变量前一行注释 `/* [作用] … */`（type、space、radius、motion、neutral、accent、effect、data、status）；
 - kit.css：每组规则前一行注释 `/* @component <类名> <一句话> */`；
@@ -259,6 +264,8 @@ dayring 身兼两职：它是一个本地优先看板的公开展示，也是一
 | `--c-sleep` | `#4a3aa7` | `#9085e9` | 睡眠：有自己的一圈、一条泳道和一张图 |
 | `--c-exercise` | `#bf3fa6` | `#cb4db2` | 记录下来的训练 |
 | `--c-exercise-ink` | `#a8318f` | `#de78c8` | 写成文字的训练分钟 |
+| `--c-exercise-2` | `#da90cb` | `#86397b` | 一种训练，浅一档：有氧（运动页） |
+| `--c-exercise-3` | `#e7b6dd` | `#5d2d5c` | 一种训练，最浅：步行和其他训练 |
 | `--c-event` | `#161616` | `#eceef5` | 日程块（墨色，不用彩色） |
 | `--c-band` | `rgba(22, 22, 22, .075)` | `rgba(236, 238, 245, .085)` | “你的平常”色带和空轨道 |
 | `--c-grid` | `rgba(22, 22, 22, .07)` | `rgba(236, 238, 245, .07)` | 网格线 |
@@ -304,6 +311,8 @@ dayring 身兼两职：它是一个本地优先看板的公开展示，也是一
 | `ladderChart(ladder, { width, height = 200, final })` | 闹钟画成台阶线（越早越高），醒来的点按时为绿、晚了为红，目标是虚线。 |
 | `coverage(marks, first, { width, height = 16 })` | 从 first 起一天一格："1" = 有数据，"p" = 不全，其他 = 没有。 |
 | `lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true })` | 一种活动一行，列是小时或日子，每行有自己的刻度；× = 没有记录，虚线 = 上限，斜纹 = hatch 部分。 |
+| `mealTimeline(days, { width, gapH = 3, rowH = 24 })` | 一天一行，横轴 05:00 到次日 03:00：从醒来到睡着是醒着的底色（两头的睡眠画成紫色），每一餐是一个点、大小按热量，睡前 gapH 小时画斜纹；落在斜纹里的一餐加一圈，提示里写离睡着多久。状态 none 的一天写“没记”，partial 的一天把餐点画淡。 |
+| `keptDots(days, { width, height = 20 })` | 一串日子画成一排点，每 7 天留一点空：实心 = 做到了，空心圈 = 没做到，短横 = 那天没有记录。 |
 
 | 辅助 | 做什么 |
 |---|---|
@@ -318,26 +327,27 @@ dayring 身兼两职：它是一个本地优先看板的公开展示，也是一
 | `RING_CATS` (js/charts.js) | 环上屏幕时间的分组，从里往外：[键、合并的类别、颜色]。 |
 | `ICON_KEYS` (js/icons.js) | icon() 认得的名字，按画的顺序。 |
 | `icon(key, size = 20)` (js/icons.js) | 画 size 像素大小的 key 图标（不认得的 key 画“没有记录”的虚线钟）。 |
-| `COLOR` (js/icons.js) | 每个图标的颜色：它的数据颜色（ai 用专注蓝：替你做的事），“没有记录”用 ink-3，勾和“几台同时用”的两项用 ink-2；菜单图标跟文字颜色。 |
+| `COLOR` (js/icons.js) | 每个图标的颜色：它的数据颜色（ai 用专注蓝：替你做的事），“没有记录”用 ink-3，勾、饮食（没有自己的数据颜色）和“几台同时用”的两项用 ink-2；菜单图标跟文字颜色。 |
 | `STATE_ICON` (js/icons.js) | 状态标签里的 12 像素小图：good = 勾，bad = 感叹号。 |
 
 ### 用到别的应用里
 
-1. **拷过去。** `python3 -m dayring kit export path/to/app/static/kit` 在那里写出 `css/tokens.css`、`css/kit.css`、`js/charts.js`、`js/icons.js` 和 `kit.json`。如果那里已经有同名、却不是导出写的文件，或者有一个不是导出写的 `kit.json`，它会停下来，不覆盖，除非加 `--force`。
+1. **拷过去。** `python3 -m healthaio kit export path/to/app/static/kit` 在那里写出 `css/tokens.css`、`css/kit.css`、`js/charts.js`、`js/icons.js` 和 `kit.json`。如果那里已经有同名、却不是导出写的文件，或者有一个不是导出写的 `kit.json`，它会停下来，不覆盖，除非加 `--force`。
 2. **先加载套件。** 依次引用 `kit/css/tokens.css`、`kit/css/kit.css`，再引用你自己的样式。图表按 ES 模块导入（`import { draw, spark, setFormat } from "./kit/js/charts.js"`）。普通脚本（没有 `type="module"`）的最外层不能写 `await`：用 `import("/kit/js/charts.js").then((kit) => { kit.setFormat({ … }); … })`，或者在 async 函数里写 `const kit = await import("/kit/js/charts.js")`。网址取决于你的应用把这个目录放在哪：应用把 `static/` 放在 `/` 下，`static/kit` 就在 `/kit/`。
 3. **把你的文字交给图表。** 调用一次 `setFormat({ t, dur, clock, shortDay, measure, toDate, wtype })`，给哪几个都行。`CHART_WORDS` 列出图表会向 `t()` 要的键和英文默认值；你的 `t()` 不认得的键（返回键本身，或者什么都不返回），图表照写英文默认值。
 4. **自己的东西放在自己的文件里，套件文件一个字都不改。** 应用有自己的一套变量名，就在一个小的转接文件里用 `var()` 映射到套件的名字（`--label: var(--ink)`），不要抄数值，这样套件一更新每一页都跟着变。kit.css 会给 `body`、链接和一些通用类名（`.card`、`.chip`、`.tile`、`.grid`、`.row`、`.muted` 等）上样式；如果你的应用已经拿这些名字做别的事，先只加载 tokens.css 和两个脚本，组件一个一个搬。
-5. **dayring 每次更新后检查一遍。** `python3 -m dayring kit check path/to/app/static/kit` 给每个文件标上 *up to date*（最新）、*outdated*（导出后套件改过）、*modified locally*（和导出时记下的哈希不一样，本地改过）或 *missing*（缺失），全部最新时才返回 0。
-6. **把本地的改进搬回 dayring。** 标着“本地改过”的文件里有一处改动，要么值得留下、要么该丢掉。要留就在 dayring 里改（展示页上能看到效果），升 `KIT_VERSION`，再导出。拷贝被本地改过时，`export` 拒绝覆盖，除非加 `--force`。以前导出过、现在套件里已经没有的文件，没动过就删掉；改过的话，`export --force` 把它留在原处，`kit check` 一直列着它，直到它被删掉。
+5. **Health AIO 每次更新后检查一遍。** `python3 -m healthaio kit check path/to/app/static/kit` 给每个文件标上 *up to date*（最新）、*outdated*（导出后套件改过）、*modified locally*（和导出时记下的哈希不一样，本地改过）或 *missing*（缺失），全部最新时才返回 0。
+6. **把本地的改进搬回 Health AIO。** 标着“本地改过”的文件里有一处改动，要么值得留下、要么该丢掉。要留就在 Health AIO 里改（展示页上能看到效果），升 `KIT_VERSION`，再导出。拷贝被本地改过时，`export` 拒绝覆盖，除非加 `--force`。以前导出过、现在套件里已经没有的文件，没动过就删掉；改过的话，`export --force` 把它留在原处，`kit check` 一直列着它，直到它被删掉。
 
 ### 版本
 
-`dayring/kit.py` 里的 `KIT_VERSION` 是语义化版本。四个套件文件里任何一个改了都要升：数值或画法的修正升第三位，新增变量、类、函数或选项升第二位，改名或删除升第一位（用旧名字的应用会坏）。清单里记着版本和每个文件的哈希，所以 `kit check` 分得清一份拷贝是过期了还是被改过。
+`healthaio/kit.py` 里的 `KIT_VERSION` 是语义化版本。四个套件文件里任何一个改了都要升：数值或画法的修正升第三位，新增变量、类、函数或选项升第二位，改名或删除升第一位（用旧名字的应用会坏）。清单里记着版本和每个文件的哈希，所以 `kit check` 分得清一份拷贝是过期了还是被改过。
 
-`dayring/kit.lock.json` 记着当前版本那四个文件的哈希；套件文件改了而 `KIT_VERSION` 没变，`tests/test_kit.py` 就不通过。所以改一处的顺序是：改文件，升 `KIT_VERSION`，在下面的表里加一行（本文件中英两半都加），再跑 `python3 -m dayring kit lock`；版本没有变新时，它拒绝把改过的文件记下来。
+`healthaio/kit.lock.json` 记着当前版本那四个文件的哈希；套件文件改了而 `KIT_VERSION` 没变，`tests/test_kit.py` 就不通过。所以改一处的顺序是：改文件，升 `KIT_VERSION`，在下面的表里加一行（本文件中英两半都加），再跑 `python3 -m healthaio kit lock`；版本没有变新时，它拒绝把改过的文件记下来。
 
 | 版本 | 日期 | 改了什么 |
 |---|---|---|
+| 1.4.0 | 2026-10-13 | 为健康页（运动、饮食、目标）新增：变量 `--c-exercise-2`、`--c-exercise-3`，运动洋红的两档浅色，按深浅区分训练种类（有氧、步行），不加新色相；`mealTimeline`（一天里什么时候吃，睡前几小时画斜纹）和 `keptDots`（目标哪几天做到了）；图标 `food`（用 ink-2：饮食没有自己的数据颜色）、`target` 和 `walk`（菜单的计划和行为）；注释里的名字改成 Health AIO |
 | 1.3.0 | 2026-10-13 | `lanes` 的行可以带 `fmt`（这一行的值用自己的单位写，比如指令条数）；`.legend .key i.hatch` 的斜纹改用 `color`（默认墨色），别的颜色的 hatch 部分也有对得上的图例；新图标 `ai`（专注蓝：替你干活的 AI 代理，AI 干活量页）。AI 工时画成专注蓝斜纹，而不是新加一种数据颜色：现有五种数据色之外，已经找不到跟它们都能通过色盲校验的颜色 |
 | 1.2.0 | 2026-10-13 | 新增 `.side`：900 像素以上是左侧栏，能收成 64 像素的图标条（`html.side-folded`），更窄时是底部标签栏（`.top` 和 `.nav` 留给用顶栏的应用）；有侧栏时 `.subnav` 隐藏（它的几页已经列在侧栏里）；`lanes` 的部分可以带 `{ hatch: true }`（用这部分的颜色画斜纹，图例是 `.legend .key i.hatch`），一行里叠起来的部分不再超出这一行的顶；新图标 `ratio`、`single`（时间页的“几台同时用”）和菜单图标 `sun`、`heart`、`clock`、`battery`、`list`、`database`、`sidebar` |
 | 1.1.0 | 2026-10-13 | 新增 `formatDuration`（`stackedColumns` 和 `lanes` 的 `unitFmt` 默认用它）和 `stackedColumns` 的 `minutes` 选项（分钟按整点的小时标刻度：0 / 2h / 4h，不再是 3h 20m）；`dayRing` 默认用导出的 `RING_CATS`；应用的 `t()` 不认得的词，`setFormat()` 之后照写英文默认值；`stackedColumns` 的上限名字写在坐标轴下面的图例里，不再压在柱子上；`timeChart` 参考线和 `ladderChart` 目标的文字带一圈底色、压在标记上面；`blockColumns`、`stackedColumns` 和 `ladderChart` 相邻标签会撞在一起时均匀地省掉一些，头尾的标签不出图；`sleepWindows` 的整点标签按放得下的空间隔 2、4 或 6 小时；`.stepper` 的胶囊不在中间断行（整排换行）；kit.css 的间距改用间距变量（像素不变） |

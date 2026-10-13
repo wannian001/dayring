@@ -1,0 +1,306 @@
+/* Health AIO's own page rules: layouts and pieces that belong to one page. The shared look (base, shell,
+   components) is the design kit in kit.css, which loads before this file. Colours come only from tokens.css. */
+
+/* ---- today: day ring + agenda ---- */
+.hero { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: var(--s-6); align-items: start; }
+@media (max-width: 860px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+.verdict { display: flex; flex-direction: column; gap: var(--s-2); }
+
+/* ---- today: effects (dot + interval) ---- */
+.effects { display: flex; flex-direction: column; }
+.effect { display: grid; grid-template-columns: minmax(150px, 230px) minmax(0, 1fr) 150px; gap: var(--s-3); align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.effect:first-child { border-top: 0; }
+.effect .what { font-size: var(--t-sm); font-weight: 600; }
+.effect .what span { display: block; font-size: var(--t-xs); color: var(--ink-3); font-weight: 400; }
+.effect .verdict-cell { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.effect .verdict-cell .read { white-space: nowrap; }
+.effect-head { padding: 0 0 6px; border-top: 0; font-size: var(--t-xs); color: var(--ink-3); font-weight: 600; }
+.effect-head .axis { display: flex; justify-content: space-between; padding: 0 8px; }
+.effect-head > span:last-child { text-align: right; }
+.effect-head + .effect { border-top: 0; }
+@media (max-width: 640px) { .effect { grid-template-columns: minmax(0, 1fr) auto; row-gap: 4px; } .effect .ivl { grid-column: 1 / -1; grid-row: 2; } .effect-head > span:first-child, .effect-head > span:last-child { display: none; } .effect-head .axis { grid-column: 1 / -1; } }
+
+/* ---- training in the calendar (today, week) ---- */
+.workout-icon { color: var(--c-exercise); display: inline-flex; vertical-align: -2px; margin-right: 4px; }
+.training-row .when { display: inline-flex; align-items: center; }
+
+/* ---- data and sleep tables ---- */
+table.review tr.problem td { color: var(--off-ink); border-top: 0; padding-top: 0; }
+table.checks th, table.checks td { text-align: center; padding: 7px 4px; }
+table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-right: 10px; }
+.streams { display: flex; flex-direction: column; gap: 14px; }
+.stream-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; font-size: var(--t-sm); }
+
+/* ---- time: top apps ---- */
+.apps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.apps li { display: grid; grid-template-columns: minmax(110px, 40%) minmax(0, 1fr) 64px; gap: 10px; align-items: center; }
+.apps .app { font-size: var(--t-sm); display: flex; gap: 6px; align-items: center; min-width: 0; white-space: nowrap; }
+.apps .app-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.apps .app .chip { height: 18px; padding: 0 6px; font-size: 10.5px; flex: none; }
+.apps .num { text-align: right; white-space: nowrap; }
+
+/* ---- week ---- */
+.days7 { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--s-2); }
+@media (max-width: 1080px) { .days7 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .days7 { grid-template-columns: minmax(0, 1fr); } }
+.daycol { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.daycol.past { opacity: .72; }
+.daycol.is-today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; opacity: 1; }
+.daycol header { display: flex; align-items: center; gap: 8px; }
+.daycol header span:not(.chip) { color: var(--ink-3); font-size: var(--t-xs); }
+.daylist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: var(--t-xs); line-height: 1.4; }
+.daylist .num { font-weight: 650; color: var(--ink-2); }
+.daylist li.due { padding: 6px 8px; border-radius: var(--r-sm); background: var(--surface-2); }
+.daylist li.due.soon { background: var(--watch-soft); }
+.daylist li.due.done { text-decoration: line-through; color: var(--ink-3); }
+.daylist li.workout { color: var(--ink); }
+.day-train { margin: 0; padding-top: 6px; border-top: 1px dashed var(--line-2); color: var(--ink-2); display: flex; align-items: center; gap: 2px; }
+.day-train.missed { color: var(--ink-3); }
+.day-actual { margin: 0; }
+
+/* ---- time: the top (what changed) and the seven day cells ---- */
+.time-hero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-4) var(--s-5); align-items: center; }
+.time-lede .chip.stale { height: auto; padding: 4px 10px; white-space: normal; margin: 8px 6px 0 0; line-height: 1.4; }
+.time-top { --halo: var(--surface-2); width: 96px; height: 96px; border-radius: 24px; background: var(--surface-2); display: grid; place-items: center; }
+/* an activity icon in its colour; a change carries an up / down badge in its tone (green better, red worse) */
+.chg-icon { position: relative; display: inline-grid; place-items: center; line-height: 0; }
+.chg-icon > svg { display: block; }
+.chg-badge { position: absolute; right: -7px; bottom: -7px; padding: 2px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface); color: var(--ink-2); box-shadow: 0 0 0 1.5px var(--line-2); }
+.chg-badge svg { display: block; stroke-width: 2.4; }
+.chg-badge.good { color: var(--good-ink); } .chg-badge.bad { color: var(--off-ink); }
+.time-top .chg-badge { right: -10px; bottom: -10px; padding: 3px; }
+.chg-also { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.chg-also > span:first-child { margin-right: 2px; }
+.days-strip { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.daycell { --halo: var(--surface-2); background: var(--surface-2); border-radius: var(--r-md); padding: 12px 6px 10px; display: flex; flex-direction: column; align-items: center;
+  gap: 6px; text-align: center; min-width: 0; }
+.daycell-date { display: flex; flex-wrap: wrap; justify-content: center; column-gap: 4px; line-height: 1.25; }
+.daycell-date span { white-space: nowrap; }
+.daycell-mark { height: 40px; display: grid; place-items: center; }
+.daycell-what { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; max-width: 100%; }
+.daycell-label { font-size: var(--t-sm); font-weight: 620; line-height: 1.25; }
+.daycell-delta { font-size: var(--t-sm); line-height: 1.25; white-space: nowrap; }
+.daycell-delta.good { color: var(--good-ink); } .daycell-delta.bad { color: var(--off-ink); }
+.daycell.usual .daycell-label { color: var(--ink-3); font-weight: 550; }
+.daycell-foot { margin-top: auto; padding-top: 7px; border-top: 1px solid var(--line); align-self: stretch; display: flex; flex-direction: column;
+  align-items: center; line-height: 1.4; }
+.daycell-foot > span { white-space: nowrap; }
+.daycell-foot .sep { display: none; }
+/* narrower: the days become rows (date · mark · what changed, with screens and exercise under it) */
+@media (max-width: 900px) {
+  .days-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .daycell { display: grid; grid-template-columns: 48px 36px minmax(0, 1fr); grid-template-areas: "date mark what" "date mark foot";
+    align-items: center; text-align: left; padding: 9px 12px; column-gap: 10px; row-gap: 2px; }
+  .daycell-date { grid-area: date; flex-direction: column; align-items: flex-start; }
+  .daycell-mark { grid-area: mark; }
+  .daycell-what { grid-area: what; flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 8px; }
+  .daycell-foot { grid-area: foot; margin: 0; padding: 0; border: 0; flex-direction: row; flex-wrap: wrap; }
+  .daycell-foot > span { white-space: pre; }
+  .daycell-foot .sep { display: inline; }
+}
+@media (max-width: 600px) {
+  .days-strip { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .time-hero { grid-template-columns: minmax(0, 1fr); gap: var(--s-3); }
+  .time-top { width: 64px; height: 64px; border-radius: 16px; }
+  .time-top .chg-icon > svg { width: 38px; height: 38px; }
+  .time-top .chg-badge { right: -8px; bottom: -8px; padding: 2px; }
+  .time-top .chg-badge svg { width: 18px; height: 18px; }
+  .time-lede .lede { font-size: var(--t-lg); }
+}
+
+/* ---- time: the eight daily-average tiles ---- */
+/* eight tiles in full rows: three columns (screens two wide) on desktop, two below 1100px, one on phones */
+.act-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.act-tiles .act-wide { grid-column: span 2; }
+@media (max-width: 1100px) { .act-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .act-tiles .act-wide { grid-column: auto; } }
+@media (max-width: 520px) { .act-tiles { grid-template-columns: minmax(0, 1fr); } }
+/* the four rows of a tile (name, value, bullet, note) are shared across its grid row, so a name that
+   wraps never pushes one value or bullet below its neighbours' */
+.act-tile { display: grid; grid-template-columns: minmax(0, 1fr); grid-row: span 4; grid-template-rows: subgrid; row-gap: 6px;
+  align-content: start; }
+/* the chip sits right of the name. Two narrow columns (521–700px): every chip goes under its name, so a
+   row stays even; one column: a chip that does not fit wraps under the name (nothing to line up with) */
+.act-tile .label { flex-wrap: nowrap; }
+.act-tile .label > .act-name:first-child { flex: 0 1 auto; }  /* the name keeps its own width, unlike a kit tile's */
+@media (min-width: 521px) and (max-width: 700px) { .act-tile .label { flex-direction: column; align-items: flex-start; gap: 4px; } }
+@media (max-width: 520px) { .act-tile .label { flex-wrap: wrap; row-gap: 4px; } }
+.act-tile .label .chip { flex: none; }
+.act-tile .act-value .catbar { margin-top: 8px; }
+.act-tile .note .piece { display: inline-block; max-width: 100%; }
+.act-name { display: inline-flex; align-items: flex-start; gap: 6px; font-weight: 650; min-width: 0; }
+.act-name svg { flex: none; }
+.act-name span { color: var(--ink-2); min-width: 0; }
+
+/* ---- drain ---- */
+/* one set of column tracks for the header and all seven rows (subgrid), so the strips and the
+   descriptions line up down the card whatever chips a row carries; the value column grows to 260px and
+   then wraps its chips */
+.drain-rows { display: grid; grid-template-columns: minmax(180px, 1.25fr) minmax(140px, 1.4fr) fit-content(260px) 150px; column-gap: var(--s-4); }
+.drain-head, .drain-row { grid-column: 1 / -1; display: grid; gap: var(--s-4);
+  grid-template-columns: minmax(180px, 1.25fr) minmax(140px, 1.4fr) fit-content(260px) 150px; grid-template-columns: subgrid; align-items: center; }
+.drain-head { font-size: var(--t-xs); color: var(--ink-3); font-weight: 600; padding-bottom: 4px; }
+.drain-row { padding: 12px 0; border-top: 1px solid var(--line); }
+.drain-row .what b { font-size: var(--t-sm); }
+.drain-row .what span { display: block; font-size: var(--t-xs); color: var(--ink-3); margin-top: 2px; }
+.drain-value { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; min-width: 0; }
+.drain-value b { font-size: var(--t-lg); font-weight: 680; }
+.drain-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.drain-strip svg, .drain-weeks svg { display: block; width: 100%; }
+.drain-weeks-label, .drain-weeks-key { display: none; }
+/* narrower: the strip and the weekly line get rows of their own, the weekly line with its own label */
+@media (max-width: 900px) {
+  .drain-rows { display: block; }
+  .drain-head { display: none; }
+  .drain-row { grid-template-columns: minmax(0, 1fr) fit-content(300px); row-gap: 8px; column-gap: var(--s-3); }
+  .drain-row .drain-strip { grid-column: 1 / -1; grid-row: 2; }
+  .drain-row .drain-weeks-cell { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-3); align-items: center; }
+  .drain-weeks-label { display: block; white-space: nowrap; }
+  .drain-weeks-key { display: inline-flex; }
+}
+/* phones: everything in one column, the value under the name (left-aligned), so no column is squeezed */
+@media (max-width: 600px) {
+  .drain-row { grid-template-columns: minmax(0, 1fr); }
+  .drain-row .drain-value { grid-row: 2; flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 10px; row-gap: 4px; text-align: left; }
+  .drain-row .drain-chips { justify-content: flex-start; }
+  .drain-row .drain-strip { grid-row: 3; }
+  .drain-row .drain-weeks-cell { grid-row: 4; }
+}
+
+/* ---- design kit gallery (#kit) ---- */
+.kit-pals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); }
+@media (max-width: 900px) { .kit-pals { grid-template-columns: minmax(0, 1fr); } }
+/* each palette sets its own mode's colours inline, so both show whatever mode the page is in */
+.kit-pal { border: 1px solid; border-radius: var(--r-md); padding: var(--s-4); min-width: 0; }
+.kit-pal h3 { margin: 0; font-size: var(--t-sm); font-weight: 650; }
+.kit-pal h4 { margin: var(--s-4) 0 var(--s-2); font-size: var(--t-xs); font-weight: 650; letter-spacing: .06em; text-transform: uppercase; }
+.kit-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); gap: var(--s-2) var(--s-3); }
+.kit-sw { display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: var(--s-2); align-items: center; min-width: 0; font-size: var(--t-xs); line-height: 1.3; }
+.kit-sw i { grid-row: span 2; width: 24px; height: 24px; border-radius: 6px; }
+.kit-sw code, .kit-sw span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kit-sw span { font-family: var(--mono); font-size: 11px; }
+.kit-chipsw { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: -3px; margin-right: 6px; box-shadow: inset 0 0 0 1px var(--line); }
+.kit-status td { white-space: nowrap; }
+/* phones: the hex values are in the palettes above, the hashes in kit.json */
+@media (max-width: 640px) { .kit-data th:nth-child(n+4), .kit-data td:nth-child(n+4), .kit-files th:nth-child(4), .kit-files td:nth-child(4) { display: none; } }
+.kit-data th code { white-space: nowrap; }  /* a token name is copied whole: never "--c-exercise-" over "ink" */
+.kit-types { display: flex; flex-direction: column; }
+.kit-type { display: flex; flex-direction: column; gap: 2px; padding: 10px 0; border-top: 1px solid var(--line); min-width: 0; }
+.kit-type:first-child { border-top: 0; padding-top: 0; }
+.kit-type-sample { line-height: 1.2; font-weight: 600; overflow-wrap: anywhere; }
+.kit-spaces { display: flex; flex-direction: column; gap: 6px; }
+.kit-space { display: grid; grid-template-columns: 44px auto minmax(0, 1fr); gap: 10px; align-items: center; }
+.kit-space i { display: block; height: 10px; background: var(--accent); border-radius: 2px; }
+.kit-radii { display: flex; flex-wrap: wrap; gap: var(--s-4); margin-top: var(--s-5); }
+.kit-radius { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-1); }
+.kit-radius i { display: block; width: 64px; height: 44px; background: var(--surface-2); border: 1px solid var(--line-2); margin-bottom: 2px; }
+/* a cell is 300px at least, or the whole row when the card is narrower (a 320px phone) */
+.kit-cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); grid-auto-flow: dense; gap: var(--s-3); }
+.kit-cell { border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-3) var(--s-4) var(--s-4); min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.kit-cell header { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.kit-wide { grid-column: span 2; }
+.kit-full { grid-column: 1 / -1; }
+@media (max-width: 760px) { .kit-wide { grid-column: auto; } }
+.kit-name { font-size: var(--t-sm); font-weight: 650; color: var(--ink); }
+.kit-sig { margin: 0; color: var(--ink-2); overflow-wrap: anywhere; }
+.kit-doc { margin: 0; color: var(--ink-2); }
+.kit-sample { margin-top: var(--s-2); min-width: 0; }
+/* a row label takes at most 40% of the cell, so the chart beside it keeps room; on phones each label sits over its chart */
+.kit-rows { display: grid; grid-template-columns: fit-content(40%) minmax(0, 1fr); gap: var(--s-2) var(--s-3); align-items: center; }
+.kit-axis { display: flex; justify-content: space-between; gap: var(--s-2); }
+.kit-axis span { white-space: nowrap; }
+@media (max-width: 480px) {
+  .kit-rows { grid-template-columns: minmax(0, 1fr); row-gap: 2px; }
+  .kit-rows > span:empty { display: none; }
+  .kit-rows > .kit-rowlabel:not(:first-child) { margin-top: var(--s-2); }
+}
+/* the ring with its legend beside it once the cell is wide enough */
+@media (min-width: 760px) { .kit-ringrow { flex-direction: row; justify-content: center; gap: var(--s-6); } .kit-ringrow .legend { flex-direction: column; gap: var(--s-2); } }
+.kit-narrow { max-width: 360px; }
+.kit-grid > div { background: var(--c-band); border-radius: var(--r-sm); padding: 6px 10px; font: 400 var(--t-xs)/1.4 var(--mono); color: var(--ink-2); }
+.kit-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--s-3); }
+@media (max-width: 640px) { .kit-icons { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); } }  /* two a row on a phone */
+.kit-icon { margin: 0; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--r-md); }
+.kit-icon figcaption { flex-basis: 100%; color: var(--ink-2); }
+/* helpers: a signature over its line on a phone, so neither is squeezed into a column */
+.kit-helpers th code { overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .kit-helpers tr { display: block; padding: var(--s-2) 0; border-top: 1px solid var(--line); }
+  .kit-helpers th, .kit-helpers td { display: block; padding: 0; border-top: 0; }
+  .kit-helpers td { margin-top: var(--s-1); }
+}
+.kit-cmd { white-space: pre-wrap; overflow-wrap: anywhere; }  /* the commands wrap on a phone instead of hiding their end */
+/* effects, motion and fonts: each shadow on both modes' own surfaces, the easing on hover or focus, each stack in its face */
+.kit-fxs { display: flex; flex-direction: column; gap: var(--s-4); }
+.kit-fx { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.kit-fx-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); }
+.kit-fx-tile { margin: 0; border-radius: var(--r-md); padding: var(--s-4) var(--s-3) var(--s-2); display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; }
+.kit-fx-tile i { display: block; height: 28px; border-radius: var(--r-sm); }
+.kit-fx-tile figcaption { font-size: 11px; line-height: 1.35; overflow-wrap: anywhere; }
+.kit-ease { position: relative; height: 28px; border-radius: var(--r-pill); background: var(--c-band); display: flex; align-items: center; justify-content: flex-end; padding: 0 var(--s-3) 0 32px; cursor: default; }
+.kit-ease span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kit-ease i { position: absolute; left: var(--s-1); top: var(--s-1); width: 20px; height: 20px; border-radius: 50%; background: var(--accent); transition: left .7s var(--ease); }
+.kit-ease:hover i, .kit-ease:focus-visible i { left: calc(100% - 24px); }
+.kit-ease:hover span, .kit-ease:focus-visible span { visibility: hidden; }
+.kit-font { gap: var(--s-1); }
+.kit-font-sample { font-size: var(--t-lg); font-weight: 600; line-height: 1.3; }
+.kit-font > .xs { overflow-wrap: anywhere; }
+.kit-steps { margin: var(--s-3) 0 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: var(--s-1); color: var(--ink-2); }
+
+/* ---- time: devices at once ---- */
+/* three tiles in one row down to phone width (with or without the sidebar), then one per row: never two and a gap */
+.act-tiles.stack-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 660px) { .act-tiles.stack-tiles { grid-template-columns: minmax(0, 1fr); } }
+/* a narrow tile (the sidebar takes part of the width) puts the chip under the name instead of squeezing the name */
+.act-tiles.stack-tiles .act-tile .label { flex-direction: row; flex-wrap: wrap; align-items: flex-start; row-gap: 4px; }
+.stack-hours-title { margin: var(--s-5) 0 var(--s-2); flex-wrap: wrap; row-gap: 6px; }
+/* the gallery's sample of the sidebar: a framed column as wide as the real one */
+.kit-side { max-width: 232px; padding: var(--s-4) var(--s-3); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+
+/* ---- ai: five tiles: one row when there is room, else two columns with the last one wide, one on phones ---- */
+.act-tiles.ai-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.act-tiles.ai-tiles .ai-tile:last-child { grid-column: span 2; }
+@media (min-width: 1280px) { .act-tiles.ai-tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); } .act-tiles.ai-tiles .ai-tile:last-child { grid-column: auto; } }
+@media (max-width: 660px) { .act-tiles.ai-tiles { grid-template-columns: minmax(0, 1fr); } .act-tiles.ai-tiles .ai-tile:last-child { grid-column: auto; } }
+.act-tiles.ai-tiles .act-tile .label { flex-direction: row; flex-wrap: wrap; align-items: flex-start; row-gap: 4px; }
+
+/* ---- today: what to adjust (one card per kind, side by side; stacked on a phone) ---- */
+.todo { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--s-3); }
+.todo-item { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: var(--s-3); padding: var(--s-4); border-radius: var(--r-md); background: var(--surface-2); }
+.todo-icon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.todo-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.todo-body b { font-size: var(--t-md); line-height: 1.35; }
+.todo-body .small.muted { line-height: 1.45; }
+.todo-body a { margin-top: 2px; }
+
+/* ---- food: the two weekly rates side by side ---- */
+.food-balance { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); margin-bottom: var(--s-3); }
+.food-balance > div { display: flex; flex-direction: column; gap: 2px; padding: var(--s-3); border-radius: var(--r-md); background: var(--surface-2); }
+.food-balance b { font-size: var(--t-xl); line-height: 1.15; }
+
+/* ---- goals: one row per goal (name, 28 dots or weekly bars, the count) ---- */
+.goal-rows { display: flex; flex-direction: column; }
+.goal-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 12px 0; border-top: 1px solid var(--line); }
+.goal-row:first-child { border-top: 0; padding-top: 2px; }
+.goal-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--t-sm); }
+.goal-name .chip { height: 20px; font-size: 11px; padding: 0 7px; }
+.goal-unset .goal-name { flex-direction: column; align-items: flex-start; gap: 2px; color: var(--ink-3); }
+.goal-unset .goal-name b { font-weight: 550; }
+.goal-dots { max-width: 360px; }
+.goal-count { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: var(--t-sm); }
+.goal-weeks { display: flex; flex-direction: column; gap: 6px; }
+.goal-week { display: grid; grid-template-columns: 56px minmax(0, 1fr) 74px 24px; gap: 10px; align-items: center; }
+.goal-week .num { text-align: right; white-space: nowrap; }
+.goal-status { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* ---- exercise: the week as seven day cells ---- */
+.ex-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--s-2); }
+@media (max-width: 720px) { .ex-days { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ex-day { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: var(--r-md); background: var(--surface-2); min-width: 0; }
+.ex-day.is-today { box-shadow: inset 0 0 0 1px var(--accent); }
+.ex-day.future { background: none; box-shadow: inset 0 0 0 1px var(--line); }
+.ex-day b { font-size: var(--t-lg); }
+.ex-bar { display: flex; margin: 0; }
+.ex-bar span { flex: none; border-radius: 0; }
+.ex-note { color: var(--ink-2); line-height: 1.35; }
+.ex-day.future .ex-note { color: var(--ink-3); }

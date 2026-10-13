@@ -6,11 +6,11 @@ import unittest
 from datetime import date, datetime
 from pathlib import Path
 
-from dayring.config import Config
-from dayring.context import Context
-from dayring.importers import apple_health
-from dayring.modules import time as time_page
-from dayring.store import Store, write_table
+from healthaio.config import Config
+from healthaio.context import Context
+from healthaio.importers import apple_health
+from healthaio.modules import time as time_page
+from healthaio.store import Store, write_table
 
 TZ = "Australia/Melbourne"
 HEAD = '<?xml version="1.0" encoding="UTF-8"?>\n<HealthData locale="en_AU">\n <ExportDate value="{export}"/>\n'
@@ -28,7 +28,7 @@ def event(kind, when):
 
 class Case(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp(prefix="dayring-ahw-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="healthaio-ahw-"))
         self.cfg = Config(root=self.tmp, data_dir=self.tmp / "data", timezone=TZ)
         self.cfg.data_dir.mkdir()
 

@@ -9,9 +9,9 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
-from dayring.config import Config
-from dayring.importers import macos_screentime as st
-from dayring.store import Store
+from healthaio.config import Config
+from healthaio.importers import macos_screentime as st
+from healthaio.store import Store
 
 TZ = "Australia/Melbourne"
 

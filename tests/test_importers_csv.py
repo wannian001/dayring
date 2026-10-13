@@ -7,9 +7,9 @@ import unittest
 from datetime import date
 from pathlib import Path
 
-from dayring.config import Config
-from dayring.importers import cli, csv_map
-from dayring.store import Store
+from healthaio.config import Config
+from healthaio.importers import cli, csv_map
+from healthaio.store import Store
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -79,7 +79,7 @@ class CliTest(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
         self.cfg = Config(root=self.tmp, data_dir=self.tmp / "data", timezone="Australia/Melbourne")
-        parser = argparse.ArgumentParser(prog="dayring")
+        parser = argparse.ArgumentParser(prog="healthaio")
         cli.add_parsers(parser.add_subparsers(dest="command"))
         self.parser = parser
 

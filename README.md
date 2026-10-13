@@ -1,143 +1,166 @@
 <div align="center">
 
-# dayring
+# Proactive Health AIO · 主动健康管理 AIO
 
-A local-first dashboard for your day: sleep, recovery, where the time goes and deadlines, each compared with your own normal.<br>
-一个本地优先的个人看板：睡眠、恢复、时间去向和截止日期，每一项都和你自己的平常比。
+Proactive health management, all in one, on your own computer: sleep, exercise, food, weight, screens and your plans
+in one place, each compared with your own normal, and every morning, what to adjust today and why.<br>
+一站式的主动健康管理，跑在你自己的电脑上：睡眠、运动、饮食、体重、屏幕和计划放在一处，每一项都和你自己的平常比；每天早上告诉你今天该调整什么、为什么。
 
-**[Live demo · 在线演示](https://wannian001.github.io/dayring/)** (made-up data · 虚构数据) &nbsp;·&nbsp; [English](#english) &nbsp;·&nbsp; [中文](#中文)
+**[Live demo · 在线演示](https://wannian001.github.io/proactive-health-aio/)** (made-up data · 虚构数据) &nbsp;·&nbsp; [English](#english) &nbsp;·&nbsp; [中文](#中文)
 
 </div>
 
 ## English
 
-![Today page, dark mode](docs/images/today-dark.png)
+![Today page, dark mode: the day ring, recovery, and what to adjust today](docs/images/today-dark.png)
 
-The ring at the top is one day on a 24-hour clock. The outer band is last night's sleep, the middle band is
-today's calendar with the day's workouts in their own colour, and the inner bars are screen time for each hour,
-coloured by what it was spent on. Everything below it answers one question: compared with my own last four
-weeks, how am I doing today?
+### Why it exists
 
-### What it shows
-
-| Page | Question it answers |
+| | |
 |---|---|
-| **Today** | Recovered as usual? (sleep, HRV and resting heart rate against the middle half of your previous 28 days) What is on today, and when should I be asleep tonight? What went on screens yesterday? What has tended to help the next day? |
-| **Week** | Seven days of classes, deadlines and training, and how heavy the coming weeks are by share of grade. |
-| **Body** · Weight | Weight as a 7-day average inside the corridor your plan allows, the weekly rate, and the long view. |
-| **Body** · Sleep | 21 nights on one axis, last week against the week before, and an optional wake-time plan that moves the alarm earlier one step after each on-time morning. |
-| **Time** | Where did the time go, and what changed? Sleep, workouts, calendar blocks and screens (phone, tablet and laptop counted once when they overlap), each measured from its own record and compared with your normal (a day with the middle half of the 28 days before it, the 7 days with your usual 7-day averages). The top names the biggest change, counted only when it is clearly outside your normal (say, more entertainment & social), not the biggest activity; each day gets an icon for its own change, or a check when it was a usual day, plus its screen and exercise minutes. Time no record covers is shown as not recorded. By hour, by app, over 30 days. **Devices at once** counts every device on its own instead: device time, screens at once (device time over clock time; 1.3× means using 1.3 screens at a time on average), the longest stretch on one thing, and each device by hour. An AI agent left working on the laptop while you are on your phone is not counted as you. Both can be named as what changed. |
-| **Time** · AI work | How much did AI agents work for you, on how many instructions, next to your own focused work? Claude Code and Codex logs on this computer (times and counts only, never what was said): AI work a day, instructions, AI work per instruction and AI work over your own focus, each against your normal; AI and your day by the hour; and what came out, 7 days at a time (deadlines you marked done, and the focus and AI work each took). Usage is input, not output, so the AI numbers are never coloured better or worse. |
-| **Drain** | What has been quietly wearing you down over the last 7 days? Seven signals (resting heart rate, HRV, the time you fall asleep, sleep-timing spread, screens in the hour before sleep, entertainment & social, app switching), each against your normal and, where you set one, your plan, plus whether short nights and hard training stacked up. No total score. |
-| **Review** | One week of facts next to the four weeks before it. No scores, no judging. |
-| **Data** | What arrived each day for 90 days, which files have unreadable rows, how to import more. |
+| **Today** | Your health data is already being collected, in pieces: the watch has sleep, HRV, resting heart rate and workouts; a food app has your meals; Screen Time has your phone; the calendar has the week's load. |
+| **The problem** | Each app answers its own question, against a population norm or its own score, and only when you go and look. Nothing puts "slept 6 hours, ate late three nights running, strength training planned for today" side by side and says what to change today. So most people use health data *reactively*: they look after they already feel bad. |
+| **What makes it hard** | The signals have different units and different strength of evidence. Logs have gaps (a day you did not log food is not a day you ate nothing). Associations in one person's data are not causes. And this is the most private data you have. |
+| **What people use now** | Wearable apps (Oura, WHOOP, Garmin Connect) turn their own device's data into a recovery score. Food loggers (MyFitnessPal, Cronometer) cover food. Screen Time covers screens. Apple Health stores almost everything but explains little. Cross-app trackers (Exist.io, Bearable) look for correlations between apps. |
+| **What that costs you** | Several apps and often several subscriptions; your history in several clouds; scores whose formula you cannot check; and you still do the joining-up yourself. |
+| **What this does instead** | One local app reads the exports you already have, compares every signal with *your own* last 28 days (not a population), keeps every goal in one file, and each morning names at most three things to adjust (one each for training, sleep and food) with the numbers behind each. Every rule is written down; nothing leaves the computer. |
+| **Trade-offs, on purpose** | No live sync: you import an Apple Health export (an iPhone companion is future work). Food needs a logging app that writes to Apple Health, or a CSV. The advice is a short list of fixed, explainable rules, not a model; it is about habits, not medical advice. A missing number stays missing, so a sparse log gives fewer answers, not made-up ones. |
+
+### The loop it runs
+
+**Measure** (import what your devices already record) → **compare** (each signal against your own normal and your plan) → **adjust** (today's three things) → **keep track** (goals, kept on how many days) → **review** (the week next to the four before it).
+
+| Menu | Page | Question it answers |
+|---|---|---|
+| **Today** | | Recovered as usual? (sleep, HRV and resting heart rate against the middle half of your previous 28 days) **What should I adjust today, and why?** What is on today, and when should I be asleep tonight? What went on screens yesterday? What has tended to help the next day (including an early dinner)? |
+| **Body** | Sleep | 21 nights on one axis, last week against the week before, and an optional wake-time plan that moves the alarm earlier one step after each on-time morning. |
+| | Exercise | This week against the weekly goal (your plan, or the WHO guideline of 150 active minutes and 2 strength days, and it says which), day by day with the training planned for the days to come; the last 7 days against your normal; training load against recovery; 12 weeks by kind (strength, cardio, walking); how HRV and resting heart rate tend to answer each kind the next morning. |
+| | Food | The last 7 logged days against your normal and your plan: energy, protein (per kg of your weight), fibre, and the hours from the last meal to falling asleep; 14 days of meals by time of day with the hours before sleep striped; the food log set against the scale (the weekly change the log implies against the one the scale shows); what an early dinner has gone with the next morning. |
+| | Weight | Weight as a 7-day average inside the corridor your plan allows, the weekly rate, and the long view. |
+| **Behaviour** | Where it went | Where did the time go, and what changed? Sleep, workouts, calendar and screens (phone, tablet and laptop counted once when they overlap), each against your normal; the biggest change clearly outside your normal is named, not the biggest activity. **Devices at once** counts every device on its own: screens at once, the longest stretch on one thing, each device by the hour. |
+| | AI work | How much AI agents worked for you, on how many instructions, next to your own focused work (Claude Code and Codex logs on this computer: times and counts only, never what was said). Usage is input, not output, so it is never coloured better or worse. |
+| | Drain | What has been quietly wearing you down over 7 days? Seven signals (resting heart rate, HRV, the time you fall asleep, sleep-timing spread, screens before sleep, entertainment & social, app switching), each against your normal and your plan, plus whether short nights and hard training stacked up. No total score. |
+| **Plan** | Goals | Every plan in one place: sleep, exercise, food, weight, screens, each with the last 28 days as kept / not kept / no record, counted as "n of the days with a record" (never a streak, never a score). A plan you have not set is listed with the line that sets it. |
+| | Schedule | Seven days of classes, deadlines and training, and how heavy the coming weeks are by share of grade. |
+| **Review** | | One week of facts next to the four weeks before it, food and activity included. No scores, no judging. |
+| **Data** | | What arrived each day for 90 days (sleep, HRV, steps, weight, screens, food log, …), which files have unreadable rows, how to import more. |
 
 <p>
-  <img src="docs/images/week.png" width="49%" alt="Week page">
-  <img src="docs/images/time.png" width="49%" alt="Time page">
+  <img src="docs/images/exercise.png" width="49%" alt="Exercise page, light mode">
+  <img src="docs/images/food.png" width="49%" alt="Food page, light mode">
 </p>
 <p>
-  <img src="docs/images/today-zh.png" width="49%" alt="Today page in Chinese, light mode">
-  <img src="docs/images/body.png" width="49%" alt="Body page, Weight tab, light mode">
+  <img src="docs/images/goals.png" width="49%" alt="Goals page, light mode">
+  <img src="docs/images/food-zh.png" width="49%" alt="Food page in Chinese, dark mode">
 </p>
 <p>
+  <img src="docs/images/time.png" width="49%" alt="Where the time went, light mode">
   <img src="docs/images/drain.png" width="49%" alt="Drain page, light mode">
-  <img src="docs/images/drain-zh.png" width="49%" alt="Drain page in Chinese, dark mode">
-</p>
-<p>
-  <img src="docs/images/ai.png" width="49%" alt="AI work page, light mode">
-  <img src="docs/images/ai-zh.png" width="49%" alt="AI work page in Chinese, dark mode">
 </p>
 
-English and Chinese, light and dark (it follows your system), phone and desktop. On a computer the menu is a sidebar on the left that folds to a column of icons; on a phone it is a tab bar at the bottom.
+English and Chinese, light and dark (it follows your system), phone and desktop. On a computer the menu is a sidebar
+on the left that folds to a column of icons; on a phone it is a tab bar at the bottom.
 
 ### How it decides what to say
 
-- **You against you.** "Normal" is the 25th–75th percentile of your own previous 28 days, never a population
-  norm. Two of three recovery signals worse than normal reads as "below your normal".
-- **Missing stays missing.** An empty cell is unknown, not zero. A day that was not over when the data synced is
-  shown but not compared. When a stream stops, every page says how old its numbers are. Waking time that no
-  record covers is shown as not recorded, not shared out among the rest.
-- **Associations, not causes.** "What has tended to help" compares the days after doing something with the days
-  after not doing it, with 95% intervals and a Benjamini–Hochberg correction across the list. Only results that
-  survive are coloured; the page says why you might train more on days you already feel good.
+- **You against you.** "Normal" is the 25th–75th percentile of your own previous 28 days, never a population norm.
+  Two of three recovery signals worse than normal reads as "below your normal". The one place a population number
+  appears is the WHO activity guideline, used only when you have set no exercise plan, and labelled as such.
+- **Today's adjustments are rules you can read.** Recovery below normal with training planned → take it easy;
+  a short night → tonight's time to be asleep by; late last meals on two or more of the last 7 logged nights → when to
+  finish dinner; and so on (the full list is in `healthaio/modules/actions.py` and on the page). At most one each for
+  training, sleep and food; nothing off means "a steady day", never invented advice.
+- **Missing stays missing.** An empty cell is unknown, not zero. A day with fewer than two main meals logged is shown
+  but not averaged; a day not logged at all is not a day of eating nothing. A day that was not over when the data
+  synced is shown but not compared. When a stream stops, every page says how old its numbers are.
+- **Associations, not causes.** "What has tended to help" compares the days after doing something with the days after
+  not doing it, with 95% intervals and a Benjamini–Hochberg correction across the list. Only results that survive are
+  coloured; the page says why you might train more on days you already feel good.
 - **Colour means something.** Data colours follow the thing measured (focus is always blue, entertainment always
-  orange, exercise always magenta) and were checked for colour-vision deficiency. Green and red are kept for
-  "better" and "worse" and always come with a word.
+  orange, exercise always magenta, with lighter steps of it for kinds of training) and were checked for colour-vision
+  deficiency. Green and red are kept for "better" and "worse" and always come with a word.
 
 ### Design kit
 
 Every page is built from one design kit: the colour tokens of both modes, the components, the SVG charts and the
 icons, in four files (`css/tokens.css`, `css/kit.css`, `js/charts.js`, `js/icons.js`). The
-**[gallery](https://wannian001.github.io/dayring/#kit)** shows all of them, each chart drawn from sample data
+**[gallery](https://wannian001.github.io/proactive-health-aio/#kit)** shows all of them, each chart drawn from sample data
 (it is not in the menu; every page links to it from its footer). Another app can take the kit with
-`python3 -m dayring kit export DIR` and later see whether its copy is up to date, outdated or changed locally with
-`python3 -m dayring kit check DIR`. How to use it, the colour rules and the versioning: [docs/DESIGN_KIT.md](docs/DESIGN_KIT.md).
+`python3 -m healthaio kit export DIR` and later see whether its copy is up to date, outdated or changed locally with
+`python3 -m healthaio kit check DIR`. How to use it, the colour rules and the versioning: [docs/DESIGN_KIT.md](docs/DESIGN_KIT.md).
 
 ### Quick start
 
 Needs Python 3.9 or newer. No other packages.
 
 ```bash
-git clone https://github.com/wannian001/dayring.git
-cd dayring
-python3 -m dayring serve --demo
+git clone https://github.com/wannian001/proactive-health-aio.git
+cd proactive-health-aio
+python3 -m healthaio serve --demo
 ```
 
 Open <http://localhost:8790>. With your own data:
 
 ```bash
-cp examples/dayring.example.toml dayring.toml     # timezone, plans, devices
-python3 -m dayring import apple-health ~/Downloads/export.zip
-python3 -m dayring import ics ~/Downloads/timetable.ics --kind class
-python3 -m dayring import macos-screentime        # macOS only, experimental
-python3 -m dayring import ai-logs                 # Claude Code and Codex: times and counts only
-python3 -m dayring check                           # which rows could not be read
-python3 -m dayring serve
+cp examples/healthaio.example.toml healthaio.toml     # timezone, plans (sleep, exercise, food, weight, screens), devices
+python3 -m healthaio import apple-health ~/Downloads/export.zip
+python3 -m healthaio import ics ~/Downloads/timetable.ics --kind class
+python3 -m healthaio import macos-screentime        # macOS only, experimental
+python3 -m healthaio import ai-logs                 # Claude Code and Codex: times and counts only
+python3 -m healthaio check                           # which rows could not be read
+python3 -m healthaio serve
 ```
 
-The Apple Health export also holds your workouts with their start and end times (Apple Fitness and the Workout
-app save them there), so the Time page can place exercise in the day next to sleep, classes and screens.
-
-Deadlines, self-reports, workouts from another app and anything else are plain CSV files you can edit by hand or
-map from another export (`python3 -m dayring import csv deadlines my-tracker.csv --map "Due=due,Task=title,Course=group"`).
+One Apple Health export brings in most of it: sleep, HRV, resting heart rate, steps, the Activity ring, energy burned,
+weight, every workout with its times and average heart rate, and the meals that food-logging apps (MyFitnessPal,
+Lose It!, Cronometer and others) write into Health. Deadlines, self-reports and anything else are plain CSV files you
+can edit by hand or map from another export
+(`python3 -m healthaio import csv meals my-food-log.csv --map "Date=time,Meal=meal,Calories=kcal,Protein=protein_g"`).
 
 ### Your data stays on your computer
 
 - Data lives in plain CSV files in a folder you choose ([format](docs/DATA_FORMAT.md)). Importers write them
   ([how each importer works](docs/IMPORTERS.md)); the dashboard only reads them.
 - The server listens on `127.0.0.1`, has no write endpoints, and sends nothing anywhere.
-- `build-static` (used for the demo site) refuses to run on your own data unless you pass a flag that says you
-  mean to publish it.
+- `build-static` (used for the demo site) refuses to run on your own data unless you pass a flag that says you mean to
+  publish it.
 
 ### How it is built
 
 ```
 importers ─▶ data/*.csv ─▶ store (checked against schema.py) ─▶ page modules ─▶ JSON ─▶ web app
- Apple Health, .ics,          one table per file,                today, week, body,     vanilla JS,
- Screen Time, any CSV         bad rows reported, not fatal       sleep, time, ...       hand-drawn SVG
+ Apple Health, .ics,          one table per file,                today, exercise, food,   vanilla JS,
+ Screen Time, any CSV         bad rows reported, not fatal       goals, sleep, time, ...  hand-drawn SVG
 ```
 
-- `dayring/schema.py` is the single definition of every table; `docs/DATA_FORMAT.md` is generated from it.
-- Each page module returns numbers, units, bands and states, never sentences. The browser writes the words, which
-  is why one payload reads in both languages (`dayring/web/js/i18n.js`).
-- `python3 -m dayring page today` prints a page's JSON, so a script or an AI assistant can read the same numbers
-  the page shows.
-- The demo site is the same app with pre-rendered JSON (`python3 -m dayring build-static --demo`), served by
-  GitHub Pages.
+- `healthaio/schema.py` is the single definition of every table; `docs/DATA_FORMAT.md` is generated from it.
+- Each page module returns numbers, units, bands and states, never sentences. The browser writes the words, which is
+  why one payload reads in both languages (`healthaio/web/js/i18n.js`).
+- `python3 -m healthaio page today` prints a page's JSON (today's adjustments included), so a script or an AI
+  assistant can read the same numbers the page shows.
+- The demo site is the same app with pre-rendered JSON (`python3 -m healthaio build-static --demo`), served by GitHub
+  Pages. The demo person, Sam, is made up: a graduate student with a night-owl sleep, a weight plan, a food log with
+  late snacks before deadlines, and the screen habits of most students.
 - Design notes: [docs/DESIGN.md](docs/DESIGN.md); the shared look is the design kit ([docs/DESIGN_KIT.md](docs/DESIGN_KIT.md), gallery at `#kit`).
 
 ### Development
 
 ```bash
 python3 -m unittest discover -s tests      # runs on Python 3.9–3.13
-python3 -m dayring page today --demo --today 2026-10-12
+python3 -m healthaio page food --demo --today 2026-10-12
 ```
+
+### Not medical advice
+
+This is a tool for noticing patterns in your own habits. It does not diagnose anything, and its suggestions are
+everyday habits (sleep earlier, eat earlier, train lighter). For anything about your health, talk to a professional.
 
 ### Where it comes from
 
-dayring is the public showcase of a personal system I use every day. My own version has more features and runs on
-my real watch, phone and laptop data; it takes its look from the design kit here. This repository contains none of that data.
+This project started as *dayring*, the public showcase of a personal system I use every day; the day ring at the top
+of Today is where the old name came from, and links to the old repository still redirect here. My own version has
+more features and runs on my real watch, phone and laptop data; it takes its look from the design kit here. This
+repository contains none of that data.
 
 ### License
 
@@ -147,77 +170,90 @@ my real watch, phone and laptop data; it takes its look from the design kit here
 
 ## 中文
 
-![今天页，浅色](docs/images/today-zh.png)
+![今天页，浅色：一天的环、恢复和今天该调整的](docs/images/today-zh.png)
 
-最上面的环是 24 小时的一天：外圈是昨晚的睡眠，中圈是今天的日程（当天的训练用它自己的颜色画在上面），内圈是每小时的屏幕时间，按用途上色。
-下面所有内容都在回答一个问题：和我自己最近四周比，今天怎么样？
+### 为什么做这个
 
-### 每一页回答什么
-
-| 页面 | 回答的问题 |
+| | |
 |---|---|
-| **今天** | 恢复得怎么样（睡眠、HRV、静息心率，各自和你之前 28 天的中间 50% 比）？今天要做什么，今晚几点放手机、几点睡？昨天屏幕时间花在哪了？做什么第二天会更好？ |
-| **本周** | 七天的课、截止和训练；接下来几周按占成绩的比例看有多重。 |
-| **身体** · 体重 | 体重 7 天平均是不是在计划允许的走廊里、每周降多少、长期走势。 |
-| **身体** · 作息 | 21 晚画在同一根轴上，这周和上周比；可选的起床前移计划：每按时起一天，闹钟往前挪一步。 |
-| **时间** | 时间都去哪了，和平常比变了什么？睡眠、训练、日程和屏幕（手机、平板、电脑同一时刻只算一次）各按自己的记录算，各自和你的平常比（单独一天和它之前 28 天的中间一半比，这 7 天和你平常的 7 天平均比）。最上面写的是明显超出平常的变化里最大的那一项（比如娱乐社交多了），而不是占得最多的那一项；每天一个图标标出当天的变化，平常的一天打个勾，下面写当天的屏幕时间和运动分钟。哪项记录都没覆盖的时间写成“没有记录”。按小时、按应用、最近 30 天。**几台同时用**则是每台设备各算各的：几台加起来的时间、叠加倍数（几台加起来 ÷ 钟表时间，1.3 倍就是平均同时用着 1.3 块屏幕）、最长一段只做一件事，以及每台设备按小时的分布。电脑上 AI 代理自己在干活、你在用手机的时间，不算成你的。这两项也会被写成“变了什么”。 |
-| **时间** · AI 干活量 | AI 代理替你干了多少、你下了多少指令，和你自己专注做事放在一起看。读这台电脑上 Claude Code 和 Codex 的日志（只读时刻和条数，绝不读说了什么）：每天 AI 工时、指令条数、每条指令换来的工时、AI 对你自己专注的倍数，各和你的平常比；AI 和你的一天按小时排开；再按每 7 天看做成了什么（你标了完成的截止事项）、每件花了多少专注和 AI 工时。用量是投入不是产出，所以 AI 的几项不分好坏。 |
-| **消耗** | 最近 7 天哪些东西在悄悄耗你？七个信号（静息心率、HRV、入睡时刻、作息波动、睡前一小时屏幕、娱乐和社交、应用切换），各自跟你的平常比，定了计划的再跟计划比；另外看这一周睡眠不足和高强度训练有没有叠在一起。不打总分。 |
-| **复盘** | 一周的事实和之前四周并排。不打分，不评价。 |
-| **数据** | 90 天里每天到了什么数据、哪些文件有读不出的行、怎么继续导入。 |
+| **现状** | 你的健康数据其实已经在被记录，只是散在各处：手表里有睡眠、HRV、静息心率和训练；饮食 App 里有每一餐；屏幕使用时间里有手机；日历里有这周有多忙。 |
+| **问题** | 每个 App 只回答自己那一个问题，拿人群标准或者它自己的分数来比，而且要你自己点进去看。没有谁会把“只睡了 6 小时、连续三晚吃得晚、今天又排了力量训练”放在一起，告诉你今天该改什么。所以大多数人用健康数据是**被动**的：已经不舒服了才去看。 |
+| **难在哪** | 各种信号单位不同、证据强弱不同；记录有缺口（某天没记饮食，不等于那天没吃东西）；一个人数据里的关联不是因果；而且这是你最私密的数据。 |
+| **现在大家用什么** | 穿戴设备的 App（Oura、WHOOP、Garmin Connect）把自家设备的数据算成一个恢复分；记饮食的 App（MyFitnessPal、薄荷健康、Cronometer）只管吃；屏幕使用时间只管屏幕；Apple 健康几乎什么都存，但很少解释；跨 App 的追踪工具（Exist.io、Bearable）在不同 App 之间找相关。 |
+| **它们带来的负担** | 好几个 App、往往还有好几份订阅；你的历史散在好几家云上；分数怎么算的你查不到；最后把这些拼起来的还是你自己。 |
+| **这里的做法** | 一个本地的 App 读你手上已有的导出数据，每个信号都和**你自己**最近 28 天比（不和人群比），所有目标写在一个文件里；每天早上最多点出三件该调整的事（训练、睡眠、饮食各一件），每件都写明依据的数字。每条规则都写在明处，数据不出这台电脑。 |
+| **有意做的取舍** | 不实时同步：要导入一次 Apple 健康的导出包（iPhone 配套 App 是以后的事）。饮食要靠一个会写进 Apple 健康的记录 App，或者一份 CSV。建议是一小组固定、讲得清的规则，不是模型；管的是生活习惯，不是医疗建议。缺的数就是缺，记得少，得到的回答就少，而不是编出来的回答。 |
+
+### 它跑的闭环
+
+**记录**（导入设备已经记下的）→ **对比**（每个信号对比你自己的平常、对比你的计划）→ **调整**（今天的三件事）→ **跟踪**（每个目标做到了几天）→ **复盘**（这一周和之前四周并排）。
+
+| 菜单 | 页面 | 回答的问题 |
+|---|---|---|
+| **今天** | | 恢复得怎么样（睡眠、HRV、静息心率，各自和你之前 28 天的中间 50% 比）？**今天该调整什么、为什么？** 今天要做什么，今晚几点睡？昨天屏幕时间花在哪了？做什么第二天会更好（包括早点吃晚饭）？ |
+| **身体** | 作息 | 21 晚画在同一根轴上，这周和上周比；可选的起床前移计划：每按时起一天，闹钟往前挪一步。 |
+| | 运动 | 本周对照每周目标（你的计划，没设就用世卫组织建议的每周 150 分钟活动、2 天力量训练，并写明用的是哪个），一天一格，还没到的日子写着计划的训练；最近 7 天对比平常；训练负荷对照恢复；12 周按种类（力量、有氧、步行）；每种训练后第二天早上的 HRV 和静息心率通常怎么样。 |
+| | 饮食 | 最近 7 天里记全的日子对比平常、对比计划：热量、蛋白质（按体重每公斤算）、膳食纤维、最后一餐到睡着隔了几小时；最近 14 天每一餐在一天里的时刻，睡前几小时画斜纹；饮食记录和体重秤对账（按记录该每周变多少、秤上实际变多少）；早点吃完晚饭的第二天早上有什么不同。 |
+| | 体重 | 体重 7 天平均是不是在计划允许的走廊里、每周降多少、长期走势。 |
+| **行为** | 去向 | 时间都去哪了，和平常比变了什么？睡眠、训练、日程和屏幕（手机、平板、电脑同一时刻只算一次）各自和平常比；写出的是明显超出平常的变化里最大的那一项，而不是占得最多的那一项。**几台同时用**：每台设备各算各的，叠加倍数、最长一段只做一件事、每台设备按小时。 |
+| | AI 干活量 | AI 代理替你干了多少、你下了多少指令，和你自己专注做事放在一起看（读这台电脑上 Claude Code 和 Codex 的日志：只读时刻和条数，绝不读说了什么）。用量是投入不是产出，所以不分好坏。 |
+| | 消耗 | 最近 7 天哪些东西在悄悄耗你？七个信号（静息心率、HRV、入睡时刻、作息波动、睡前屏幕、娱乐和社交、应用切换），各自和平常比、和计划比；另外看睡眠不足和高强度训练有没有叠在一起。不打总分。 |
+| **计划** | 目标 | 所有计划放在一处：睡眠、运动、饮食、体重、屏幕，每个目标把最近 28 天画成做到 / 没做到 / 没记录，计数写成“有记录的日子里做到几天”（不算连续天数，也不打分）。还没设的计划也列出来，附上设置它的那一行。 |
+| | 日程 | 七天的课、截止和训练；接下来几周按占成绩的比例看有多重。 |
+| **复盘** | | 一周的事实和之前四周并排，饮食和活动也在里面。不打分，不评价。 |
+| **数据** | | 90 天里每天到了什么数据（睡眠、HRV、步数、体重、屏幕、饮食记录……）、哪些文件有读不出的行、怎么继续导入。 |
 
 <p>
-  <img src="docs/images/week.png" width="49%" alt="本周页">
-  <img src="docs/images/sleep-zh.png" width="49%" alt="身体页的作息，深色">
+  <img src="docs/images/exercise-zh.png" width="49%" alt="运动页，深色">
+  <img src="docs/images/food-zh.png" width="49%" alt="饮食页，深色">
 </p>
 <p>
+  <img src="docs/images/goals-zh.png" width="49%" alt="目标页，深色">
   <img src="docs/images/drain-zh.png" width="49%" alt="消耗页，深色">
-  <img src="docs/images/today-dark.png" width="49%" alt="今天页，英文，深色">
 </p>
 <p>
   <img src="docs/images/ai-zh.png" width="49%" alt="AI 干活量页，深色">
-  <img src="docs/images/ai.png" width="49%" alt="AI 干活量页，英文，浅色">
+  <img src="docs/images/sleep-zh.png" width="49%" alt="作息页，深色">
 </p>
 
 界面中英双语，浅色和深色（默认跟随系统），手机和电脑都能用。电脑上菜单是左边的侧栏，能收成一列图标；手机上是底部的标签栏。
 
 ### 它怎么判断
 
-- **只和自己比。** “平常”是你自己之前 28 天的第 25–75 百分位，从不拿人群标准比。三项恢复指标里两项以上变差，就说“恢复低于平常”。
-- **缺的就是缺。** 空格表示不知道，不当成 0。同步时还没过完的那天照样显示，但不跟平常比。某路数据停了，每一页都会写明数字是多久以前的。醒着却没有任何记录覆盖的时间写成“没有记录”，不摊到别的项目里。
+- **只和自己比。** “平常”是你自己之前 28 天的第 25–75 百分位，从不拿人群标准比。三项恢复指标里两项以上变差，就说“恢复低于平常”。唯一出现人群数字的地方是世卫组织的活动建议，只在你没设运动计划时用，而且标明了出处。
+- **今天的调整是看得懂的规则。** 恢复低于平常、今天又排了训练 → 放轻松；昨晚睡少了 → 今晚几点前睡着；最近 7 个记全的晚上有 2 晚以上最后一餐离睡觉太近 → 几点前吃完晚饭；等等（完整列表在 `healthaio/modules/actions.py` 和页面上）。训练、睡眠、饮食各最多一件；没有偏离就写“照计划来”，绝不编建议。
+- **缺的就是缺。** 空格表示不知道，不当成 0。一天记了不到两顿正餐，照样显示但不算平均；一天完全没记，不等于那天没吃。同步时还没过完的那天照样显示，但不跟平常比。某路数据停了，每一页都会写明数字是多久以前的。
 - **是关联，不是因果。** “做什么第二天会更好”拿做了和没做的第二天比，给 95% 区间，整张表一起做 Benjamini–Hochberg 校正，只有校正后还成立的才上颜色；页面也写明为什么状态好的日子本来就更可能去练。
-- **颜色有含义。** 数据颜色跟着被测的东西走（专注永远是蓝，娱乐永远是橙，运动永远是品红），做过色弱校验；绿和红只用来表示更好和更差，而且一定配文字。
+- **颜色有含义。** 数据颜色跟着被测的东西走（专注永远是蓝，娱乐永远是橙，运动永远是品红，训练种类用它的浅几档来分），做过色弱校验；绿和红只用来表示更好和更差，而且一定配文字。
 
 ### 设计套件
 
-每一页都出自同一套设计套件：两种模式的颜色变量、组件、SVG 图表和图标，放在四个文件里（`css/tokens.css`、`css/kit.css`、`js/charts.js`、`js/icons.js`）。**[展示页](https://wannian001.github.io/dayring/#kit)**把它们全摆出来，每张图都用示例数据现场画（展示页不在菜单里，每一页底部都有链接）。别的应用可以用 `python3 -m dayring kit export DIR` 拷走这套文件，之后用 `python3 -m dayring kit check DIR` 查自己那份是最新、过期还是本地改过。怎么用、颜色规则和版本规则见 [docs/DESIGN_KIT.md](docs/DESIGN_KIT.md)。
+每一页都出自同一套设计套件：两种模式的颜色变量、组件、SVG 图表和图标，放在四个文件里（`css/tokens.css`、`css/kit.css`、`js/charts.js`、`js/icons.js`）。**[展示页](https://wannian001.github.io/proactive-health-aio/#kit)**把它们全摆出来，每张图都用示例数据现场画（展示页不在菜单里，每一页底部都有链接）。别的应用可以用 `python3 -m healthaio kit export DIR` 拷走这套文件，之后用 `python3 -m healthaio kit check DIR` 查自己那份是最新、过期还是本地改过。怎么用、颜色规则和版本规则见 [docs/DESIGN_KIT.md](docs/DESIGN_KIT.md)。
 
 ### 快速开始
 
 需要 Python 3.9 以上，不用装别的包。
 
 ```bash
-git clone https://github.com/wannian001/dayring.git
-cd dayring
-python3 -m dayring serve --demo
+git clone https://github.com/wannian001/proactive-health-aio.git
+cd proactive-health-aio
+python3 -m healthaio serve --demo
 ```
 
 打开 <http://localhost:8790>。换成你自己的数据：
 
 ```bash
-cp examples/dayring.example.toml dayring.toml     # 时区、计划、设备
-python3 -m dayring import apple-health ~/Downloads/export.zip
-python3 -m dayring import ics ~/Downloads/timetable.ics --kind class
-python3 -m dayring import macos-screentime        # 只限 macOS，试验性
-python3 -m dayring import ai-logs                 # Claude Code 和 Codex：只读时刻和条数
-python3 -m dayring check                           # 看哪些行读不出
-python3 -m dayring serve
+cp examples/healthaio.example.toml healthaio.toml     # 时区、计划（睡眠、运动、饮食、体重、屏幕）、设备
+python3 -m healthaio import apple-health ~/Downloads/export.zip
+python3 -m healthaio import ics ~/Downloads/timetable.ics --kind class
+python3 -m healthaio import macos-screentime        # 只限 macOS，试验性
+python3 -m healthaio import ai-logs                 # Claude Code 和 Codex：只读时刻和条数
+python3 -m healthaio check                           # 看哪些行读不出
+python3 -m healthaio serve
 ```
 
-Apple 健康导出的数据里也有你的每次训练，带开始和结束时间（Apple Fitness 和“体能训练” App 记下的都在里面），所以时间页能把运动放进一天里，和睡眠、上课、屏幕排在一起。
-
-截止日期、自评、别的 App 记的训练等其他数据都是普通 CSV，可以手改，也可以从别的导出文件映射过来
-（`python3 -m dayring import csv deadlines my-tracker.csv --map "Due=due,Task=title,Course=group"`）。
+一个 Apple 健康导出包就能带进来大部分：睡眠、HRV、静息心率、步数、活动圆环、消耗的热量、体重、每次训练（带起止时间和平均心率），以及记饮食的 App（MyFitnessPal、Lose It!、Cronometer 等）写进健康里的每一餐。截止日期、自评等其他数据都是普通 CSV，可以手改，也可以从别的导出文件映射过来
+（`python3 -m healthaio import csv meals my-food-log.csv --map "Date=time,Meal=meal,Calories=kcal,Protein=protein_g"`）。
 
 ### 数据只在你的电脑上
 
@@ -229,26 +265,30 @@ Apple 健康导出的数据里也有你的每次训练，带开始和结束时�
 
 ```
 导入工具 ─▶ data/*.csv ─▶ 读取层（按 schema.py 检查）─▶ 各页计算 ─▶ JSON ─▶ 网页
-Apple 健康、.ics、        一张表一个文件，              今天、本周、身体、      原生 JS，
-屏幕使用时间、任意 CSV    坏行只报告、不中断            作息、时间……           手画 SVG
+Apple 健康、.ics、        一张表一个文件，              今天、运动、饮食、      原生 JS，
+屏幕使用时间、任意 CSV    坏行只报告、不中断            目标、作息、时间……     手画 SVG
 ```
 
-- `dayring/schema.py` 是所有表的唯一定义，`docs/DATA_FORMAT.md` 由它生成。
-- 每页的计算只返回数字、单位、平常范围和状态，不返回句子；文字由浏览器写，所以同一份数据能切中英文（`dayring/web/js/i18n.js`）。
-- `python3 -m dayring page today` 打出一页的 JSON，脚本或 AI 助手读到的数和页面上的一样。
-- 演示站就是同一个网页加上预先算好的 JSON（`python3 -m dayring build-static --demo`），放在 GitHub Pages 上。
+- `healthaio/schema.py` 是所有表的唯一定义，`docs/DATA_FORMAT.md` 由它生成。
+- 每页的计算只返回数字、单位、平常范围和状态，不返回句子；文字由浏览器写，所以同一份数据能切中英文（`healthaio/web/js/i18n.js`）。
+- `python3 -m healthaio page today` 打出一页的 JSON（包括今天该调整的），脚本或 AI 助手读到的数和页面上的一样。
+- 演示站就是同一个网页加上预先算好的 JSON（`python3 -m healthaio build-static --demo`），放在 GitHub Pages 上。演示里的 Sam 是虚构的：一个研究生，夜猫子作息，有体重计划，记饮食（赶截止那几天会吃夜宵），屏幕习惯和大多数学生一样。
 - 设计说明：[docs/DESIGN.md](docs/DESIGN.md)；共用的外观是设计套件（[docs/DESIGN_KIT.md](docs/DESIGN_KIT.md)，展示页在 `#kit`）。
 
 ### 开发
 
 ```bash
 python3 -m unittest discover -s tests      # Python 3.9–3.13 都能跑
-python3 -m dayring page today --demo --today 2026-10-12
+python3 -m healthaio page food --demo --today 2026-10-12
 ```
+
+### 不是医疗建议
+
+这是用来发现你自己生活习惯里规律的工具，不做任何诊断；它给的建议都是日常习惯（早点睡、早点吃、练轻一点）。涉及健康的事，请找专业人士。
 
 ### 来历
 
-dayring 是我每天在用的个人系统的公开展示版。我自己那一版功能更多，用的是真实的手表、手机和电脑数据；它的外观来自这里的设计套件。这个仓库里没有任何那边的数据。
+这个项目原来叫 *dayring*，是我每天在用的个人系统的公开展示版；今天页顶上那个“一天的环”就是旧名字的来历，旧仓库的链接也会自动跳到这里。我自己那一版功能更多，用的是真实的手表、手机和电脑数据；它的外观来自这里的设计套件。这个仓库里没有任何那边的数据。
 
 ### 许可
 

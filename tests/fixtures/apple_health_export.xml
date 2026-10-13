@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Synthetic Apple Health export for dayring tests. No real data. Exported in Melbourne (+1100). -->
+<!-- Synthetic Apple Health export for Health AIO tests. No real data. Exported in Melbourne (+1100). -->
 <!DOCTYPE HealthData [
 <!ELEMENT HealthData (ExportDate,Me,(Record|Correlation|Workout|ActivitySummary)*)>
 <!ATTLIST HealthData locale CDATA #REQUIRED>

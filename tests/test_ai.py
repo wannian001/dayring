@@ -1,6 +1,6 @@
 """AI work: Claude Code and Codex logs -> ai_work / ai_prompts, and the AI work page.
 
-Rules under test (dayring/importers/ai_logs.py, dayring/context.py, dayring/modules/ai.py):
+Rules under test (healthaio/importers/ai_logs.py, healthaio/context.py, healthaio/modules/ai.py):
 - only times and counts leave the logs: no prompt or reply text, no session id in the clear, no path;
 - two calls of one session at most 5 minutes apart are work in between; a longer gap is waiting; a call split over
   several records counts once; a subagent's calls count into its parent session;
@@ -18,17 +18,17 @@ import unittest
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from dayring import config, demo
-from dayring.config import Config
-from dayring.context import Context
-from dayring.importers.ai_logs import import_ai_logs, session_code
-from dayring.modules import PAGES
-from dayring.modules import ai as ai_page
-from dayring.modules import data as data_page
-from dayring.store import write_table
+from healthaio import config, demo
+from healthaio.config import Config
+from healthaio.context import Context
+from healthaio.importers.ai_logs import import_ai_logs, session_code
+from healthaio.modules import PAGES
+from healthaio.modules import ai as ai_page
+from healthaio.modules import data as data_page
+from healthaio.store import write_table
 
 ROOT = Path(__file__).resolve().parent.parent
-WEB = ROOT / "dayring" / "web"
+WEB = ROOT / "healthaio" / "web"
 SECRET = "please refactor the secret-project billing module"
 
 
@@ -54,7 +54,7 @@ def write_jsonl(path: Path, items) -> None:
 
 class Logs(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp(prefix="dayring-ai-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="healthaio-ai-"))
         self.claude = self.tmp / "claude" / "projects"
         self.codex = self.tmp / "codex" / "sessions"
         self.data = self.tmp / "data"
@@ -168,7 +168,7 @@ class Logs(unittest.TestCase):
 
 class Days(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp(prefix="dayring-ai-days-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="healthaio-ai-days-"))
         (self.tmp / "data").mkdir()
 
     def tearDown(self):
@@ -201,13 +201,13 @@ class Days(unittest.TestCase):
 class DemoPage(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.tmp = Path(tempfile.mkdtemp(prefix="dayring-ai-demo-"))
+        cls.tmp = Path(tempfile.mkdtemp(prefix="healthaio-ai-demo-"))
         cls.now = datetime(2026, 10, 12, 18, 40)
         try:
             cls.cfg = config.load(demo.generate(cls.tmp, cls.now.date(), cls.now))
         except config.ConfigError:  # Python 3.9/3.10 without tomli
             shutil.rmtree(cls.tmp, ignore_errors=True)
-            raise unittest.SkipTest("needs Python 3.11+ or tomli to read the demo dayring.toml")
+            raise unittest.SkipTest("needs Python 3.11+ or tomli to read the demo healthaio.toml")
 
     @classmethod
     def tearDownClass(cls):
@@ -259,7 +259,7 @@ class DemoPage(unittest.TestCase):
     def test_data_page_lists_ai_only_when_there_is_a_file(self):
         keys = [s["key"] for s in data_page.build(self.ctx())["streams"]]
         self.assertIn("ai", keys)
-        tmp = Path(tempfile.mkdtemp(prefix="dayring-ai-none-"))
+        tmp = Path(tempfile.mkdtemp(prefix="healthaio-ai-none-"))
         try:
             (tmp / "data").mkdir()
             ctx = Context(Config(root=tmp, data_dir=tmp / "data", timezone="Australia/Melbourne"), now=self.now)
@@ -273,8 +273,8 @@ class Wiring(unittest.TestCase):
     def test_menu_and_words(self):
         app = (WEB / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn('import ai from "./pages/ai.js";', app)
-        self.assertIn('time: [["time", "nav.time_tab"], ["ai", "nav.ai"]]', app)
-        self.assertNotIn('"ai"', re.search(r"const NAV\s*=\s*\[([^\]]*)\]", app).group(1))  # a page of the Time item
+        self.assertIn('time: [["time", "nav.time_tab"], ["ai", "nav.ai"], ["drain", "nav.drain"]]', app)
+        self.assertNotIn('"ai"', re.search(r"const NAV\s*=\s*\[([^\]]*)\]", app).group(1))  # a page of the Behaviour item
         page = (WEB / "js" / "pages" / "ai.js").read_text(encoding="utf-8")
         i18n = (WEB / "js" / "i18n.js").read_text(encoding="utf-8")
         used = set(re.findall(r't\("((?:ai|time|act|cat|chg|nav)\.[\w.]+)"', page))
@@ -283,7 +283,7 @@ class Wiring(unittest.TestCase):
             self.assertEqual(i18n.count(f'"{key}"'), 2, key)
 
     def test_the_importer_is_on_the_command_line(self):
-        cli = (ROOT / "dayring" / "importers" / "cli.py").read_text(encoding="utf-8")
+        cli = (ROOT / "healthaio" / "importers" / "cli.py").read_text(encoding="utf-8")
         self.assertIn('sub.add_parser("ai-logs"', cli)
         self.assertIn("ai-logs", (ROOT / "docs" / "IMPORTERS.md").read_text(encoding="utf-8"))
 

@@ -1,6 +1,6 @@
 """Devices at once: every device in use counts its own minutes (context.StackDay, the Time page's card).
 
-Rules under test (dayring/context.py, dayring/modules/time.py, dayring/config.py):
+Rules under test (healthaio/context.py, healthaio/modules/time.py, healthaio/config.py):
 - two devices in use at the same minute count two minutes; clock time still counts the minute once;
 - an AI agent app in front on a computer while another device is in use is taken out (the agent works, you are
   on the other device), but not when the agent is the only thing in use, and not when every device in use is one;
@@ -9,7 +9,7 @@ Rules under test (dayring/context.py, dayring/modules/time.py, dayring/config.py
   clock time; it needs 0.1 (a day) or 0.05 (7 days) outside its band and ranks by the minutes it means;
 - the longest stretch on one thing is one app on one device with nothing else in use, and survives a pause
   (or something else) of up to 3 minutes;
-- [devices] computers and agent_apps can be set in dayring.toml;
+- [devices] computers and agent_apps can be set in healthaio.toml;
 - the menu is a sidebar: every item has a glyph the kit draws, and a folded sidebar is applied before first paint.
 """
 import json
@@ -20,14 +20,14 @@ import unittest
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from dayring import config
-from dayring.config import Config, ConfigError
-from dayring.context import Context
-from dayring.modules import time as time_page
-from dayring.store import write_table
+from healthaio import config
+from healthaio.config import Config, ConfigError
+from healthaio.context import Context
+from healthaio.modules import time as time_page
+from healthaio.store import write_table
 
 ROOT = Path(__file__).resolve().parent.parent
-WEB = ROOT / "dayring" / "web"
+WEB = ROOT / "healthaio" / "web"
 DAY = date(2026, 10, 7)
 NOW = datetime(2026, 10, 12, 18, 40)
 
@@ -42,7 +42,7 @@ def session(device: str, app: str, category: str, start: datetime, minutes: floa
 
 class StackCase(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp(prefix="dayring-stack-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="healthaio-stack-"))
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
@@ -163,9 +163,9 @@ class RatioAsAChange(unittest.TestCase):
 
 class Settings(unittest.TestCase):
     def test_devices_computers_and_agent_apps(self):
-        tmp = Path(tempfile.mkdtemp(prefix="dayring-cfg-"))
+        tmp = Path(tempfile.mkdtemp(prefix="healthaio-cfg-"))
         try:
-            path = tmp / "dayring.json"
+            path = tmp / "healthaio.json"
             path.write_text(json.dumps({"devices": {"priority": ["phone", "laptop"], "computers": ["laptop"],
                                                     "agent_apps": ["Claude"]}}), encoding="utf-8")
             cfg = config.load(path)
@@ -178,7 +178,7 @@ class Settings(unittest.TestCase):
             shutil.rmtree(tmp, ignore_errors=True)
 
     def test_the_example_settings_name_both(self):
-        text = (ROOT / "examples" / "dayring.example.toml").read_text(encoding="utf-8")
+        text = (ROOT / "examples" / "healthaio.example.toml").read_text(encoding="utf-8")
         self.assertIn("computers = [", text)
         self.assertIn("agent_apps = [", text)
 
@@ -197,7 +197,7 @@ class Sidebar(unittest.TestCase):
         index = (WEB / "index.html").read_text(encoding="utf-8")
         self.assertIn('<header class="side"></header>', index)
         self.assertNotIn('class="top"', index)
-        self.assertIn('localStorage.getItem("dayring.side") === "folded"', index)
+        self.assertIn('localStorage.getItem("healthaio.side") === "folded"', index)
         app = (WEB / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn('store.set("side"', app)
         i18n = (WEB / "js" / "i18n.js").read_text(encoding="utf-8")
