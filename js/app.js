@@ -1,24 +1,25 @@
 // Shell: the menu (a left sidebar that folds to icons, a bottom tab bar on phones), language and light/dark,
 // hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js?v=a0fb39e998";
-import { installTooltip, esc, setFormat } from "./charts.js?v=a0fb39e998";
-import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=a0fb39e998";
-import { icon } from "./icons.js?v=a0fb39e998";
-import body from "./pages/body.js?v=a0fb39e998";
-import data from "./pages/data.js?v=a0fb39e998";
-import drain from "./pages/drain.js?v=a0fb39e998";
-import kit from "./pages/kit.js?v=a0fb39e998";
-import review from "./pages/review.js?v=a0fb39e998";
-import sleep from "./pages/sleep.js?v=a0fb39e998";
-import time from "./pages/time.js?v=a0fb39e998";
-import today from "./pages/today.js?v=a0fb39e998";
-import week from "./pages/week.js?v=a0fb39e998";
+import { get, isStatic } from "./api.js?v=ad73753ded";
+import { installTooltip, esc, setFormat } from "./charts.js?v=ad73753ded";
+import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=ad73753ded";
+import { icon } from "./icons.js?v=ad73753ded";
+import ai from "./pages/ai.js?v=ad73753ded";
+import body from "./pages/body.js?v=ad73753ded";
+import data from "./pages/data.js?v=ad73753ded";
+import drain from "./pages/drain.js?v=ad73753ded";
+import kit from "./pages/kit.js?v=ad73753ded";
+import review from "./pages/review.js?v=ad73753ded";
+import sleep from "./pages/sleep.js?v=ad73753ded";
+import time from "./pages/time.js?v=ad73753ded";
+import today from "./pages/today.js?v=ad73753ded";
+import week from "./pages/week.js?v=ad73753ded";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
-const PAGES = { today, week, body, sleep, time, drain, review, data, kit };
+const PAGES = { today, week, body, sleep, time, ai, drain, review, data, kit };
 const NAV = ["today", "week", "body", "time", "drain", "review", "data"];
 // a menu item that holds several pages shows a small switch above the page title
-const GROUPS = { body: [["body", "nav.weight"], ["sleep", "nav.sleep_tab"]] };
+const GROUPS = { body: [["body", "nav.weight"], ["sleep", "nav.sleep_tab"]], time: [["time", "nav.time_tab"], ["ai", "nav.ai"]] };
 const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) => p === page)) || page;
 // a page inside a group is titled by its own tab (Weight, Sleep), not by the group
 const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;

@@ -595,7 +595,8 @@ export function coverage(marks, first, { width, height = 16 }) {
 }
 
 // ---- lanes: one row per activity, columns over hours or days, each row on its own scale -------------
-// rows: [{key, label, sub, parts: [[partKey, color, {hatch}]], values: [{partKey: minutes} | null], max, limit, limitLabel}]
+// rows: [{key, label, sub, parts: [[partKey, color, {hatch}]], values: [{partKey: minutes} | null], max, limit, limitLabel, fmt}]
+// (a row's fmt writes its values in its own unit, such as a count; the others use unitFmt)
 // cols: [{label, tip, shade}]. showMax: write each row's top value under its name (off when every row has the same scale)
 // A part with {hatch: true} is drawn in diagonal stripes of its colour: something on top of the rest, such as the
 // minutes several devices add beyond the clock. .legend .key i.hatch is its key.
@@ -638,13 +639,13 @@ export function lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, la
         y -= h;
       });
       const total = row.parts.reduce((s, [key]) => s + (v[key] || 0), 0);
-      const tip = `${row.label} · ${c.tip || c.label} · ${unitFmt(total)}`;
+      const tip = `${row.label} · ${c.tip || c.label} · ${(row.fmt || unitFmt)(total)}`;
       parts.push(`<rect x="${(cx - slot / 2).toFixed(1)}" y="${y0}" width="${slot.toFixed(1)}" height="${rowH}" fill="transparent" data-tip="${esc(tip)}"/>`);
     });
     // the row's scale and its limit sit under its label, never over the bars
     let ty = y0 + (row.sub ? 48 : 33);
     if (showMax) {
-      parts.push(`<text x="0" y="${ty}" font-size="10.5" fill="var(--ink-3)">${esc(t("chart.row_max", { v: unitFmt(row.max) }))}</text>`);
+      parts.push(`<text x="0" y="${ty}" font-size="10.5" fill="var(--ink-3)">${esc(t("chart.row_max", { v: (row.fmt || unitFmt)(row.max) }))}</text>`);
       ty += 15;
     }
     if (row.limit) {

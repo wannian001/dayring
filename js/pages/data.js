@@ -1,5 +1,5 @@
-import { coverage, draw, esc } from "../charts.js?v=a0fb39e998";
-import { clock, day, num, t } from "../i18n.js?v=a0fb39e998";
+import { coverage, draw, esc } from "../charts.js?v=ad73753ded";
+import { clock, day, num, t } from "../i18n.js?v=ad73753ded";
 
 const STATUS = { ok: "good", stale: "watch", missing: "bad" };
 
@@ -31,6 +31,7 @@ export default {
           <pre class="code">python -m dayring import apple-health export.zip
 python -m dayring import ics timetable.ics --kind class
 python -m dayring import macos-screentime
+python -m dayring import ai-logs
 python -m dayring import csv deadlines my.csv \\
   --map "Due=due,Task=title,Course=group"
 python -m dayring check</pre>

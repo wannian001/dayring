@@ -2,9 +2,9 @@
 // (/api/kit; api/kit.json on the static site) and drawn with made-up sample data. Not a menu item: the footer
 // of every page and the Data page link here. Every manifest entry needs a sample below (tests/test_kit.py).
 import { blockColumns, bullet, coverage, dayDots, dayRing, draw, esc, interval, ladderChart, lanes, legendKey, rangeStrip,
-  RING_CATS, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js?v=a0fb39e998";
-import { dur, getLang, measure, num, shortDay, t } from "../i18n.js?v=a0fb39e998";
-import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js?v=a0fb39e998";
+  RING_CATS, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js?v=ad73753ded";
+import { dur, getLang, measure, num, shortDay, t } from "../i18n.js?v=ad73753ded";
+import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js?v=ad73753ded";
 
 const DOCS = "https://github.com/wannian001/dayring/blob/main/docs/DESIGN_KIT.md";
 const SIZES = [13, 16, 28, 64];

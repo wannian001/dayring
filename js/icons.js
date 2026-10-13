@@ -16,6 +16,8 @@ const PATHS = {
   focus: '<rect x="4.5" y="5" width="15" height="10" rx="1.5"/><path d="M2.5 18.5h19"/><path d="m10.3 8-2 2 2 2M13.7 8l2 2-2 2"/>',
   // screens at once (the stacking ratio): two screens, one in front of the other
   ratio: '<rect x="2.5" y="4" width="13" height="9.5" rx="1.6"/><rect x="8.5" y="9.5" width="13" height="9.5" rx="1.6" fill="var(--halo)"/>',
+  // AI agents working for you: a sparkle
+  ai: '<path d="M11 3.5 12.8 9l5.5 1.8-5.5 1.8L11 18l-1.8-5.4L3.7 10.8 9.2 9z"/><path d="M18.5 14.5l.8 2.1 2.2.8-2.2.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"/>',
   // the longest stretch on one thing: a stopwatch
   single: '<circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V10M10 3.5h4M12 3.5v3M18.2 7.3l1.3-1.3"/>',
   // communication: a speech bubble
@@ -36,10 +38,10 @@ const PATHS = {
 export const ICON_KEYS = Object.freeze(Object.keys(PATHS));
 // The icon for key at size px (an unknown key draws the dashed clock of "not recorded").
 export function icon(key, size = 20) { return svg(PATHS[key] || PATHS.not_recorded, size); }
-// The colour each icon is drawn in: its data colour, ink-3 for not recorded, ink-2 for the check and the two devices-at-once measures; the menu glyphs take the text colour.
+// The colour each icon is drawn in: its data colour (ai: focus blue, work done for you), ink-3 for not recorded, ink-2 for the check and the two devices-at-once measures; the menu glyphs take the text colour.
 export const COLOR = { sleep: "var(--c-sleep)", exercise: "var(--c-exercise)", calendar: "var(--c-event)", screen: "var(--c-focus)",
   focus: "var(--c-focus)", fun: "var(--c-fun)", communication: "var(--c-comms)", other: "var(--c-other)", not_recorded: "var(--ink-3)",
-  ratio: "var(--ink-2)", single: "var(--ink-2)", check: "var(--ink-2)" };
+  ratio: "var(--ink-2)", single: "var(--ink-2)", ai: "var(--c-focus)", check: "var(--ink-2)" };
 // The 12px glyphs inside a state chip: good = a tick, bad = an exclamation mark.
 export const STATE_ICON = Object.freeze({
   good: `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2.5 6.3 2.3 2.3 4.7-5.1"/></svg>`,
