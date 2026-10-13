@@ -2,7 +2,7 @@
 const DICT = {
   en: {
     "nav.today": "Today", "nav.week": "Week", "nav.body": "Body", "nav.sleep": "Sleep",
-    "nav.review": "Review", "nav.data": "Data",
+    "nav.review": "Weekly review", "nav.data": "Data sources",
     "ui.demo": "Demo data", "ui.lang": "中文", "ui.mode": "Light / dark", "ui.fold": "Fold the menu", "ui.unfold": "Unfold the menu",
     "ui.prev_day": "Previous day", "ui.next_day": "Next day", "ui.back_today": "Back to today",
     "ui.how": "How this is worked out", "ui.list_sep": ", ", "ui.loading": "Loading…", "ui.error": "Could not load this page",
@@ -64,8 +64,8 @@ const DICT = {
     "unit.min": "min", "unit.ms": "ms", "unit.bpm": "bpm", "unit.steps": "steps", "unit.pct": "%", "unit.points": "pts",
   },
   zh: {
-    "nav.today": "今天", "nav.week": "本周", "nav.body": "身体", "nav.sleep": "作息",
-    "nav.review": "复盘", "nav.data": "数据",
+    "nav.today": "今天", "nav.week": "本周", "nav.body": "身体数据", "nav.sleep": "作息",
+    "nav.review": "每周复盘", "nav.data": "数据来源",
     "ui.demo": "演示数据", "ui.lang": "EN", "ui.mode": "浅色 / 深色", "ui.fold": "收起菜单", "ui.unfold": "展开菜单",
     "ui.prev_day": "前一天", "ui.next_day": "后一天", "ui.back_today": "回到今天",
     "ui.how": "怎么算的", "ui.list_sep": "、", "ui.loading": "正在读取…", "ui.error": "这一页没读出来",
@@ -475,7 +475,7 @@ Object.assign(DICT.en, {
   "kit.axis.worse": "← worse", "kit.axis.better": "better →",
   "kit.c.sr": "A sentence is hidden here that only a screen reader reads out.", "kit.c.sr_hidden": "Only a screen reader reads this.",
   "kit.c.top": "A top bar for an app with few pages; this one uses .side instead.", "kit.c.brand": "Top of the menu on the left; on a phone only the logo stays.",
-  "kit.c.side": "This page's menu is one, fixed to the left (fold it with the button at its top); here it is drawn in place.",
+  "kit.c.side": "This page's menu is one, fixed to the left (fold it with the button at its top); here it is drawn in place. An item with pages opens and closes its list with a click.",
   "kit.c.head": "Page title", "kit.c.head_sub": "One line under the title", "kit.c.box": "card",
   "kit.c.card": "A card", "kit.c.aside": "aside", "kit.c.card_body": "One topic per card.",
   "kit.c.ring": "dayRing() draws into it: see Charts below.",
@@ -526,7 +526,7 @@ Object.assign(DICT.zh, {
   "kit.axis.worse": "← 更差", "kit.axis.better": "更好 →",
   "kit.c.sr": "这里藏着一句只有读屏软件会念的话。", "kit.c.sr_hidden": "只有读屏软件会念这句。",
   "kit.c.top": "页面不多的应用用的顶栏；这一页改用 .side。", "kit.c.brand": "左边菜单的最上面；手机上只留标志。",
-  "kit.c.side": "这一页的菜单就是它，固定在左边（点它顶上的按钮收起）；这里画在原地。",
+  "kit.c.side": "这一页的菜单就是它，固定在左边（点它顶上的按钮收起）；这里画在原地。有子页的一项，点一下展开或收起它的子页。",
   "kit.c.head": "页面标题", "kit.c.head_sub": "标题下面一行", "kit.c.box": "卡片",
   "kit.c.card": "一张卡片", "kit.c.aside": "旁注", "kit.c.card_body": "一张卡片讲一件事。",
   "kit.c.ring": "dayRing() 画在里面：见下面的图表。",
@@ -587,7 +587,7 @@ Object.assign(DICT.zh, {
   "kitdoc.trendLine": "穿过几个平均值（比如八周）的短线，末端一个圆点；缺的点直接连过去；至少要两个点。",
   "kitdoc.legendKey": "和标记画法一样的图例：\"normal\"（色带）、\"median\"、\"now\"（圆点）、\"plan\"（虚线竖线）、\"weeks\"（走势）。",
   "kitdoc.RING_CATS": "环上屏幕时间的分组，从里往外：[键、合并的类别、颜色]。",
-  "kitdoc.dayRing": "24 小时的钟，午夜在最上面：外圈睡眠，中圈日程和训练，里圈每小时的屏幕分钟。",
+  "kitdoc.dayRing": "24 小时的钟，午夜在最上面：外圈睡眠，中圈训练和画得很淡的日程（日程只当背景），里圈每小时的屏幕分钟。",
   "kitdoc.interval": "一个差值和它的 95% 区间，对着零线画；右边 = 第二天更好（flip 左右翻转）。",
   "kitdoc.dayDots": "一天一个圆：实心 = 做了，空心 = 0，虚线 = 没有记录；下面写几号。",
   "kitdoc.timeChart": "日期轴：一条阴影走廊、淡淡的每日点、隔 maxGap 天以上就断开的线，加几条虚线参考线。",
@@ -651,7 +651,7 @@ Object.assign(DICT.zh, {
 
 // ---- proactive health: the health menu, what to adjust today, Exercise, Food and Goals ----
 Object.assign(DICT.en, {
-  "nav.time": "Behaviour", "nav.plan": "Plan", "nav.exercise": "Exercise", "nav.food": "Food", "nav.goals": "Goals", "nav.schedule": "Schedule",
+  "nav.time": "Time & energy", "nav.plan": "Goals & schedule", "nav.exercise": "Exercise", "nav.food": "Food", "nav.goals": "Goals", "nav.schedule": "Schedule",
   "eff.ate_early": "Last meal {hours}+ h before sleep that night",
 
   "todo.title": "What to adjust today", "todo.aside": "read off every page this morning",
@@ -763,7 +763,7 @@ Object.assign(DICT.en, {
   "kit.enc.c-exercise-2": "a kind of exercise, lighter: cardio", "kit.enc.c-exercise-3": "a kind of exercise, lightest: walking",
 });
 Object.assign(DICT.zh, {
-  "nav.time": "行为", "nav.plan": "计划", "nav.exercise": "运动", "nav.food": "饮食", "nav.goals": "目标", "nav.schedule": "日程",
+  "nav.time": "时间与精力", "nav.plan": "目标与日程", "nav.exercise": "运动", "nav.food": "饮食", "nav.goals": "目标", "nav.schedule": "日程",
   "eff.ate_early": "当晚最后一餐离睡着 {hours} 小时以上",
 
   "todo.title": "今天该调整的", "todo.aside": "今早从各页读出来的",
@@ -877,14 +877,123 @@ Object.assign(DICT.zh, {
   "kitdoc.keptDots": "一串日子画成一排点，每 7 天留一点空：实心 = 做到了，空心圈 = 没做到，短横 = 那天没有记录。",
 });
 
-// ---- the reading pages under the menu (their own words are in pages/guide.js and history-content.js) ----
+// ---- the reading pages under the menu (their own words are in pages/project.js and guide.js; History is on the author's site) ----
 Object.assign(DICT.en, {
-  "nav.about": "About this project", "nav.guide": "Guide", "nav.history": "History",
+  "nav.about": "About this project", "nav.project": "Overview", "nav.guide": "Guide", "nav.history": "History",
+  "doc.history_url": "https://tangjiakuo.top/demo/aio-history/en/",
   "doc.other_lang": "阅读中文版",
 });
 Object.assign(DICT.zh, {
-  "nav.about": "关于这个项目", "nav.guide": "使用说明", "nav.history": "迭代记录",
+  "nav.about": "关于这个项目", "nav.project": "项目说明", "nav.guide": "使用说明", "nav.history": "迭代记录",
+  "doc.history_url": "https://tangjiakuo.top/demo/aio-history/",
   "doc.other_lang": "Read in English",
+});
+
+
+// ---- Today in one card plus one line per part; the next-day patterns move to Review ----
+Object.assign(DICT.en, {
+  "today.sched": "Calendar", "today.sched_sep": " · ", "today.sched_none": "nothing on the calendar", "today.sched_events": "{n} events",
+  "today.sched_due": "{n} due, first {when}", "today.sched_due_in": "{n} due, first in {d} days", "today.colon": ": ", "today.trained_short": "{what} {d}",
+  "todo.short.ease": "Recovery below your normal", "todo.short.deload": "More training than you are used to",
+  "todo.short.move": "{left} to go this week", "todo.short.strength": "{n} days left this week",
+  "todo.short.asleep": "Last night was {d} short", "todo.short.phone_drain": "More screen before bed than usual",
+  "todo.short.phone_last": "{d} of scrolling before bed last night", "todo.short.late_meal": "Ate late on {n} of {k} nights",
+  "todo.short.protein": "{avg} g a day, target {target} g", "todo.short.kcal": "{avg} kcal a day, at most {max}",
+  "sum.title": "Everything else", "sum.none": "No records yet",
+  "sum.exercise_name": "Exercise this week",
+  "sum.ex.met": "goal met", "sum.ex.on_track": "on track", "sum.ex.behind": "behind", "sum.ex.missed": "goal missed",
+  "sum.food_few": "Too few days logged", "sum.food_few_chip": "too few days",
+  "sum.food_protein": "protein short", "sum.food_late": "late dinner on {n} nights",
+  "sum.food_kcal_above": "too much", "sum.food_kcal_below": "too little",
+  "sum.food_ok": "on plan", "sum.food_off": "off the plan", "sum.food_within": "within the plan",
+  "sum.screens_name": "Screens yesterday",
+  "sum.screens_bad": "worse than usual", "sum.screens_good": "better than usual", "sum.screens_usual": "as usual", "sum.stale": "stopped {n} days ago",
+  "sum.drain_name": "Drain, 7 days",
+  "sum.strain": "short nights and hard training", "sum.drain_n": "{n} worse than usual", "sum.drain_ok": "nothing worse",
+  "sum.patterns": "What helps you", "sum.patterns_none": "Nothing clear yet",
+  "eff.short.trained": "training", "eff.short.steps": "{min}+ steps", "eff.short.exercise": "{min}+ active minutes",
+  "eff.short.slept": "{hours}+ h sleep", "eff.short.in_bed": "{hours}+ h in bed", "eff.short.ate_early": "dinner {hours} h before bed",
+  "eff.short.asleep_by": "asleep by {clock}",
+  "sum.rule": "Each line is the short form of a page; open it for the numbers, charts and rules. Exercise is this calendar week against the weekly goal; food is the last 7 days logged in full; weight is the 7-day average and the rate of the last 3 weeks; drain is the 7 days before today; what helps is the list on Review.",
+  "review.due_line": "Due this week: {a} ({ap}% of grades) · next week: {b} ({bp}%).",
+  "ex.src.plan": "Against your plan", "ex.src.who": "Against the WHO guideline (no plan set)", "ex.week_short": "{d} of {goal}",
+  "ex.load.line": "workouts {a}, a usual week {c} ({r}×)", "ex.load.line_one": "workouts {a}",
+  "food.effect_moved": "What an early dinner goes with the next morning: on Review →",
+  "sleep.checks_moved": "Asleep in time, up with the alarm, night by night: on Goals →",
+  "ai.tab.day": "AI and your day",
+  "doc.open": "Open",
+  "time.detail": "In detail", "time.tab.day": "A typical day", "time.tab.history": "Last 30 days", "time.tab.trend": "Stimulation & focus", "time.tab.apps": "Top apps",
+});
+Object.assign(DICT.zh, {
+  "today.sched": "日程", "today.sched_sep": " · ", "today.sched_none": "没有安排", "today.sched_events": "{n} 项安排",
+  "today.sched_due": "{n} 项截止，最早{when}", "today.sched_due_in": "{n} 项截止，最早 {d} 天后", "today.colon": "：", "today.trained_short": "{what} {d}",
+  "todo.short.ease": "恢复低于平常", "todo.short.deload": "最近练得比平常多",
+  "todo.short.move": "本周还差 {left}", "todo.short.strength": "本周只剩 {n} 天",
+  "todo.short.asleep": "昨晚少睡了 {d}", "todo.short.phone_drain": "睡前刷手机比平常多",
+  "todo.short.phone_last": "昨晚睡前刷了 {d}", "todo.short.late_meal": "{k} 晚里 {n} 晚吃得晚",
+  "todo.short.protein": "每天 {avg} 克，目标 {target} 克", "todo.short.kcal": "每天 {avg} 千卡，上限 {max}",
+  "sum.title": "其他各项", "sum.none": "还没有记录",
+  "sum.exercise_name": "本周运动",
+  "sum.ex.met": "达到了", "sum.ex.on_track": "跟得上", "sum.ex.behind": "落后了", "sum.ex.missed": "没达到",
+  "sum.food_few": "记的天数太少", "sum.food_few_chip": "记得太少",
+  "sum.food_protein": "蛋白质不够", "sum.food_late": "{n} 晚吃得晚",
+  "sum.food_kcal_above": "吃多了", "sum.food_kcal_below": "吃少了",
+  "sum.food_ok": "都在计划内", "sum.food_off": "和计划不符", "sum.food_within": "在计划内",
+  "sum.screens_name": "昨天屏幕",
+  "sum.screens_bad": "比平常差", "sum.screens_good": "比平常好", "sum.screens_usual": "和平常差不多", "sum.stale": "停了 {n} 天",
+  "sum.drain_name": "消耗 · 7 天",
+  "sum.strain": "睡得少又练得狠", "sum.drain_n": "{n} 项比平常差", "sum.drain_ok": "没有哪项变差",
+  "sum.patterns": "对你有用的", "sum.patterns_none": "还没看出来",
+  "eff.short.trained": "训练", "eff.short.steps": "走够 {min} 步", "eff.short.exercise": "锻炼够 {min} 分钟",
+  "eff.short.slept": "睡够 {hours} 小时", "eff.short.in_bed": "躺够 {hours} 小时", "eff.short.ate_early": "睡前 {hours} 小时吃完",
+  "eff.short.asleep_by": "{clock} 前睡着",
+  "sum.rule": "每一行是一页的缩写，点开能看到这一项的数字、图和规则。运动看这个自然周对照每周目标；饮食看最近 7 天里记全的日子；体重看 7 天平均和最近 3 周的速度；消耗看今天之前的 7 天；对你有用的，完整的表在复盘页。",
+  "review.due_line": "这一周截止 {a} 项（占成绩 {ap}%）· 下一周 {b} 项（{bp}%）。",
+  "ex.src.plan": "按你的计划", "ex.src.who": "按世卫组织建议（没设计划）", "ex.week_short": "已动 {d} / 目标 {goal}",
+  "ex.load.line": "训练 {a}，平常一周 {c}（{r} 倍）", "ex.load.line_one": "训练 {a}",
+  "food.effect_moved": "早点吃完晚饭，第二天早上有什么不同：在复盘页 →",
+  "sleep.checks_moved": "每晚有没有按时睡、按时起：在目标页 →",
+  "ai.tab.day": "AI 和你的一天",
+  "doc.open": "展开",
+  "time.detail": "细看", "time.tab.day": "典型的一天", "time.tab.history": "最近 30 天", "time.tab.trend": "刺激和专注", "time.tab.apps": "常用应用",
+});
+
+// ---- the menu's short names on a phone's tab bar, and goals set on the Goals page (goal_log.py) ----
+Object.assign(DICT.en, {
+  "nav.short.today": "Today", "nav.short.body": "Body", "nav.short.time": "Time", "nav.short.plan": "Goals",
+  "nav.short.review": "Review", "nav.short.data": "Data",
+  "goals.edit": "Edit", "goals.set_one": "Set one", "goals.save": "Save", "goals.cancel": "Cancel", "goals.reset": "Back to the original",
+  "goals.src.you": "set here", "goals.src.accepted": "suggestion you accepted",
+  "goals.static": "The online demo is read-only. On your own computer, Save recomputes every page against the new goal.",
+  "goals.err": "Not saved: {e}", "goals.nothing": "Fill in a value first.",
+  "goals.props": "Waiting for you", "goals.accept": "Accept", "goals.decline": "Decline", "goals.assistant": "Assistant",
+  "goals.prop_from": "{by} · {day}",
+  "goals.props_note": "Nothing changes until you accept. An assistant writes these with healthaio goal propose; every change stays in goals.jsonl.",
+  "goals.f.sleep.bedtime": "Asleep by", "goals.f.sleep.wake": "Up by", "goals.f.sleep.target_hours": "Sleep a night",
+  "goals.f.exercise.weekly_min": "Active a week", "goals.f.exercise.strength_days": "Strength days a week",
+  "goals.f.food.kcal_min": "Energy a day, at least", "goals.f.food.kcal_max": "Energy a day, at most",
+  "goals.f.food.protein_g_per_kg": "Protein per kg of weight", "goals.f.food.last_meal_gap_h": "Last meal before sleep, at least",
+  "goals.f.weight.target_kg": "Target weight", "goals.f.screen.work_min_hours": "Focused work a day, at least",
+  "goals.f.screen.entertainment_max_hours": "Entertainment & social a day, at most",
+  "goals.u.h": "h", "goals.u.min": "min", "goals.u.days": "days", "goals.u.kcal": "kcal", "goals.u.g_per_kg": "g", "goals.u.kg": "kg",
+});
+Object.assign(DICT.zh, {
+  "nav.short.today": "今天", "nav.short.body": "身体", "nav.short.time": "时间", "nav.short.plan": "目标",
+  "nav.short.review": "复盘", "nav.short.data": "数据",
+  "goals.edit": "改", "goals.set_one": "设一个", "goals.save": "保存", "goals.cancel": "取消", "goals.reset": "用回原来的",
+  "goals.src.you": "在这里设的", "goals.src.accepted": "采纳的建议",
+  "goals.static": "在线演示只能看。在自己电脑上运行时，点保存后每一页都按新目标重算。",
+  "goals.err": "没保存上：{e}", "goals.nothing": "先填一个数。",
+  "goals.props": "等你决定", "goals.accept": "采纳", "goals.decline": "不要", "goals.assistant": "AI 助手",
+  "goals.prop_from": "{by} · {day}",
+  "goals.props_note": "你采纳之前什么都不变。助手用 healthaio goal propose 写建议；每一次改动都留在 goals.jsonl 里。",
+  "goals.f.sleep.bedtime": "几点前睡着", "goals.f.sleep.wake": "几点前起床", "goals.f.sleep.target_hours": "每晚睡够",
+  "goals.f.exercise.weekly_min": "每周活动", "goals.f.exercise.strength_days": "每周力量训练",
+  "goals.f.food.kcal_min": "每天热量至少", "goals.f.food.kcal_max": "每天热量至多",
+  "goals.f.food.protein_g_per_kg": "每公斤体重的蛋白质", "goals.f.food.last_meal_gap_h": "最后一餐离睡着至少",
+  "goals.f.weight.target_kg": "目标体重", "goals.f.screen.work_min_hours": "每天专注至少",
+  "goals.f.screen.entertainment_max_hours": "每天娱乐和社交至多",
+  "goals.u.h": "小时", "goals.u.min": "分钟", "goals.u.days": "天", "goals.u.kcal": "千卡", "goals.u.g_per_kg": "克", "goals.u.kg": "千克",
 });
 
 const WEEKDAY = { en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], zh: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"] };

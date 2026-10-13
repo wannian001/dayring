@@ -5,11 +5,13 @@
 // outside normal (`clear`, worked out in modules/time.py), and colours only those. Lanes may overlap;
 // unrecorded waking time is shown as such. A day without an activity's record shows "—" for it (never 0)
 // and is left out of its average and normal. Devices at once (each device counting its own minutes) has its
-// own card; its two measures, screens at once (a ratio, kept in hundredths) and the longest stretch on one thing,
-// are candidates of "what changed" like the rest.
-import { bullet, draw, esc, lanes, timeChart } from "../charts.js?v=150dddf82c";
-import { day, device, dur, getLang, num, shortDay, t, weekdayShort, wtype } from "../i18n.js?v=150dddf82c";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=150dddf82c";
+// own tab; its two measures, screens at once (a ratio, kept in hundredths) and the longest stretch on one thing,
+// are candidates of "what changed" like the rest. Two cards: what changed with the daily averages, then the
+// detail as tabs (a typical day, 30 days, stimulation and focus, devices at once, top apps).
+import { bullet, draw, esc, lanes, timeChart } from "../charts.js?v=260bf4b694";
+import { day, device, dur, getLang, num, shortDay, t, weekdayShort } from "../i18n.js?v=260bf4b694";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=260bf4b694";
+import { mountTabs, tabs } from "./tabs.js?v=260bf4b694";
 
 const ORDER = ["sleep", "exercise", "calendar", "screen"];  // the lanes, in the same order in both lane charts
 const TILES = ["screen", "fun", "focus", "communication", "exercise", "calendar", "sleep", "not_recorded"];  // every candidate has a tile
@@ -119,12 +121,12 @@ function stackHtml(p) {
     tile("single", S, best ? [t("time.single_best", { d: dur(best.minutes), app: best.app, device: device(best.device), day: day(best.date), at: best.start })] : [], "", " stack-tile"),
   ].join("");
   const agent = Object.values(K.agent_by_hour).reduce((a, b) => a + b, 0);
-  return `<section class="card span-12"><h2>${t("time.stack")}<span class="aside">${phrases(t("time.stack_note"))}</span></h2>
+  return `<p class="xs muted tab-note">${phrases(t("time.stack_note"))}</p>
     <div class="tiles act-tiles stack-tiles">${tiles}</div>
     <div class="section-title stack-hours-title"><span>${phrases(t("time.stack_hours"))}</span><span class="aside legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}
       <span class="key"><i style="background:var(--c-axis)"></i>${t("time.key_clock")}</span><span class="key"><i class="hatch"></i>${t("time.key_extra")}</span></span></div>
     <div id="stack-hours" class="chart"></div>
-    ${agent >= 1 ? `<p class="xs muted" style="margin:8px 0 0">${esc(t("time.agent_note", { v: dur(agent) }))}</p>` : ""}</section>`;
+    ${agent >= 1 ? `<p class="xs muted" style="margin:8px 0 0">${esc(t("time.agent_note", { v: dur(agent) }))}</p>` : ""}`;
 }
 
 // stimulation and focus, averaged: what people call "dopamine tolerance" can't be measured, so the card shows
@@ -148,12 +150,12 @@ function trendHtml(p) {
       <p class="small" style="margin:2px 0 8px">${phrases(level)}</p>
       <div id="trend-${key}" class="chart"></div></div>`;
   };
-  return `<section class="card span-12"><h2>${t("trend.title")}<span class="aside">${phrases(t("trend.note"))}</span></h2>
+  return `<p class="xs muted tab-note">${phrases(t("trend.note"))}</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:20px 32px">${TREND.map(box).join("")}</div>
-    <p class="xs muted" style="margin:10px 0 0">${esc(t("trend.key"))}</p></section>`;
+    <p class="xs muted" style="margin:10px 0 0">${esc(t("trend.key"))}</p>`;
 }
 
-function heroHtml(p) {
+function heroHtml(p, tiles) {
   const S = p.span;
   const top = S.standout;
   const compared = S.changes.filter((c) => c.state).map((c) => c.key);
@@ -182,7 +184,8 @@ function heroHtml(p) {
     <div class="time-top">${mark}</div>
     <div class="time-lede"><span class="eyebrow">${t("time.eyebrow")}</span><p class="lede" style="margin:4px 0">${phrases(lede)}</p>
       <p class="small muted" style="margin:0">${esc(sub)}</p>${chips}${notCompared}${staleNote(S)}</div>
-    <div class="days-strip">${S.days.map(dayCell).join("")}</div></div></section>`;
+    <div class="days-strip">${S.days.map(dayCell).join("")}</div></div>
+    <div class="time-avg"><h2 class="section-title">${t("time.per_day")}<span class="aside">${t("time.vs_normal", { n: p.baseline_days })}</span></h2><div class="tiles act-tiles">${tiles}</div></div></section>`;
 }
 
 export default {
@@ -208,34 +211,32 @@ export default {
       if (key === "fun") return tile(key, S, L.fun_max_min ? [t("time.fun_limit", { v: dur(L.fun_max_min, { short: true }) })] : []);
       if (key === "focus") return tile(key, S, L.focus_min_min ? [t("time.focus_goal", { v: dur(L.focus_min_min, { short: true }) })] : []);
       if (key === "exercise") return tile(key, S, [exDays]);
-      if (key === "sleep") return tile(key, S, [t("time.sleep_note")]);
+      if (key === "sleep") return tile(key, S);  // how sleep is clocked is in "How this is worked out"
       return tile(key, S);
     }).join("");
     const maxApp = Math.max(1, ...S.apps.map((a) => a.minutes));
     const apps = S.apps.map((a) => `<li><span class="app"><span class="app-name" title="${esc(a.app)}">${esc(a.app)}</span><span class="chip">${esc(device(a.device))}</span></span>
       <span class="hbar"><span style="width:${(a.minutes / maxApp * 100).toFixed(1)}%;background:${CAT_COLOR[a.category]}"></span></span>
       <span class="num small">${dur(a.minutes)}</span></li>`).join("");
-    const workouts = S.workouts.length
-      ? `<ul class="agenda">${S.workouts.map((w) => `<li><span class="when">${weekdayShort(w.start)} ${w.start.slice(11, 16)}</span>
-          <span class="what"><b>${esc(wtype(w.type))}</b><span class="muted">${esc(w.source || "")}</span></span><span class="chip" style="color:var(--c-exercise-ink)">${dur(w.minutes)}</span></li>`).join("")}</ul>`
-      : `<p class="muted small">${t(S.untimed_exercise ? "time.untimed" : "time.no_workouts")}</p>`;
     const devices = Object.entries(S.devices).sort((a, b) => b[1] - a[1]).map(([d, m]) => `${esc(device(d))} ${dur(m)}`).join(" · ");
     return `<div class="head"><div><h1>${t("time.title")}</h1><div class="sub">${t("time.span", { from: day(S.from, { weekday: false }), to: day(S.to, { weekday: false }), n: S.n })}</div></div>${stepper}</div>
       <div class="grid">
-        ${heroHtml(p)}
-        <section class="card span-12"><h2>${t("time.per_day")}<span class="aside">${t("time.vs_normal", { n: p.baseline_days })}</span></h2><div class="tiles act-tiles">${tiles}</div></section>
-        <section class="card span-12"><h2><span>${phrases(t("time.typical"))}</span><span class="aside legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}</span></h2><div id="hours" class="chart"></div></section>
-        ${stackHtml(p)}
-        <section class="card span-12"><h2>${t("time.history")}<span class="aside">${phrases(t("time.history_note"))}</span></h2><div id="history" class="chart"></div></section>
-        ${trendHtml(p)}
-        <section class="card span-7"><h2>${t("time.apps")}<span class="aside">${t("time.apps_note")}</span></h2>${apps ? `<ul class="apps">${apps}</ul>
-          <p class="xs muted" style="margin:10px 0 0">${t("time.devices")}: ${devices}</p>` : `<p class="muted small">${t("time.no_screens")}</p>`}</section>
-        <section class="card span-5"><h2>${t("time.workouts")}<span class="aside">${t("time.workouts_note")}</span></h2>${workouts}</section>
-        <section class="card span-12"><details class="how" open><summary>${t("ui.how")}</summary><p>${esc(t("time.rule", { n: p.baseline_days, min: p.baseline_min }))}</p><p>${esc(t("time.rule_stack"))}</p>${p.trend ? `<p>${esc(t("trend.rule", { n: p.baseline_days, min: p.baseline_min, level: p.trend.level_days, lmin: p.trend.level_min, days: p.trend.days }))}</p>` : ""}</details></section>
+        ${heroHtml(p, tiles)}
+        <section class="card span-12"><h2>${t("time.detail")}</h2>
+          ${tabs("time", [
+            { key: "day", label: t("time.tab.day"), html: `<p class="xs muted tab-note legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}</p><div id="hours" class="chart"></div>` },
+            { key: "history", label: t("time.tab.history"), html: `<p class="xs muted tab-note">${phrases(t("time.history_note"))}</p><div id="history" class="chart"></div>` },
+            p.trend ? { key: "trend", label: t("time.tab.trend"), html: trendHtml(p) } : null,
+            S.stack ? { key: "stack", label: t("time.stack"), html: stackHtml(p) } : null,
+            { key: "apps", label: t("time.tab.apps"), html: apps ? `<p class="xs muted tab-note">${t("time.apps_note")}</p><ul class="apps">${apps}</ul>
+              <p class="xs muted" style="margin:10px 0 0">${t("time.devices")}: ${devices}</p>` : `<p class="muted small">${t("time.no_screens")}</p>` },
+          ])}
+          <details class="how"><summary>${t("ui.how")}</summary><p>${esc(t("time.rule", { n: p.baseline_days, min: p.baseline_min }))}</p><p>${esc(t("time.sleep_note"))}</p><p>${esc(t("time.rule_stack"))}</p>${p.trend ? `<p>${esc(t("trend.rule", { n: p.baseline_days, min: p.baseline_min, level: p.trend.level_days, lmin: p.trend.level_min, days: p.trend.days }))}</p>` : ""}</details></section>
       </div>`;
   },
   mount(root, p) {
     if (p.empty || !p.span.metrics || !p.span.changes.every((c) => "clear" in c)) return;
+    mountTabs(root);
     const S = p.span;
     root.querySelectorAll(".bul").forEach((el) => {
       const m = S.metrics[el.dataset.key];

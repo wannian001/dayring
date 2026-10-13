@@ -1,27 +1,27 @@
 // Shell: the menu (a left sidebar that folds to icons, a bottom tab bar on phones), language and light/dark,
 // hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js?v=150dddf82c";
-import { installTooltip, esc, setFormat } from "./charts.js?v=150dddf82c";
-import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=150dddf82c";
-import { icon } from "./icons.js?v=150dddf82c";
-import ai from "./pages/ai.js?v=150dddf82c";
-import body from "./pages/body.js?v=150dddf82c";
-import data from "./pages/data.js?v=150dddf82c";
-import drain from "./pages/drain.js?v=150dddf82c";
-import exercise from "./pages/exercise.js?v=150dddf82c";
-import food from "./pages/food.js?v=150dddf82c";
-import goals from "./pages/goals.js?v=150dddf82c";
-import guide from "./pages/guide.js?v=150dddf82c";
-import historyPage from "./pages/history.js?v=150dddf82c";  // not `history`: that would hide window.history (replaceState)
-import kit from "./pages/kit.js?v=150dddf82c";
-import review from "./pages/review.js?v=150dddf82c";
-import sleep from "./pages/sleep.js?v=150dddf82c";
-import time from "./pages/time.js?v=150dddf82c";
-import today from "./pages/today.js?v=150dddf82c";
-import week from "./pages/week.js?v=150dddf82c";
+import { get, isStatic } from "./api.js?v=260bf4b694";
+import { installTooltip, esc, setFormat } from "./charts.js?v=260bf4b694";
+import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=260bf4b694";
+import { icon } from "./icons.js?v=260bf4b694";
+import ai from "./pages/ai.js?v=260bf4b694";
+import body from "./pages/body.js?v=260bf4b694";
+import data from "./pages/data.js?v=260bf4b694";
+import drain from "./pages/drain.js?v=260bf4b694";
+import exercise from "./pages/exercise.js?v=260bf4b694";
+import food from "./pages/food.js?v=260bf4b694";
+import goals from "./pages/goals.js?v=260bf4b694";
+import guide from "./pages/guide.js?v=260bf4b694";
+import kit from "./pages/kit.js?v=260bf4b694";
+import project from "./pages/project.js?v=260bf4b694";
+import review from "./pages/review.js?v=260bf4b694";
+import sleep from "./pages/sleep.js?v=260bf4b694";
+import time from "./pages/time.js?v=260bf4b694";
+import today from "./pages/today.js?v=260bf4b694";
+import week from "./pages/week.js?v=260bf4b694";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
-const PAGES = { today, week, body, sleep, exercise, food, time, ai, drain, goals, review, data, kit, guide, history: historyPage };
+const PAGES = { today, week, body, sleep, exercise, food, time, ai, drain, goals, review, data, kit, project, guide };
 // the menu follows the loop of managing your health: today's state and what to adjust, the body (sleep, exercise,
 // food, weight), behaviour (where the time goes, AI work, drain), the plan (goals, schedule), the review, the data
 const NAV = ["today", "body", "time", "plan", "review", "data"];
@@ -37,11 +37,15 @@ const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === pag
 const ALIAS = { attention: "time", plan: "goals" };  // old links keep working
 // each menu item's glyph (icons.js)
 const NAV_ICON = { today: "sun", body: "heart", time: "walk", plan: "target", review: "list", data: "database" };
-// the reading pages sit under the menu, apart from the health loop: how to use the app, and how the personal
-// system it comes from changed over a year. On a phone they are two small links in the top row, so the tab bar
-// keeps the six items of the loop.
-const DOCS = ["guide", "history"];
-const DOC_ICON = { guide: "communication", history: "clock" };
+// the reading pages sit under the menu, apart from the health loop: what the project is and who it is for, how to
+// use the app, and how the personal system it comes from changed over a year. History is on the author's own site
+// (it quotes that personal system), so it is a link out, in a new tab. On a phone they are small links in the top
+// row, so the tab bar keeps the six items of the loop.
+const DOCS = ["project", "guide", "history"];
+const DOC_ICON = { project: "info", guide: "communication", history: "clock" };
+const OUTSIDE = { history: "doc.history_url" };  // the i18n key of its address (one page per language)
+const docAttrs = (p) => (OUTSIDE[p] ? `href="${esc(t(OUTSIDE[p]))}" target="_blank" rel="noopener"` : `href="#${p}"`);
+const docName = (p) => `${t(`nav.${p}`)}${OUTSIDE[p] ? " ↗" : ""}`;
 const store = {
   get(key) { try { return localStorage.getItem(`healthaio.${key}`); } catch { return null; } },
   set(key, value) { try { localStorage.setItem(`healthaio.${key}`, value); } catch { /* private mode */ } },
@@ -49,7 +53,7 @@ const store = {
 let settings = { title: "Health AIO", locale: "en", demo: false };
 // the kit's charts write their words and numbers with this app's i18n (charts.js imports nothing)
 setFormat({ t, dur, clock, shortDay, measure, toDate, wtype });
-const footer = () => `<footer class="foot">${DOCS.map((p) => `<a href="#${p}">${t(`nav.${p}`)}</a>`).join("")}<a href="#kit">${t("kit.link")}</a></footer>`;
+const footer = () => `<footer class="foot">${DOCS.map((p) => `<a ${docAttrs(p)}>${docName(p)}</a>`).join("")}<a href="#kit">${t("kit.link")}</a></footer>`;
 
 const ICON = {
   logo: `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12.5" fill="none" stroke="var(--c-band)" stroke-width="5"/><path d="M16 3.5a12.5 12.5 0 0 1 11.8 8.3" fill="none" stroke="var(--c-sleep)" stroke-width="5" stroke-linecap="round"/><path d="M28.3 18.5a12.5 12.5 0 0 1-6.6 9.1" fill="none" stroke="var(--c-focus)" stroke-width="5" stroke-linecap="round"/><path d="M17.5 28.4a12.5 12.5 0 0 1-9.7-3.7" fill="none" stroke="var(--c-fun)" stroke-width="5" stroke-linecap="round"/></svg>`,
@@ -68,15 +72,30 @@ function applyLook() {
 const folded = () => document.documentElement.classList.contains("side-folded");
 const wide = () => matchMedia("(min-width: 900px)").matches;
 
+// a menu item that holds several pages opens and closes its list with a click (in the full sidebar; on the icon
+// rail and the phone's tab bar it opens its first page). The item you arrive in opens by itself, the others start
+// closed on every visit.
+const openGroups = new Set();
+let lastGroup = null;
+const CARET = `<svg class="side-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m4.5 2.5 3.5 3.5-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+// on a phone's tab bar six items share the width, so each takes its short name (Body, not Body data)
+const navName = (p) => t(wide() ? `nav.${p}` : `nav.short.${p}`);
+let shown = "today";
+matchMedia("(min-width: 900px)").addEventListener("change", () => header(shown));
+
 function header(active) {
+  shown = active;
   const top = document.querySelector(".side");
   const group = groupOf(active);
-  // a menu item that holds several pages lists them under it while one of them is open
+  if (GROUPS[group] && group !== lastGroup) openGroups.add(group);
+  lastGroup = group;
   const items = NAV.filter((p) => PAGES[p] || GROUPS[p]).map((p) => {
     const here = p === group;
-    const subs = here && GROUPS[p] ? GROUPS[p].map(([page, key]) => `<a class="side-sub" href="#${page}" ${page === active ? 'aria-current="page"' : ""}><span>${t(key)}</span></a>`).join("") : "";
-    const href = GROUPS[p] ? GROUPS[p][0][0] : p;
-    return `<a href="#${href}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${t(`nav.${p}`)}</span></a>${subs}`;
+    if (!GROUPS[p]) return `<a href="#${p}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${navName(p)}</span></a>`;
+    const open = openGroups.has(p);
+    const subs = GROUPS[p].map(([page, key]) => `<a class="side-sub" data-in="${p}" href="#${page}" ${page === active ? 'aria-current="page"' : ""}${open ? "" : " hidden"}><span>${t(key)}</span></a>`).join("");
+    return `<a href="#${GROUPS[p][0][0]}" data-group="${p}" aria-expanded="${open}" title="${esc(t(`nav.${p}`))}" ${here ? 'aria-current="page"' : ""}>${icon(NAV_ICON[p], 18)}<span>${navName(p)}</span>${CARET}</a>${subs}`;
   }).join("");
   top.innerHTML = `
     <div class="side-head">
@@ -85,7 +104,7 @@ function header(active) {
     </div>
     <nav class="side-nav" aria-label="Pages">${items}</nav>
     <nav class="side-docs" aria-label="${esc(t("nav.about"))}"><span class="side-label">${t("nav.about")}</span>${DOCS.map((p) =>
-      `<a href="#${p}" title="${esc(t(`nav.${p}`))}" ${p === active ? 'aria-current="page"' : ""}>${icon(DOC_ICON[p], 18)}<span>${t(`nav.${p}`)}</span></a>`).join("")}</nav>
+      `<a ${docAttrs(p)} title="${esc(docName(p))}" ${p === active ? 'aria-current="page"' : ""}>${icon(DOC_ICON[p], 18)}<span>${docName(p)}</span></a>`).join("")}</nav>
     <div class="side-tools">
       ${settings.demo ? `<span class="demo-badge" title="${esc(t("ui.demo"))}">${t("ui.demo")}</span>` : ""}
       <button class="tool" id="lang" type="button" aria-label="Language">${t("ui.lang")}</button>
@@ -100,6 +119,16 @@ function header(active) {
   const setFold = (on) => { document.documentElement.classList.toggle("side-folded", on); store.set("side", on ? "folded" : "open"); label(); };
   label();
   top.querySelector("#fold").onclick = () => { setFold(true); brand.focus(); };
+  top.querySelectorAll("a[data-group]").forEach((a) => {
+    a.onclick = (e) => {
+      if (folded() || !wide()) return;  // no room for the list: the item opens its first page
+      e.preventDefault();
+      const g = a.dataset.group, open = !openGroups.has(g);
+      if (open) openGroups.add(g); else openGroups.delete(g);
+      a.setAttribute("aria-expanded", String(open));
+      top.querySelectorAll(`a.side-sub[data-in="${g}"]`).forEach((sub) => { sub.hidden = !open; });
+    };
+  });
   brand.onclick = (e) => { if (folded() && wide()) { e.preventDefault(); setFold(false); top.querySelector("#fold").focus(); } };
   top.querySelector("#lang").onclick = () => { const next = getLang() === "zh" ? "en" : "zh"; store.set("lang", next); setLang(next); route(); };
   top.querySelector("#mode").onclick = () => {
@@ -117,6 +146,7 @@ function header(active) {
 
 async function route() {
   const [raw, param] = (location.hash.replace(/^#/, "") || "today").split("/");
+  if (OUTSIDE[raw]) { location.replace(t(OUTSIDE[raw])); return; }  // an old #history link: the page moved to the author's site
   const name = ALIAS[raw] || raw;
   const page = PAGES[name] ? name : "today";
   header(page);

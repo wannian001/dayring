@@ -3,9 +3,10 @@
 // worse; only your focused work keeps the Time page's direction. AI work is drawn in focus blue stripes (work, done
 // for you), scheduled tasks and scripts in grey stripes, your instructions in ink. A day before the AI record shows
 // × (never 0); a day in between without AI use is a real zero.
-import { bullet, draw, esc, lanes } from "../charts.js?v=150dddf82c";
-import { day, dur, getLang, num, shortDay, t } from "../i18n.js?v=150dddf82c";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=150dddf82c";
+import { bullet, draw, esc, lanes } from "../charts.js?v=260bf4b694";
+import { day, dur, getLang, num, shortDay, t } from "../i18n.js?v=260bf4b694";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=260bf4b694";
+import { mountTabs, tabs } from "./tabs.js?v=260bf4b694";
 
 const TILES = [  // key, icon, icon colour
   ["ai", "ai", COLOR.ai], ["prompts", "communication", "var(--ink-2)"], ["per_prompt", "ai", "var(--ink-2)"],
@@ -39,7 +40,7 @@ function stateChip(m) {
 function tile([key, glyph, color], S) {
   const m = S.metrics[key];
   const known = S.known[key] < S.n ? (S.known[key] ? t("time.known", { n: S.known[key], k: S.n }) : t("time.no_record")) : "";
-  const pieces = [m.band ? bandLabel(key, m.band) : "", known, t(`ai.note.${key}`)].filter(Boolean);
+  const pieces = [m.band ? bandLabel(key, m.band) : "", known].filter(Boolean);  // what each number means is in "How this is worked out"
   const note = pieces.map((x, i) => `<span class="piece">${esc(x)}${i < pieces.length - 1 ? " ·" : ""}</span>`).join(" ");
   return `<div class="tile act-tile ai-tile">
     <div class="label"><span class="act-name" style="color:${color}">${icon(glyph, 16)}<span>${t(`ai.m.${key}`)}</span></span>${stateChip(m)}</div>
@@ -48,12 +49,9 @@ function tile([key, glyph, color], S) {
     <div class="note">${note}</div></div>`;
 }
 
-function heroHtml(p) {
+function heroHtml(p, tiles) {
   const S = p.span, A = S.avg;
   const lede = A.ai ? t("ai.line", { ai: keep(dur(A.ai)), n: count(A.prompts) }) : t("ai.line_none");
-  const subs = [A.per_prompt != null ? t("ai.sub_per", { per: keep(dur(A.per_prompt)) }) : "",
-    A.leverage != null && A.focus ? t("ai.sub_focus", { focus: keep(dur(A.focus)), lev: ratio(A.leverage) }) : "",
-    A.other >= 1 ? t("ai.other", { v: keep(dur(A.other)) }) : ""].filter(Boolean).join(" ");
   const compared = Object.values(S.metrics).filter((m) => m.state);
   const chips = S.changes.length
     ? `<div class="chg-also"><span class="xs muted">${t("ai.changes")}</span>${S.changes.map((m) => `<span class="chip ${toneCls(m.tone)}">${icon(m.state === "high" ? "up" : "down", 12)}${esc(t("time.chip", { what: t(`ai.m.${m.key}`), d: fmt(m.key, Math.abs(m.delta)), dir: dirWord(m) }))}</span>`).join("")}</div>`
@@ -64,7 +62,8 @@ function heroHtml(p) {
   return `<section class="card span-12"><div class="time-hero">
     <div class="time-top"><span class="chg-icon" style="color:${COLOR.ai}">${icon("ai", 56)}</span></div>
     <div class="time-lede"><span class="eyebrow">${t("ai.eyebrow", { n: S.n })}</span><p class="lede" style="margin:4px 0">${phrases(lede)}</p>
-      <p class="small muted" style="margin:0">${esc(subs)}</p>${chips}${stale}</div></div></section>`;
+      ${A.other >= 1 ? `<p class="xs muted" style="margin:0">${esc(t("ai.other", { v: keep(dur(A.other)) }))}</p>` : ""}${chips}${stale}</div></div>
+    <div class="time-avg"><h2 class="section-title">${t("time.per_day")}<span class="aside">${t("time.vs_normal", { n: p.baseline_days })}</span></h2><div class="tiles act-tiles ai-tiles">${tiles}</div></div></section>`;
 }
 
 export default {
@@ -81,16 +80,20 @@ export default {
     const aiKeys = `<span class="key"><i class="hatch" style="color:var(--c-focus)"></i>${t("ai.key.you")}</span><span class="key"><i class="hatch" style="color:var(--c-other)"></i>${t("ai.key.other")}</span>`;
     return `${head}<div class="sub">${t("ai.span", { from: day(S.from, { weekday: false }), to: day(S.to, { weekday: false }), n: S.n })}</div></div>${stepper}</div>
       <div class="grid">
-        ${heroHtml(p)}
-        <section class="card span-12"><h2>${t("time.per_day")}<span class="aside">${t("time.vs_normal", { n: p.baseline_days })}</span></h2><div class="tiles act-tiles ai-tiles">${TILES.map((x) => tile(x, S)).join("")}</div></section>
-        <section class="card span-12"><h2><span>${phrases(t("ai.day"))}</span><span class="aside legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}${aiKeys}</span></h2>
-          <div id="ai-hours" class="chart"></div><p class="xs muted" style="margin:8px 0 0">${t("ai.day_note")}</p></section>
-        <section class="card span-12"><h2>${t("time.history")}<span class="aside">${phrases(t("time.history_note"))}</span></h2><div id="ai-history" class="chart"></div></section>
-        <section class="card span-12"><h2>${t("ai.weeks")}<span class="aside">${phrases(t("ai.weeks_note"))}</span></h2><div id="ai-weeks" class="chart"></div></section>
-        <section class="card span-12"><details class="how"><summary>${t("ui.how")}</summary><p>${esc(t("ai.rule", { n: p.baseline_days, min: p.baseline_min }))}</p></details></section>
+        ${heroHtml(p, TILES.map((x) => tile(x, S)).join(""))}
+        <section class="card span-12"><h2>${t("time.detail")}</h2>
+          ${tabs("ai", [
+            { key: "day", label: t("ai.tab.day"), html: `<p class="xs muted tab-note legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}${aiKeys}</p>
+              <div id="ai-hours" class="chart"></div><p class="xs muted" style="margin:8px 0 0">${t("ai.day_note")}</p>` },
+            { key: "history", label: t("time.tab.history"), html: `<p class="xs muted tab-note">${phrases(t("time.history_note"))}</p><div id="ai-history" class="chart"></div>` },
+            { key: "weeks", label: t("ai.weeks"), html: `<p class="xs muted tab-note">${phrases(t("ai.weeks_note"))}</p><div id="ai-weeks" class="chart"></div>` },
+          ])}
+          <details class="how"><summary>${t("ui.how")}</summary><p>${esc(t("ai.rule", { n: p.baseline_days, min: p.baseline_min }))}</p>
+            ${TILES.map(([key]) => `<p>${esc(t(`ai.m.${key}`))}${t("today.colon")}${esc(t(`ai.note.${key}`))}</p>`).join("")}</details></section>
       </div>`;
   },
   mount(root, p) {
+    mountTabs(root);
     if (p.empty) return;
     const S = p.span;
     root.querySelectorAll(".ai-tile .bul").forEach((el) => {

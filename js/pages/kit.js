@@ -2,9 +2,9 @@
 // (/api/kit; api/kit.json on the static site) and drawn with made-up sample data. Not a menu item: the footer
 // of every page and the Data page link here. Every manifest entry needs a sample below (tests/test_kit.py).
 import { blockColumns, bullet, coverage, dayDots, dayRing, draw, esc, interval, keptDots, ladderChart, lanes, legendKey, mealTimeline,
-  rangeStrip, RING_CATS, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js?v=150dddf82c";
-import { dur, getLang, measure, num, shortDay, t } from "../i18n.js?v=150dddf82c";
-import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js?v=150dddf82c";
+  rangeStrip, RING_CATS, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js?v=260bf4b694";
+import { dur, getLang, measure, num, shortDay, t } from "../i18n.js?v=260bf4b694";
+import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js?v=260bf4b694";
 
 const DOCS = "https://github.com/wannian001/proactive-health-aio/blob/main/docs/DESIGN_KIT.md";
 const SIZES = [13, 16, 28, 64];
@@ -148,17 +148,19 @@ const HELPERS = ["esc", "CHART_WORDS", "setFormat", "formatDuration", "toneColor
 const TILES = [["metric.sleep", "good", "state.high", "min", 474, { q1: 400, median: 418, q3: 438 }],
   ["metric.resting_hr", "bad", "state.high", "bpm", 66, { q1: 55, median: 57, q3: 59 }],
   ["metric.hrv", "", "state.normal", "ms", 52, { q1: 48, median: 51, q3: 56 }]];
+const CARET = `<svg class="side-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m4.5 2.5 3.5 3.5-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const chip = (cls, text, glyph = "") => `<span class="chip ${cls}">${glyph}${text}</span>`;
 const SAMPLES = {
   ".sr": () => `<p class="small" style="margin:0">${t("kit.c.sr")}<span class="sr">${t("kit.c.sr_hidden")}</span></p>`,
   ".top": () => `<p class="small muted" style="margin:0">${t("kit.c.top")}</p>`,
   ".brand": () => `<p class="small muted" style="margin:0">${t("kit.c.brand")}</p>`,
   ".nav": () => `<nav class="nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit" aria-current="page">${t("nav.today")}</a><a href="#kit">${t("nav.body")}</a><a href="#kit">${t("nav.time")}</a></nav>`,
-  // drawn in place (not a child of <body>): the same menu as this page's, with a menu item open on its first page
+  // drawn in place (not a child of <body>): the same menu as this page's, one menu item open on its second page and
+  // two closed
   ".side": () => `<p class="small muted" style="margin:0 0 10px">${t("kit.c.side")}</p><div class="kit-side side"><div class="side-head"><span class="brand"><span>Health AIO</span></span></div>
     <nav class="side-nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit">${icon("sun", 18)}<span>${t("nav.today")}</span></a>
-      <a href="#kit" aria-current="page">${icon("heart", 18)}<span>${t("nav.body")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.sleep_tab")}</span></a><a class="side-sub" href="#kit" aria-current="page"><span>${t("nav.exercise")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.food")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.weight")}</span></a>
-      <a href="#kit">${icon("walk", 18)}<span>${t("nav.time")}</span></a><a href="#kit">${icon("target", 18)}<span>${t("nav.plan")}</span></a></nav>
+      <a href="#kit" aria-current="page" aria-expanded="true">${icon("heart", 18)}<span>${t("nav.body")}</span>${CARET}</a><a class="side-sub" href="#kit"><span>${t("nav.sleep_tab")}</span></a><a class="side-sub" href="#kit" aria-current="page"><span>${t("nav.exercise")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.food")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.weight")}</span></a>
+      <a href="#kit" aria-expanded="false">${icon("walk", 18)}<span>${t("nav.time")}</span>${CARET}</a><a href="#kit" aria-expanded="false">${icon("target", 18)}<span>${t("nav.plan")}</span>${CARET}</a></nav>
     <div class="side-tools"><button class="tool" type="button">${t("ui.lang")}</button><button class="tool" type="button" aria-label="${esc(t("ui.mode"))}">${icon("sleep", 15)}</button></div></div>`,
   ".tool": () => `<div class="tools"><button class="tool" type="button">${t("ui.lang")}</button><button class="tool" type="button" aria-label="${esc(t("ui.mode"))}">${icon("sleep", 15)}</button></div>`,
   ".demo-badge": () => `<span class="demo-badge">${t("ui.demo")}</span>`,

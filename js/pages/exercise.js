@@ -1,8 +1,11 @@
 // Exercise: this week against the weekly goal, the last 7 days against your normal, load against recovery,
 // twelve weeks by kind, and how the body tends to answer each kind the next day.
-import { bullet, draw, esc, spark, stackedColumns } from "../charts.js?v=150dddf82c";
-import { clock, day, dur, measure, num, shortDay, signed, t, weekdayShort, wtype } from "../i18n.js?v=150dddf82c";
-import { STATE_ICON } from "../icons.js?v=150dddf82c";
+import { bullet, draw, esc, spark, stackedColumns } from "../charts.js?v=260bf4b694";
+import { clock, day, dur, measure, num, shortDay, signed, t, weekdayShort, wtype } from "../i18n.js?v=260bf4b694";
+import { STATE_ICON } from "../icons.js?v=260bf4b694";
+import { mountTabs, tabs } from "./tabs.js?v=260bf4b694";
+
+const chip = (cls, text) => `<span class="chip ${cls}">${esc(text)}</span>`;
 
 // kinds of training share the exercise hue and differ in lightness; minutes outside any logged workout are grey
 export const KIND_PARTS = [["strength", "var(--c-exercise)"], ["cardio", "var(--c-exercise-2)"], ["walk", "var(--c-exercise-3)"], ["loose", "var(--c-other)"]];
@@ -27,12 +30,6 @@ function tile(r, i) {
   return `<div class="tile"><div class="label"><span>${t(`ex.m.${r.key}`)}</span>${stateChip(r)}</div>
     <div class="value">${esc(value(r))}</div><div class="bul" data-i="${i}"></div><div class="spk" data-i="${i}"></div>
     <div class="note">${esc([t(`ex.how.${r.how}`), band].filter(Boolean).join(" · "))}</div></div>`;
-}
-
-function weekLine(w, g) {
-  if (!w.is_current) return t("ex.week_past", { d: dur(w.minutes), goal: dur(g.weekly_min) });
-  if (w.status === "met") return t("ex.week_met", { d: dur(w.minutes), goal: dur(g.weekly_min) });
-  return t("ex.week_left", { d: dur(w.minutes), left: dur(w.remaining_min), n: w.days_left, per: dur(Math.ceil(w.remaining_min / Math.max(1, w.days_left))) });
 }
 
 // the seven days of the week: active minutes as a bar split by kind (one scale for the week), the workouts done,
@@ -78,45 +75,34 @@ export default {
       return `<div class="head"><div><h1>${t("nav.exercise")}</h1></div></div><div class="card"><div class="empty">${t("ex.empty")}</div></div>`;
     }
     const share = Math.min(100, (w.minutes / g.weekly_min) * 100);
-    const goalLine = t(g.source === "plan" ? "ex.goal_plan" : "ex.goal_who", { d: dur(g.weekly_min), n: g.strength_days });
-    const strength = t("ex.strength_days", { n: w.strength_days, goal: g.strength_days });
     const load = p.load;
-    const loadFacts = [
-      [t("ex.load.acute"), dur(load.acute_min)],
-      [t("ex.load.chronic"), load.chronic_min == null ? "—" : dur(load.chronic_min)],
-      [t("ex.load.ratio"), load.ratio == null ? "—" : `${num(load.ratio, 2)}×`],
-    ];
-    const recovery = `<span class="chip ${p.recovery.verdict === "low" ? "bad" : p.recovery.verdict === "good" ? "good" : ""}">${t(`recovery.${p.recovery.verdict}`)}</span>`;
-    return `<div class="head"><div><h1>${t("nav.exercise")}</h1><div class="sub">${esc(goalLine)}</div></div></div>
+    const recovery = chip(p.recovery.verdict === "low" ? "bad" : p.recovery.verdict === "good" ? "good" : "", t(`recovery.${p.recovery.verdict}`));
+    const loadLine = load.chronic_min == null ? t("ex.load.line_one", { a: dur(load.acute_min) })
+      : t("ex.load.line", { a: dur(load.acute_min), c: dur(load.chronic_min), r: num(load.ratio, 2) });
+    return `<div class="head"><div><h1>${t("nav.exercise")}</h1><div class="sub">${t(g.source === "plan" ? "ex.src.plan" : "ex.src.who")}</div></div></div>
       <div class="grid">
         <section class="card span-12"><span class="eyebrow">${t("ex.eyebrow", { from: day(w.start, { weekday: false }), to: day(w.end, { weekday: false }) })}</span>
-          <p class="lede" style="margin:6px 0 10px">${esc(weekLine(w, g))}</p>
+          <p class="lede" style="margin:6px 0 10px">${esc(t("ex.week_short", { d: dur(w.minutes), goal: dur(g.weekly_min) }))}</p>
           <div class="progress" role="img" aria-label="${esc(`${dur(w.minutes)} / ${dur(g.weekly_min)}`)}"><span style="width:${share.toFixed(1)}%"></span></div>
-          <p class="small" style="margin:8px 0 14px;color:var(--ink-2)">${esc(strength)}${w.strength_left && w.is_current ? ` · ${esc(t("ex.strength_left", { n: w.strength_left, d: w.days_left }))}` : ""}</p>
+          <p class="small" style="margin:8px 0 14px;color:var(--ink-2)">${esc(t("ex.strength_days", { n: w.strength_days, goal: g.strength_days }))}</p>
           ${weekStrip(p)}
           <div class="legend" style="margin-top:10px">${KIND_PARTS.map(key).join("")}</div></section>
-        <div class="col span-7">
-          <section class="card"><h2>${t("ex.last7")}<span class="aside">${day(p.window.from, { weekday: false })} – ${day(p.window.to, { weekday: false })}</span></h2>
-            <div class="tiles two aligned">${p.rows.map(tile).join("")}</div>
-            <details class="how"><summary>${t("ui.how")}</summary><p>${t("ex.rule_tiles", { b: p.rule.baseline, k: p.rule.min_total_days })}</p></details></section>
-          <section class="card"><h2>${t("ex.weeks", { n: p.rule.weeks })}</h2><div id="exweeks" class="chart"></div>
-            <div class="legend" style="margin-top:8px">${KIND_PARTS.map(key).join("")}</div></section>
-          <section class="card"><h2>${t("ex.response")}<span class="aside">${t("ex.response_note", { n: p.rule.response_days })}</span></h2>${responseHtml(p)}
-            <p class="xs muted" style="margin:10px 0 0">${t("ex.response_rule")}</p></section>
-        </div>
-        <div class="col span-5">
-          <section class="card"><h2>${t("ex.load.title")}</h2>
-            <p class="lede" style="font-size:var(--t-lg);margin:0 0 8px">${t(`ex.advice.${p.advice}`)}</p>
-            <div class="row" style="gap:6px;margin-bottom:8px"><span class="small muted">${t("ex.recovery_today")}</span>${recovery}
-              <span class="chip ${load.state === "high" ? "watch" : ""}">${t(`ex.load.${load.state}`)}</span></div>
-            <dl class="facts">${loadFacts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd class="num">${esc(v)}</dd></div>`).join("")}</dl>
-            <details class="how"><summary>${t("ui.how")}</summary><p>${t("ex.load.rule", { hi: num(load.high, 1), lo: num(load.low, 1) })}</p></details></section>
-          <section class="card"><h2>${t("ex.recent")}</h2>${recentHtml(p)}</section>
-        </div>
+        <section class="card span-12"><h2>${t("ex.last7")}<span class="aside">${day(p.window.from, { weekday: false })} – ${day(p.window.to, { weekday: false })}</span></h2>
+          <p class="lede" style="font-size:var(--t-lg);margin:0 0 8px">${t(`ex.advice.${p.advice}`)}</p>
+          <div class="row" style="gap:6px;margin-bottom:var(--s-4)">${recovery}${chip(load.state === "high" ? "watch" : "", t(`ex.load.${load.state}`))}<span class="xs muted">${esc(loadLine)}</span></div>
+          <div class="tiles aligned ex-tiles">${p.rows.map(tile).join("")}</div>
+          <details class="how"><summary>${t("ui.how")}</summary><p>${t("ex.rule_tiles", { b: p.rule.baseline, k: p.rule.min_total_days })}</p><p>${t("ex.load.rule", { hi: num(load.high, 1), lo: num(load.low, 1) })}</p></details></section>
+        <section class="card span-12"><h2>${t("time.detail")}</h2>
+          ${tabs("ex", [
+            { key: "weeks", label: t("ex.weeks", { n: p.rule.weeks }), html: `<div id="exweeks" class="chart"></div><div class="legend" style="margin-top:8px">${KIND_PARTS.map(key).join("")}</div>` },
+            { key: "response", label: t("ex.response"), html: `<p class="xs muted tab-note">${t("ex.response_note", { n: p.rule.response_days })}</p>${responseHtml(p)}<p class="xs muted" style="margin:10px 0 0">${t("ex.response_rule")}</p>` },
+            { key: "recent", label: t("ex.recent"), html: recentHtml(p) },
+          ])}</section>
       </div>`;
   },
   mount(root, p) {
     if (!p.has_data) return;
+    mountTabs(root);
     const weeks = p.weeks.map((x) => ({
       label: shortDay(x.week_start),
       values: x.minutes == null ? null : parts(x.by_kind, x.loose),

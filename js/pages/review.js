@@ -1,5 +1,6 @@
-import { esc } from "../charts.js?v=150dddf82c";
-import { clock, day, dur, measure, num, signed, t } from "../i18n.js?v=150dddf82c";
+import { esc } from "../charts.js?v=260bf4b694";
+import { clock, day, dur, measure, num, signed, t } from "../i18n.js?v=260bf4b694";
+import { effectsHtml, mountEffects } from "./effects.js?v=260bf4b694";
 
 function fmt(m, v) {
   if (v == null) return "—";
@@ -31,6 +32,7 @@ function changeCell(m) {
 }
 
 export default {
+  mount(root, p) { mountEffects(root, p.effects); },
   render(p) {
     const stepper = `<div class="stepper"><a href="#review/${p.prev}">‹ ${t("review.prev")}</a>${p.next ? `<a href="#review/${p.next}">${t("review.next")} ›</a>` : `<span aria-disabled="true">${t("review.next")} ›</span>`}</div>`;
     const rows = p.sections.map((s) => `<tr class="sec"><th colspan="4" scope="rowgroup">${t(`review.sec.${s.key}`)}</th></tr>${s.metrics.map((m) => `<tr>
@@ -38,7 +40,9 @@ export default {
       <td class="num"><b>${esc(fmt(m, m.value))}</b>${m.days != null && m.key !== "workout_days" && m.key !== "logged_days" ? `<span class="xs muted"> · ${t("review.days", { n: m.days })}</span>` : ""}</td>
       <td class="num muted">${esc(fmt(m, m.before))}</td>${changeCell(m)}</tr>`).join("")}`).join("");
     const w = p.weight;
-    const due = (items) => (items.length ? `<ul class="agenda">${items.map((x) => `<li><span class="when">${day(x.due)}</span><span class="what"><b>${esc(x.title)}</b><span class="muted">${esc([x.group, x.weight_pct ? `${num(x.weight_pct)}%` : ""].filter(Boolean).join(" · "))}</span></span><span class="chip ${x.status === "todo" ? "" : "good"}">${t(`status.${x.status}`)}</span></li>`).join("")}</ul>` : `<p class="muted small">${t("review.none")}</p>`);
+    // deadlines are the calendar's: one line here, the list on the Schedule page
+    const pctOf = (items) => items.reduce((sum, x) => sum + (x.weight_pct || 0), 0);
+    const dueLine = t("review.due_line", { a: p.due_this.length, ap: num(pctOf(p.due_this)), b: p.due_next.length, bp: num(pctOf(p.due_next)) });
     return `<div class="head"><div><h1>${t("review.title", { from: day(p.week_start, { weekday: false }), to: day(p.week_end, { weekday: false }) })}</h1>
       <div class="sub">${p.partial ? t("review.partial") : t("review.sub")}</div></div>${stepper}</div>
       <div class="grid">
@@ -49,10 +53,10 @@ export default {
           <details class="how"><summary>${t("ui.how")}</summary><p>${t("review.rule")}</p></details></section>
         <div class="col span-5">
           <section class="card"><h2>${t("review.weight")}</h2><p class="hero-num" style="font-size:var(--t-2xl)">${w.avg == null ? "—" : `${num(w.avg, 1)} kg`}</p>
-            <p class="small muted" style="margin:0">${w.prev_avg != null && w.avg != null ? t("review.weight_change", { v: signed(w.avg - w.prev_avg, 1, " kg") }) : t("review.weight_days", { n: w.days })}</p></section>
-          <section class="card"><h2>${t("review.due_this")}</h2>${due(p.due_this)}</section>
-          <section class="card"><h2>${t("review.due_next")}</h2>${due(p.due_next)}</section>
+            <p class="small muted" style="margin:0">${w.prev_avg != null && w.avg != null ? t("review.weight_change", { v: signed(w.avg - w.prev_avg, 1, " kg") }) : t("review.weight_days", { n: w.days })}</p>
+            <p class="small" style="margin:var(--s-4) 0 0;padding-top:var(--s-3);border-top:1px solid var(--line)">${esc(dueLine)} <a href="#week">${t("nav.schedule")} →</a></p></section>
         </div>
+        <section class="card span-12">${effectsHtml(p.effects)}</section>
       </div>`;
   },
 };

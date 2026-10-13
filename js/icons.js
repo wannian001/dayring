@@ -1,7 +1,7 @@
 // Health AIO design kit: stroke icons, coloured by currentColor. Part of the kit (see docs/DESIGN_KIT.md).
 // One per lane of the Time page and one per thing "what changed" can name, plus food (a bowl), a check (a usual
 // day), the up / down arrows of the change badge and the menu's glyphs (sun, calendar, heart, clock, battery, list,
-// database, target, walk, and sidebar for the fold button). Same grid (24), stroke (1.8) and round joins throughout.
+// database, target, walk, info, and sidebar for the fold button). Same grid (24), stroke (1.8) and round joins throughout.
 // Convention: the comment line right above each export is its one-line doc (`healthaio kit json` reads it).
 const svg = (body, size) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 const PATHS = {
@@ -37,6 +37,8 @@ const PATHS = {
   sidebar: '<rect x="3" y="4.5" width="18" height="15" rx="2.6"/><path d="M9 4.5v15"/>',
   // plans and goals: a target
   target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
+  // what a project is: an i in a circle (the Overview page under the menu)
+  info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><circle cx="12" cy="7.9" r=".7" fill="currentColor"/>',
   // behaviour: a person walking
   walk: '<circle cx="13" cy="4.5" r="1.8"/><path d="m9.5 21 2.6-6.2 2.9 2.4V21M8 12.5l2-4.6 4 .8 2.5 3.3M12 8.7l.1 6.1"/>',
 };

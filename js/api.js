@@ -29,3 +29,14 @@ export async function get(name, param) {
 }
 
 export const isStatic = STATIC;
+
+// The one write: a goal set on the Goals page, or an answer to an assistant's proposal (live mode only; the
+// static demo has no server). Every page is read again afterwards, since a goal changes what they compare with.
+export async function post(name, body) {
+  const res = await fetch(`api/${name}`, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body) });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(out.error || `${res.status}`);
+  cache.clear();
+  return out;
+}
