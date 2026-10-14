@@ -1,5 +1,5 @@
-"""Load (#load): what is being asked of you, week by week, from the body and from the mind: the 8 weeks behind you, this
-week and the 4 ahead.
+"""Body & mind load (#load, under Schedule): what is being asked of you, week by week, from the body and from the
+mind: the 8 weeks behind you, this week and the 4 ahead.
 
 - Training (the body): the Recovery page's training load, effort x minutes, summed per week. Weeks ahead (and the
   rest of this week) hold the sessions planned in [plan.training], each at the median load of your sessions in the

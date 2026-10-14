@@ -25,7 +25,7 @@ TODAY = date(2026, 10, 12)
 NOW = datetime(2026, 10, 12, 18, 40)
 KIT_PATHS = [path for path, _ in kit.FILES]
 # colour tokens that dark mode keeps on purpose (status fills read the same on both backgrounds)
-SAME_IN_BOTH = {"--good", "--watch", "--off", "--c-sore-0", "--c-sore-1", "--c-sore-2", "--c-sore-3", "--plate", "--plate-ink"}
+SAME_IN_BOTH = {"--good", "--watch", "--off", "--c-sore-1", "--c-sore-2", "--c-sore-3"}
 COLOUR_ROLES = {"neutral", "accent", "data", "status"}
 
 

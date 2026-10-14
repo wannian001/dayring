@@ -102,6 +102,18 @@ Key: `date`, `region`. Typical sources: the Recovery page's body figure; typed b
 | `region` | text | yes | Which region (the body figure's seven), or none. One of: `head`, `torso`, `pelvis`, `left_upper_arm`, `right_upper_arm`, `left_calf`, `right_calf`, `none`. |
 | `level` | number | yes | 1 a little, 2 clearly sore, 3 very sore; 0 with region none. |
 
+## `workout_notes.csv`
+
+What a workout trained: the regions of the body figure and a note in your own words (typed, or dictated with the phone keyboard's microphone). After a strength session or a hard one (effort 7 or more) the pages ask once; the next mornings' check-in then asks about those regions first. A row with no regions and no note means you chose not to say.
+
+Key: `start`. Typical sources: the after-workout prompt on any page; healthaio trained; typed by hand.
+
+| column | type | required | meaning |
+|---|---|---|---|
+| `start` | datetime | yes | The workout's start, as in workouts.csv. |
+| `regions` | text |  | The regions trained, separated by spaces: head, torso, pelvis, left_upper_arm, right_upper_arm, left_calf, right_calf. |
+| `note` | text |  | What you trained, in your own words, e.g. bench, rows, curls. |
+
 ## `screen_sessions.csv`
 
 Foreground app sessions across your devices. Overlaps between devices are allowed; Health AIO counts wall-clock time once, preferring the device order in healthaio.toml (the Stimulation page's devices-at-once tab counts each device on its own). `end` must be after `start`.

@@ -84,16 +84,33 @@ streaks or scores. What it does not do yet is reach you: the page has to be open
 The first page under Body signals, because recovery is the body signal the day's decisions hang on.
 
 - **How recovered** is the Today page's verdict, the same numbers, so the two pages never disagree. Under it, this
-  week's training load (a link to Load) and this morning's soreness, one line each.
+  week's training load (a link to Body & mind load) and this morning's soreness, one line each.
 - **The morning check-in** is two things in one save. How you feel is one tap of three: not recovered (2), so-so (5),
   recovered (8); three steps are as many as a sleepy person tells apart, and the numbers put them on the same 0–10
   scale as the score below. Where you are sore is the body figure from the author's GEOM90007 project Ready to Train
   (seven regions, a male and a female figure, `[healthaio] figure`): tapping a region cycles a little → clearly →
   very → not sore. Save sends `POST /api/checkin`, which sets that morning's `feel` in `self_report.csv` and replaces
-  its rows in `soreness.csv`, the second and last thing a page may write (same rule as goals: only this app's own
-  page). An SVG mask does not change what a click hits, so the region under the pointer is read from the masks' own
-  pixels. The figure is a white plate in both modes; the soreness colours (`--c-sore-*`) are one hue getting
-  stronger, the same in both modes. A morning without a check-in is unknown.
+  its rows in `soreness.csv` (same rule as goals: only this app's own page). An SVG mask does not change what a
+  click hits, so the region under the pointer is read from the masks' own pixels. The figure is line art with a
+  see-through background, made from Ready to Train's reference images and painted in `--plate-ink` on `--plate`, so
+  it sits on a light plate in light mode and a dark one in dark mode; the soreness colours (`--c-sore-1..3`) are one
+  hue getting stronger, the same in both modes. A morning without a check-in is unknown.
+- **What a workout trained.** Soreness the next morning means little without knowing what was trained, and the
+  watch does not know (a strength session is just "strength training"). So after a strength session or a hard one
+  (effort 7 or more on Apple's scale, where 7–8 is "hard"), every page shows a note in the corner for 36 hours after
+  it ended: tap the parts it trained on the figure, or say it in a sentence. A sentence is quicker than taps right
+  after training, and on a phone the keyboard's microphone takes dictation, so the page needs no speech service of
+  its own (nothing leaves the computer). Words in the sentence light up the parts they name (Chinese and English,
+  `checkin.REGION_WORDS`: 卧推 or bench → torso, 二头 or curls → both upper arms; longer words first, so 小腿 is not
+  also 腿), always shown and always untickable, never a hidden guess. "Not this time" writes an empty row, so the
+  note does not come back on the phone after it was dismissed on the computer. Saved into `workout_notes.csv`
+  through `POST /api/trained`. The note appears only when a page is open: the iPhone app sends Health data while it
+  is open, so "right after the workout" means the next time you look.
+- **The next two mornings ask about those parts first**, a row per part with a button per level (not sore, a
+  little, clearly, very), above the figure, which still takes the rest; buttons and figure are the same check-in.
+  Delayed muscle soreness peaks a day or two after training, hence two mornings. The 14-day strips mark the days
+  each part was trained, and each training day under the morning-after score says what it trained and how sore
+  those parts were the next morning.
 - **The morning after training** answers "did I come back from that session?" for the last training day, on day 2:
   four parts, each set against your own normal and put on 0–10 with 5 for a usual morning (2.5 points per spread
   of your normal, better direction up): how you said you felt; HRV the morning after against the morning before
@@ -109,11 +126,11 @@ The first page under Body signals, because recovery is the body signal the day's
 - A region clearly or very sore this morning, with training planned, gives "train, but spare the sore parts" on
   Today (after "take it easy" and "rest", which come first).
 
-## The Load page (`#load`)
+## The Body & mind load page (`#load`)
 
 The page answers "how much is being asked of me, by the body and by the mind, and is a heavy stretch coming?". It
-took the schedule out of Daily life: the weeks ahead are not a habit, they are a load, and training is only half of
-it. It looks at the 8 weeks behind, this week and the 4 ahead, Monday to Sunday.
+sits under Schedule, after the week itself: the schedule is the thing you look at, the load is what it adds up to,
+and training is only half of it. It looks at the 8 weeks behind, this week and the 4 ahead, Monday to Sunday.
 
 - **The body** is training load: each workout's effort on Apple's 1–10 scale times its minutes (session-RPE, Foster
   et al. 2001; the same idea as Apple Fitness's Training Load). The effort is your own rating in the Fitness or
@@ -215,12 +232,12 @@ matters, and says when the evidence is softer (entertainment).
 
 ## Menu
 
-Today · Body signals (Recovery, Sleep, Drain, Weight) · Daily life (Exercise, Food, Stimulation) · Load (Body and
-mind, Schedule) · Actions & goals (Follow-up, Goals) · Weekly review · Data sources. The items are the loop of
+Today · Body signals (Recovery, Sleep, Drain, Weight) · Daily life (Exercise, Food, Stimulation) · Schedule (Week,
+Body & mind load) · Actions & goals (Follow-up, Goals) · Weekly review · Data sources. The items are the loop of
 managing your health, one question each: how am I today and what do I change; what is my body showing (outcomes you
-cannot change directly); what do I do every day (the causes you can change); what are the weeks asking of me, body
-and mind, behind and ahead; what did I decide to change and is it happening; did it help; where do the numbers come
-from. On a phone's tab bar each item takes a short name: Today, Body, Life, Load, Actions, Review, Data. (Two earlier menus mixed axes: Today and Week (time) next to Time and Drain (topics) and
+cannot change directly); what do I do every day (the causes you can change); what is coming, and how much do the
+weeks ask of me, body and mind; what did I decide to change and is it happening; did it help; where do the numbers come
+from. On a phone's tab bar each item takes a short name: Today, Body, Life, Schedule, Actions, Review, Data. (Two earlier menus mixed axes: Today and Week (time) next to Time and Drain (topics) and
 Review and Data (meta pages); then Body held exercise and food (things you do) next to weight (an outcome), while
 Time & energy held drain (mostly body signals). Splitting outcomes from causes is what makes "what to change" a
 question the menu itself asks.) The menu sits in a sidebar on the left from 900 px (the

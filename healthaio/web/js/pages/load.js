@@ -1,6 +1,7 @@
-// Load (#load): what is being asked of you, week by week, from the body (training load) and from the mind (hours of
-// classes and work, the share of grade due), the 8 weeks behind and the 4 ahead, each against your normal; then the
-// training load day by day. Nothing is added into one number. The rules are in modules/load.py.
+// Body & mind load (#load, under Schedule): what is being asked of you, week by week, from the body (training load)
+// and from the mind (hours of classes and work, the share of grade due), the 8 weeks behind and the 4 ahead, each
+// against your normal; then the training load day by day. Nothing is added into one number. The rules are in
+// modules/load.py.
 import { draw, esc, lanes, stackedColumns } from "../charts.js";
 import { day, dur, num, shortDay, t, wtype } from "../i18n.js";
 import { icon, STATE_ICON } from "../icons.js";

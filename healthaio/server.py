@@ -1,10 +1,11 @@
 """A small web server: the page files, one JSON endpoint per page, and the routes the iPhone app uses.
 
 Binds to 127.0.0.1 by default. The pages only read the data; it changes by editing or importing the CSV files, or by
-a package from the paired iPhone app. The browser can write two things, and only from a page this server served
+a package from the paired iPhone app. The browser can write three things, and only from a page this server served
 itself: a goal (POST /api/goals: set one, or answer an assistant's proposal), added as a line to goals.jsonl next to
-healthaio.toml; and the morning check-in (POST /api/checkin: how you feel and where you are sore), which replaces
-that morning's soreness rows and sets that morning's feeling. ``--lan`` lets phones on your home network or Tailscale in: they need a token from pairing,
+healthaio.toml; the morning check-in (POST /api/checkin: how you feel and where you are sore), which replaces
+that morning's soreness rows and sets that morning's feeling; and what a workout trained (POST /api/trained), which
+replaces that workout's row in workout_notes.csv. ``--lan`` lets phones on your home network or Tailscale in: they need a token from pairing,
 and nobody else is answered (docs/CAPTURE.md).
 """
 import json
@@ -222,7 +223,9 @@ def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: No
             if path == "/api/goals":
                 return self._goals()
             if path == "/api/checkin":
-                return self._checkin()
+                return self._checkin(checkin.from_browser)
+            if path == "/api/trained":
+                return self._checkin(checkin.trained_from_browser)
             return self._json(404, {"error": "nothing to write here"})
 
         def _same_site(self) -> bool:
@@ -246,16 +249,16 @@ def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: No
                 return self._send(400, to_json({"error": str(error)}), "application/json")
             return self._send(200, to_json({"ok": True, "id": entry["id"]}), "application/json; charset=utf-8")
 
-        def _checkin(self) -> None:
-            # the morning check-in from the Recovery page: the same rule as goals (this app's own page, here or in the
-            # paired phone's panel), and it only ever writes that morning's rows
+        def _checkin(self, write) -> None:
+            # the morning check-in, or what a workout trained: the same rule as goals (this app's own page, here or in
+            # the paired phone's panel), and it only ever writes that morning's rows or that workout's row
             if not self._same_site() or not (self._local() or phone.authenticate(cfg, self._cookie(), "read")):
                 return self._send(403, to_json({"error": "a check-in can only be saved from this app's own page"}), "application/json")
             length = int(self.headers.get("Content-Length") or 0)
             if not 0 < length <= 4096:
                 return self._send(413, to_json({"error": "expected a small JSON body"}), "application/json")
             try:
-                result = checkin.from_browser(cfg, json.loads(self.rfile.read(length)), now())
+                result = write(cfg, json.loads(self.rfile.read(length)), now())
             except ValueError as error:  # CheckinError and bad JSON
                 return self._send(400, to_json({"error": str(error)}), "application/json")
             return self._send(200, to_json(result), "application/json; charset=utf-8")

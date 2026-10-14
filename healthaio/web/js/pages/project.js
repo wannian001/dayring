@@ -27,7 +27,7 @@ const PROJECT = {
     data: { head: ["从哪", "收什么", "多久一次", "你要做的"], rows: [
       ["iPhone App", "Apple 健康里的睡眠、HRV、静息心率、步数、活动和训练（带强度评分）、体重，以及记饮食的 App 写进健康的每一餐。Apple Watch 不直接连：手表先写进 Apple 健康，再由它带过来。", "每次打开 App，把最近 3 天发到你的电脑；不在后台跑", "用 Xcode 装一次，扫码配对。免费 Apple ID 签的 App 每 7 天要续签：手机提前提醒，点一下由电脑重签"],
       ["Mac App（菜单栏）", "屏幕使用时间：这台 Mac，以及打开了“跨设备共享”的 iPhone、iPad", "每 2 小时一次。macOS 只留大约 4 周，所以要一直开着", "给它“完全磁盘访问权限”，可以设成登录时打开"],
-      ["手动记录", "恢复页上的早上打卡（感觉和酸痛）；Apple 健康导出包（export.zip）、课表或日历（.ics）、任意 CSV", "你想记、想导的时候", "点几下保存；导入是一条命令，适合第一次带进几年的历史"]] },
+      ["手动记录", "恢复页上的早上打卡（感觉和酸痛）、练完弹出的“练了哪儿”；Apple 健康导出包（export.zip）、课表或日历（.ics）、任意 CSV", "你想记、想导的时候", "点几下保存；导入是一条命令，适合第一次带进几年的历史"]] },
     costTitle: "它在你电脑上的开销（在一台 M4 MacBook 上实测）",
     cost: [
       "<b>没有服务器要扛：</b>每个人的电脑就是自己的服务器，作者这边不收任何数据。唯一联网的是每天问一次 GitHub 有没有新版本。",
@@ -43,6 +43,7 @@ const PROJECT = {
       ["建议", "每天早上说出今天做什么，最多三件，写明依据", "yes", "today", "今天"],
       ["跟进", "第二天按数据核对做到没有，不用打勾", "new", "followup", "跟进"],
       ["换做法", "老做不到就换：改小一步、让手机替你记、写一句“如果……就……”", "new", "followup", "跟进"],
+      ["追问", "练完问练了哪儿；之后两天早上先问这些部位酸不酸", "new", "recovery", "恢复"],
       ["找上门", "不打开页面也能收到提醒", "no", null, "现在要打开页面才看得到"],
       ["验证", "改了以后，第二天有没有更好", "part", "review", "每周复盘只说相关，不说因果"]] },
     status: { yes: "有", new: "这一版加的", no: "还没有", part: "一部分" },
@@ -93,7 +94,7 @@ const PROJECT = {
     data: { head: ["From", "What", "How often", "What you do"], rows: [
       ["iPhone app", "From Apple Health: sleep, HRV, resting heart rate, steps, activity and workouts (with their effort score), weight, and the meals a food-logging app writes into Health. The Apple Watch is not connected directly: it writes into Apple Health, and the app brings it over.", "Each time you open the app, the last 3 days go to your computer; nothing is sent while it is closed", "Install it once with Xcode and scan a QR code to pair. An app signed with a free Apple ID needs renewing every 7 days: the phone reminds you, and one tap has your computer re-sign it"],
       ["Mac app (menu bar)", "Screen Time: this Mac, plus the iPhone and iPad when “Share across devices” is on", "Every 2 hours. macOS keeps only about four weeks, so it stays running", "Give it Full Disk Access; it can open at login"],
-      ["By hand", "The morning check-in on the Recovery page (how you feel, where you are sore); an Apple Health export (export.zip), a timetable or calendar (.ics), any CSV", "Whenever you like", "A few taps and Save; an import is one command, good for bringing in years of history the first time"]] },
+      ["By hand", "The morning check-in on the Recovery page (how you feel, where you are sore) and the note after a workout (what it trained); an Apple Health export (export.zip), a timetable or calendar (.ics), any CSV", "Whenever you like", "A few taps and Save; an import is one command, good for bringing in years of history the first time"]] },
     costTitle: "What it costs your computer (measured on an M4 MacBook)",
     cost: [
       "<b>No server to carry:</b> each person's computer is their own server, and the author receives no data. The only request to the internet is asking GitHub once a day whether there is a newer version.",
@@ -109,6 +110,7 @@ const PROJECT = {
       ["Advise", "Each morning, at most three things to do today, with the reason", "yes", "today", "Today"],
       ["Follow up", "The next day, checked against the data, nothing to tick", "new", "followup", "Follow-up"],
       ["Change the approach", "When it keeps failing: a smaller step, a phone setting that remembers for you, an if-then plan", "new", "followup", "Follow-up"],
+      ["Ask back", "After a workout, what it trained; the next two mornings, whether those parts are sore", "new", "recovery", "Recovery"],
       ["Reach you", "A reminder without opening the page", "no", null, "For now you open the page to see it"],
       ["Check it helped", "After a change, were the next days better", "part", "review", "Weekly review shows associations, not causes"]] },
     status: { yes: "Yes", new: "New in this version", no: "Not yet", part: "In part" },

@@ -9,6 +9,7 @@
     python -m healthaio kit json|export|check|lock  # the design kit: its manifest, a copy for another app, is a copy current
     python -m healthaio goal list|set|propose|accept|decline  # goals beyond healthaio.toml (also set on the Goals page)
     python -m healthaio checkin --feel 5 torso=2 left_calf=1  # this morning's check-in (also on the Recovery page)
+    python -m healthaio trained --start 2026-10-12T17:44 --note "bench, rows"  # what a workout trained (also the popup)
     python -m healthaio serve --lan          # let your paired iPhone in (home network or Tailscale)
     python -m healthaio pair                 # open a code for the iPhone app;  devices [revoke ID|--all]
     python -m healthaio collect              # run the automatic importers once (the Mac app does it every few hours)
@@ -108,6 +109,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("levels", nargs="*", metavar="REGION=LEVEL", help="1 a little, 2 clearly, 3 very; none given = nothing sore")
     p.add_argument("--feel", type=int, choices=[2, 5, 8], help="2 not recovered, 5 so-so, 8 recovered")
     p.add_argument("--date", help="the morning, YYYY-MM-DD (default today)")
+    p = sub.add_parser("trained", help="what a workout trained: regions of the body figure and a note (also the popup after a workout)")
+    p.add_argument("regions", nargs="*", metavar="REGION", help="head, torso, pelvis, left_upper_arm, ...; none given = from the note's words")
+    p.add_argument("--start", required=True, help="the workout's start, YYYY-MM-DDTHH:MM, as in workouts.csv")
+    p.add_argument("--note", help="what you trained, in your own words")
     p = sub.add_parser("pair", help="open an 8-digit code (10 minutes) for the iPhone app")
     p.add_argument("--port", type=int, default=8790, help="the port `serve --lan` listens on")
     p.add_argument("--json", action="store_true")
@@ -175,6 +180,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.command == "checkin":
         from . import checkin
         return checkin.run(args, cfg)
+    if args.command == "trained":
+        from . import checkin
+        return checkin.run_trained(args, cfg)
     done = _phone_commands(args, cfg)
     if done is not None:
         return done

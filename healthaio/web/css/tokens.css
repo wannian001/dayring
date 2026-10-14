@@ -65,14 +65,14 @@
   --c-grid: rgba(22, 22, 22, .07);
   --c-axis: rgba(22, 22, 22, .22);
   --c-mark: #161616;
-  /* soreness, 1 a little to 3 very: one hue getting stronger, the same in both modes (the body figure is a white
-     plate in both), and the plate itself */
+  /* soreness, 1 a little to 3 very: one hue getting stronger, the same in both modes; the body figure's plate and
+     its line art follow the mode */
   --c-sore-0: #e5e5ea;        /* a region with nothing sore, on the plate */
   --c-sore-1: #f6c1cf;
   --c-sore-2: #ec6f8d;
   --c-sore-3: #c81d4b;
   --plate: #ffffff;           /* the body figure's plate */
-  --plate-ink: #3a3a3c;       /* labels on the plate */
+  --plate-ink: #3a3a3c;       /* the figure's line art and labels on the plate */
 
   /* [status] good / watch / off: fill, text (ink) and background (soft); the fills are the same in both modes */
   --good: #0ca30c; --good-ink: #1d7a1d; --good-soft: rgba(12, 163, 12, .11);
@@ -99,6 +99,7 @@
     --good-ink: #4cc94c; --good-soft: rgba(12, 163, 12, .18);
     --watch-ink: #f5bd4a; --watch-soft: rgba(250, 178, 25, .14); --on-watch: #0b0d13;
     --off-ink: #f27c7c; --off-soft: rgba(208, 59, 59, .2);
+    --c-sore-0: #3a4152; --plate: #1c2130; --plate-ink: #c3c9d6;
   }
 }
 :root[data-mode="dark"] {
@@ -116,4 +117,5 @@
   --good-ink: #4cc94c; --good-soft: rgba(12, 163, 12, .18);
   --watch-ink: #f5bd4a; --watch-soft: rgba(250, 178, 25, .14); --on-watch: #0b0d13;
   --off-ink: #f27c7c; --off-soft: rgba(208, 59, 59, .2);
+  --c-sore-0: #3a4152; --plate: #1c2130; --plate-ink: #c3c9d6;
 }

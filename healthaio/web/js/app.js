@@ -4,6 +4,7 @@ import { get, isStatic } from "./api.js";
 import { installTooltip, esc, setFormat } from "./charts.js";
 import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js";
 import { icon } from "./icons.js";
+import { mountPrompt } from "./trained.js";
 import { loadUpdate, mountUpdate, updateNote } from "./update.js";
 import body from "./pages/body.js";
 import data from "./pages/data.js";
@@ -27,23 +28,23 @@ import week from "./pages/week.js";
 const PAGES = { today, week, body, recovery, load, sleep, exercise, food, time, drain, followup, goals, review, data, kit, project, guide };
 // the menu is one axis, the loop of managing your health, one question per item: how am I today and what do I
 // change (Today); what is my body showing, the outcomes (Body signals: recovery, sleep, drain, weight); what do I do every day,
-// the causes I control (Daily life: exercise, food, stimulation); what is being asked of me, by the body and by the
-// mind (Load: training load, classes and deadlines, the schedule); what did I decide to change and is it happening
-// (Actions & goals: follow-up, goals); did it help (Weekly review); where the numbers come from (Data sources)
-const NAV = ["today", "body", "life", "load", "act", "review", "data"];
+// the causes I control (Daily life: exercise, food, stimulation); what is coming and how much it asks of me, body
+// and mind (Schedule: the week, then body and mind load across the weeks); what did I decide to change and is it
+// happening (Actions & goals: follow-up, goals); did it help (Weekly review); where the numbers come from (Data sources)
+const NAV = ["today", "body", "life", "sched", "act", "review", "data"];
 // a menu item that holds several pages shows a small switch above the page title and opens on its first page
 const GROUPS = {
   body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight"]],
   life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"]],
-  load: [["load", "nav.load_tab"], ["week", "nav.schedule"]],
+  sched: [["week", "nav.schedule_week"], ["load", "nav.load_tab"]],
   act: [["followup", "nav.followup"], ["goals", "nav.goals"]],
 };
 const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) => p === page)) || page;
 // a page inside a group is titled by its own tab (Weight, Sleep), not by the group
 const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;
-const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup" };  // old links keep working (AI work was removed)
+const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup", sched: "week" };  // old links keep working (AI work was removed)
 // each menu item's glyph (icons.js)
-const NAV_ICON = { today: "sun", body: "heart", life: "walk", load: "battery", act: "target", review: "list", data: "database" };
+const NAV_ICON = { today: "sun", body: "heart", life: "walk", sched: "calendar", act: "target", review: "list", data: "database" };
 // the reading pages sit under the menu, apart from the health loop: what the project is and who it is for, how to
 // use the app, and how the personal system it comes from changed over a year. History is on the author's own site
 // (it quotes that personal system), so it is a link out, in a new tab. On a phone they are small links in the top
@@ -170,6 +171,7 @@ async function route() {
     main.innerHTML = updateNote() + sub + PAGES[page].render(data) + footer();
     mountUpdate(main);
     PAGES[page].mount?.(main, data);
+    get("prompt").then(mountPrompt, () => mountPrompt(null));  // after a strength or hard workout: what did it train?
   } catch (error) {
     const staticGap = isStatic && /^404/.test(error.message);  // the demo site only has a few pre-rendered dates
     main.innerHTML = `<div class="card"><p class="lede">${t(staticGap ? "ui.static_gap" : "ui.error")}</p><p class="muted small">${t(staticGap ? "ui.static_gap_hint" : "ui.error_hint")}</p>

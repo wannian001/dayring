@@ -86,12 +86,12 @@ Colours, light and dark ("same" = the same value in both modes):
 | `--c-grid` | `rgba(22, 22, 22, .07)` | `rgba(236, 238, 245, .07)` | Gridlines |
 | `--c-axis` | `rgba(22, 22, 22, .22)` | `rgba(236, 238, 245, .22)` | Axes and baselines |
 | `--c-mark` | `#161616` | `#eceef5` | A neutral mark: this week, an average, a deadline |
-| `--c-sore-0` | `#e5e5ea` | same | A body region with nothing sore, on the plate |
+| `--c-sore-0` | `#e5e5ea` | `#3a4152` | A body region with nothing sore, on the plate |
 | `--c-sore-1` | `#f6c1cf` | same | Soreness: a little (the Recovery page's body figure and strips) |
 | `--c-sore-2` | `#ec6f8d` | same | Soreness: clearly sore |
 | `--c-sore-3` | `#c81d4b` | same | Soreness: very sore |
-| `--plate` | `#ffffff` | same | The body figure's plate, white in both modes |
-| `--plate-ink` | `#3a3a3c` | same | Labels on the plate |
+| `--plate` | `#ffffff` | `#1c2130` | The body figure's plate |
+| `--plate-ink` | `#3a3a3c` | `#c3c9d6` | The figure's line art and the labels on the plate |
 | `--good` | `#0ca30c` | same | good mark in a chart |
 | `--good-ink` | `#1d7a1d` | `#4cc94c` | good text |
 | `--good-soft` | `rgba(12, 163, 12, .11)` | `rgba(12, 163, 12, .18)` | good chip background |
@@ -205,6 +205,7 @@ changed files under a version that is not newer.
 
 | version | date | change |
 |---|---|---|
+| 1.7.1 | 2026-10-14 | `--plate`, `--plate-ink` and `--c-sore-0` get dark-mode values: the body figure is now line art painted in `--plate-ink`, so it sits on a dark plate in dark mode instead of a white one |
 | 1.7.0 | 2026-10-14 | Tokens `--c-sore-0` to `--c-sore-3` (soreness, one hue getting stronger, the same in both modes) and `--plate`, `--plate-ink` (the body figure's white plate), for the Recovery page |
 | 1.6.0 | 2026-10-14 | Icons `watch`, `phone`, `laptop` and `tray`: the devices data comes from, on the Data sources page; `ai` now stands for an AI assistant (AI work left the app) |
 | 1.5.0 | 2026-10-13 | `.side`: a menu item with pages opens and closes its list with a click: it ends in a `.side-caret` (turned down while open) and carries `aria-expanded`, and its `.side-sub` links are `[hidden]` while it is closed; the item stays highlighted while its list is closed. On the icon rail and the phone's tab bar the caret and the list stay hidden; icon `info` (the Overview page under the menu) |
@@ -281,12 +282,12 @@ Health AIO 身兼两职：它是一个本地优先看板的公开展示，也是
 | `--c-grid` | `rgba(22, 22, 22, .07)` | `rgba(236, 238, 245, .07)` | 网格线 |
 | `--c-axis` | `rgba(22, 22, 22, .22)` | `rgba(236, 238, 245, .22)` | 坐标轴和基线 |
 | `--c-mark` | `#161616` | `#eceef5` | 中性标记：这一周、平均线、截止 |
-| `--c-sore-0` | `#e5e5ea` | 同左 | 人体图上不酸的部位 |
+| `--c-sore-0` | `#e5e5ea` | `#3a4152` | 人体图上不酸的部位 |
 | `--c-sore-1` | `#f6c1cf` | 同左 | 酸痛：有点酸（恢复页的人体图和小格） |
 | `--c-sore-2` | `#ec6f8d` | 同左 | 酸痛：明显酸 |
 | `--c-sore-3` | `#c81d4b` | 同左 | 酸痛：很酸 |
-| `--plate` | `#ffffff` | 同左 | 人体图的底板，深浅色下都是白的 |
-| `--plate-ink` | `#3a3a3c` | 同左 | 底板上的文字 |
+| `--plate` | `#ffffff` | `#1c2130` | 人体图的底板 |
+| `--plate-ink` | `#3a3a3c` | `#c3c9d6` | 人体图的线条和底板上的文字 |
 | `--good` | `#0ca30c` | 同左 | 图上“好”的标记 |
 | `--good-ink` | `#1d7a1d` | `#4cc94c` | “好”的文字 |
 | `--good-soft` | `rgba(12, 163, 12, .11)` | `rgba(12, 163, 12, .18)` | “好”的标签底色 |
@@ -363,6 +364,7 @@ Health AIO 身兼两职：它是一个本地优先看板的公开展示，也是
 
 | 版本 | 日期 | 改了什么 |
 |---|---|---|
+| 1.7.1 | 2026-10-14 | `--plate`、`--plate-ink`、`--c-sore-0` 有了深色模式的值：人体图改成用 `--plate-ink` 画的线稿，深色模式下底板也是深色，不再是白的 |
 | 1.7.0 | 2026-10-14 | 新变量 `--c-sore-0` 到 `--c-sore-3`（酸痛，同一色相由浅到深，深浅色下相同）和 `--plate`、`--plate-ink`（人体图的白色底板），给恢复页用 |
 | 1.6.0 | 2026-10-14 | 新图标 `watch`、`phone`、`laptop`、`tray`：数据从哪台设备来（数据来源页用）；`ai` 现在指 AI 助手（AI 干活量已从应用里去掉） |
 | 1.5.0 | 2026-10-13 | `.side`：有子页的菜单项点一下展开或收起子页：末尾一个 `.side-caret`（展开时转向下），带 `aria-expanded`，收起时它的 `.side-sub` 带 `[hidden]`；收起时高亮落在这一项本身。图标条和手机底部标签栏上不显示箭头和子页；新图标 `info`（菜单下面的项目说明页） |

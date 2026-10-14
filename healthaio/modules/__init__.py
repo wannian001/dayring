@@ -11,6 +11,8 @@ PAGES: Dict[str, Callable[..., Dict[str, Any]]] = {
     "body": lambda ctx, param=None: body.build(ctx, day=param),
     "sleep": lambda ctx, param=None: sleep.build(ctx, day=param),
     "recovery": lambda ctx, param=None: recovery.build(ctx, day=param),
+    # not a page: what every page asks after a strength or hard workout (the popup; modules/recovery.py)
+    "prompt": lambda ctx, param=None: recovery.prompt(ctx),
     "load": lambda ctx, param=None: load.build(ctx, day=param),
     "time": lambda ctx, param=None: time.build(ctx, day=param),
     "drain": lambda ctx, param=None: drain.build(ctx, day=param),

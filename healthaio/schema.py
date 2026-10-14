@@ -223,6 +223,20 @@ TABLES: Dict[str, Table] = {t.name: t for t in (
         ),
     ),
     Table(
+        name="workout_notes",
+        doc="What a workout trained: the regions of the body figure and a note in your own words (typed, or dictated "
+            "with the phone keyboard's microphone). After a strength session or a hard one (effort 7 or more) the pages "
+            "ask once; the next mornings' check-in then asks about those regions first. A row with no regions and no "
+            "note means you chose not to say.",
+        key=("start",),
+        sources=("the after-workout prompt on any page", "healthaio trained", "typed by hand"),
+        columns=(
+            Column("start", "datetime", "The workout's start, as in workouts.csv.", required=True),
+            Column("regions", "text", "The regions trained, separated by spaces: " + ", ".join(SORE_REGIONS) + "."),
+            Column("note", "text", "What you trained, in your own words, e.g. bench, rows, curls."),
+        ),
+    ),
+    Table(
         name="screen_sessions",
         doc="Foreground app sessions across your devices. Overlaps between devices are allowed; "
             "Health AIO counts wall-clock time once, preferring the device order in healthaio.toml "

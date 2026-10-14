@@ -342,6 +342,39 @@ class Sam:
             w["effort"] = float(min(10, max(1, round(effort))))
             w["effort_source"] = "rated" if roll < 0.82 else "estimated"
 
+    def lunch_run(self) -> None:
+        """Today Sam fitted in a run at lunch, harder than usual (an 8 he rated himself). Nothing is written yet about
+        what it trained, so every page asks (the after-workout prompt)."""
+        if self.now.time() < time(13, 30):
+            return
+        begin = datetime.combine(self.today, time(12, 20))
+        self.workouts.append({"start": begin, "end": begin + timedelta(minutes=34), "type": "running", "source": "Apple Watch",
+                              "kcal": 342, "avg_hr": 161, "effort": 8.0, "effort_source": "rated"})
+
+    def workout_notes(self) -> List[Dict]:
+        """What Sam wrote about his strength sessions and hard runs: most of them, those of the last four days always
+        (so this week's check-ins ask about them), never today's run. Monday is upper body, Friday lower, as in
+        soreness(); the notes use the words the page turns into regions."""
+        rng = random.Random(SEED + 41)
+        upper = ("Bench, rows, curls", "Pull-ups, bench press, dips", "Chest and back, then arms")
+        lower = ("Squats, deadlifts, calf raises", "Leg day: squats and lunges", "Deadlifts, hip thrusts, calf raises")
+        runs = ("Tempo run", "Intervals, calves heavy at the end")
+        rows = []
+        for w in sorted(self.workouts, key=lambda x: x["start"]):
+            day = w["start"].date()
+            if day >= self.today or not (w["type"] == "strength training" or (w.get("effort") or 0) >= 7):
+                continue
+            if (self.today - day).days > 4 and rng.random() < 0.2:
+                continue  # not written that time
+            if w["type"] == "strength training" and day.weekday() == 0:
+                regions, note = ("torso", "left_upper_arm", "right_upper_arm"), rng.choice(upper)
+            elif w["type"] == "strength training":
+                regions, note = ("pelvis", "left_calf", "right_calf"), rng.choice(lower)
+            else:
+                regions, note = ("left_calf", "right_calf"), rng.choice(runs)
+            rows.append({"start": w["start"], "regions": " ".join(regions), "note": note})
+        return rows
+
     def soreness(self) -> List[Dict]:
         """Morning check-ins on nine mornings in ten after a workout and one in two otherwise (the morning after is
         when Sam wants to know how he came back): the regions a workout loads are sore the next morning
@@ -574,7 +607,9 @@ def generate(out: Path, today: Optional[date] = None, now: Optional[datetime] = 
     write_table(data, "events", events)
     write_table(data, "deadlines", sam.deadlines())
     sam.rate_workouts()
+    sam.lunch_run()
     write_table(data, "workouts", sam.workouts)
+    write_table(data, "workout_notes", sam.workout_notes())
     write_table(data, "soreness", sore)
     write_table(data, "meals", sam.meals(body))
     sessions = sam.screen(body, events)
