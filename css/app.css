@@ -400,6 +400,18 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 
 /* ---- today: what to adjust, inside the morning card under the ring ---- */
 .today-todo { margin-top: var(--s-5); padding-top: var(--s-5); border-top: 1px solid var(--line); }
+.today-followup { margin: var(--s-3) 0 0; }
+/* a menu item with five pages (Daily life): on a narrow screen the switch stays one line and scrolls sideways */
+main > .subnav { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+main > .subnav::-webkit-scrollbar { display: none; }
+main > .subnav a { flex: none; white-space: nowrap; }
+
+/* Follow-up (#followup): yesterday's advice checked, other ways for advice that keeps not happening */
+.goal-name .todo-icon { width: 26px; height: 26px; }
+.fu-ways { display: grid; gap: var(--s-3); padding: var(--s-4) 0; border-top: 1px solid var(--line); }
+.fu-ways:first-of-type { border-top: 0; padding-top: 0; }
+.fu-ways ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--s-3); }
+.fu-ways li { display: flex; flex-direction: column; gap: 4px; padding: var(--s-3) var(--s-4); border-radius: var(--r-md); background: var(--surface-2); font-size: var(--t-sm); line-height: 1.5; }
 
 /* ---- today: every part in one line (icon · name and sentence · small picture · state · open) ---- */
 .sum-rows { display: flex; flex-direction: column; }
@@ -472,6 +484,9 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 }
 .doc-table { font-size: var(--t-sm); }
 .doc-table th[scope="row"] { font-weight: 600; text-align: left; }
+.doc-table td .chip { height: 22px; font-size: 11px; padding: 0 8px; margin-right: 4px; }
+.doc-sub { margin: var(--s-5) 0 var(--s-2); font-size: var(--t-md); font-weight: 680; }
+.doc-ladder th[scope="row"] { white-space: nowrap; }
 .doc-list { margin: 0; padding-left: 1.1em; display: grid; gap: var(--s-2); font-size: var(--t-sm); line-height: 1.65; color: var(--ink-2); max-width: 80ch; }
 .doc-list b { color: var(--ink); }
 .doc-folds details .table-wrap { margin-bottom: var(--s-3); }

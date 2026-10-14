@@ -8,10 +8,10 @@
 // own tab; its two measures, screens at once (a ratio, kept in hundredths) and the longest stretch on one thing,
 // are candidates of "what changed" like the rest. Two cards: what changed with the daily averages, then the
 // detail as tabs (a typical day, 30 days, stimulation and focus, devices at once, top apps).
-import { bullet, draw, esc, lanes, timeChart } from "../charts.js?v=c807d708f4";
-import { day, device, dur, getLang, num, shortDay, t, weekdayShort } from "../i18n.js?v=c807d708f4";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=c807d708f4";
-import { mountTabs, tabs } from "./tabs.js?v=c807d708f4";
+import { bullet, draw, esc, lanes, timeChart } from "../charts.js?v=baa624a8af";
+import { day, device, dur, getLang, num, shortDay, t, weekdayShort } from "../i18n.js?v=baa624a8af";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=baa624a8af";
+import { mountTabs, tabs } from "./tabs.js?v=baa624a8af";
 
 const ORDER = ["sleep", "exercise", "calendar", "screen"];  // the lanes, in the same order in both lane charts
 const TILES = ["screen", "fun", "focus", "communication", "exercise", "calendar", "sleep", "not_recorded"];  // every candidate has a tile

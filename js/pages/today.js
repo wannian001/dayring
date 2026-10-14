@@ -1,11 +1,11 @@
 // Today: one card for the morning (the day ring, how recovered you are, what is on, tonight, and what to adjust), then
 // every other part of your health in one line each. Numbers and a state only: the sentences that explain them live on
 // each part's own page, one click away, so a first look takes seconds.
-import { dayRing, draw, esc, RING_CATS, spark } from "../charts.js?v=c807d708f4";
-import { clock, day, dur, measure, num, signed, t, wtype } from "../i18n.js?v=c807d708f4";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=c807d708f4";
-import { worseLine } from "./drain.js?v=c807d708f4";
-import { helping } from "./effects.js?v=c807d708f4";
+import { dayRing, draw, esc, RING_CATS, spark } from "../charts.js?v=baa624a8af";
+import { clock, day, dur, measure, num, signed, t, wtype } from "../i18n.js?v=baa624a8af";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=baa624a8af";
+import { worseLine } from "./drain.js?v=baa624a8af";
+import { helping } from "./effects.js?v=baa624a8af";
 
 const shiftDay = (iso, n) => { const d = new Date(`${iso}T12:00:00`); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 const chip = (cls, text, glyph = "") => `<span class="chip ${cls}">${glyph}${esc(text)}</span>`;
@@ -44,10 +44,11 @@ function tonightHtml(p) {
     <div><span>${t("today.alarm")}</span><b>${clock(s.alarm)}</b></div></div>`;
 }
 
-// ---- what to adjust today: at most one thing each for training, sleep and food; the reason in a few words
-const TODO_ICON = { training: "exercise", sleep: "sleep", food: "food" };
+// ---- what to adjust today: at most three things, at most one each for training, sleep, food and daytime screens;
+// the reason in a few words. The Follow-up page (pages/followup.js) checks them the next day with the same titles.
+export const TODO_ICON = { training: "exercise", sleep: "sleep", food: "food", screen: "fun" };
 
-function todoTitle(x) {
+export function todoTitle(x) {
   const q = x.params || {};
   switch (x.key) {
     case "ease": return q.planned ? t("todo.ease", { what: q.planned }) : t("todo.ease_rest");
@@ -59,6 +60,7 @@ function todoTitle(x) {
     case "late_meal": return q.clock ? t("todo.late_meal", { clock: clock(q.clock) }) : t("todo.late_meal_h", { h: num(q.hours) });
     case "protein": return t("todo.protein", { g: num(q.more_g) });
     case "kcal": return t("todo.kcal", { kcal: num(q.max) });
+    case "fun_cap": return t("todo.fun_cap", { h: num(q.hours, Number.isInteger(q.hours) ? 0 : 1) });
     default: return x.key;
   }
 }
@@ -75,6 +77,7 @@ function todoWhy(x) {
     case "late_meal": return t("todo.short.late_meal", { n: w.late, k: w.known });
     case "protein": return t("todo.short.protein", { avg: num(w.avg_g), target: num(x.params.target_g) });
     case "kcal": return t("todo.short.kcal", { avg: num(w.avg), max: num(x.params.max) });
+    case "fun_cap": return t(`todo.short.fun_cap_${x.params.source}`, { avg: dur(w.avg), h: num(x.params.hours, Number.isInteger(x.params.hours) ? 0 : 1) });
     default: return "";
   }
 }
@@ -87,6 +90,7 @@ function todoHtml(p) {
         <span class="todo-icon" style="color:${COLOR[TODO_ICON[x.domain]] || "var(--ink-2)"}">${icon(TODO_ICON[x.domain], 20)}</span>
         <span class="todo-body"><b>${esc(todoTitle(x))}</b><span class="small muted">${esc(todoWhy(x))}</span></span></a></li>`).join("")}</ol>`;
   return `<div class="today-todo"><h2 class="section-title">${t("todo.title")}</h2>${body}
+    <p class="small today-followup"><a href="#followup">${t("fu.today_link")} ›</a></p>
     <details class="how"><summary>${t("ui.how")}</summary><p>${t("todo.rule")}</p></details></div>`;
 }
 

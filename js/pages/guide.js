@@ -2,8 +2,8 @@
 // Numbered steps in the order you meet them, in one card, each opening on a click; commands are the ones in the README's Quick start
 // and companion-app sections. The server only
 // names the page (modules/docs.py).
-import { esc } from "../charts.js?v=c807d708f4";
-import { getLang, t } from "../i18n.js?v=c807d708f4";
+import { esc } from "../charts.js?v=baa624a8af";
+import { getLang, t } from "../i18n.js?v=baa624a8af";
 
 const CODE = {
   install: ["git clone https://github.com/wannian001/proactive-health-aio.git", "cd proactive-health-aio", "python3 -m healthaio serve --demo"],
@@ -20,24 +20,26 @@ const GUIDE = {
     note: "在线演示里的人叫 Sam，是虚构的研究生，数字都是编的。想看你自己的，按下面第 2 到 4 步装到你自己的电脑上；数据只留在那台电脑里。",
     steps: [
       { h: "先看看演示", body: [
-        "左边的菜单（手机上在底部）按管理健康的顺序排：<b>今天 → 身体数据 → 时间与精力 → 目标与日程 → 每周复盘 → 数据来源</b>。点有子页的一项，子页才展开。",
+        "左边的菜单（手机上在底部）按管理健康的顺序排：<b>今天 → 身体状态 → 生活习惯 → 行动与目标 → 每周复盘 → 数据来源</b>。点有子页的一项，子页才展开。",
+        "<b>身体状态</b>是结果，你没法直接改（睡眠、消耗、体重）；<b>生活习惯</b>是你每天做的事，能直接改（运动、饮食、时间去向、AI 干活量、日程）；<b>行动与目标</b>是你决定改什么、做到了没有。",
         "从“今天”开始：恢复得怎样、今天该调整什么、今天有什么安排、今晚几点该睡着。",
         "菜单旁边的两个按钮可以切换中英文和深浅色。"] },
       { h: "装到你的电脑上", body: ["需要 Python 3.9 以上，不用装别的包。先用演示数据确认能跑，然后打开 <b>http://localhost:8790</b>："], code: "install" },
-      { h: "导入你的数据", body: [
+      { h: "先带进历史数据", body: [
         "在 iPhone 的“健康” App 里点右上角的头像，选“导出所有健康数据”，把得到的 <b>export.zip</b> 传到电脑上。",
-        "一个导出包就能带进来大部分：睡眠、HRV、静息心率、步数、体重、每次训练，以及记饮食的 App 写进健康里的每一餐。"], code: "import",
+        "一个导出包就能带进来大部分：睡眠、HRV、静息心率、步数、体重、每次训练，以及记饮食的 App 写进健康里的每一餐。历史长的话包会很大（几年的手表数据可以有几个 GB），导一次就行；之后交给第 5 步的 iPhone App。"], code: "import",
         after: "下面这些是可选的：课表或日历（.ics）、Mac 的屏幕使用时间（试验性）、Claude Code 和 Codex 的使用记录（只读时刻和条数）；最后一行检查哪些行读不出：", code2: "more" },
       { h: "打开，设你的目标", body: [
         "在 <b>healthaio.toml</b> 里改一下时区，然后运行下面这行。",
         "目标在“目标”页直接设、随时改：几点睡着、每周练几次、饮食和屏幕的上限。每一项都可以不设，没设的页面照样显示事实，只是没有目标可比。"], code: "serve" },
       { h: "让它自己跑：Mac App 和 iPhone App", body: [
-        "<b>Mac App</b> 在菜单栏里：给它“完全磁盘访问权限”后，每 2 小时自己采一次屏幕使用时间，看板一直开着；GitHub 上有新版本时会弹窗问你要不要更新。",
-        "<b>iPhone App</b> 用 Xcode 装到手机上（见 ios/README.md），在 Mac App 里点“配对 iPhone”扫二维码。之后每次打开，它把最近 3 天的 Apple 健康发到电脑，看板就在它的一个标签页里。",
+        "<b>Mac App</b> 在菜单栏里（构建一次约 20 秒）：给它“完全磁盘访问权限”后，每 2 小时自己采一次屏幕使用时间，看板一直开着；GitHub 上有新版本时会弹窗问你要不要更新。",
+        "<b>iPhone App</b> 用 Xcode（本体约 3.7 GB）装到手机上（见 ios/README.md），在 Mac App 里点“配对 iPhone”扫二维码。之后每次打开，它把最近 3 天的 Apple 健康发到电脑，看板就在它的一个标签页里。它不在后台跑：不打开，就不发。",
         "免费 Apple ID 签的 App 管 7 天：手机每天第一次打开时会检查，快到期就提醒你，点“现在续签”由电脑重新签好装上。"], code: "apps" },
       { h: "每天怎么用", body: [
-        "<b>早上</b>打开“今天”：先看恢复（和你自己最近 28 天比），再看“今天该调整的”：训练、睡眠、饮食各最多一件，每件都写明依据的数字。",
-        "想细看某一项，去“身体数据”（作息、运动、饮食、体重）或“时间与精力”（时间去向、AI 干活量、消耗）。",
+        "<b>早上</b>打开“今天”：先看恢复（和你自己最近 28 天比），再看“今天该调整的”：训练、睡眠、饮食、白天的屏幕各最多一件，一共最多三件，每件都写明依据的数字。",
+        "<b>第二天</b>看“行动与目标 › 跟进”：昨天的建议按数据核对做到没有，不用你打勾。同一条老做不到，那里会换几种做法给你：改小一步、让手机替你记、写一句“如果……就……”。",
+        "想细看某一项，去“身体状态”（睡眠、消耗、体重）或“生活习惯”（运动、饮食、时间去向、AI 干活量、日程）。",
         "<b>周末</b>看“每周复盘”：这一周和前四周并排放，不打分。",
         "某项很久没更新，去“数据来源”页看是哪一路断了。装了 iPhone App，打开它就会把新数据发过来；没装的话，再导出一次 Apple 健康、重新导入。"] },
       { h: "怎么读这些数", body: [
@@ -58,24 +60,26 @@ const GUIDE = {
     note: "The person in the online demo, Sam, is a made-up graduate student, and every number is invented. To see your own, install it on your computer with steps 2 to 4 below; your data stays on that computer.",
     steps: [
       { h: "Look around the demo", body: [
-        "The menu on the left (at the bottom on a phone) follows the loop of managing your health: <b>Today → Body → Time & energy → Goals & schedule → Weekly review → Data sources</b>. An item with pages opens them with a click.",
+        "The menu on the left (at the bottom on a phone) follows the loop of managing your health: <b>Today → Body signals → Daily life → Actions & goals → Weekly review → Data sources</b>. An item with pages opens them with a click.",
+        "<b>Body signals</b> are outcomes you cannot change directly (sleep, drain, weight); <b>Daily life</b> is what you do every day and can change (exercise, food, where time went, AI work, the schedule); <b>Actions & goals</b> is what you decided to change and whether it happens.",
         "Start with Today: how you recovered, what to adjust today, what is on, and when to be asleep tonight.",
         "The two buttons by the menu switch the language and light / dark."] },
       { h: "Install it on your computer", body: ["Needs Python 3.9 or newer, no other packages. Check it runs with the demo data first, then open <b>http://localhost:8790</b>:"], code: "install" },
-      { h: "Bring in your data", body: [
+      { h: "Bring in your history", body: [
         "On your iPhone, open the Health app, tap your picture at the top right and choose Export All Health Data; copy the <b>export.zip</b> to your computer.",
-        "One export brings in most of it: sleep, HRV, resting heart rate, steps, weight, every workout, and the meals that food-logging apps write into Health."], code: "import",
+        "One export brings in most of it: sleep, HRV, resting heart rate, steps, weight, every workout, and the meals that food-logging apps write into Health. With a long history the file is large (years of watch data can run to several GB); you do this once, and the iPhone app in step 5 takes over."], code: "import",
         after: "These are optional: a timetable or calendar (.ics), Screen Time on a Mac (experimental), Claude Code and Codex logs (times and counts only); the last line checks which rows could not be read:", code2: "more" },
       { h: "Open it, set your goals", body: [
         "Set your timezone in <b>healthaio.toml</b>, then run the line below.",
         "Set goals right on the Goals page and change them any time: when to be asleep, how often to train, limits for food and screens. Each is optional; a page without its goal still shows the facts, just without a goal to compare with."], code: "serve" },
       { h: "Let it run by itself: the Mac app and the iPhone app", body: [
-        "The <b>Mac app</b> lives in the menu bar. Once you give it Full Disk Access it collects Screen Time every 2 hours and keeps the dashboard running; when GitHub has a newer version it asks whether to update.",
-        "Install the <b>iPhone app</b> with Xcode (see ios/README.md) and scan the QR code from Pair iPhone in the Mac app. From then on, each time you open it, it sends the last 3 days of Apple Health to your computer, and the dashboard is one of its tabs.",
+        "The <b>Mac app</b> lives in the menu bar (about 20 seconds to build). Once you give it Full Disk Access it collects Screen Time every 2 hours and keeps the dashboard running; when GitHub has a newer version it asks whether to update.",
+        "Install the <b>iPhone app</b> with Xcode (3.7 GB on its own; see ios/README.md) and scan the QR code from Pair iPhone in the Mac app. From then on, each time you open it, it sends the last 3 days of Apple Health to your computer, and the dashboard is one of its tabs. It sends only while it is open: not opened, nothing sent.",
         "An app signed with a free Apple ID lasts 7 days: the first time it opens each day the phone checks, reminds you when the end is near, and Renew now has your computer sign and install it again."], code: "apps" },
       { h: "A normal day with it", body: [
-        "<b>In the morning</b>, open Today: first recovery (against your own last 28 days), then what to adjust today: at most one thing each for training, sleep and food, each with the numbers behind it.",
-        "For a closer look, go to Body (sleep, exercise, food, weight) or Time & energy (where the time went, AI work, drain).",
+        "<b>In the morning</b>, open Today: first recovery (against your own last 28 days), then what to adjust today: at most one thing each for training, sleep, food and daytime screens, three at most, each with the numbers behind it.",
+        "<b>The next day</b>, open Actions & goals › Follow-up: yesterday's advice, checked against the data, with nothing to tick. When the same advice keeps not happening, it offers other ways: a smaller step, a phone setting that remembers for you, an if-then plan.",
+        "For a closer look, go to Body signals (sleep, drain, weight) or Daily life (exercise, food, where time went, AI work, the schedule).",
         "<b>At the weekend</b>, open Weekly review: this week next to the four before it, with no scores.",
         "If something has not updated for a while, Data sources shows which stream stopped. With the iPhone app, opening it sends the new data; without it, export from Apple Health again and import it."] },
       { h: "How to read the numbers", body: [

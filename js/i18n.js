@@ -1,7 +1,7 @@
 // Words live here, numbers come from the server. Add a language by adding one more dictionary.
 const DICT = {
   en: {
-    "nav.today": "Today", "nav.week": "Week", "nav.body": "Body", "nav.sleep": "Sleep",
+    "nav.today": "Today", "nav.week": "Week", "nav.body": "Body signals", "nav.sleep": "Sleep",
     "nav.review": "Weekly review", "nav.data": "Data sources",
     "ui.demo": "Demo data", "ui.lang": "中文", "ui.mode": "Light / dark", "ui.fold": "Fold the menu", "ui.unfold": "Unfold the menu",
     "ui.prev_day": "Previous day", "ui.next_day": "Next day", "ui.back_today": "Back to today",
@@ -67,7 +67,7 @@ const DICT = {
     "unit.min": "min", "unit.ms": "ms", "unit.bpm": "bpm", "unit.steps": "steps", "unit.pct": "%", "unit.points": "pts",
   },
   zh: {
-    "nav.today": "今天", "nav.week": "本周", "nav.body": "身体数据", "nav.sleep": "作息",
+    "nav.today": "今天", "nav.week": "本周", "nav.body": "身体状态", "nav.sleep": "睡眠",
     "nav.review": "每周复盘", "nav.data": "数据来源",
     "ui.demo": "演示数据", "ui.lang": "EN", "ui.mode": "浅色 / 深色", "ui.fold": "收起菜单", "ui.unfold": "展开菜单",
     "ui.prev_day": "前一天", "ui.next_day": "后一天", "ui.back_today": "回到今天",
@@ -401,7 +401,7 @@ Object.assign(DICT.en, {
   "today.drain": "Drain, last 7 days", "today.drain_more": "See what is wearing you down →",
 });
 Object.assign(DICT.zh, {
-  "nav.drain": "消耗", "nav.weight": "体重", "nav.sleep_tab": "作息",
+  "nav.drain": "消耗", "nav.weight": "体重", "nav.sleep_tab": "睡眠",
   "drain.title": "消耗", "drain.sub": "{from} – {to}，和之前 28 天比",
   "drain.prev": "往前 7 天", "drain.next": "往后 7 天", "drain.latest": "最近",
   "drain.eyebrow": "哪些东西在悄悄耗你", "drain.sep": "、",
@@ -611,7 +611,7 @@ Object.assign(DICT.zh, {
 
 // ---- AI work page ----
 Object.assign(DICT.en, {
-  "nav.time_tab": "Where it went", "nav.ai": "AI work", "data.s.ai": "AI agents",
+  "nav.time_tab": "Where time went", "nav.ai": "AI work", "data.s.ai": "AI agents",
   "ai.title": "AI work", "ai.span": "{from} – {to} · {n} days with an AI record", "ai.eyebrow": "These {n} days",
   "ai.count_v": "{n}", "ai.done_v": "{n}",
   "ai.line": "AI worked {ai} a day for you, on {n} instructions a day", "ai.line_none": "No AI work in sessions you started these days",
@@ -633,7 +633,7 @@ Object.assign(DICT.en, {
   "ai.rule": "AI work comes from the logs Claude Code and Codex keep on this computer (healthaio import ai-logs), and only times and counts are read: never a prompt, a reply, a file or a path. Within one session, two model calls no more than 5 minutes apart mean the agent was working in between; a longer gap is the agent waiting for you. Several sessions at once each count, like several people working, so an hour can hold more than 60 minutes of AI work. A tool that runs for more than 5 minutes between two calls is missed, so AI work is a lower bound. Only sessions you started count; scheduled tasks and scripts (claude -p, codex exec) are shown on their own. Instructions are the prompts you typed. Your focused work is the Time page's focus (work and learning apps, each minute counted once across devices). AI work per instruction and AI work over your focused work are worked out from the 7 days' totals, never as an average of daily ratios. Each number is compared with your normal as on the Time page: the middle half of your 7-day averages (or 7-day totals, for the two ratios) ending on each of the {n} days before the first shown day, at least {min} of them, each with at least 4 days of the record. A change counts when it lies one width of the normal outside it. Usage is input, not output: an agent going in circles adds minutes too, so the AI numbers are never coloured better or worse. What came out is the deadlines you marked submitted or done in deadlines.csv. Days before the first AI record and the cut-off last import day are unknown; a day in between without AI use is a real zero. Web and app chats (claude.ai, ChatGPT) leave no log on this computer and are not counted.",
 });
 Object.assign(DICT.zh, {
-  "nav.time_tab": "去向", "nav.ai": "AI 干活量", "data.s.ai": "AI 代理",
+  "nav.time_tab": "时间去向", "nav.ai": "AI 干活量", "data.s.ai": "AI 代理",
   "ai.title": "AI 干活量", "ai.span": "{from} – {to} · {n} 个有 AI 记录的日子", "ai.eyebrow": "这 {n} 天",
   "ai.count_v": "{n} 条", "ai.done_v": "{n} 件",
   "ai.line": "AI 每天替你干了 {ai}，你每天下 {n} 指令", "ai.line_none": "这几天你没有发起过 AI 会话",
@@ -657,18 +657,19 @@ Object.assign(DICT.zh, {
 
 // ---- proactive health: the health menu, what to adjust today, Exercise, Food and Goals ----
 Object.assign(DICT.en, {
-  "nav.time": "Time & energy", "nav.plan": "Goals & schedule", "nav.exercise": "Exercise", "nav.food": "Food", "nav.goals": "Goals", "nav.schedule": "Schedule",
+  "nav.life": "Daily life", "nav.act": "Actions & goals", "nav.followup": "Follow-up", "nav.exercise": "Exercise", "nav.food": "Food", "nav.goals": "Goals", "nav.schedule": "Schedule",
   "eff.ate_early": "Last meal {hours}+ h before sleep that night",
 
   "todo.title": "What to adjust today", "todo.aside": "read off every page this morning",
   "todo.steady": "Nothing needs adjusting today: keep to the plan.",
-  "todo.domain.training": "Training", "todo.domain.sleep": "Sleep", "todo.domain.food": "Food",
-  "todo.link.training": "See exercise", "todo.link.sleep": "See sleep", "todo.link.food": "See food",
+  "todo.domain.training": "Training", "todo.domain.sleep": "Sleep", "todo.domain.food": "Food", "todo.domain.screen": "Screens",
+  "todo.link.training": "See exercise", "todo.link.sleep": "See sleep", "todo.link.food": "See food", "todo.link.screen": "See where time went",
   "todo.ease": "Swap “{what}” for something easy", "todo.ease_rest": "Keep today easy: a walk, not a workout",
   "todo.deload": "Make today a rest day", "todo.move": "Move {d} more today", "todo.strength": "Fit in a strength session ({n} to go this week)",
   "todo.asleep_by": "Be asleep by {clock} tonight", "todo.phone_away": "Phone away at {clock}",
   "todo.late_meal": "Finish dinner by {clock}", "todo.late_meal_h": "Finish eating {h} hours before bed",
   "todo.protein": "Add about {g} g of protein today", "todo.kcal": "Keep today under {kcal} kcal",
+  "todo.fun_cap": "Keep entertainment & social under {h} h today",
   "todo.why.ease": "Recovery is below your normal: {list} worse than usual.",
   "todo.why.deload": "The last 7 days held {a} of workouts, against {c} a week before that.",
   "todo.why.move": "{left} to go for the weekly {goal}, with {n} days left.",
@@ -680,7 +681,7 @@ Object.assign(DICT.en, {
   "todo.why.late_meal": "On {n} of {k} logged nights the last meal came less than {h} hours before sleep.",
   "todo.why.protein": "Averaging {avg} g a day against a target of {target} g ({n} logged days).",
   "todo.why.kcal": "Averaging {avg} kcal against a plan of at most {max} ({n} logged days).",
-  "todo.rule": "Every morning the app reads the other pages for you and names at most one thing each for training, sleep and food. Training: recovery below your normal with training planned → take it easy; workouts well above your last 4 weeks → rest; otherwise what today still needs for the weekly activity goal (10 minutes or more), or a strength session when the days left barely fit them. Sleep: recovery below normal or a short night → tonight's time to be asleep by; screens before sleep above normal → when to put the phone away. Food (last 7 logged days, at least 3): late last meals on 2 or more nights → when to finish dinner; then protein under 90% of the target; then energy above the plan. The rules are fixed and listed in the code; there is no model and no score. They are habits, not medical advice.",
+  "todo.rule": "Every morning the app reads the other pages for you and names at most three things, at most one each for training, sleep, food and daytime screens. Training: recovery below your normal with training planned → take it easy; workouts well above your last 4 weeks → rest; otherwise what today still needs for the weekly activity goal (10 minutes or more), or a strength session when the days left barely fit them. Sleep: recovery below normal or a short night → tonight's time to be asleep by; screens before sleep above normal → when to put the phone away. Food (last 7 logged days, at least 3): late last meals on 2 or more nights → when to finish dinner; then protein under 90% of the target; then energy above the plan. Screens in the day (last 7 whole days, at least 3): entertainment & social above your plan, or above your normal when there is no plan → a cap for today (the plan, or your usual day). When all four have something, screens wait: the screen habit that touches recovery most, the hour before sleep, is already the sleep item. The next day, Follow-up checks each one against the data. The rules are fixed and listed in the code; there is no model and no score. They are habits, not medical advice.",
 
   "ex.empty": "No exercise data yet. Import Apple Health (it holds the Activity ring and your workouts) or add workouts.csv.",
   "ex.goal_plan": "Your plan: {d} of activity a week, strength on {n} days",
@@ -769,18 +770,19 @@ Object.assign(DICT.en, {
   "kit.enc.c-exercise-2": "a kind of exercise, lighter: cardio", "kit.enc.c-exercise-3": "a kind of exercise, lightest: walking",
 });
 Object.assign(DICT.zh, {
-  "nav.time": "时间与精力", "nav.plan": "目标与日程", "nav.exercise": "运动", "nav.food": "饮食", "nav.goals": "目标", "nav.schedule": "日程",
+  "nav.life": "生活习惯", "nav.act": "行动与目标", "nav.followup": "跟进", "nav.exercise": "运动", "nav.food": "饮食", "nav.goals": "目标", "nav.schedule": "日程",
   "eff.ate_early": "当晚最后一餐离睡着 {hours} 小时以上",
 
   "todo.title": "今天该调整的", "todo.aside": "今早从各页读出来的",
   "todo.steady": "今天没有要特别调整的，照计划来。",
-  "todo.domain.training": "训练", "todo.domain.sleep": "睡眠", "todo.domain.food": "饮食",
-  "todo.link.training": "看运动", "todo.link.sleep": "看作息", "todo.link.food": "看饮食",
+  "todo.domain.training": "训练", "todo.domain.sleep": "睡眠", "todo.domain.food": "饮食", "todo.domain.screen": "屏幕",
+  "todo.link.training": "看运动", "todo.link.sleep": "看睡眠", "todo.link.food": "看饮食", "todo.link.screen": "看时间去向",
   "todo.ease": "把“{what}”换成轻松的", "todo.ease_rest": "今天放轻松：走走路，不练强度",
   "todo.deload": "今天休息一天", "todo.move": "今天再动 {d}", "todo.strength": "安排一次力量训练（本周还差 {n} 次）",
   "todo.asleep_by": "今晚 {clock} 前睡着", "todo.phone_away": "{clock} 放下手机",
   "todo.late_meal": "{clock} 前吃完晚饭", "todo.late_meal_h": "睡前 {h} 小时吃完最后一口",
   "todo.protein": "今天多吃约 {g} 克蛋白质", "todo.kcal": "今天控制在 {kcal} 千卡以内",
+  "todo.fun_cap": "今天娱乐和社交不超过 {h} 小时",
   "todo.why.ease": "恢复低于平常：{list}比平常差。",
   "todo.why.deload": "最近 7 天练了 {a}，之前 4 周平均每周 {c}。",
   "todo.why.move": "离每周 {goal} 还差 {left}，还剩 {n} 天。",
@@ -792,7 +794,7 @@ Object.assign(DICT.zh, {
   "todo.why.late_meal": "记全的 {k} 晚里有 {n} 晚，最后一餐离睡着不到 {h} 小时。",
   "todo.why.protein": "最近 {n} 个记全的日子平均每天 {avg} 克，目标 {target} 克。",
   "todo.why.kcal": "最近 {n} 个记全的日子平均 {avg} 千卡，计划上限 {max}。",
-  "todo.rule": "每天早上替你把各页读一遍，训练、睡眠、饮食各最多点出一件事。训练：恢复低于平常、今天又排了训练 → 放轻松；最近 7 天练得明显多于前 4 周 → 休息；否则看本周活动目标今天还要动多少（差 10 分钟以上才提），或者剩下的天数刚够塞进力量训练时提醒一次。睡眠：恢复低于平常或昨晚睡少了 → 今晚几点前睡着；睡前屏幕时间高于平常 → 几点放下手机。饮食（最近 7 天里记全的日子，至少 3 天）：有 2 晚以上最后一餐离睡觉太近 → 几点前吃完晚饭；其次蛋白质不到目标的 90%；再次热量高于计划。规则是固定的、写在代码里，没有模型，也不打分。这些是生活习惯，不是医疗建议。",
+  "todo.rule": "每天早上替你把各页读一遍，最多点出三件事：训练、睡眠、饮食、白天的屏幕各最多一件。训练：恢复低于平常、今天又排了训练 → 放轻松；最近 7 天练得明显多于前 4 周 → 休息；否则看本周活动目标今天还要动多少（差 10 分钟以上才提），或者剩下的天数刚够塞进力量训练时提醒一次。睡眠：恢复低于平常或昨晚睡少了 → 今晚几点前睡着；睡前屏幕时间高于平常 → 几点放下手机。饮食（最近 7 天里记全的日子，至少 3 天）：有 2 晚以上最后一餐离睡觉太近 → 几点前吃完晚饭；其次蛋白质不到目标的 90%；再次热量高于计划。白天的屏幕（最近 7 个完整的日子，至少 3 天）：娱乐和社交高于计划，没设计划时高于你的平常 → 今天的上限（计划的，或你平常的一天）。四类都有时屏幕排最后：和恢复关系最大的那段屏幕时间——睡前一小时——已经算在睡眠那一件里。第二天，“跟进”页按数据核对每一件做到没有。规则是固定的、写在代码里，没有模型，也不打分。这些是生活习惯，不是医疗建议。",
 
   "ex.empty": "还没有运动数据。导入 Apple 健康（活动圆环和训练记录都在里面），或者填 workouts.csv。",
   "ex.goal_plan": "你的计划：每周活动 {d}，力量训练 {n} 天",
@@ -905,6 +907,7 @@ Object.assign(DICT.en, {
   "todo.short.asleep": "Last night was {d} short", "todo.short.phone_drain": "More screen before bed than usual",
   "todo.short.phone_last": "{d} of scrolling before bed last night", "todo.short.late_meal": "Ate late on {n} of {k} nights",
   "todo.short.protein": "{avg} g a day, target {target} g", "todo.short.kcal": "{avg} kcal a day, at most {max}",
+  "todo.short.fun_cap_plan": "{avg} a day this week, plan {h} h", "todo.short.fun_cap_normal": "{avg} a day this week, more than usual",
   "sum.title": "Everything else", "sum.none": "No records yet",
   "sum.exercise_name": "Exercise this week",
   "sum.ex.met": "goal met", "sum.ex.on_track": "on track", "sum.ex.behind": "behind", "sum.ex.missed": "goal missed",
@@ -938,6 +941,7 @@ Object.assign(DICT.zh, {
   "todo.short.asleep": "昨晚少睡了 {d}", "todo.short.phone_drain": "睡前刷手机比平常多",
   "todo.short.phone_last": "昨晚睡前刷了 {d}", "todo.short.late_meal": "{k} 晚里 {n} 晚吃得晚",
   "todo.short.protein": "每天 {avg} 克，目标 {target} 克", "todo.short.kcal": "每天 {avg} 千卡，上限 {max}",
+  "todo.short.fun_cap_plan": "这周每天 {avg}，计划 {h} 小时", "todo.short.fun_cap_normal": "这周每天 {avg}，比平常多",
   "sum.title": "其他各项", "sum.none": "还没有记录",
   "sum.exercise_name": "本周运动",
   "sum.ex.met": "达到了", "sum.ex.on_track": "跟得上", "sum.ex.behind": "落后了", "sum.ex.missed": "没达到",
@@ -966,7 +970,7 @@ Object.assign(DICT.zh, {
 
 // ---- the menu's short names on a phone's tab bar, and goals set on the Goals page (goal_log.py) ----
 Object.assign(DICT.en, {
-  "nav.short.today": "Today", "nav.short.body": "Body", "nav.short.time": "Time", "nav.short.plan": "Goals",
+  "nav.short.today": "Today", "nav.short.body": "Body", "nav.short.life": "Life", "nav.short.act": "Actions",
   "nav.short.review": "Review", "nav.short.data": "Data",
   "goals.edit": "Edit", "goals.set_one": "Set one", "goals.save": "Save", "goals.cancel": "Cancel", "goals.reset": "Back to the original",
   "goals.src.you": "set here", "goals.src.accepted": "suggestion you accepted",
@@ -984,7 +988,7 @@ Object.assign(DICT.en, {
   "goals.u.h": "h", "goals.u.min": "min", "goals.u.days": "days", "goals.u.kcal": "kcal", "goals.u.g_per_kg": "g", "goals.u.kg": "kg",
 });
 Object.assign(DICT.zh, {
-  "nav.short.today": "今天", "nav.short.body": "身体", "nav.short.time": "时间", "nav.short.plan": "目标",
+  "nav.short.today": "今天", "nav.short.body": "身体", "nav.short.life": "生活", "nav.short.act": "行动",
   "nav.short.review": "复盘", "nav.short.data": "数据",
   "goals.edit": "改", "goals.set_one": "设一个", "goals.save": "保存", "goals.cancel": "取消", "goals.reset": "用回原来的",
   "goals.src.you": "在这里设的", "goals.src.accepted": "采纳的建议",
@@ -1000,6 +1004,98 @@ Object.assign(DICT.zh, {
   "goals.f.weight.target_kg": "目标体重", "goals.f.screen.work_min_hours": "每天专注至少",
   "goals.f.screen.entertainment_max_hours": "每天娱乐和社交至多",
   "goals.u.h": "小时", "goals.u.min": "分钟", "goals.u.days": "天", "goals.u.kcal": "千卡", "goals.u.g_per_kg": "克", "goals.u.kg": "千克",
+});
+
+// ---- Follow-up (#followup): did yesterday's advice happen, and another way when it keeps not happening (modules/followup.py) ----
+Object.assign(DICT.en, {
+  "fu.sub": "Did yesterday's advice happen? Checked against the data: there is nothing to tick.",
+  "fu.today_link": "Did yesterday's advice happen?",
+  "fu.yesterday": "Yesterday's advice", "fu.yesterday_none": "There was nothing to adjust yesterday.",
+  "fu.kept": "Done", "fu.missed": "Not done", "fu.no_record": "No record", "fu.not_checked": "Not checked", "fu.not_given": "Not given that day",
+  "fu.score": "{k} of {m} done", "fu.score_none": "No record to check yet",
+  "fu.fact.asleep_ok": "Asleep at {clock}", "fu.fact.asleep_late": "Asleep at {clock}, {d} after the time given",
+  "fu.fact.phone_away": "{d} of entertainment & social in the hour before sleep",
+  "fu.fact.late_meal": "Last meal at {clock}, {h} h before falling asleep",
+  "fu.fact.protein": "{g} g of protein that day", "fu.fact.kcal": "{kcal} kcal that day",
+  "fu.fact.fun_cap": "{d} of entertainment & social that day",
+  "fu.fact.none": "No record for that day", "fu.fact.training": "Training advice is not checked: a rebuild already knows that day's workouts",
+  "fu.days_title": "The last 14 days", "fu.days_sub": "Each piece of advice: how often it was given, and how often it happened when there is a record",
+  "fu.count": "done {k} of {m}", "fu.given": "given {n}×", "fu.count_none": "no record yet",
+  "fu.ways_title": "Try another way",
+  "fu.ways_sub": "Not done on {missed} or more of the last {of} times. The same reminder again is unlikely to help, so here are other ways, with your own numbers.",
+  "fu.ways_none": "Nothing keeps failing: no advice was missed on {missed} or more of its last {of} times.",
+  "fu.way.smaller.asleep_by": "Be asleep by {clock} first; after 3 nights in a row, move it earlier.",
+  "fu.way.setting.asleep_by": "iPhone Settings › Screen Time › Downtime, starting at {clock}.",
+  "fu.way.if_then.asleep_by": "Write it down where you will see it: “If it is {clock}, I put my phone on the charger in another room.”",
+  "fu.way.setting.phone_away": "iPhone Settings › Screen Time › Downtime, starting at {clock}.",
+  "fu.way.place.phone_away": "Charge the phone where you cannot reach it from bed.",
+  "fu.way.if_then.phone_away": "Write it down where you will see it: “If it is {clock}, I put my phone on the charger in another room.”",
+  "fu.way.smaller.late_meal": "Finish dinner by {clock} first; after 3 days in a row, move it earlier.",
+  "fu.way.setting.late_meal": "Set an alarm for {clock}: when it rings, start making dinner.",
+  "fu.way.if_then.late_meal": "“If I have not eaten dinner by {clock}, I eat something ready-made instead of waiting.”",
+  "fu.way.if_then.late_meal_h": "“If it is less than {h} hours before bed, I stop eating for the day.”",
+  "fu.way.smaller.protein": "{g} g more a day first; after 3 days in a row, add the rest.",
+  "fu.way.place.protein": "Give breakfast one fixed protein: two eggs are about 12 g, a glass of milk about 8 g.",
+  "fu.way.if_then.protein": "“If breakfast has no protein in it, I add an egg or a glass of milk.”",
+  "fu.way.smaller.kcal": "Stay under {kcal} kcal first; after 3 days in a row, bring it down.",
+  "fu.way.place.kcal": "Put snacks away in a cupboard; leave fruit and water on the table.",
+  "fu.way.if_then.kcal": "“If I want a snack after dinner, I drink a glass of water and wait 10 minutes.”",
+  "fu.way.smaller.fun_cap": "{h} h of entertainment & social a day first; after 3 days in a row, bring it down.",
+  "fu.way.setting.fun_cap": "iPhone Settings › Screen Time › App Limits, one limit of {h} h for Social, Entertainment and Games together.",
+  "fu.way.place.fun_cap": "Move the apps you open most for fun off the first home screen, or sign out of one of them.",
+  "fu.way.if_then.fun_cap": "“If I pick up the phone to scroll, I first give what I was doing 10 more minutes.”",
+  "fu.name.ease": "Take it easy", "fu.name.deload": "A rest day", "fu.name.move": "Move more", "fu.name.strength": "A strength session",
+  "fu.name.asleep_by": "Asleep by the time given", "fu.name.phone_away": "Phone away in time", "fu.name.late_meal": "Dinner early enough",
+  "fu.name.protein": "Enough protein", "fu.name.kcal": "Under the energy plan", "fu.name.fun_cap": "Entertainment & social under the cap",
+  "fu.kind.smaller": "Smaller step", "fu.kind.setting": "Let the phone remember", "fu.kind.place": "Change the room", "fu.kind.if_then": "If-then plan",
+  "fu.goals_link": "Change the goal on Goals ›",
+  "fu.why_ways": "Why these: another reminder on its own rarely changes much. A smaller step, a setting that does the remembering and an if-then plan are among the better-tested ways to close the gap between meaning to and doing (if-then plans: a meta-analysis of 94 studies, Gollwitzer & Sheeran, 2006).",
+  "fu.rule": "Yesterday's advice is rebuilt from the data as it stood that morning, with the same rules as Today; sleep, food and screen advice only read last night and the days before, so the rebuild is what the page said. Each is then checked against what the data shows: asleep no more than 15 minutes after the time given; no more than 15 minutes of entertainment & social in the hour before sleep; the last meal early enough; protein at least 90% of the target; energy under the plan; entertainment & social under the cap. No record is not a miss. Training advice is listed but not checked. Advice missed on 3 or more of its last 5 times (with a record) moves to Try another way. Counts, never streaks or scores; habits, not medical advice.",
+});
+Object.assign(DICT.zh, {
+  "fu.sub": "昨天的建议做到了没有：按数据核对，不用你打勾",
+  "fu.today_link": "昨天的建议做到了吗",
+  "fu.yesterday": "昨天的建议", "fu.yesterday_none": "昨天没有要调整的。",
+  "fu.kept": "做到了", "fu.missed": "没做到", "fu.no_record": "没有记录", "fu.not_checked": "不核对", "fu.not_given": "那天没提",
+  "fu.score": "做到 {k} / {m} 件", "fu.score_none": "还没有能核对的记录",
+  "fu.fact.asleep_ok": "{clock} 睡着", "fu.fact.asleep_late": "{clock} 才睡着，比建议晚了 {d}",
+  "fu.fact.phone_away": "睡前一小时刷了 {d}",
+  "fu.fact.late_meal": "最后一餐 {clock}，离睡着 {h} 小时",
+  "fu.fact.protein": "那天吃了 {g} 克蛋白质", "fu.fact.kcal": "那天 {kcal} 千卡",
+  "fu.fact.fun_cap": "那天娱乐和社交 {d}",
+  "fu.fact.none": "那天没有记录", "fu.fact.training": "训练类建议不核对：重算时已经看得到那天练了什么",
+  "fu.days_title": "最近 14 天", "fu.days_sub": "每条建议给了几次、有记录的那几次做到了几次",
+  "fu.count": "做到 {k} / {m} 次", "fu.given": "给了 {n} 次", "fu.count_none": "还没有记录",
+  "fu.ways_title": "换个做法",
+  "fu.ways_sub": "最近 {of} 次里有 {missed} 次以上没做到。再提醒一遍大概也没用，换几种做法，数字按你自己的来。",
+  "fu.ways_none": "没有老是做不到的：每条建议最近 {of} 次里没做到的都不到 {missed} 次。",
+  "fu.way.smaller.asleep_by": "先做到 {clock} 前睡着，连着 3 晚做到再往前挪。",
+  "fu.way.setting.asleep_by": "iPhone 设置 › 屏幕使用时间 › 停用时间，从 {clock} 开始。",
+  "fu.way.if_then.asleep_by": "写下来，贴在看得见的地方：“如果到了 {clock}，我就把手机放到另一个房间充电。”",
+  "fu.way.setting.phone_away": "iPhone 设置 › 屏幕使用时间 › 停用时间，从 {clock} 开始。",
+  "fu.way.place.phone_away": "把充电器放到躺在床上够不着的地方。",
+  "fu.way.if_then.phone_away": "写下来，贴在看得见的地方：“如果到了 {clock}，我就把手机放到另一个房间充电。”",
+  "fu.way.smaller.late_meal": "先做到 {clock} 前吃完晚饭，连着 3 天做到再提前。",
+  "fu.way.setting.late_meal": "设一个 {clock} 的闹钟：响了就开始做晚饭。",
+  "fu.way.if_then.late_meal": "“如果到了 {clock} 还没吃晚饭，我就先吃现成的，不再等。”",
+  "fu.way.if_then.late_meal_h": "“如果离睡觉不到 {h} 小时，我今天就不再吃东西。”",
+  "fu.way.smaller.protein": "先每天多吃 {g} 克，连着 3 天做到再加。",
+  "fu.way.place.protein": "早餐固定放一份蛋白质：两个鸡蛋约 12 克，一杯牛奶约 8 克。",
+  "fu.way.if_then.protein": "“如果早餐里没有蛋白质，我就加一个鸡蛋或一杯牛奶。”",
+  "fu.way.smaller.kcal": "先控制在 {kcal} 千卡以内，连着 3 天做到再往下调。",
+  "fu.way.place.kcal": "零食收进柜子，桌上只放水果和水。",
+  "fu.way.if_then.kcal": "“如果晚饭后想吃零食，我就先喝一杯水，等 10 分钟。”",
+  "fu.way.smaller.fun_cap": "先做到每天娱乐和社交不超过 {h} 小时，连着 3 天做到再往下减。",
+  "fu.way.setting.fun_cap": "iPhone 设置 › 屏幕使用时间 › App 限额，给“社交”“娱乐”“游戏”一起设 {h} 小时。",
+  "fu.way.place.fun_cap": "把最常打开的娱乐 App 从第一屏移走，或者退出其中一个的登录。",
+  "fu.way.if_then.fun_cap": "“如果拿起手机想刷，我就先把手上的事再做 10 分钟。”",
+  "fu.name.ease": "放轻松", "fu.name.deload": "休息一天", "fu.name.move": "再动一动", "fu.name.strength": "力量训练",
+  "fu.name.asleep_by": "按时睡着", "fu.name.phone_away": "按时放下手机", "fu.name.late_meal": "早点吃完晚饭",
+  "fu.name.protein": "蛋白质吃够", "fu.name.kcal": "热量不超计划", "fu.name.fun_cap": "娱乐和社交不超上限",
+  "fu.kind.smaller": "把一步改小", "fu.kind.setting": "让手机替你记", "fu.kind.place": "改一改环境", "fu.kind.if_then": "如果……就……",
+  "fu.goals_link": "去目标页改 ›",
+  "fu.why_ways": "为什么是这几条：光是再提醒一次，很少能改变什么。把一步改小、让设置替你记、写一句“如果……就……”，是研究里验证得比较多的办法（“如果……就……”计划：94 项研究的元分析，Gollwitzer 和 Sheeran，2006）。",
+  "fu.rule": "昨天的建议按那天早上已有的数据、用和“今天”页同样的规则重算；睡眠、饮食、屏幕三类只读前一晚和之前几天，所以重算出来的就是当天页面上写的。然后按数据核对：比建议的时间晚不超过 15 分钟睡着；睡前一小时娱乐和社交不超过 15 分钟；最后一餐够早；蛋白质到目标的 90%；热量不超过计划；娱乐和社交不超过上限。没有记录不算没做到。训练类建议列出来但不核对。一条建议最近 5 次（有记录的）里有 3 次以上没做到，就进“换个做法”。只数次数，不算连胜、不打分；这些是生活习惯，不是医疗建议。",
 });
 
 const WEEKDAY = { en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], zh: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"] };
