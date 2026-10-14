@@ -3,10 +3,10 @@
 // project; saved into self_report.csv and soreness.csv), the score the morning after each training day (four parts
 // side by side, averaged), and how your body has answered training. What training asked of you is on Load.
 // The rules are in modules/recovery.py.
-import { isStatic, post } from "../api.js?v=927cbc558c";
-import { bullet, draw, esc } from "../charts.js?v=927cbc558c";
-import { day, dur, measure, num, shortDay, t, wtype } from "../i18n.js?v=927cbc558c";
-import { icon, STATE_ICON } from "../icons.js?v=927cbc558c";
+import { isStatic, post } from "../api.js?v=8d57b217c2";
+import { bullet, draw, esc } from "../charts.js?v=8d57b217c2";
+import { day, dur, measure, num, shortDay, t, wtype } from "../i18n.js?v=8d57b217c2";
+import { icon, STATE_ICON } from "../icons.js?v=8d57b217c2";
 
 const toneCls = (tone) => (tone === "good" ? "good" : tone === "bad" ? "bad" : "");
 const LOAD_TONE = { high: "watch", low: "", steady: "good" };
