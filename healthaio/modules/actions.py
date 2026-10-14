@@ -15,6 +15,10 @@ Candidates, highest priority first within each kind (a kind gets at most one):
     still to do; recovery not low.
   - spare: this morning's soreness check-in has a region clearly or very sore (Recovery page) and training is
     planned or the week still needs minutes: train, but spare those regions.
+  (ease, deload and spare are about today's session, so once it is done they are not given: it would be advice for a session
+  already over. Done = workouts before now reach DONE_SHARE of the minutes the plan names ("Easy run 30 min"), or
+  DONE_MIN minutes when it names none or nothing is planned. Only for today itself; a past day is rebuilt as its
+  morning saw it.)
   - strength: strength days are short of the goal and the days left barely fit them; recovery not low.
   (move and strength need activity records in the last 7 days: without them there is no telling what is left.)
 - sleep
@@ -54,6 +58,8 @@ PROTEIN_SHORT = 0.9
 SHORT_NIGHT_MIN = 30
 CALM_LAST_HOUR_MIN = 15
 MIN_MOVE = 10  # minutes: less than this left for today is not worth a line
+DONE_MIN = 10  # minutes of workouts already done today: advice for today's session would come too late
+DONE_SHARE = 0.8  # of the minutes today's plan names
 BASELINE = 28  # days of screens before the window that make "your normal" for the fun cap without a plan
 DOMAINS = ("training", "sleep", "food", "screen")
 # every piece of advice, in the order the pages list them
@@ -75,13 +81,18 @@ def build(ctx: Context, day: date, recovery: Dict[str, Any], drain: Dict[str, An
     load = exercise_page.build(ctx, iso(day))["load"]
     # this morning's check-in: the regions clearly or very sore
     sore = {r: lv for r, lv in recovery_page.soreness_log(ctx).get(day, {}).items() if lv >= 2}
-    if low and (planned or week["remaining_min"] > 0):
+    now = ctx.now.replace(tzinfo=None)
+    done_min = sum((w["end"] - w["start"]).total_seconds() / 60 for w in ctx.store.rows("workouts")
+                   if w["start"].date() == day and w["end"] <= now and w["end"] > w["start"])
+    need = plans.planned_minutes(planned)
+    done = day == ctx.today and done_min >= (max(DONE_MIN, DONE_SHARE * need) if need else DONE_MIN)
+    if low and not done and (planned or week["remaining_min"] > 0):
         items.append({"key": "ease", "domain": "training", "params": {"planned": planned}, "why": {"worse": worse},
                       "link": "#exercise"})
-    elif load["state"] == "high" and recovery["verdict"] != "good":
+    elif load["state"] == "high" and recovery["verdict"] != "good" and not done:
         items.append({"key": "deload", "domain": "training", "params": {"ratio": load["ratio"]},
                       "why": {"acute": load["acute_min"], "chronic": load["chronic_min"]}, "link": "#exercise"})
-    elif sore and (planned or week["remaining_min"] > 0):
+    elif sore and not done and (planned or week["remaining_min"] > 0):
         items.append({"key": "spare", "domain": "training", "params": {"regions": sorted(sore, key=lambda r: -sore[r])},
                       "why": {"levels": sore}, "link": "#recovery"})
     elif tracked and not low and week["is_current"] and week["remaining_min"] > 0 and week["need_today_min"] - week["today_min"] >= MIN_MOVE:

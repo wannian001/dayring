@@ -1,4 +1,5 @@
 """Plan arithmetic shared by several pages: today's training, screen targets, and the wake-time shift."""
+import re
 from datetime import date, datetime, time, timedelta
 from typing import Any, Dict, List, Optional
 
@@ -10,6 +11,12 @@ PHONE_AWAY_MIN = 30
 
 def training_for(cfg: Config, day: date) -> Optional[str]:
     return cfg.training.get(WEEKDAYS[day.weekday()])
+
+
+def planned_minutes(label: Optional[str]) -> Optional[int]:
+    """The minutes a training plan names ("Easy run 30 min", "力量 50 分钟"), or None when it names none."""
+    found = re.search(r"(\d+)\s*(?:min|mins|minutes|分钟|分)", label or "", re.I)
+    return int(found.group(1)) if found else None
 
 
 def screen_targets(cfg: Config, series: Dict[str, Dict[date, float]], last: date) -> List[Dict[str, Any]]:

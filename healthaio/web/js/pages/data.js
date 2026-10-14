@@ -34,7 +34,7 @@ function device(d, p) {
 export default {
   render(p) {
     const streams = `<div class="dev-grid">${(p.devices || []).map((d) => device(d, p)).join("")}</div>`;
-    const tables = p.tables.map((tb) => `<tr><th scope="row"><code>${esc(tb.file)}</code><span class="xs muted" style="display:block;font-weight:400">${esc(tb.doc)}</span></th>
+    const tables = p.tables.map((tb) => `<tr><th scope="row"><code>${esc(tb.file)}</code><span class="xs muted" style="display:block;font-weight:400">${esc(t(`data.table.${tb.name}`))}</span></th>
       <td class="num">${tb.present ? num(tb.rows) : `<span class="muted">${t("data.absent")}</span>`}</td>
       <td class="xs muted">${tb.modified ? `${day(tb.modified, { weekday: false })} ${clock(tb.modified)}` : "—"}</td>
       <td>${tb.problem_count ? `<span class="chip bad">${t("data.problems", { n: tb.problem_count })}</span>` : tb.present ? `<span class="chip good">${t("data.clean")}</span>` : ""}</td></tr>

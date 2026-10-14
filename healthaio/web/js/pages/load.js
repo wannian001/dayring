@@ -69,7 +69,7 @@ function trainingHtml(p) {
     <p class="lede" style="font-size:var(--t-lg);margin:0 0 4px">${esc(lede)} ${state}</p>
     ${notes.length ? `<p class="small muted" style="margin:0">${esc(notes.join(t("ui.list_sep")))}</p>` : ""}
     <div id="load-days" class="chart" style="margin-top:var(--s-3)"></div>
-    <p class="xs muted rec-cns">${t("rec.cns_note")}</p></section>`;
+    <p class="xs muted rec-cns">${t("rec.cns_note")} <a href="#recovery">${t("rec.to_recovery")} ›</a></p></section>`;
 }
 
 function dueHtml(p) {

@@ -25,8 +25,11 @@ context, not a subject: one line on Today and a faint arc on the day ring; the l
 At most three items, at most one each for training, sleep, food and daytime screens (when all four have one, screens
 wait: the hour before sleep is already the sleep item), each with the reason in numbers and a link to the page that
 shows them. Fixed rules (listed in `healthaio/modules/actions.py` and in the card's fold), checked in order
-within each kind: recovery below normal with training planned → take it easy; a load spike → rest; otherwise what
-the week's activity goal needs today, or a strength session when the days left barely fit. Sleep: recovery low or a
+within each kind: recovery below normal with training planned → take it easy; a load spike → rest; a part clearly
+sore this morning → train but spare it; otherwise what the week's activity goal needs today, or a strength session
+when the days left barely fit. The first three are about today's session, so once it is done (the minutes the plan
+names, "Easy run 30 min", mostly in; 10 minutes when it names none) they are dropped: "take it easy today" after a
+hard lunchtime run is advice that comes too late. A past day is still rebuilt as its morning saw it. Sleep: recovery low or a
 short night → tonight's time to be asleep by; screens before sleep above normal → when to put the phone away. Food,
 over the last 7 logged days: late last meals → when to finish dinner; then protein under 90% of the target; then
 energy above the plan. Screens in the day, over the last 7 whole days: entertainment & social above the plan, or

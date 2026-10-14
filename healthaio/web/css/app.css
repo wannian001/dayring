@@ -457,15 +457,21 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 .after-bar > span { display: block; height: 100%; background: var(--c-mark); border-radius: 3px; }
 .after-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .after-list li { display: grid; grid-template-columns: 3.2em minmax(0, 1fr) minmax(60px, 160px) 2.4em; gap: 10px; align-items: center; }
+.after-later { grid-column: 3 / -1; text-align: right; }
 .after-trained { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; color: var(--c-exercise-ink); }
-.after-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: var(--s-3) 0 0; color: var(--ink-2); }
-.after-line > svg { color: var(--c-exercise-ink); }
+.after-line { display: flex; align-items: flex-start; gap: 6px; margin: var(--s-3) 0 0; color: var(--ink-2); }
+.after-line > svg { flex: none; margin-top: 3px; color: var(--c-exercise-ink); }
+.after-line > span { min-width: 0; }
+.after-line > button { flex: none; }
 /* after a strength or hard workout (trained.js): a prompt in the corner on every page, and the dialog it opens */
 .pop { position: fixed; z-index: 40; right: var(--s-5); bottom: calc(var(--s-5) + env(safe-area-inset-bottom)); width: min(380px, calc(100vw - 2 * var(--s-4)));
   display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-3); padding: var(--s-4); border-radius: var(--r-lg);
   background: var(--surface); box-shadow: var(--shadow), inset 0 0 0 1px var(--line-2); }
+.pop-close { position: absolute; top: 6px; right: 8px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: none;
+  color: var(--ink-3); font: 400 20px/1 var(--font); cursor: pointer; }
+.pop-close:hover { background: var(--surface-2); color: var(--ink); }
 .pop-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--surface-2); color: var(--c-exercise-ink); }
-.pop-text { display: grid; gap: 4px; }
+.pop-text { display: grid; gap: 4px; padding-right: 22px; }
 .pop-text .small { color: var(--ink-2); }
 .pop-text .goal-act { margin-top: var(--s-2); }
 @media (max-width: 899px) { .pop { right: var(--s-4); bottom: calc(76px + env(safe-area-inset-bottom)); } html.in-app .pop { bottom: calc(var(--s-4) + env(safe-area-inset-bottom)); } }

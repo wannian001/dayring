@@ -234,7 +234,9 @@ def self_report(ctx: Context, day: date) -> Optional[Dict[str, Any]]:
     if not rows:
         return None
     row = rows[-1]
-    return {"date": iso(row["date"]), "energy": row.get("energy"), "focus": row.get("focus"), "note": row.get("note")}
+    # the feeling is that morning's answer on the Recovery check-in, so only today's counts
+    return {"date": iso(row["date"]), "energy": row.get("energy"), "focus": row.get("focus"), "note": row.get("note"),
+            "feel": row.get("feel") if row["date"] == day else None}
 
 
 def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:

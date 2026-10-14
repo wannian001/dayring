@@ -98,8 +98,8 @@ function todoHtml(p) {
 
 function morningHtml(p) {
   const r = p.recovery;
-  const self = p.self && (p.self.energy != null || p.self.focus != null)
-    ? `<p class="small muted" style="margin:0">${esc(t("self.title"))}${t("today.colon")}${esc([p.self.energy != null ? t("self.energy", { v: num(p.self.energy) }) : "", p.self.focus != null ? t("self.focus", { v: num(p.self.focus) }) : ""].filter(Boolean).join(SEP()))}</p>` : "";
+  const self = p.self && (p.self.energy != null || p.self.focus != null || p.self.feel != null)
+    ? `<p class="small muted" style="margin:0">${esc(t("self.title"))}${t("today.colon")}${esc([p.self.feel != null ? t("self.feel", { v: t(`feel.${p.self.feel}`) }) : "", p.self.energy != null ? t("self.energy", { v: num(p.self.energy) }) : "", p.self.focus != null ? t("self.focus", { v: num(p.self.focus) }) : ""].filter(Boolean).join(SEP()))}</p>` : "";
   const behind = r.days_behind > 1 ? `<p class="chip watch" style="height:auto;padding:4px 10px;white-space:normal">${t("recovery.behind", { n: r.days_behind, day: day(r.as_of) })}</p>` : "";
   const legend = `<div class="legend">
     <span class="key"><i style="background:var(--c-sleep)"></i>${t("ring.sleep")}</span>

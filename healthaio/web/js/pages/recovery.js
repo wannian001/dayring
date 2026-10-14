@@ -74,13 +74,14 @@ function afterHtml(p) {
       ${x ? `<b class="num">${num(x.score, 1)}</b><span class="after-bar"><span style="width:${(x.score * 10).toFixed(0)}%"></span></span><span class="xs muted">${esc(partText(k, x))}</span>`
         : `<b class="num muted">—</b><span class="after-bar"></span><span class="xs muted">${t(k === "feel" ? "after.no_feel" : "after.no_record")}</span>`}</div>`;
   }).join("") : "";
-  const what = (d) => d.sessions.map((s) => `${wtype(s.type)} ${dur(s.minutes)}${s.effort ? ` × ${num(s.effort)}` : ""}`).join(t("ui.list_sep"));
+  const what = (d) => d.sessions.map((s) => `${wtype(s.type)} ${dur(s.minutes)}${s.effort ? ` · ${t("trained.effort", { v: num(s.effort) })}` : ""}`).join(t("ui.list_sep"));
   const unnoted = (d) => d.sessions.find((s) => s.hard && s.note == null);
   const trainedOf = (d) => (d.trained.length ? `<span class="xs after-trained">${icon("exercise", 12)}${esc(regionsShort(d.trained))}</span>`
     : unnoted(d) ? `<button type="button" class="doc-link xs" data-note="${esc(d.date)}">${t("after.note_it")}</button>` : "");
+  // a training day whose next morning has not come yet (today's) is listed with "scored tomorrow morning"
   const rows = A.days.slice(0, 10).map((d) => `<li><span class="num small">${esc(shortDay(d.date))}</span><span class="small">${esc(what(d))} ${trainedOf(d)}</span>
-    <span class="after-bar"><span style="width:${d.score == null ? 0 : (d.score * 10).toFixed(0)}%"></span></span>
-    <b class="num small">${d.score == null ? "—" : num(d.score, 1)}</b></li>`).join("");
+    ${d.morning > p.day ? `<span class="xs muted after-later">${t("after.tomorrow")}</span>`
+      : `<span class="after-bar"><span style="width:${d.score == null ? 0 : (d.score * 10).toFixed(0)}%"></span></span><b class="num small">${d.score == null ? "—" : num(d.score, 1)}</b>`}</li>`).join("");
   const trainedLine = !L ? "" : L.trained.length
     ? `<p class="small after-line">${icon("exercise", 14)}<span>${esc(t("after.trained", { list: regionsShort(L.trained) }))}${L.sore_next ? esc(t("after.sore_next", { list: L.trained.map((r) => t("sore.with_level", { region: t(`sore.region.${r}`), level: t(`sore.level_short.${L.sore_next[r] || 0}`) })).join(t("ui.list_sep")) })) : esc(t("after.sore_unchecked"))}</span></p>`
     : unnoted(L) ? `<p class="small after-line">${icon("exercise", 14)}<span>${t("after.not_noted")}</span> <button type="button" class="doc-link" data-note="${esc(L.date)}">${t("after.note_it")}</button></p>` : "";

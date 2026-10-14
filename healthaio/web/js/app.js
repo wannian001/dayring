@@ -171,7 +171,7 @@ async function route() {
     main.innerHTML = updateNote() + sub + PAGES[page].render(data) + footer();
     mountUpdate(main);
     PAGES[page].mount?.(main, data);
-    get("prompt").then(mountPrompt, () => mountPrompt(null));  // after a strength or hard workout: what did it train?
+    get("prompt").then((info) => mountPrompt(info, page), () => mountPrompt(null));  // after a strength or hard workout: what did it train?
   } catch (error) {
     const staticGap = isStatic && /^404/.test(error.message);  // the demo site only has a few pre-rendered dates
     main.innerHTML = `<div class="card"><p class="lede">${t(staticGap ? "ui.static_gap" : "ui.error")}</p><p class="muted small">${t(staticGap ? "ui.static_gap_hint" : "ui.error_hint")}</p>

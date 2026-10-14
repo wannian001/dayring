@@ -179,6 +179,24 @@ class Soreness(Folder):
         self.assertEqual((item["key"], item["params"]["regions"]), ("spare", ["left_calf"]))  # only clearly or very sore
         self.assertFalse(followup.check(ctx, item, TODAY, {})["checked"])  # training advice is not checked
 
+    def test_no_advice_for_a_session_already_done(self):
+        # sore this morning with 50 minutes planned: "spare" until the planned minutes are mostly done
+        self.cfg.training = {"mon": "Gym 50 min"}
+        checkin.save(self.cfg, TODAY, {"left_calf": 2})
+        start = NOW - timedelta(hours=3)
+
+        def training(minutes):
+            write_table(self.cfg.data_dir, "workouts", [{"start": start, "end": start + timedelta(minutes=minutes), "type": "strength training"}])
+            ctx = self.ctx()
+            out = actions.build(ctx, TODAY, today.recovery(ctx, TODAY), {"worse": []})
+            return [x["key"] for x in out["items"] if x["domain"] == "training"]
+
+        self.assertEqual(training(20), ["spare"])  # 20 of 50 minutes: the session is not over
+        self.assertNotIn("spare", training(45))    # 45 of 50: done, so the advice would come too late
+        ctx = self.ctx()  # a past day is rebuilt as its morning saw it (the follow-up page)
+        past = actions.build(ctx, TODAY - timedelta(days=7), today.recovery(ctx, TODAY - timedelta(days=7)), {"worse": []})
+        self.assertIsNotNone(past)
+
 
 class Feeling(Folder):
     def test_the_feeling_joins_that_mornings_row(self):
@@ -409,6 +427,9 @@ class Demo(unittest.TestCase):
         figure = (WEB / "js" / "figure.js").read_text(encoding="utf-8") + (WEB / "js" / "trained.js").read_text(encoding="utf-8")
         for key in set(re.findall(r't\("((?:trained|sore|asked|after)\.[\w.]+)"', page + figure)):
             self.assertEqual(i18n.count(f'"{key}"'), 2, key)
+        from healthaio.schema import TABLES
+        for name in TABLES:  # the Data page says what each file holds in both languages, not the schema's English
+            self.assertEqual(i18n.count(f'"data.table.{name}"'), 2, name)
         for sex in ("male", "female"):
             self.assertTrue((WEB / "img" / f"body-{sex}-art.png").is_file())
             for region in recovery.SORE_REGIONS:

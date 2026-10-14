@@ -281,7 +281,8 @@ def after_training(ctx: Context, end: date, days: Dict[date, Dict[str, Any]],
     feel = {r["date"]: r["feel"] for r in ctx.store.rows("self_report") if r.get("feel") is not None}
     change = {d: v - hrv[d - timedelta(days=1)] for d, v in hrv.items() if d - timedelta(days=1) in hrv}  # morning to morning
     out = []
-    for d in sorted((d for d, v in days.items() if v["minutes"] > 0 and end - timedelta(days=AFTER_DAYS) < d < end), reverse=True):
+    # today's training is listed too (its morning has not come: no score yet)
+    for d in sorted((d for d, v in days.items() if v["minutes"] > 0 and end - timedelta(days=AFTER_DAYS) < d <= end), reverse=True):
         m = d + timedelta(days=1)
         parts: Dict[str, Dict[str, Any]] = {}
         if m in feel:
