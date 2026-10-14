@@ -2,7 +2,7 @@
 // (/api/kit; api/kit.json on the static site) and drawn with made-up sample data. Not a menu item: the footer
 // of every page and the Data page link here. Every manifest entry needs a sample below (tests/test_kit.py).
 import { blockColumns, bullet, coverage, dayDots, dayRing, draw, esc, interval, keptDots, ladderChart, lanes, legendKey, mealTimeline,
-  rangeStrip, RING_CATS, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js";
+  rangeStrip, RING_CATS, scoreDots, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js";
 import { dur, getLang, measure, num, shortDay, t } from "../i18n.js";
 import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js";
 
@@ -113,6 +113,9 @@ const CHARTS = {
   timeChart: { html: () => box("weight"),
     draw: { weight: (w) => timeChart({ band: CORRIDOR, points: WEIGH, line: AVG7, refs: [{ value: 74, label: t("body.target", { kg: num(74, 1) }) }] },
       { width: w, height: 240, first: iso(69), last: iso(-14), fmt: (v) => num(v, 1) }) } },
+  scoreDots: { html: () => box("scores"),
+    draw: { scores: (w) => scoreDots([[58, 4.9], [53, 4.5], [51, 4.8], [44, 3.8], [40, 6.9], [37, 8.4], [36, 2.3], [34, 2.6], [32, 5.1], [30, 4.4], [26, 6.1], [23, 5.4], [19, 3.1], [16, 5.8], [12, 7.2], [9, 4.6], [5, 5.5], [2, 6.4]]
+      .map(([k, value]) => ({ date: iso(k), value })), { width: w, first: iso(59), last: iso(0), band: { low: 3.5, high: 6.5 }, refs: [{ value: 5, label: t("after.usual") }], fmt: (v) => num(v, Number.isInteger(v) ? 0 : 1) }) } },
   stackedColumns: { html: () => box("columns"),
     draw: { columns: (w) => stackedColumns(days14(), FUN_FIRST, { width: w, limit: 180, limitLabel: t("time.fun_limit", { v: dur(180, { short: true }) }),
       labelEvery: w < 560 ? 3 : 2 }) } },
@@ -274,7 +277,7 @@ function spaceScale(tokens) {
 function chartCell(c) {
   const sample = CHARTS[c.name];
   // the narrow charts fill two or three columns evenly; the ring, the day dots and the wide charts each take a row
-  const span = ["dayRing", "dayDots", "timeChart", "stackedColumns", "blockColumns", "sleepWindows", "ladderChart", "coverage", "lanes", "mealTimeline"].includes(c.name) ? " kit-full" : "";
+  const span = ["dayRing", "dayDots", "timeChart", "scoreDots", "stackedColumns", "blockColumns", "sleepWindows", "ladderChart", "coverage", "lanes", "mealTimeline"].includes(c.name) ? " kit-full" : "";
   return `<article class="kit-cell${span}">
     <header><code class="kit-name">${esc(c.name)}</code><span class="chip">${t("kit.sample")}</span></header>
     <p class="kit-sig"><code>${esc(c.signature)}</code></p><p class="small kit-doc">${esc(docOf(c.name, c.doc))}</p>

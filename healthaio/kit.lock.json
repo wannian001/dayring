@@ -1,9 +1,9 @@
 {
-  "version": "1.7.1",
+  "version": "1.8.0",
   "files": {
     "css/tokens.css": "3bb16fc92e065cbff7b34479d3458f5eebdf602fadc08e8538587fd54a0b9705",
     "css/kit.css": "c09238eedb15ba4e93dfe72794f783b9d04b14abdd5732070667162f12e2b94b",
-    "js/charts.js": "8976c9f2a8ad9712b9efb607516130f483ff1e205f82fc120e7268d3f46ec685",
+    "js/charts.js": "8814fffbe18382f5963c1d3f2c1a6cbe2a31f8fe5cdcbc6be10cdbbd4df1385b",
     "js/icons.js": "64dd5a0a361b289ec1ccd86bb8aa31a27d4ea58dd8b9d09924b9a2218bc799c4"
   }
 }

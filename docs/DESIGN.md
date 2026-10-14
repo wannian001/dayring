@@ -122,10 +122,15 @@ The first page under Body signals, because recovery is the body signal the day's
   and how much of the time in bed you were asleep). They are added up and divided by how many there are, with at
   least two parts and one of them from the body. This is the only total score in the app, on purpose: the parts are
   already on one scale, each is "against your normal", and every part is shown beside the score with its own
-  number, so nothing is hidden in the sum. The last 10 training days are listed with theirs.
+  number, so nothing is hidden in the sum. Each part's bar has a tick at 5, so "against a usual morning" is seen,
+  not read. The last 60 days of scores are a dot chart on the fixed 0–10 scale (one dot per training day, no line:
+  the days between have no score), with the so-so band shaded; the session's details are in each dot's tooltip.
+  Under it, only the training days still waiting for a note are listed, as links that open the note.
 - **How the body answered training**: the next morning after hard days (load above the median of your fully rated
   training days) against every other known day, for HRV, resting heart rate and the worst sore region, with 95%
-  intervals and Benjamini–Hochberg. An association; the card names the obvious confound.
+  intervals and Benjamini–Hochberg. An association; the card names the obvious confound. Each outcome is drawn as
+  on Weekly review, a difference with its interval against zero (right = better), each row on its own scale, with
+  the numbers in the tooltip: the picture answers "which way, and does it cross zero" before any number is read.
 - A region clearly or very sore this morning, with training planned, gives "train, but spare the sore parts" on
   Today (after "take it easy" and "rest", which come first).
 
@@ -148,7 +153,8 @@ and training is only half of it. It looks at the 8 weeks behind, this week and t
   least 4 weeks with the record). The three are never added into one number: effort × minutes and a share of grade
   are not the same kind of thing, and a sum would hide which side is heavy.
 - **What it says**: this week (done plus still planned) as body and mind together ("stacked"), the mind's side, the
-  body's side, or a usual week; the heaviest week ahead; and the weeks to plan lighter. A week ahead is not judged
+  body's side, or a usual week; the heaviest week ahead; and the weeks to plan lighter, both also marked under their
+  week on the 13-week chart ("heaviest", "lighter"). A week ahead is not judged
   on training, since a plan is not a load (not every planned session happens); it is flagged instead when classes or
   deadlines are heavier than usual and the plan still holds your usual number of sessions or more.
 - Below: the 13 weeks as three lanes (training done and planned, calendar hours, share of grade), 42 days of
@@ -311,6 +317,10 @@ above the page.
 - Page names say what the page measures. The page about screens is **Stimulation** (刺激水平): it measures what
   goes in and what the body does next, and never calls either a hormone level.
 - No scores out of 100, no streaks, no badges. The Review page only lays facts side by side.
+- A sentence that carries numbers is a chart waiting to be drawn. "2.1% lower (95% interval −7.4% to 3.2%)" is an
+  interval against zero; ten rows of "date, session, score" are dots on a scale; "these weeks need a lighter plan"
+  is a flag under those weeks. Words stay for what to do and why; the numbers move into the picture and its
+  tooltip, and how-to text that the controls already show (a legend, a button's own label) is cut.
 
 ## Accessibility
 

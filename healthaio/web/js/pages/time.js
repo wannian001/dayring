@@ -7,6 +7,7 @@
 import { bullet, draw, esc, lanes, timeChart } from "../charts.js";
 import { day, device, dur, getLang, num, t } from "../i18n.js";
 import { icon, STATE_ICON } from "../icons.js";
+import { compareHtml, mountCompare } from "./effects.js";
 import { mountTabs, tabs } from "./tabs.js";
 
 const SCREEN_PARTS = [["fun", "var(--c-fun)"], ["focus", "var(--c-focus)"], ["communication", "var(--c-comms)"], ["other", "var(--c-other)"]];
@@ -124,16 +125,9 @@ function responseHtml(p) {
     const head = e === "fun_high"
       ? (R.median_fun != null ? t("stim.exp.fun_high", { v: dur(R.median_fun) }) : t("stim.exp.fun_high_none"))
       : t("stim.exp.late_fun", { v: dur(R.calm_min) });
-    const items = rows.map((r) => {
-      let chip, text;
-      if (r.status !== "ok") { chip = `<span class="chip">${t("stim.too_few")}</span>`; text = t("stim.too_few_line", { a: r.yes_days, b: r.no_days, n: R.method.min_group_days }); }
-      else if (r.detected) {
-        const better = R.better[r.outcome], worse = (r.diff > 0) === (better === "lower");
-        chip = `<span class="chip ${worse ? "bad" : "good"}">${STATE_ICON[worse ? "bad" : "good"]}${t("stim.seen")}</span>`; text = outcomeText(r, R);
-      } else { chip = `<span class="chip">${t("stim.not_seen")}</span>`; text = outcomeText(r, R); }
-      return `<li><span class="stim-out-name">${t(`stim.out.${r.outcome}`)}</span><span class="stim-out-chip">${chip}</span><span class="small muted">${esc(text)}</span></li>`;
-    }).join("");
-    return `<div class="stim-group"><h3 class="section-title">${esc(head)}</h3><ul class="stim-out">${items}</ul></div>`;
+    const items = compareHtml(rows, { name: (r) => t(`stim.out.${r.outcome}`), better: (r) => R.better[r.outcome],
+      text: (r) => (r.status === "ok" ? outcomeText(r, R) : t("stim.too_few_line", { a: r.yes_days, b: r.no_days, n: R.method.min_group_days })) });
+    return `<div class="stim-group"><h3 class="section-title">${esc(head)}</h3><div data-exposure="${e}">${items}</div></div>`;
   }).join("");
   return `<section class="card span-12"><h2>${t("stim.body_title")}<span class="aside">${t("stim.body_sub", { n: R.days })}</span></h2>
     ${groups}<p class="xs muted" style="margin:10px 0 0">${phrases(t("stim.body_note"))}</p></section>`;
@@ -198,6 +192,7 @@ export default {
       </div>`;
   },
   mount(root, p) {
+    root.querySelectorAll("[data-exposure]").forEach((box) => mountCompare(box, p.response.rows.filter((r) => r.exposure === box.dataset.exposure)));
     if (p.empty || !p.span.metrics || !p.span.metrics.before_sleep) return;
     mountTabs(root);
     const M = p.span.metrics;

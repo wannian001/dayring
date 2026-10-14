@@ -138,12 +138,13 @@ Each of these is shown in the gallery. Components (kit.css): `.sr`, `.top`, `.br
 | `interval(row, domain, { width, height = 26, flip = false })` | A difference with its 95% interval against a zero line; right = a better next day (flip mirrors it). |
 | `dayDots(series, { width, height = 30 })` | One circle per day: filled = done, hollow = 0, dashed = no record; the day of the month under each. |
 | `timeChart(layers, { width, height = 240, first, last, unit = "", fmt = (v) => String(v), yPad = 0.15, maxGap = 7 })` | A date axis with a shaded corridor, faint daily points, a line that breaks after maxGap days and dashed reference lines. |
+| `scoreDots(points, { width, height = 170, first, last, lo = 0, hi = 10, band = null, refs = [], fmt = (v) => String(v) })` | One dot per scored day on a fixed scale, a shaded band for the usual middle and dashed reference lines; each dot has its own tooltip. |
 | `stackedColumns(columns, groups, { width, height = 200, limit = null, limitLabel = "", maxValue = null, labelEvery = 1, unitFmt = formatDuration, minutes = true })` | Columns of stacked categories on one scale (minutes tick on round hours), with an optional dashed limit named in a key under the axis; × = no record. |
 | `blockColumns(columns, { width, height = 210, minTop = 60, label = "", maxChars = 12 })` | Columns of stacked blocks, one per item (block height = its value), a total above each column and two label lines under it. |
 | `sleepWindows(nights, { width, target = null, rowH = 18 })` | One bar per night on a 20:00–14:00 axis, the alarm as an ink tick over it, an optional dashed target window. |
 | `ladderChart(ladder, { width, height = 200, final })` | The alarm as a step line (earlier = higher) with wake dots, green on time and red late, and the goal dashed. |
 | `coverage(marks, first, { width, height = 16 })` | One cell per day from first: "1" = has data, "p" = partial, anything else = nothing. |
-| `lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true })` | One row per activity with columns over hours or days, each row on its own scale; × = no record, dashed = a limit, stripes = a hatch part. |
+| `lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true })` | One row per activity with columns over hours or days, each row on its own scale; × = no record, dashed = a limit, stripes = a hatch part, a flag = a word under a column. |
 | `mealTimeline(days, { width, gapH = 3, rowH = 24 })` | One row per day on a 05:00–03:00 axis: awake from waking to falling asleep (sleep in violet at both ends), meals as dots sized by energy, the gapH hours before sleep striped; a meal inside them is ringed and its tooltip says how long before sleep it was. A day with status "none" is written as not logged; "partial" draws its meals faint. |
 | `keptDots(days, { width, height = 20 })` | A run of days as dots, a small gap after every 7th: filled = the goal was kept, a ring = not kept, a short dash = no record that day. |
 
@@ -205,6 +206,7 @@ changed files under a version that is not newer.
 
 | version | date | change |
 |---|---|---|
+| 1.8.0 | 2026-10-14 | `scoreDots`: one dot per scored day on a fixed scale with the usual band and reference lines (Recovery's morning-after scores); `lanes` columns take `flag`, a word under the column in `--watch-ink` (the week to plan lighter, the heaviest week ahead) |
 | 1.7.1 | 2026-10-14 | `--plate`, `--plate-ink` and `--c-sore-0` get dark-mode values: the body figure is now line art painted in `--plate-ink`, so it sits on a dark plate in dark mode instead of a white one |
 | 1.7.0 | 2026-10-14 | Tokens `--c-sore-0` to `--c-sore-3` (soreness, one hue getting stronger, the same in both modes) and `--plate`, `--plate-ink` (the body figure's white plate), for the Recovery page |
 | 1.6.0 | 2026-10-14 | Icons `watch`, `phone`, `laptop` and `tray`: the devices data comes from, on the Data sources page; `ai` now stands for an AI assistant (AI work left the app) |
@@ -322,12 +324,13 @@ Health AIO 身兼两职：它是一个本地优先看板的公开展示，也是
 | `interval(row, domain, { width, height = 26, flip = false })` | 一个差值和它的 95% 区间，对着零线画；右边 = 第二天更好（flip 左右翻转）。 |
 | `dayDots(series, { width, height = 30 })` | 一天一个圆：实心 = 做了，空心 = 0，虚线 = 没有记录；下面写几号。 |
 | `timeChart(layers, { width, height = 240, first, last, unit = "", fmt = (v) => String(v), yPad = 0.15, maxGap = 7 })` | 日期轴：一条阴影走廊、淡淡的每日点、隔 maxGap 天以上就断开的线，加几条虚线参考线。 |
+| `scoreDots(points, { width, height = 170, first, last, lo = 0, hi = 10, band = null, refs = [], fmt = (v) => String(v) })` | 固定刻度上，有分的日子各一个点，一条阴影带标出平常的中间段，加几条虚线参考线；每个点有自己的提示。 |
 | `stackedColumns(columns, groups, { width, height = 200, limit = null, limitLabel = "", maxValue = null, labelEvery = 1, unitFmt = formatDuration, minutes = true })` | 同一刻度上的堆叠柱（分钟按整点的小时标刻度），可加一条虚线上限，名字写在坐标轴下面的图例里；× = 那一列没有记录。 |
 | `blockColumns(columns, { width, height = 210, minTop = 60, label = "", maxChars = 12 })` | 一列一列叠起来的块，一项一块（块高 = 它的值），每列上面写合计、下面两行标签。 |
 | `sleepWindows(nights, { width, target = null, rowH = 18 })` | 20:00–14:00 的轴上一晚一根条，闹钟是压在条上的一道墨色竖线，可加虚线目标框。 |
 | `ladderChart(ladder, { width, height = 200, final })` | 闹钟画成台阶线（越早越高），醒来的点按时为绿、晚了为红，目标是虚线。 |
 | `coverage(marks, first, { width, height = 16 })` | 从 first 起一天一格："1" = 有数据，"p" = 不全，其他 = 没有。 |
-| `lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true })` | 一种活动一行，列是小时或日子，每行有自己的刻度；× = 没有记录，虚线 = 上限，斜纹 = hatch 部分。 |
+| `lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true })` | 一种活动一行，列是小时或日子，每行有自己的刻度；× = 没有记录，虚线 = 上限，斜纹 = hatch 部分，flag = 列下面的一个词。 |
 | `mealTimeline(days, { width, gapH = 3, rowH = 24 })` | 一天一行，横轴 05:00 到次日 03:00：从醒来到睡着是醒着的底色（两头的睡眠画成紫色），每一餐是一个点、大小按热量，睡前 gapH 小时画斜纹；落在斜纹里的一餐加一圈，提示里写离睡着多久。状态 none 的一天写“没记”，partial 的一天把餐点画淡。 |
 | `keptDots(days, { width, height = 20 })` | 一串日子画成一排点，每 7 天留一点空：实心 = 做到了，空心圈 = 没做到，短横 = 那天没有记录。 |
 
@@ -364,6 +367,7 @@ Health AIO 身兼两职：它是一个本地优先看板的公开展示，也是
 
 | 版本 | 日期 | 改了什么 |
 |---|---|---|
+| 1.8.0 | 2026-10-14 | 新增 `scoreDots`：固定刻度上，有分的日子各一个点，带平常的阴影带和参考线（恢复页的练后第二天分）；`lanes` 的列可以带 `flag`，用 `--watch-ink` 写在这一列下面的一个词（该减量的周、接下来最重的一周） |
 | 1.7.1 | 2026-10-14 | `--plate`、`--plate-ink`、`--c-sore-0` 有了深色模式的值：人体图改成用 `--plate-ink` 画的线稿，深色模式下底板也是深色，不再是白的 |
 | 1.7.0 | 2026-10-14 | 新变量 `--c-sore-0` 到 `--c-sore-3`（酸痛，同一色相由浅到深，深浅色下相同）和 `--plate`、`--plate-ink`（人体图的白色底板），给恢复页用 |
 | 1.6.0 | 2026-10-14 | 新图标 `watch`、`phone`、`laptop`、`tray`：数据从哪台设备来（数据来源页用）；`ai` 现在指 AI 助手（AI 干活量已从应用里去掉） |
