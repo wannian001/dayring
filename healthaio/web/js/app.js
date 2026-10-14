@@ -27,29 +27,28 @@ import week from "./pages/week.js";
 const PAGES = { today, week, body, recovery, load, sleep, exercise, food, time, drain, followup, goals, data, kit, project, guide };
 // the menu is one axis, the loop of managing your health, one question per item: how am I today and what do I
 // change (Today); what is my body showing, the outcomes (Body signals: recovery, sleep, drain, weight); what do I do every day,
-// the causes I control (Daily life: exercise, food, stimulation); what is coming and how much it asks of me, body
-// and mind (Schedule: the week, then body and mind load across the weeks); what did I decide to change and is it
-// happening, and did it help (Actions & goals: follow-up with "tomorrow will be better", goals). Weekly review was
-// folded into Follow-up (its useful part was what helps the next day); where the numbers come from (Data sources) sits
-// under the menu with the reading pages, since it is not a step of the loop.
-const NAV = ["today", "body", "life", "sched", "act"];
+// the causes I control (Daily life: exercise, food, stimulation); and what have I planned and did it happen (Plans &
+// follow-up: the week on the calendar, how heavy the weeks are for body and mind, the goals, and whether yesterday's
+// advice happened and helped, "tomorrow will be better"). Schedule and Actions & goals were one question asked
+// twice (a plan, and whether it held), so they are one item. Weekly review was folded into Follow-up; where the
+// numbers come from (Data sources) sits under the menu with the reading pages, since it is not a step of the loop.
+const NAV = ["today", "body", "life", "plans"];
 // a menu item that holds several pages shows a small switch above the page title and opens on its first page
 const GROUPS = {
   body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight_tab"]],
   life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"]],
-  sched: [["week", "nav.schedule_week"], ["load", "nav.load_tab"]],
-  act: [["followup", "nav.followup"], ["goals", "nav.goals"]],
+  plans: [["week", "nav.schedule_week"], ["load", "nav.load_tab"], ["goals", "nav.goals"], ["followup", "nav.followup"]],
 };
 const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) => p === page)) || page;
 // a page inside a group is titled by its own tab (Weight, Sleep), not by the group
 const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;
-const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup", sched: "week", review: "followup" };  // old links keep working (AI work was removed)
+const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup", sched: "week", plans: "week", review: "followup" };  // old links keep working (AI work was removed)
 // each menu item's glyph (icons.js)
-const NAV_ICON = { today: "sun", body: "heart", life: "walk", sched: "calendar", act: "target" };
+const NAV_ICON = { today: "sun", body: "heart", life: "walk", plans: "calendar" };
 // under the menu, apart from the health loop: where the numbers come from, what the project is and who it is for, how
 // to use the app, and how the personal system it comes from changed over a year. History is on the author's own site
 // (it quotes that personal system), so it is a link out, in a new tab. On a phone they are small links in the top
-// row, so the tab bar keeps the five items of the loop.
+// row, so the tab bar keeps the four items of the loop.
 const DOCS = ["data", "project", "guide", "history"];
 const DOC_ICON = { data: "database", project: "info", guide: "communication", history: "clock" };
 const OUTSIDE = { history: "doc.history_url" };  // the i18n key of its address (one page per language)
@@ -91,7 +90,7 @@ const openGroups = new Set();
 let lastGroup = null;
 const CARET = `<svg class="side-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m4.5 2.5 3.5 3.5-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
-// on a phone's tab bar seven items share the width, so each takes its short name (Body, not Body signals)
+// on a phone's tab bar the items share the width, so each takes its short name (Body, not Body signals)
 const navName = (p) => t(wide() ? `nav.${p}` : `nav.short.${p}`);
 let shown = "today";
 matchMedia("(min-width: 900px)").addEventListener("change", () => header(shown));

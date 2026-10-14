@@ -261,14 +261,14 @@ matters, and says when the evidence is softer (entertainment).
 ## Menu
 
 Today · Body signals (Recovery, Sleep, Wear and tear, Weight & fitness) · Daily life (Exercise, Food, Stimulation) ·
-Schedule (Week, Body & mind load) · Actions & goals (Follow-up, Goals); under it, Data sources with the reading
-pages. The items are the loop of
+Plans & follow-up (Week, Body & mind load, Goals, Follow-up); under it, Data sources with the reading pages. The items are the loop of
 managing your health, one question each: how am I today and what do I change; what is my body showing (outcomes you
-cannot change directly); what do I do every day (the causes you can change); what is coming, and how much do the
-weeks ask of me, body and mind; what did I decide to change, is it happening and did it help. Where the numbers come from is not a step of
+cannot change directly); what do I do every day (the causes you can change); what have I planned (the week, how heavy
+the weeks are for body and mind, my goals) and did it hold and help. Schedule and Actions & goals were two items
+until 2026-10-14; they ask one question (a plan, and whether it held), so they are one. Where the numbers come from is not a step of
 the loop, so Data sources sits under the menu. One item's pages are open at a time (arriving in an item, or opening
 one, closes the other), so the sidebar stays about ten lines long. On a phone's tab bar each item takes a short
-name: Today, Body, Life, Schedule, Actions. Weekly review was folded into Follow-up on
+name: Today, Body, Life, Plans. Weekly review was folded into Follow-up on
 2026-10-14: its week-of-facts table repeated the other pages, and its one useful part, what has helped the next
 day, belongs next to whether the advice was kept ("Tomorrow will be better"). (Two earlier menus mixed axes: Today and Week (time) next to Time and Drain (topics) and
 Review and Data (meta pages); then Body held exercise and food (things you do) next to weight (an outcome), while
