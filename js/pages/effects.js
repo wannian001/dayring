@@ -2,9 +2,9 @@
 // energy on days after doing it against days after not, with its 95% interval. Shared by the Review page (the whole
 // list) and the Today page (one summary line that links to it). compareHtml draws the same picture for the
 // "how the body answered" cards on Recovery and Stimulation.
-import { draw, esc, interval } from "../charts.js?v=24f83eae9c";
-import { num, signed, t } from "../i18n.js?v=24f83eae9c";
-import { STATE_ICON } from "../icons.js?v=24f83eae9c";
+import { draw, esc, interval } from "../charts.js?v=8ad8a09b08";
+import { num, signed, t } from "../i18n.js?v=8ad8a09b08";
+import { STATE_ICON } from "../icons.js?v=8ad8a09b08";
 
 export function effectLabel(r) {
   const p = r.params || {};

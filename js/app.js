@@ -1,27 +1,27 @@
 // Shell: the menu (a left sidebar that folds to icons, a bottom tab bar on phones), language and light/dark,
 // hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js?v=24f83eae9c";
-import { installTooltip, esc, setFormat } from "./charts.js?v=24f83eae9c";
-import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=24f83eae9c";
-import { icon } from "./icons.js?v=24f83eae9c";
-import { mountPrompt } from "./trained.js?v=24f83eae9c";
-import { loadUpdate, mountUpdate, updateNote } from "./update.js?v=24f83eae9c";
-import body from "./pages/body.js?v=24f83eae9c";
-import data from "./pages/data.js?v=24f83eae9c";
-import drain from "./pages/drain.js?v=24f83eae9c";
-import exercise from "./pages/exercise.js?v=24f83eae9c";
-import followup from "./pages/followup.js?v=24f83eae9c";
-import load from "./pages/load.js?v=24f83eae9c";
-import recovery from "./pages/recovery.js?v=24f83eae9c";
-import food from "./pages/food.js?v=24f83eae9c";
-import goals from "./pages/goals.js?v=24f83eae9c";
-import guide from "./pages/guide.js?v=24f83eae9c";
-import kit from "./pages/kit.js?v=24f83eae9c";
-import project from "./pages/project.js?v=24f83eae9c";
-import sleep from "./pages/sleep.js?v=24f83eae9c";
-import time from "./pages/time.js?v=24f83eae9c";
-import today from "./pages/today.js?v=24f83eae9c";
-import week from "./pages/week.js?v=24f83eae9c";
+import { get, isStatic } from "./api.js?v=8ad8a09b08";
+import { installTooltip, esc, setFormat } from "./charts.js?v=8ad8a09b08";
+import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=8ad8a09b08";
+import { icon } from "./icons.js?v=8ad8a09b08";
+import { mountPrompt } from "./trained.js?v=8ad8a09b08";
+import { loadUpdate, mountUpdate, updateNote } from "./update.js?v=8ad8a09b08";
+import body from "./pages/body.js?v=8ad8a09b08";
+import data from "./pages/data.js?v=8ad8a09b08";
+import drain from "./pages/drain.js?v=8ad8a09b08";
+import exercise from "./pages/exercise.js?v=8ad8a09b08";
+import followup from "./pages/followup.js?v=8ad8a09b08";
+import load from "./pages/load.js?v=8ad8a09b08";
+import recovery from "./pages/recovery.js?v=8ad8a09b08";
+import food from "./pages/food.js?v=8ad8a09b08";
+import goals from "./pages/goals.js?v=8ad8a09b08";
+import guide from "./pages/guide.js?v=8ad8a09b08";
+import kit from "./pages/kit.js?v=8ad8a09b08";
+import project from "./pages/project.js?v=8ad8a09b08";
+import sleep from "./pages/sleep.js?v=8ad8a09b08";
+import time from "./pages/time.js?v=8ad8a09b08";
+import today from "./pages/today.js?v=8ad8a09b08";
+import week from "./pages/week.js?v=8ad8a09b08";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
 const PAGES = { today, week, body, recovery, load, sleep, exercise, food, time, drain, followup, goals, data, kit, project, guide };
@@ -29,9 +29,10 @@ const PAGES = { today, week, body, recovery, load, sleep, exercise, food, time, 
 // change (Today); what is my body showing, the outcomes (Body signals: recovery, sleep, drain, weight); what do I do every day,
 // the causes I control (Daily life: exercise, food, stimulation); what is coming and how much it asks of me, body
 // and mind (Schedule: the week, then body and mind load across the weeks); what did I decide to change and is it
-// happening, and did it help (Actions & goals: follow-up with "tomorrow will be better", goals); where the numbers come
-// from (Data sources). Weekly review was folded into Follow-up: its useful part was what helps the next day.
-const NAV = ["today", "body", "life", "sched", "act", "data"];
+// happening, and did it help (Actions & goals: follow-up with "tomorrow will be better", goals). Weekly review was
+// folded into Follow-up (its useful part was what helps the next day); where the numbers come from (Data sources) sits
+// under the menu with the reading pages, since it is not a step of the loop.
+const NAV = ["today", "body", "life", "sched", "act"];
 // a menu item that holds several pages shows a small switch above the page title and opens on its first page
 const GROUPS = {
   body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight_tab"]],
@@ -44,13 +45,13 @@ const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) =
 const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;
 const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup", sched: "week", review: "followup" };  // old links keep working (AI work was removed)
 // each menu item's glyph (icons.js)
-const NAV_ICON = { today: "sun", body: "heart", life: "walk", sched: "calendar", act: "target", data: "database" };
-// the reading pages sit under the menu, apart from the health loop: what the project is and who it is for, how to
-// use the app, and how the personal system it comes from changed over a year. History is on the author's own site
+const NAV_ICON = { today: "sun", body: "heart", life: "walk", sched: "calendar", act: "target" };
+// under the menu, apart from the health loop: where the numbers come from, what the project is and who it is for, how
+// to use the app, and how the personal system it comes from changed over a year. History is on the author's own site
 // (it quotes that personal system), so it is a link out, in a new tab. On a phone they are small links in the top
-// row, so the tab bar keeps the seven items of the loop.
-const DOCS = ["project", "guide", "history"];
-const DOC_ICON = { project: "info", guide: "communication", history: "clock" };
+// row, so the tab bar keeps the five items of the loop.
+const DOCS = ["data", "project", "guide", "history"];
+const DOC_ICON = { data: "database", project: "info", guide: "communication", history: "clock" };
 const OUTSIDE = { history: "doc.history_url" };  // the i18n key of its address (one page per language)
 const docAttrs = (p) => (OUTSIDE[p] ? `href="${esc(t(OUTSIDE[p]))}" target="_blank" rel="noopener"` : `href="#${p}"`);
 const docName = (p) => `${t(`nav.${p}`)}${OUTSIDE[p] ? " ↗" : ""}`;
@@ -84,8 +85,8 @@ const folded = () => document.documentElement.classList.contains("side-folded");
 const wide = () => matchMedia("(min-width: 900px)").matches;
 
 // a menu item that holds several pages opens and closes its list with a click (in the full sidebar; on the icon
-// rail and the phone's tab bar it opens its first page). The item you arrive in opens by itself, the others start
-// closed on every visit.
+// rail and the phone's tab bar it opens its first page). One list is open at a time: the item you arrive in opens by
+// itself and closes the others, and opening one by hand closes the one that was open, so the menu stays short.
 const openGroups = new Set();
 let lastGroup = null;
 const CARET = `<svg class="side-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m4.5 2.5 3.5 3.5-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -99,7 +100,7 @@ function header(active) {
   shown = active;
   const top = document.querySelector(".side");
   const group = groupOf(active);
-  if (GROUPS[group] && group !== lastGroup) openGroups.add(group);
+  if (group !== lastGroup) { openGroups.clear(); if (GROUPS[group]) openGroups.add(group); }
   lastGroup = group;
   const items = NAV.filter((p) => PAGES[p] || GROUPS[p]).map((p) => {
     const here = p === group;
@@ -135,9 +136,10 @@ function header(active) {
       if (folded() || !wide()) return;  // no room for the list: the item opens its first page
       e.preventDefault();
       const g = a.dataset.group, open = !openGroups.has(g);
-      if (open) openGroups.add(g); else openGroups.delete(g);
-      a.setAttribute("aria-expanded", String(open));
-      top.querySelectorAll(`a.side-sub[data-in="${g}"]`).forEach((sub) => { sub.hidden = !open; });
+      openGroups.clear();
+      if (open) openGroups.add(g);
+      top.querySelectorAll("a[data-group]").forEach((x) => x.setAttribute("aria-expanded", String(openGroups.has(x.dataset.group))));
+      top.querySelectorAll("a.side-sub").forEach((sub) => { sub.hidden = !openGroups.has(sub.dataset.in); });
     };
   });
   brand.onclick = (e) => { if (folded() && wide()) { e.preventDefault(); setFold(false); top.querySelector("#fold").focus(); } };

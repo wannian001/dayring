@@ -4,11 +4,11 @@
 // themselves. Saved into workout_notes.csv (POST /api/trained); the next mornings' check-in asks about those parts.
 // "Not this time" saves an empty row, so the prompt does not come back on another device; the × only hides it until
 // the app is opened again. The reading pages (Overview, Guide, the kit gallery) do not show it.
-import { isStatic, post } from "./api.js?v=24f83eae9c";
-import { esc } from "./charts.js?v=24f83eae9c";
-import { figureSvg, mountFigure, regionsIn } from "./figure.js?v=24f83eae9c";
-import { clock, day, dur, num, t, toDate, wtype } from "./i18n.js?v=24f83eae9c";
-import { icon } from "./icons.js?v=24f83eae9c";
+import { isStatic, post } from "./api.js?v=8ad8a09b08";
+import { esc } from "./charts.js?v=8ad8a09b08";
+import { figureSvg, mountFigure, regionsIn } from "./figure.js?v=8ad8a09b08";
+import { clock, day, dur, num, t, toDate, wtype } from "./i18n.js?v=8ad8a09b08";
+import { icon } from "./icons.js?v=8ad8a09b08";
 
 const SKIPPED = "healthaio.trained.skipped";  // the static demo cannot save: "Not this time" is remembered here
 const LATER = "healthaio.trained.later";      // × : hidden until the app is opened again (this tab only)
