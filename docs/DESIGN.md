@@ -79,6 +79,30 @@ streaks or scores. What it does not do yet is reach you: the page has to be open
 - Every chart is drawn at its real pixel width (redrawn on resize), so text never scales with the chart. The charts
   live in the design kit (`healthaio/web/js/charts.js`); pages only map their data onto them.
 
+## The Recovery page (`#recovery`)
+
+The first page under Body signals, because recovery is the body signal the day's decisions hang on.
+
+- **How recovered** is the Today page's verdict, the same numbers, so the two pages never disagree.
+- **Training load** is each workout's effort on Apple's 1–10 scale times its minutes (session-RPE, Foster et al.
+  2001; the same idea as Apple Fitness's Training Load), the last 7 days against the weekly average of the 28 before,
+  with the Exercise page's lines (1.3 and 0.8). The effort is your own rating in the Fitness or Workout app when there
+  is one, else the watch's estimate (`workouts.csv` says which). Minutes without an effort are left out and counted,
+  and with under half of the minutes rated the load says it is unsure instead of reading low. People ask for "load on
+  the nervous system"; no device measures that, so the page says so and shows the closest honest pair: what training
+  asked (the load) and what the autonomic nervous system answered (next-morning HRV and resting heart rate).
+- **How the body answered training**: the next morning after hard days (load above the median of your fully rated
+  training days) against every other known day, for HRV, resting heart rate and the worst sore region, with 95%
+  intervals and Benjamini–Hochberg. An association; the card names the obvious confound.
+- **Soreness** is the body figure from the author's GEOM90007 project Ready to Train (seven regions, a male and a
+  female figure, `[healthaio] figure`). Tapping a region cycles a little → clearly → very → not sore; Save replaces
+  that morning's rows in `soreness.csv` through `POST /api/soreness`, the second and last thing a page may write
+  (same rule as goals: only this app's own page). An SVG mask does not change what a click hits, so the region under
+  the pointer is read from the masks' own pixels. The figure is a white plate in both modes; the soreness colours
+  (`--c-sore-*`) are one hue getting stronger, the same in both modes. A morning without a check-in is unknown.
+- A region clearly or very sore this morning, with training planned, gives "train, but spare the sore parts" on
+  Today (after "take it easy" and "rest", which come first).
+
 ## The Stimulation page (`#time`)
 
 The page answers "how stimulating were my days, and what did my body do afterwards?". It replaced "Where your

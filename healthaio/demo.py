@@ -326,6 +326,59 @@ class Sam:
                         "status": status, "note": note})
         return out
 
+    # ---- effort and soreness ---------------------------------------------------------------------
+    def rate_workouts(self) -> None:
+        """Effort on Apple's 1-10 scale for each workout (its own random stream, so nothing else moves): Sam rates
+        most sessions himself in the Fitness app; the rest keep the watch's estimate, and a few have neither.
+        Strength days are hard, runs moderate, walks easy; the week before a deadline runs a little harder."""
+        rng = random.Random(SEED + 29)
+        base = {"strength training": 7.0, "running": 5.5, "walking": 2.5, "cycling": 4.5}
+        for w in self.workouts:
+            crunch = any(0 <= (self.today + timedelta(days=d[0]) - w["start"].date()).days <= 7 for d in DEADLINES)
+            effort = base.get(w["type"], 4.0) + rng.gauss(0, 0.9) + (0.6 if crunch else 0)
+            roll = rng.random()
+            if roll < 0.08:
+                continue  # no rating, no estimate
+            w["effort"] = float(min(10, max(1, round(effort))))
+            w["effort_source"] = "rated" if roll < 0.82 else "estimated"
+
+    def soreness(self) -> List[Dict]:
+        """Morning check-ins on about two mornings in three: the regions a workout loads are sore the next morning
+        and fading the one after (upper-body strength on Mondays: torso and upper arms; lower body on Fridays: hips
+        and calves; runs: calves), now and then a stiff neck, and a check-in with nothing sore otherwise."""
+        rng = random.Random(SEED + 31)
+        hits: Dict[date, Dict[str, int]] = {}
+        for w in self.workouts:
+            day = w["start"].date()
+            if w["type"] == "strength training":
+                regions = ["torso", "left_upper_arm", "right_upper_arm"] if day.weekday() == 0 else ["pelvis", "left_calf", "right_calf"]
+                first = 2 if (w.get("effort") or 6) < 8 else 3
+            elif w["type"] == "running":
+                regions, first = ["left_calf", "right_calf"], 1
+            else:
+                continue
+            for lag, level in ((1, first), (2, first - 1)):
+                if level <= 0:
+                    continue
+                spot = hits.setdefault(day + timedelta(days=lag), {})
+                for region in regions:
+                    if rng.random() < 0.85:
+                        spot[region] = max(spot.get(region, 0), max(1, level - (1 if rng.random() < 0.25 else 0)))
+        rows: List[Dict] = []
+        start = self.today - timedelta(days=BODY_DAYS - 1)
+        for k in range(BODY_DAYS):
+            day = start + timedelta(days=k)
+            if rng.random() > 0.68:
+                continue  # no check-in that morning
+            sore = dict(hits.get(day, {}))
+            if rng.random() < 0.05:
+                sore["head"] = 1
+            if not sore:
+                rows.append({"date": day, "region": "none", "level": 0})
+            for region, level in sorted(sore.items()):
+                rows.append({"date": day, "region": region, "level": level})
+        return rows
+
     # ---- screen ------------------------------------------------------------------------------
     def screen(self, body: List[Dict], events: List[Dict]) -> List[Dict]:
         """Sam's screens. Two habits make the Stimulation page's "how the body answers" card show something: on
@@ -498,7 +551,9 @@ def generate(out: Path, today: Optional[date] = None, now: Optional[datetime] = 
     write_table(data, "self_report", sam.self_report(body))
     write_table(data, "events", events)
     write_table(data, "deadlines", sam.deadlines())
+    sam.rate_workouts()
     write_table(data, "workouts", sam.workouts)
+    write_table(data, "soreness", sam.soreness())
     write_table(data, "meals", sam.meals(body))
     sessions = sam.screen(body, events)
     write_table(data, "screen_sessions", sessions)

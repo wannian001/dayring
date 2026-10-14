@@ -275,12 +275,12 @@ class DrainWords(unittest.TestCase):
 
 class Menu(unittest.TestCase):
     def test_menu_follows_the_health_loop(self):
-        # one axis: today, what the body shows (sleep, drain, weight), what you do every day (exercise, food,
+        # one axis: today, what the body shows (recovery, sleep, drain, weight), what you do every day (exercise, food,
         # stimulation, the schedule), what you decided to change and whether it happens (follow-up, goals),
         # whether it helped (review), where the numbers come from (data)
         app = (Path(__file__).resolve().parents[1] / "healthaio" / "web" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn('const NAV = ["today", "body", "life", "act", "review", "data"];', app)
-        self.assertIn('body: [["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight"]]', app)
+        self.assertIn('body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight"]]', app)
         self.assertIn('life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"], ["week", "nav.schedule"]]', app)
         self.assertIn('act: [["followup", "nav.followup"], ["goals", "nav.goals"]]', app)
         i18n = (Path(__file__).resolve().parents[1] / "healthaio" / "web" / "js" / "i18n.js").read_text(encoding="utf-8")

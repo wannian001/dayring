@@ -54,6 +54,11 @@ enum SamplePackage {
                                                   unit: "kcal"),
                                  WorkoutStatistic(type: "HKQuantityTypeIdentifierHeartRate", average: .text("146"),
                                                   unit: "count/min")]))
+                // Effort (iOS 18 and later): your rating and the watch's estimate, each spanning the workout.
+                add("HKQuantityTypeIdentifierWorkoutEffortScore", at(day, 7), at(day, 7, 31), "6",
+                    unit: "appleEffortScore")
+                add("HKQuantityTypeIdentifierEstimatedWorkoutEffortScore", at(day, 7), at(day, 7, 31), "7",
+                    unit: "appleEffortScore")
             }
         }
 

@@ -6,6 +6,7 @@ data_dir = "data"                 # where the CSV files live (relative to this f
 timezone = "Australia/Melbourne"  # IANA name; all times in the CSV files are local to it
 locale = "en"                     # en or zh; the page has a switch too
 title = "Health AIO"
+figure = "male"                   # male or female: the body figure the Recovery page draws for soreness
 
 # What `healthaio collect` (the Mac app, every 2 hours) imports by itself: Screen Time.
 # [collect]
@@ -18,7 +19,7 @@ title = "Health AIO"
 [devices]
 # When two devices are in use at the same minute, the first one in this list counts.
 priority = ["phone", "tablet", "laptop", "desktop"]
-# For "devices at once" (the Time page): a computer keeps its screen on while you are away, so an AI agent
+# For "devices at once" (the Stimulation page): a computer keeps its screen on while you are away, so an AI agent
 # app in front on one of these while another device is in use counts as the agent working, not as you.
 computers = ["laptop", "desktop"]
 agent_apps = ["Claude", "ChatGPT", "Codex", "Cursor", "Windsurf", "Terminal", "iTerm2", "Warp", "Ghostty"]

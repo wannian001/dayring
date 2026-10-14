@@ -10,6 +10,7 @@ import data from "./pages/data.js";
 import drain from "./pages/drain.js";
 import exercise from "./pages/exercise.js";
 import followup from "./pages/followup.js";
+import recovery from "./pages/recovery.js";
 import food from "./pages/food.js";
 import goals from "./pages/goals.js";
 import guide from "./pages/guide.js";
@@ -22,16 +23,16 @@ import today from "./pages/today.js";
 import week from "./pages/week.js";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
-const PAGES = { today, week, body, sleep, exercise, food, time, drain, followup, goals, review, data, kit, project, guide };
+const PAGES = { today, week, body, recovery, sleep, exercise, food, time, drain, followup, goals, review, data, kit, project, guide };
 // the menu is one axis, the loop of managing your health, one question per item: how am I today and what do I
-// change (Today); what is my body showing, the outcomes (Body signals: sleep, drain, weight); what do I do every day,
+// change (Today); what is my body showing, the outcomes (Body signals: recovery, sleep, drain, weight); what do I do every day,
 // the causes I control (Daily life: exercise, food, where time went, the schedule); what did I decide to
 // change and is it happening (Actions & goals: follow-up, goals); did it help (Weekly review); where the numbers come
 // from (Data sources)
 const NAV = ["today", "body", "life", "act", "review", "data"];
 // a menu item that holds several pages shows a small switch above the page title and opens on its first page
 const GROUPS = {
-  body: [["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight"]],
+  body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight"]],
   life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"], ["week", "nav.schedule"]],
   act: [["followup", "nav.followup"], ["goals", "nav.goals"]],
 };

@@ -1,9 +1,10 @@
 """A small web server: the page files, one JSON endpoint per page, and the routes the iPhone app uses.
 
 Binds to 127.0.0.1 by default. The pages only read the data; it changes by editing or importing the CSV files, or by
-a package from the paired iPhone app. The one thing the browser can write is a goal (POST /api/goals: set one, or
-answer an assistant's proposal), added as a line to goals.jsonl next to healthaio.toml, and only from a page this
-server served itself. ``--lan`` lets phones on your home network or Tailscale in: they need a token from pairing,
+a package from the paired iPhone app. The browser can write two things, and only from a page this server served
+itself: a goal (POST /api/goals: set one, or answer an assistant's proposal), added as a line to goals.jsonl next to
+healthaio.toml; and a morning soreness check-in (POST /api/soreness), which replaces that morning's rows in
+soreness.csv. ``--lan`` lets phones on your home network or Tailscale in: they need a token from pairing,
 and nobody else is answered (docs/CAPTURE.md).
 """
 import json
@@ -20,6 +21,7 @@ from typing import Any, Callable, Dict, Optional
 from urllib.parse import parse_qs, urlsplit
 
 from . import __version__, capture, goal_log, iphone, kit, phone, update
+from . import soreness as soreness_log
 from .config import Config
 from .context import Context
 from .modules import PAGES
@@ -219,6 +221,8 @@ def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: No
                 return self._json(409, {"started": False, "error": "an update is already running"})
             if path == "/api/goals":
                 return self._goals()
+            if path == "/api/soreness":
+                return self._soreness()
             return self._json(404, {"error": "nothing to write here"})
 
         def _same_site(self) -> bool:
@@ -241,6 +245,20 @@ def make_handler(cfg: Config, now: Callable[[], Optional[datetime]] = lambda: No
             except ValueError as error:  # GoalError, ConfigError and bad JSON are all ValueErrors
                 return self._send(400, to_json({"error": str(error)}), "application/json")
             return self._send(200, to_json({"ok": True, "id": entry["id"]}), "application/json; charset=utf-8")
+
+        def _soreness(self) -> None:
+            # a morning check-in from the Recovery page: the same rule as goals (this app's own page, here or in the
+            # paired phone's panel), and it only ever replaces that morning's rows in soreness.csv
+            if not self._same_site() or not (self._local() or phone.authenticate(cfg, self._cookie(), "read")):
+                return self._send(403, to_json({"error": "soreness can only be saved from this app's own page"}), "application/json")
+            length = int(self.headers.get("Content-Length") or 0)
+            if not 0 < length <= 4096:
+                return self._send(413, to_json({"error": "expected a small JSON body"}), "application/json")
+            try:
+                result = soreness_log.from_browser(cfg, json.loads(self.rfile.read(length)), now())
+            except ValueError as error:  # SorenessError and bad JSON
+                return self._send(400, to_json({"error": str(error)}), "application/json")
+            return self._send(200, to_json(result), "application/json; charset=utf-8")
 
         def _capture_get(self, path: str) -> None:
             if path == "/capture/v1/hello":

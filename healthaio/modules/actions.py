@@ -13,6 +13,8 @@ Candidates, highest priority first within each kind (a kind gets at most one):
     recovery is not better than usual.
   - move: the week's active-minute goal is not met yet and at least 10 minutes of today's share of what is left are
     still to do; recovery not low.
+  - spare: this morning's soreness check-in has a region clearly or very sore (Recovery page) and training is
+    planned or the week still needs minutes: train, but spare those regions.
   - strength: strength days are short of the goal and the days left barely fit them; recovery not low.
   (move and strength need activity records in the last 7 days: without them there is no telling what is left.)
 - sleep
@@ -43,6 +45,7 @@ from ..context import FUN, Context, iso
 from . import exercise as exercise_page
 from . import food as food_page
 from . import plans
+from . import recovery as recovery_page
 
 MAX_ITEMS = 3
 WINDOW = 7
@@ -54,7 +57,7 @@ MIN_MOVE = 10  # minutes: less than this left for today is not worth a line
 BASELINE = 28  # days of screens before the window that make "your normal" for the fun cap without a plan
 DOMAINS = ("training", "sleep", "food", "screen")
 # every piece of advice, in the order the pages list them
-KEYS = ("ease", "deload", "move", "strength", "asleep_by", "phone_away", "late_meal", "protein", "kcal", "fun_cap")
+KEYS = ("ease", "deload", "spare", "move", "strength", "asleep_by", "phone_away", "late_meal", "protein", "kcal", "fun_cap")
 
 
 def build(ctx: Context, day: date, recovery: Dict[str, Any], drain: Dict[str, Any]) -> Dict[str, Any]:
@@ -70,12 +73,17 @@ def build(ctx: Context, day: date, recovery: Dict[str, Any], drain: Dict[str, An
     minutes = exercise_page.active_minutes(ctx, day)
     tracked = any(day - timedelta(days=k) in minutes for k in range(1, WINDOW + 1))
     load = exercise_page.build(ctx, iso(day))["load"]
+    # this morning's check-in: the regions clearly or very sore
+    sore = {r: lv for r, lv in recovery_page.soreness_log(ctx).get(day, {}).items() if lv >= 2}
     if low and (planned or week["remaining_min"] > 0):
         items.append({"key": "ease", "domain": "training", "params": {"planned": planned}, "why": {"worse": worse},
                       "link": "#exercise"})
     elif load["state"] == "high" and recovery["verdict"] != "good":
         items.append({"key": "deload", "domain": "training", "params": {"ratio": load["ratio"]},
                       "why": {"acute": load["acute_min"], "chronic": load["chronic_min"]}, "link": "#exercise"})
+    elif sore and (planned or week["remaining_min"] > 0):
+        items.append({"key": "spare", "domain": "training", "params": {"regions": sorted(sore, key=lambda r: -sore[r])},
+                      "why": {"levels": sore}, "link": "#recovery"})
     elif tracked and not low and week["is_current"] and week["remaining_min"] > 0 and week["need_today_min"] - week["today_min"] >= MIN_MOVE:
         items.append({"key": "move", "domain": "training",
                       "params": {"min": math.ceil(week["need_today_min"] - week["today_min"])},

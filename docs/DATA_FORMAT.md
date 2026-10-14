@@ -55,6 +55,8 @@ Key: `start`, `type`. Typical sources: Apple Health export, which includes Apple
 | `source` | text |  | Which app or device recorded it. |
 | `kcal` | number |  | Active energy for the workout, kcal. |
 | `avg_hr` | number |  | Average heart rate during the workout, beats per minute. |
+| `effort` | number |  | How hard it was, 1 (easy) to 10 (all out): your own rating in the Fitness or Workout app, otherwise the watch's estimate. On every row of a paused workout. |
+| `effort_source` | text |  | Whose number the effort is: rated by you, or estimated by the watch. One of: `rated`, `estimated`. |
 
 ## `meals.csv`
 
@@ -86,6 +88,18 @@ Key: `date`. Typical sources: typed by hand; an assistant that writes this file 
 | `energy` | number |  | Body energy, 0 (drained) to 5 (full). |
 | `focus` | number |  | Mental focus, 0 to 5. |
 | `note` | text |  | One line in your own words. |
+
+## `soreness.csv`
+
+Where you were sore in the morning and how much: one row per sore region, or a single row with region `none` when you checked in and nothing was sore. A day without rows was not checked: unknown, never "not sore". The Recovery page writes this file when you tap the body figure and save; you can also write it by hand or import a CSV.
+
+Key: `date`, `region`. Typical sources: the Recovery page's body figure; typed by hand; any CSV with these columns.
+
+| column | type | required | meaning |
+|---|---|---|---|
+| `date` | date | yes | The morning. |
+| `region` | text | yes | Which region (the body figure's seven), or none. One of: `head`, `torso`, `pelvis`, `left_upper_arm`, `right_upper_arm`, `left_calf`, `right_calf`, `none`. |
+| `level` | number | yes | 1 a little, 2 clearly sore, 3 very sore; 0 with region none. |
 
 ## `screen_sessions.csv`
 

@@ -30,12 +30,13 @@ in one place, each compared with your own normal, and every morning, what to adj
 
 **Measure** (the Mac and iPhone apps collect what your devices already record) → **compare** (each signal against your own normal and your plan) → **adjust** (today's three things) → **follow up** (checked the next day against the data; another way when one keeps failing) → **review** (the week next to the four before it).
 
-The menu is that loop, one question per item: **Body signals** are the outcomes you cannot change directly (sleep, drain, weight); **Daily life** is what you do every day and can change (exercise, food, stimulation, the schedule); **Actions & goals** is what you decided to change and whether it happens.
+The menu is that loop, one question per item: **Body signals** are the outcomes you cannot change directly (recovery, sleep, drain, weight); **Daily life** is what you do every day and can change (exercise, food, stimulation, the schedule); **Actions & goals** is what you decided to change and whether it happens.
 
 | Menu | Page | Question it answers |
 |---|---|---|
 | **Today** | | One card for the morning: the day ring, how recovered you are against your own last 28 days, today's training and calendar in a line, when to be asleep tonight, and **what to adjust today** (at most three: at most one each for training, sleep, food and daytime screens, with the reason in a few words; a link checks yesterday's on Follow-up). Under it, every other part in one line with its number and state (sleep, HRV, resting heart rate, the week's exercise, food, screens, drain, weight, what helps you); a line opens its page. |
-| **Body signals** | Sleep | Tonight's times and how far the alarm plan has come; the last 7 nights against the 7 before; 21 nights on one axis and, in a tab, the alarm ladder (one step earlier after each on-time morning). Night-by-night checks are on Goals. |
+| **Body signals** | Recovery | How recovered you are (the Today verdict, with its three signals), what training has asked of you and how your body answered it, and where you are sore. **Training load** is each workout's effort on Apple's 1–10 scale (your rating in the Fitness or Workout app, else the watch's estimate) times its minutes, the last 7 days against the 4 weeks before; the same idea as Apple Fitness's Training Load, and no claim to measure the nervous system: the next morning's HRV and resting heart rate are its answer, set against hard days with 95% intervals. **Soreness**: tap the body figure (from the author's GEOM90007 project Ready to Train) to set this morning's level per region and save; 14 days per region below. A clearly sore region with training planned gives "spare the sore parts" on Today. |
+| | Sleep | Tonight's times and how far the alarm plan has come; the last 7 nights against the 7 before; 21 nights on one axis and, in a tab, the alarm ladder (one step earlier after each on-time morning). Night-by-night checks are on Goals. |
 | | Drain | What has been quietly wearing you down over 7 days? Seven signals (resting heart rate, HRV, the time you fall asleep, sleep-timing spread, screens before sleep, entertainment & social, app switching), each against your normal and your plan, plus whether short nights and hard training stacked up. No total score. |
 | | Weight | Weight as a 7-day average inside the corridor your plan allows, the weekly rate, and the long view. |
 | **Daily life** | Exercise | This week against the weekly goal (your plan, or the WHO guideline of 150 active minutes and 2 strength days, and it says which), day by day with the training planned for the days to come; the last 7 days against your normal; training load against recovery; 12 weeks by kind (strength, cardio, walking); how HRV and resting heart rate tend to answer each kind the next morning. |
@@ -51,8 +52,12 @@ The menu is that loop, one question per item: **Body signals** are the outcomes 
 | | [History ↗](https://tangjiakuo.top/demo/aio-history/en/) | Where this project comes from: the personal system it was taken out of, over a year and four generations, what each one found and what changed. It quotes that personal system, so it lives on the author's own site; the menu links out to it. |
 
 <p>
+  <img src="docs/images/recovery.png" width="49%" alt="Recovery page: training load and the soreness figure, light mode">
   <img src="docs/images/exercise.png" width="49%" alt="Exercise page, light mode">
+</p>
+<p>
   <img src="docs/images/food.png" width="49%" alt="Food page, light mode">
+  <img src="docs/images/drain-zh.png" width="49%" alt="Drain page in Chinese, dark mode">
 </p>
 <p>
   <img src="docs/images/goals.png" width="49%" alt="Goals page, light mode">
@@ -171,14 +176,15 @@ on a real phone with real data; nobody but the author has installed it yet.
 ### Your data stays on your computer
 
 - Data lives in plain CSV files in a folder you choose ([format](docs/DATA_FORMAT.md)). Importers write them
-  ([how each importer works](docs/IMPORTERS.md)); the dashboard only reads them.
+  ([how each importer works](docs/IMPORTERS.md)); the dashboard reads them, and writes only what the next bullet says.
 - The server listens on `127.0.0.1`. With `--lan` it also answers your home network and Tailscale, and there only
   the devices you paired: each holds its own tokens, the server keeps only their hashes, and `healthaio devices revoke`
   cuts one off. What a phone may send is a package of Apple Health samples; it is kept as sent under `.healthaio/`
   and written into the same CSV files. The iPhone app sends "Apple Watch" or "iPhone", never the names you gave your
   devices.
-- The one thing a page can write is a goal you set on the Goals page: a line in `goals.jsonl` next to
-  `healthaio.toml`, accepted only from the app's own page (here, or the panel in your paired phone).
+- A page can write two things, accepted only from the app's own page (here, or the panel in your paired phone): a
+  goal you set on the Goals page, a line in `goals.jsonl` next to `healthaio.toml`; and a soreness check-in you save
+  on the Recovery page, which replaces that morning's rows in `soreness.csv`.
 - The one request to the internet is the daily update check: a call to the GitHub API that sends nothing but the
   version number. `[updates] check = false` in healthaio.toml turns it off.
 - `build-static` (used for the demo site) refuses to run on your own data unless you pass a flag that says you mean to
@@ -250,12 +256,13 @@ repository contains none of that data.
 
 **记录**（Mac 和 iPhone 的小 App 把设备已经记下的收过来）→ **对比**（每个信号对比你自己的平常、对比你的计划）→ **调整**（今天的三件事）→ **跟进**（第二天按数据核对做到没有；老做不到就换个做法）→ **复盘**（这一周和之前四周并排）。
 
-菜单就是这个闭环，一项回答一个问题：**身体状态**是结果，你没法直接改（睡眠、消耗、体重）；**生活习惯**是你每天做的事，能直接改（运动、饮食、刺激水平、日程）；**行动与目标**是你决定改什么、做到了没有。
+菜单就是这个闭环，一项回答一个问题：**身体状态**是结果，你没法直接改（恢复、睡眠、消耗、体重）；**生活习惯**是你每天做的事，能直接改（运动、饮食、刺激水平、日程）；**行动与目标**是你决定改什么、做到了没有。
 
 | 菜单 | 页面 | 回答的问题 |
 |---|---|---|
 | **今天** | | 早上看的一张卡：一天的环、恢复和你自己最近 28 天比怎么样、今天的训练和日程一行、今晚几点睡着，以及**今天该调整的**（最多三件：训练、睡眠、饮食、白天的屏幕各最多一件，原因几个字说清；下面有个链接去“跟进”看昨天的做到没有）。下面是其他各项，一项一行，只写数字和状态（睡眠、HRV、静息心率、本周运动、饮食、屏幕、消耗、体重、对你有用的），点一行进它的页面。 |
-| **身体状态** | 睡眠 | 今晚几点睡、闹钟前移计划走到哪了；最近 7 晚和再往前 7 晚比；21 晚画在同一根轴上，另一个标签是闹钟台阶（每按时起一天，闹钟往前挪一步）。每晚的打勾在目标页。 |
+| **身体状态** | 恢复 | 恢复得怎样（和“今天”页同一个判断和它的三个信号）、训练给了身体多少负荷、身体怎么回应训练、哪里酸。**训练负荷**是每次训练的强度分（Apple 的 1–10 分：你在健身或体能训练 App 里打的分，没有就用手表估的）乘以分钟数，最近 7 天和之前 4 周比，思路和 Apple 健身 App 的训练负荷一样；它不声称测的是神经系统，第二天早上的 HRV 和静息心率才是神经系统的回应，和练得重的日子对照，带 95% 区间。**酸痛**：在人体图（来自作者的 GEOM90007 课程项目 Ready to Train）上点今天早上哪儿酸、多酸，保存；下面是每个部位最近 14 天。某个部位明显酸、今天又排了训练，“今天”页会提醒“避开酸的部位”。 |
+| | 睡眠 | 今晚几点睡、闹钟前移计划走到哪了；最近 7 晚和再往前 7 晚比；21 晚画在同一根轴上，另一个标签是闹钟台阶（每按时起一天，闹钟往前挪一步）。每晚的打勾在目标页。 |
 | | 消耗 | 最近 7 天哪些东西在悄悄耗你？七个信号（静息心率、HRV、入睡时刻、作息波动、睡前屏幕、娱乐和社交、应用切换），各自和平常比、和计划比；另外看睡眠不足和高强度训练有没有叠在一起。不打总分。 |
 | | 体重 | 体重 7 天平均是不是在计划允许的走廊里、每周降多少、长期走势。 |
 | **生活习惯** | 运动 | 本周对照每周目标（你的计划，没设就用世卫组织建议的每周 150 分钟活动、2 天力量训练，并写明用的是哪个），一天一格，还没到的日子写着计划的训练；最近 7 天对比平常；训练负荷对照恢复；12 周按种类（力量、有氧、步行）；每种训练后第二天早上的 HRV 和静息心率通常怎么样。 |
@@ -271,8 +278,12 @@ repository contains none of that data.
 | | [迭代记录 ↗](https://tangjiakuo.top/demo/aio-history/) | 这个项目的来历：它是从作者自己用了一年的个人系统里抽出来的；那个系统换了四代，每一代发现了什么、改了什么。它引了那个个人系统里的内容，所以放在作者自己的网站上，菜单里是一个指过去的链接。 |
 
 <p>
+  <img src="docs/images/recovery-zh.png" width="49%" alt="恢复页：训练负荷和酸痛人体图，深色">
   <img src="docs/images/exercise-zh.png" width="49%" alt="运动页，深色">
+</p>
+<p>
   <img src="docs/images/food-zh.png" width="49%" alt="饮食页，深色">
+  <img src="docs/images/followup.png" width="49%" alt="跟进页，浅色（英文）">
 </p>
 <p>
   <img src="docs/images/goals-zh.png" width="49%" alt="目标页，深色">
@@ -362,9 +373,9 @@ python3 -m healthaio iphone renew       # 给 iPhone App 续签并重新装上
 
 ### 数据只在你的电脑上
 
-- 数据是你指定文件夹里的普通 CSV（[格式](docs/DATA_FORMAT.md)）。导入工具写它们（[每个导入工具怎么工作](docs/IMPORTERS.md)），看板只读。
+- 数据是你指定文件夹里的普通 CSV（[格式](docs/DATA_FORMAT.md)）。导入工具写它们（[每个导入工具怎么工作](docs/IMPORTERS.md)），看板只读，下一条说的两样除外。
 - 服务只监听 `127.0.0.1`。加 `--lan` 后也接受家里的网络和 Tailscale，但只认你配对过的设备：每台设备有自己的令牌，服务器只存令牌的哈希，`healthaio devices revoke` 随时断开一台。手机能发的只有 Apple 健康的样本包，原样存在 `.healthaio/` 里，再写进同样的 CSV。iPhone App 只发“Apple Watch”“iPhone”这样的型号，从不发你给设备起的名字。
-- 页面唯一会写的，是你在目标页设的目标：一行记在 `healthaio.toml` 旁边的 `goals.jsonl` 里，而且只接受这个应用自己页面发来的（这台电脑上的，或者配对过的手机里的面板）。
+- 页面会写的只有两样，而且只接受这个应用自己页面发来的（这台电脑上的，或者配对过的手机里的面板）：你在目标页设的目标，一行记在 `healthaio.toml` 旁边的 `goals.jsonl` 里；你在恢复页保存的酸痛，只替换那天早上在 `soreness.csv` 里的几行。
 - 唯一联网的是每天一次的更新检查：问一次 GitHub API，除了版本号什么都不发。在 healthaio.toml 里写 `[updates] check = false` 就关掉。
 - `build-static`（演示站用的）遇到你自己的数据会拒绝运行，除非你加一个明确表示“我要公开”的参数。
 

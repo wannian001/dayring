@@ -101,8 +101,11 @@ by hand and the same days sent by the app give the same rows.
   `metadata` only `HKTimeZone`, `HKFoodType`, `HKFoodMeal` and `meal`. Anything else is dropped before the package is
   stored.
 - Types the app reads: sleep analysis, steps, exercise minutes, resting heart rate, HRV (SDNN), body mass, active and
-  resting energy, dietary energy, protein, carbohydrate, fat and fibre, and workouts. Units: `count`, `min`,
-  `count/min`, `ms`, `kg`, `kcal`, `g`. Sleep values are the `HKCategoryValueSleepAnalysis…` names (InBed,
+  resting energy, dietary energy, protein, carbohydrate, fat and fibre, and workouts; on iOS 18 and later also the
+  workout effort scores, `HKQuantityTypeIdentifierWorkoutEffortScore` (the 1–10 rating you give a workout) and
+  `HKQuantityTypeIdentifierEstimatedWorkoutEffortScore` (the watch's own estimate), each sample spanning its
+  workout's start and end. Units: `count`, `min`, `count/min`, `ms`, `kg`, `kcal`, `g`, and `appleEffortScore`
+  (values 1–10) for the effort scores. Sleep values are the `HKCategoryValueSleepAnalysis…` names (InBed,
   AsleepUnspecified, Awake, AsleepCore, AsleepDeep, AsleepREM). The app also asks to read heart rate, because iOS
   hides a workout's average heart rate without it; heart-rate samples themselves are never read or sent.
 - **No personal names.** Apple's own sources carry the name you gave your devices ("Sam's Apple Watch"). The app

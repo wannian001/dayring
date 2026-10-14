@@ -94,6 +94,9 @@ final class SourcePrivacyTests: XCTestCase {
         XCTAssertEqual(HealthNames.eventName(.pause), "HKWorkoutEventTypePause")
         XCTAssertEqual(HealthNames.eventName(.motionResumed), "HKWorkoutEventTypeMotionResumed")
         XCTAssertNil(HealthNames.eventName(.lap))
-        XCTAssertEqual(Set(HealthNames.quantities.map(\.unit)), ["count", "min", "count/min", "ms", "kg", "kcal", "g"])
+        XCTAssertEqual(Set(HealthNames.quantities(effortScoresAvailable: false).map(\.unit)),
+                       ["count", "min", "count/min", "ms", "kg", "kcal", "g"])
+        XCTAssertEqual(Set(HealthNames.quantities(effortScoresAvailable: true).map(\.unit)),
+                       ["count", "min", "count/min", "ms", "kg", "kcal", "g", "appleEffortScore"])
     }
 }

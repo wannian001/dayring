@@ -7,9 +7,31 @@ enum HealthNames {
         /// An HKUnit string that is also the export's `unit` attribute.
         let unit: String
         let isFood: Bool
+
+        /// The unit values are read in. The effort score's unit comes from its own constructor rather than the
+        /// unit-string parser, so reading never depends on the parser knowing a unit that iOS 18 added.
+        var hkUnit: HKUnit {
+            if unit == HealthNames.effortUnit, #available(iOS 18.0, *) { return .appleEffortScore() }
+            return HKUnit(from: unit)
+        }
     }
 
-    static let quantities: [QuantitySpec] = [
+    /// The quantity types read on this phone: the everyday ones, plus the workout effort scores on iOS 18 and later.
+    static var quantities: [QuantitySpec] {
+        quantities(effortScoresAvailable: effortScoresAvailable)
+    }
+
+    static func quantities(effortScoresAvailable: Bool) -> [QuantitySpec] {
+        effortScoresAvailable ? everyday + effortScores : everyday
+    }
+
+    /// HealthKit has the workout effort types (and their unit) from iOS 18; the app targets iOS 17.
+    static var effortScoresAvailable: Bool {
+        if #available(iOS 18.0, *) { return true }
+        return false
+    }
+
+    static let everyday: [QuantitySpec] = [
         QuantitySpec(identifier: .stepCount, unit: "count", isFood: false),
         QuantitySpec(identifier: .appleExerciseTime, unit: "min", isFood: false),
         QuantitySpec(identifier: .restingHeartRate, unit: "count/min", isFood: false),
@@ -24,10 +46,24 @@ enum HealthNames {
         QuantitySpec(identifier: .dietaryFiber, unit: "g", isFood: true),
     ]
 
+    /// `HKUnit.appleEffortScore()`'s unit string, as in the export. Values are 1–10.
+    static let effortUnit = "appleEffortScore"
+
+    /// Workout effort, 1–10: the rating you give a workout in the Fitness or Workout app, and the watch's own
+    /// estimate. Each sample spans its workout. Use only when `effortScoresAvailable`: the identifiers are spelled
+    /// out because the SDK constants need iOS 18 (a test checks they match).
+    static let effortScores: [QuantitySpec] = [
+        QuantitySpec(identifier: HKQuantityTypeIdentifier(rawValue: "HKQuantityTypeIdentifierWorkoutEffortScore"),
+                     unit: effortUnit, isFood: false),
+        QuantitySpec(identifier: HKQuantityTypeIdentifier(rawValue: "HKQuantityTypeIdentifierEstimatedWorkoutEffortScore"),
+                     unit: effortUnit, isFood: false),
+    ]
+
     static let sleepType = HKCategoryType(.sleepAnalysis)
 
-    /// Read permission only. Heart rate is asked for because a workout's average heart rate is hidden without it;
-    /// heart-rate samples themselves are never read.
+    /// Read permission only, for the types in `quantities` (so the effort scores only on iOS 18 and later). Heart
+    /// rate is asked for because a workout's average heart rate is hidden without it; heart-rate samples themselves
+    /// are never read.
     static var readTypes: Set<HKObjectType> {
         var types = Set<HKObjectType>(quantities.map { HKQuantityType($0.identifier) })
         types.insert(sleepType)

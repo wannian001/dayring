@@ -48,8 +48,8 @@ the way to bring in years of history at once.
 
 `sleep_min`, `in_bed_min`, `sleep_start`, `sleep_end`, `hrv_ms` (SDNN), `resting_hr`, `steps`,
 `exercise_min`, `workout_min`, `workout_type`, `active_kcal`, `basal_kcal`, `weight_kg` and `complete` in
-`body_daily.csv`; one row per workout in `workouts.csv` with `start`, `end`, `type`, `source`, `kcal` and
-`avg_hr`; and one row per meal in `meals.csv`, from what food-logging apps write into Health.
+`body_daily.csv`; one row per workout in `workouts.csv` with `start`, `end`, `type`, `source`, `kcal`,
+`avg_hr`, `effort` and `effort_source`; and one row per meal in `meals.csv`, from what food-logging apps write into Health.
 
 How the numbers are made:
 
@@ -96,9 +96,15 @@ How the numbers are made:
     then other apps, then iPhone); between equally trusted copies, the longer one.
   - *Odd dates.* Workouts dated before 2000 (exports carry epoch-0 junk) or after the export are
     left out; the summary says how many.
+  - `effort` is how hard the workout was on Apple's 1–10 scale (iOS 18 and later): your own rating in the Fitness
+    or Workout app (`HKQuantityTypeIdentifierWorkoutEffortScore`) when there is one, otherwise the watch's
+    estimate (`HKQuantityTypeIdentifierEstimatedWorkoutEffortScore`); `effort_source` says `rated` or
+    `estimated`. Apple keeps an effort as a sample spanning the workout, so it is matched to the workout that
+    starts within two minutes of it or that it covers for at least half. The Recovery page multiplies it by
+    the minutes for the training load.
   - `kcal` is the workout's active energy (`ActiveEnergyBurned`, kJ converted), on the first
     stretch. `avg_hr` is the workout's average heart rate when its statistics hold one (newer exports),
-    on every stretch. The Time page places exercise in the day from these rows; `workout_min` stays the
+    on every stretch. The day ring places exercise in the day from these rows; `workout_min` stays the
     daily total.
 - **Meals** (`meals.csv`). Food-logging apps (MyFitnessPal, Lose It!, Cronometer and others, once you allow them to
   write to Health) save what you ate as dietary records: energy, protein, carbohydrate, fat and fibre, each stamped

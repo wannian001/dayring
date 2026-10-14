@@ -410,6 +410,26 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 /* ---- today: what to adjust, inside the morning card under the ring ---- */
 .today-todo { margin-top: var(--s-5); padding-top: var(--s-5); border-top: 1px solid var(--line); }
 .today-followup { margin: var(--s-3) 0 0; }
+/* Recovery: the soreness figure (a white plate in both modes, as in Ready to Train; tokens --c-sore-*, --plate) */
+.rec-facts { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); }
+.rec-fact { display: inline-flex; align-items: center; gap: 8px; font-size: var(--t-sm); color: var(--ink-2); }
+.rec-fact .chip { white-space: normal; height: auto; padding: 2px 9px; }
+.rec-cns { margin: var(--s-3) 0 0; }
+.sore-layout { display: grid; grid-template-columns: minmax(260px, 420px) minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+@media (max-width: 760px) { .sore-layout { grid-template-columns: minmax(0, 1fr); } }
+.sore-figure-wrap { background: var(--plate); border-radius: var(--r-md); padding: var(--s-3); box-shadow: inset 0 0 0 1px var(--line); }
+.sore-figure { width: 100%; height: auto; display: block; }
+.sore-region { pointer-events: none; transition: fill .15s; }  /* the figure finds the region from the masks' pixels */
+.sore-region:focus-visible { outline: none; filter: drop-shadow(0 0 3px var(--accent)); }
+.sore-orient { font: 650 15px/1 var(--font); fill: var(--plate-ink); letter-spacing: .08em; }
+.sore-side { font: 600 13px/1 var(--font); fill: var(--plate-ink); opacity: .75; }
+.sore-figure[viewBox^="-163"] .sore-orient { font-size: 30px; }
+.sore-figure[viewBox^="-163"] .sore-side { font-size: 26px; }
+.sore-legend { margin-top: var(--s-2); color: var(--plate-ink); }
+.sore-rows { display: grid; gap: 10px; }
+.sore-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; font-size: var(--t-sm); }
+.sore-row .sore-strip { grid-column: 1 / -1; grid-row: 2; }
+.sore-msg { margin: var(--s-2) 0 0; color: var(--ink-2); }
 /* Stimulation: how the body answered, one row per outcome (name, verdict, the numbers) */
 .stim-group + .stim-group { margin-top: var(--s-4); }
 .stim-group h3 { margin: 0 0 var(--s-2); }

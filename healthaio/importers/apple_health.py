@@ -67,7 +67,11 @@ Meals (``meals.csv``)
     the configured timezone, like workouts. Re-importing replaces the rows of this export's food apps over the range
     it covers and keeps rows from anywhere else (a hand-typed meal survives).
 
-Workouts also carry ``avg_hr``, the average heart rate the workout's statistics hold (newer exports).
+Workouts also carry ``avg_hr``, the average heart rate the workout's statistics hold (newer exports), and
+``effort``, how hard it was on Apple's 1-10 scale (iOS 18 and later): the rating you gave in the Fitness or Workout
+app (``WorkoutEffortScore``) when there is one, otherwise the watch's own estimate (``EstimatedWorkoutEffortScore``),
+with ``effort_source`` saying which. Apple stores an effort as a sample spanning the workout, so it is matched to the
+workout that starts within two minutes of it or that it covers for at least half.
 
 Merge with an existing ``workouts.csv``
     Rows from a source that is in this export (its ``sourceName``) and that start in the export's
@@ -109,10 +113,13 @@ BODY_MASS = "HKQuantityTypeIdentifierBodyMass"
 ACTIVE_ENERGY = "HKQuantityTypeIdentifierActiveEnergyBurned"
 BASAL_ENERGY = "HKQuantityTypeIdentifierBasalEnergyBurned"
 HEART_RATE = "HKQuantityTypeIdentifierHeartRate"
+EFFORT_RATED = "HKQuantityTypeIdentifierWorkoutEffortScore"
+EFFORT_ESTIMATED = "HKQuantityTypeIdentifierEstimatedWorkoutEffortScore"
+EFFORT_MATCH_S = 120  # an effort sample starting this close to a workout's start belongs to it
 DIETARY = {"HKQuantityTypeIdentifierDietaryEnergyConsumed": "kcal", "HKQuantityTypeIdentifierDietaryProtein": "protein_g",
            "HKQuantityTypeIdentifierDietaryCarbohydrates": "carbs_g", "HKQuantityTypeIdentifierDietaryFatTotal": "fat_g",
            "HKQuantityTypeIdentifierDietaryFiber": "fiber_g"}
-WANTED = {SLEEP, STEPS, HRV, RESTING_HR, EXERCISE, BODY_MASS, ACTIVE_ENERGY, BASAL_ENERGY, *DIETARY}
+WANTED = {SLEEP, STEPS, HRV, RESTING_HR, EXERCISE, BODY_MASS, ACTIVE_ENERGY, BASAL_ENERGY, EFFORT_RATED, EFFORT_ESTIMATED, *DIETARY}
 GRAMS = {"g": 1.0, "mg": 0.001, "mcg": 0.000001, "kg": 1000.0, "oz": 28.349523125}
 MEAL_WORDS = {"breakfast": "breakfast", "lunch": "lunch", "dinner": "dinner", "supper": "dinner", "snack": "snack",
               "snacks": "snack", "drink": "drink", "drinks": "drink"}
@@ -239,6 +246,7 @@ class Collected:
     weight: Dict[date, Tuple[float, float]] = field(default_factory=dict)
     workouts: Dict[date, List[Tuple[float, float, float, str, str]]] = field(default_factory=lambda: defaultdict(list))
     sessions: List["Session"] = field(default_factory=list)
+    efforts: List[Tuple[float, float, float, bool]] = field(default_factory=list)  # (start_ts, end_ts, 1-10, rated)
     records: int = 0
     skipped: int = 0
 
@@ -348,6 +356,12 @@ def _record(out: Collected, elem, kind: str, zones: _Zones) -> None:
     if kind in DIETARY:
         _food(out, elem, kind, start, value)
         return
+    if kind in (EFFORT_RATED, EFFORT_ESTIMATED):
+        if 1 <= value <= 10:
+            out.efforts.append((start.timestamp(), end.timestamp(), value, kind == EFFORT_RATED))
+        else:
+            out.skipped += 1
+        return
     if kind in (ACTIVE_ENERGY, BASAL_ENERGY):
         factor = ENERGY_TO_KCAL.get(elem.get("unit") or "kcal")
         if factor is None:
@@ -435,6 +449,23 @@ def _workout(out: Collected, elem, zones: _Zones) -> None:
             kcal = value * factor
     out.sessions.append(Session(t0, t1, minutes, activity, elem.get("sourceName") or fam, fam,
                                 moving(t0, t1, events, minutes), kcal, avg_hr))
+
+
+def effort_for(item: "Session", efforts: List[Tuple[float, float, float, bool]]) -> Optional[Tuple[float, str]]:
+    """(1-10, "rated" | "estimated") for a workout: your own rating first, else the watch's estimate. An effort
+    sample belongs to the workout it starts within EFFORT_MATCH_S of, or covers for at least half."""
+    span = max(item.end - item.start, 1.0)
+    best: Optional[Tuple[bool, float, float]] = None  # (rated, -distance, value)
+    for start, end, value, rated in efforts:
+        overlap = min(end, item.end) - max(start, item.start)
+        if abs(start - item.start) > EFFORT_MATCH_S and overlap < 0.5 * span:
+            continue
+        key = (rated, -abs(start - item.start), value)
+        if best is None or key[:2] > best[:2]:
+            best = key
+    if best is None:
+        return None
+    return round(best[2], 1), "rated" if best[0] else "estimated"
 
 
 def moving(start: float, end: float, events: List[Tuple[float, bool]], minutes: Optional[float]) -> List[Tuple[float, float]]:
@@ -704,13 +735,15 @@ def workout_rows(data: Collected, tz) -> Tuple[List[Row], List[str], int]:
             continue
         written += 1
         kind = clean_workout_type(item.activity) or "workout"
+        effort = effort_for(item, data.efforts)
         for i, (a, b) in enumerate(stretches):
             low, high = _minute(a, tz), _minute(b, tz)
             if high <= low:  # under a minute after rounding, or the clocks went back during it
                 high = low + timedelta(minutes=max(1, round((b - a) / 60.0)))
             rows.append({"start": low, "end": high, "type": kind, "source": item.source,
                          "kcal": round(item.kcal, 1) if item.kcal is not None and i == 0 else None,
-                         "avg_hr": round(item.avg_hr) if item.avg_hr else None})
+                         "avg_hr": round(item.avg_hr) if item.avg_hr else None,
+                         "effort": effort[0] if effort else None, "effort_source": effort[1] if effort else None})
     notes = []
     if junk:
         notes.append(f"left out {junk} workout(s) dated before {EARLIEST.year} or after the export")

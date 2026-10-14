@@ -113,6 +113,10 @@ SCREEN_CATEGORIES = ("work", "learning", "communication", "entertainment", "soci
 EVENT_KINDS = ("class", "work", "training", "personal", "other")
 DEADLINE_STATUS = ("todo", "submitted", "done")
 MEALS = ("breakfast", "lunch", "dinner", "snack", "drink")
+EFFORT_SOURCES = ("rated", "estimated")
+# the body figure's seven regions (the soreness areas of the PMData wellness check-in), and "none" for a check-in
+# with nothing sore
+SORE_REGIONS = ("head", "torso", "pelvis", "left_upper_arm", "right_upper_arm", "left_calf", "right_calf")
 MAIN_MEALS = ("breakfast", "lunch", "dinner")
 
 TABLES: Dict[str, Table] = {t.name: t for t in (
@@ -158,6 +162,10 @@ TABLES: Dict[str, Table] = {t.name: t for t in (
             Column("source", "text", "Which app or device recorded it."),
             Column("kcal", "number", "Active energy for the workout, kcal.", low=0),
             Column("avg_hr", "number", "Average heart rate during the workout, beats per minute.", low=30, high=230),
+            Column("effort", "number", "How hard it was, 1 (easy) to 10 (all out): your own rating in the Fitness or Workout "
+                   "app, otherwise the watch's estimate. On every row of a paused workout.", low=1, high=10),
+            Column("effort_source", "text", "Whose number the effort is: rated by you, or estimated by the watch.",
+                   choices=EFFORT_SOURCES),
         ),
     ),
     Table(
@@ -192,6 +200,22 @@ TABLES: Dict[str, Table] = {t.name: t for t in (
             Column("energy", "number", "Body energy, 0 (drained) to 5 (full).", low=0, high=5),
             Column("focus", "number", "Mental focus, 0 to 5.", low=0, high=5),
             Column("note", "text", "One line in your own words."),
+        ),
+    ),
+    Table(
+        name="soreness",
+        doc="Where you were sore in the morning and how much: one row per sore region, or a single row with region "
+            "`none` when you checked in and nothing was sore. A day without rows was not checked: unknown, never "
+            "\"not sore\". The Recovery page writes this file when you tap the body figure and save; you can also "
+            "write it by hand or import a CSV.",
+        key=("date", "region"),
+        sources=("the Recovery page's body figure", "typed by hand", "any CSV with these columns"),
+        columns=(
+            Column("date", "date", "The morning.", required=True),
+            Column("region", "text", "Which region (the body figure's seven), or none.", required=True,
+                   choices=SORE_REGIONS + ("none",)),
+            Column("level", "number", "1 a little, 2 clearly sore, 3 very sore; 0 with region none.", required=True,
+                   low=0, high=3),
         ),
     ),
     Table(

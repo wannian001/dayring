@@ -4,7 +4,7 @@ number looks wrong.
 Each stream is listed under the device it comes from, the way a person thinks of their data: the watch (sleep, HRV,
 resting heart rate, activity minutes), the phone (steps, weight from a scale or typed into Health, the meals a
 food app writes into Health), the Mac (Screen Time, with the iPhone and iPad when they share it), and files brought
-in by hand (self-report). The first three reach this computer through the iPhone app and the Mac app; the page says
+in by hand (soreness check-ins from the Recovery page, self-report). The first three reach this computer through the iPhone app and the Mac app; the page says
 when each last did, outside the demo."""
 from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
@@ -25,6 +25,7 @@ STREAMS = [  # key, table, column (None = any row that day), stale after N days,
     ("weight", "body_daily", "weight_kg", 7, "phone"),
     ("food", "meals", None, 3, "phone"),  # a full day = at least two main meals logged; one meal = partial
     ("screen", "screen_sessions", None, 2, "mac"),
+    ("sore", "soreness", None, 7, "manual"),
     ("self", "self_report", None, 7, "manual"),
 ]
 
@@ -35,11 +36,12 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
     body = ctx.store.by_date("body_daily")
     screen = ctx.screen_days()
     selfr = ctx.store.by_date("self_report")
+    sore = {r["date"] for r in ctx.store.rows("soreness")}
     meals = food_days(ctx, today) if ctx.store.load("meals").present else {}
     streams = []
     for key, table, column, stale_after, device in STREAMS:
-        if table in ("meals", "self_report") and not ctx.store.load(table).present:
-            continue  # optional: someone who does not log food or rate their day gets no "never arrived" row
+        if table in ("meals", "self_report", "soreness") and not ctx.store.load(table).present:
+            continue  # optional: someone who does not log food, soreness or how the day felt gets no "never arrived" row
         marks: List[str] = []
         last: Optional[date] = None
         for k in range(DAYS):
@@ -54,6 +56,8 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
             elif table == "meals":
                 x = meals.get(d)
                 mark = "0" if x is None else ("1" if x["main"] >= 2 else "p")
+            elif table == "soreness":
+                mark = "1" if d in sore else "0"
             else:
                 mark = "1" if d in selfr else "0"
             marks.append(mark)
@@ -63,6 +67,8 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
             have = list(screen)
         elif table == "meals":
             have = list(meals)
+        elif table == "soreness":
+            have = list(sore)
         else:
             have = list(selfr)
         last = max(have) if have else None

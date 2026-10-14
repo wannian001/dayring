@@ -55,7 +55,7 @@ struct HealthReader: Sendable {
 
         for spec in HealthNames.quantities {
             let type = HKQuantityType(spec.identifier)
-            let unit = HKUnit(from: spec.unit)
+            let unit = spec.hkUnit
             let samples = try await HKSampleQueryDescriptor(
                 predicates: [.quantitySample(type: type, predicate: dayPredicate)],
                 sortDescriptors: [SortDescriptor(\.startDate)]

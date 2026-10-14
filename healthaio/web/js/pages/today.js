@@ -55,6 +55,7 @@ export function todoTitle(x) {
     case "deload": return t("todo.deload");
     case "move": return t("todo.move", { d: dur(q.min) });
     case "strength": return t("todo.strength", { n: q.left });
+    case "spare": return t("todo.spare", { list: (q.regions || []).map((r) => t(`sore.region.${r}`)).join(t("ui.list_sep")) });
     case "asleep_by": return t("todo.asleep_by", { clock: clock(q.clock) });
     case "phone_away": return t("todo.phone_away", { clock: clock(q.clock) });
     case "late_meal": return q.clock ? t("todo.late_meal", { clock: clock(q.clock) }) : t("todo.late_meal_h", { h: num(q.hours) });
@@ -72,6 +73,7 @@ function todoWhy(x) {
     case "deload": return t("todo.short.deload");
     case "move": return t("todo.short.move", { left: dur(w.remaining) });
     case "strength": return t("todo.short.strength", { n: w.days_left });
+    case "spare": return t("todo.short.spare");
     case "asleep_by": return w.low ? t("todo.short.ease") : t("todo.short.asleep", { d: dur(w.short_by) });
     case "phone_away": return w.drain ? t("todo.short.phone_drain") : t("todo.short.phone_last", { d: dur(w.last_night) });
     case "late_meal": return t("todo.short.late_meal", { n: w.late, k: w.known });
@@ -125,7 +127,7 @@ function line({ key, iconKey, name, text, viz = "", state = "", href }) {
 }
 
 function recoveryLines(p) {
-  const href = { sleep: "#sleep", hrv: "#drain", resting_hr: "#drain" };
+  const href = { sleep: "#sleep", hrv: "#recovery", resting_hr: "#recovery" };
   return p.recovery.metrics.map((m) => line({ key: m.key, iconKey: m.key === "sleep" ? "sleep" : "heart", name: t(`metric.${m.key}`),
     text: measure(m.value, m.unit), state: stateChip(m), href: href[m.key] })).join("");
 }
