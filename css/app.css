@@ -29,6 +29,15 @@ table.review tr.problem td { color: var(--off-ink); border-top: 0; padding-top: 
 table.checks th, table.checks td { text-align: center; padding: 7px 4px; }
 table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-right: 10px; }
 .streams { display: flex; flex-direction: column; gap: 14px; }
+/* Data sources: one card per device the data comes from */
+.dev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: var(--s-4); }
+.dev { display: flex; flex-direction: column; gap: var(--s-3); padding: var(--s-4); border-radius: var(--r-md); background: var(--surface-2); min-width: 0; }
+.dev-head { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.dev-icon { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.dev-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; line-height: 1.4; }
+.dev-carrier { margin: 0; color: var(--ink-2); }
+.dev .stream { display: flex; flex-direction: column; gap: 4px; }
+.dev .stream-head { margin-bottom: 0; }
 .stream-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; font-size: var(--t-sm); }
 
 /* ---- time: top apps ---- */
@@ -401,6 +410,14 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 /* ---- today: what to adjust, inside the morning card under the ring ---- */
 .today-todo { margin-top: var(--s-5); padding-top: var(--s-5); border-top: 1px solid var(--line); }
 .today-followup { margin: var(--s-3) 0 0; }
+/* Stimulation: how the body answered, one row per outcome (name, verdict, the numbers) */
+.stim-group + .stim-group { margin-top: var(--s-4); }
+.stim-group h3 { margin: 0 0 var(--s-2); }
+.stim-out { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.stim-out li { display: grid; grid-template-columns: minmax(8em, 12em) 9em minmax(0, 1fr); gap: 10px; align-items: center; font-size: var(--t-sm); }
+.stim-out-chip .chip { white-space: nowrap; }
+@media (max-width: 640px) { .stim-out li { grid-template-columns: 1fr auto; } .stim-out li > .small { grid-column: 1 / -1; } }
+.stim-note { margin: var(--s-3) 0 0; }
 /* a menu item with five pages (Daily life): on a narrow screen the switch stays one line and scrolls sideways */
 main > .subnav { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
 main > .subnav::-webkit-scrollbar { display: none; }

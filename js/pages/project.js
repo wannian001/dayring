@@ -4,8 +4,8 @@
 // made it (each opening on a click).
 // The same facts as the README's "Why it exists", shorter. The server only names the page (modules/docs.py).
 // History is not in this repository: it quotes the personal system it comes from, so it lives on the author's site.
-import { esc } from "../charts.js?v=baa624a8af";
-import { getLang, t } from "../i18n.js?v=baa624a8af";
+import { esc } from "../charts.js?v=3b938c3357";
+import { getLang, t } from "../i18n.js?v=3b938c3357";
 
 const REPO = "https://github.com/wannian001/proactive-health-aio";
 
@@ -26,7 +26,7 @@ const PROJECT = {
     dataTitle: "数据从哪来",
     data: { head: ["从哪", "收什么", "多久一次", "你要做的"], rows: [
       ["iPhone App", "Apple 健康里的睡眠、HRV、静息心率、步数、活动和训练、体重，以及记饮食的 App 写进健康的每一餐。Apple Watch 不直接连：手表先写进 Apple 健康，再由它带过来。", "每次打开 App，把最近 3 天发到你的电脑；不在后台跑", "用 Xcode 装一次，扫码配对。免费 Apple ID 签的 App 每 7 天要续签：手机提前提醒，点一下由电脑重签"],
-      ["Mac App（菜单栏）", "屏幕使用时间：这台 Mac，以及打开了“跨设备共享”的 iPhone、iPad；可选 Claude Code 和 Codex 的使用时刻和条数", "每 2 小时一次。macOS 只留大约 4 周，所以要一直开着", "给它“完全磁盘访问权限”，可以设成登录时打开"],
+      ["Mac App（菜单栏）", "屏幕使用时间：这台 Mac，以及打开了“跨设备共享”的 iPhone、iPad", "每 2 小时一次。macOS 只留大约 4 周，所以要一直开着", "给它“完全磁盘访问权限”，可以设成登录时打开"],
       ["手动导入", "Apple 健康导出包（export.zip）、课表或日历（.ics）、任意 CSV", "你想导的时候", "一条命令。适合第一次带进几年的历史"]] },
     costTitle: "它在你电脑上的开销（在一台 M4 MacBook 上实测）",
     cost: [
@@ -91,7 +91,7 @@ const PROJECT = {
     dataTitle: "Where the data comes from",
     data: { head: ["From", "What", "How often", "What you do"], rows: [
       ["iPhone app", "From Apple Health: sleep, HRV, resting heart rate, steps, activity and workouts, weight, and the meals a food-logging app writes into Health. The Apple Watch is not connected directly: it writes into Apple Health, and the app brings it over.", "Each time you open the app, the last 3 days go to your computer; nothing is sent while it is closed", "Install it once with Xcode and scan a QR code to pair. An app signed with a free Apple ID needs renewing every 7 days: the phone reminds you, and one tap has your computer re-sign it"],
-      ["Mac app (menu bar)", "Screen Time: this Mac, plus the iPhone and iPad when “Share across devices” is on; optionally when and how much you used Claude Code and Codex", "Every 2 hours. macOS keeps only about four weeks, so it stays running", "Give it Full Disk Access; it can open at login"],
+      ["Mac app (menu bar)", "Screen Time: this Mac, plus the iPhone and iPad when “Share across devices” is on", "Every 2 hours. macOS keeps only about four weeks, so it stays running", "Give it Full Disk Access; it can open at login"],
       ["Import by hand", "An Apple Health export (export.zip), a timetable or calendar (.ics), any CSV", "Whenever you like", "One command. Good for bringing in years of history the first time"]] },
     costTitle: "What it costs your computer (measured on an M4 MacBook)",
     cost: [

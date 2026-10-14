@@ -1,10 +1,10 @@
 // Follow-up (#followup): did yesterday's advice happen, checked against the data (nothing to tick); the last 14 days
 // of each piece of advice; and, for advice that keeps not happening, other ways to do it with the person's own
 // numbers instead of the same reminder again. The rules are in modules/followup.py.
-import { draw, esc } from "../charts.js?v=baa624a8af";
-import { clock, day, dur, num, shortDay, t } from "../i18n.js?v=baa624a8af";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=baa624a8af";
-import { TODO_ICON, todoTitle } from "./today.js?v=baa624a8af";
+import { draw, esc } from "../charts.js?v=3b938c3357";
+import { clock, day, dur, num, shortDay, t } from "../i18n.js?v=3b938c3357";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=3b938c3357";
+import { TODO_ICON, todoTitle } from "./today.js?v=3b938c3357";
 
 const hours = (h) => num(h, Number.isInteger(h) ? 0 : 1);
 

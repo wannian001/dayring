@@ -2,9 +2,9 @@
 // (/api/kit; api/kit.json on the static site) and drawn with made-up sample data. Not a menu item: the footer
 // of every page and the Data page link here. Every manifest entry needs a sample below (tests/test_kit.py).
 import { blockColumns, bullet, coverage, dayDots, dayRing, draw, esc, interval, keptDots, ladderChart, lanes, legendKey, mealTimeline,
-  rangeStrip, RING_CATS, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js?v=baa624a8af";
-import { dur, getLang, measure, num, shortDay, t } from "../i18n.js?v=baa624a8af";
-import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js?v=baa624a8af";
+  rangeStrip, RING_CATS, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js?v=3b938c3357";
+import { dur, getLang, measure, num, shortDay, t } from "../i18n.js?v=3b938c3357";
+import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js?v=3b938c3357";
 
 const DOCS = "https://github.com/wannian001/proactive-health-aio/blob/main/docs/DESIGN_KIT.md";
 const SIZES = [13, 16, 28, 64];
@@ -21,7 +21,7 @@ const SCREEN = [{ entertainment: 20 }, {}, {}, {}, {}, {}, {}, { communication: 
   { work: 25, social: 10 }, { communication: 15 }, { entertainment: 30 }, {}, { entertainment: 45, social: 10 }, { entertainment: 50 },
   { social: 30, communication: 10 }, { entertainment: 25 }];
 const SCREEN_PARTS = RING_CATS.map(([key, , color]) => [key, color]);
-// stacked columns put entertainment on the baseline, so a day reads against the dashed limit (as the Time page does)
+// stacked columns put entertainment on the baseline, so a day reads against the dashed limit (as a screen-time limit reads)
 const FUN_FIRST = [SCREEN_PARTS[1], SCREEN_PARTS[0], ...SCREEN_PARTS.slice(2)];
 const groupOf = (hour) => Object.fromEntries(RING_CATS.map(([key, keys]) => [key, keys.reduce((s, k) => s + (hour[k] || 0), 0)]));
 const RING = {
@@ -134,7 +134,7 @@ const CHARTS = {
         { label: t("act.sleep"), sub: dur(460), parts: [["sleep", "var(--c-sleep)"]], max: 60, values: SCREEN.map((_, h) => ({ sleep: h < 7 ? 60 : h === 7 ? 20 : h === 23 ? 20 : 0 })) },
         { label: t("act.exercise"), sub: dur(45), parts: [["exercise", "var(--c-exercise)"]], max: 60, values: SCREEN.map((_, h) => ({ exercise: h === 17 ? 30 : h === 18 ? 15 : 0 })) },
         { label: t("act.screen"), sub: dur(SCREEN.reduce((s, hr) => s + Object.values(hr).reduce((a, b) => a + b, 0), 0)), parts: SCREEN_PARTS, max: 60, values: SCREEN.map(groupOf) },
-        // a hatch part: the minutes a second device adds on top of the clock (the Time page's devices at once)
+        // a hatch part: the minutes a second device adds on top of the clock (the Stimulation page's devices at once)
         { label: t("time.all_devices"), sub: t("time.key_extra"), max: 90, parts: [["clock", "var(--c-axis)"], ["extra", "var(--ink)", { hatch: true }]],
           values: SCREEN.map((hr, h) => ({ clock: Object.values(hr).reduce((a, b) => a + b, 0), extra: [0, 0, 0, 0, 0, 0, 0, 0, 4, 10, 0, 12, 20, 6, 0, 8, 10, 0, 15, 0, 25, 30, 20, 10][h] })) },
       ];
