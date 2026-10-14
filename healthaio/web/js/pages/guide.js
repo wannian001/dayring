@@ -20,7 +20,7 @@ const GUIDE = {
     note: "在线演示里的人叫 Sam，是虚构的研究生，数字都是编的。想看你自己的，按下面第 2 到 4 步装到你自己的电脑上；数据只留在那台电脑里。",
     steps: [
       { h: "先看看演示", body: [
-        "左边的菜单（手机上在底部）按管理健康的顺序排：<b>今天 → 身体状态 → 生活习惯 → 日程 → 行动与目标 → 数据来源</b>。点有子页的一项，子页才展开。",
+        "左边的菜单（手机上在底部）按管理健康的顺序排：<b>今天 → 身体状态 → 生活习惯 → 日程 → 行动与目标</b>。点有子页的一项，子页才展开，一次只展开一项。数据来源和说明在菜单下面。",
         "<b>身体状态</b>是结果，你没法直接改（恢复、睡眠、慢性磨损、体重和心肺）；<b>生活习惯</b>是你每天做的事，能直接改（运动、饮食、刺激水平）；<b>日程</b>是接下来有什么、每周对身体和精神提了多少要求（一周日程、身心负荷）；<b>行动与目标</b>是你决定改什么、做到了没有。",
         "从“今天”开始：恢复得怎样、今天该调整什么、今天有什么安排、今晚几点该睡着。",
         "菜单旁边的两个按钮可以切换中英文和深浅色。"] },
@@ -63,7 +63,7 @@ const GUIDE = {
     note: "The person in the online demo, Sam, is a made-up graduate student, and every number is invented. To see your own, install it on your computer with steps 2 to 4 below; your data stays on that computer.",
     steps: [
       { h: "Look around the demo", body: [
-        "The menu on the left (at the bottom on a phone) follows the loop of managing your health: <b>Today → Body signals → Daily life → Schedule → Actions & goals → Data sources</b>. An item with pages opens them with a click.",
+        "The menu on the left (at the bottom on a phone) follows the loop of managing your health: <b>Today → Body signals → Daily life → Schedule → Actions & goals</b>. An item with pages opens them with a click, one at a time. Data sources and the reading pages sit under the menu.",
         "<b>Body signals</b> are outcomes you cannot change directly (recovery, sleep, wear and tear, weight & fitness); <b>Daily life</b> is what you do every day and can change (exercise, food, stimulation); <b>Schedule</b> is what is coming and how much each week asks of the body and the mind (the week, body & mind load); <b>Actions & goals</b> is what you decided to change and whether it happens.",
         "Start with Today: how you recovered, what to adjust today, what is on, and when to be asleep tonight.",
         "The two buttons by the menu switch the language and light / dark."] },

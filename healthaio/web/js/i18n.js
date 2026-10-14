@@ -923,12 +923,12 @@ Object.assign(DICT.zh, {
 
 // ---- the reading pages under the menu (their own words are in pages/project.js and guide.js; History is on the author's site) ----
 Object.assign(DICT.en, {
-  "nav.about": "About this project", "nav.project": "Overview", "nav.guide": "Guide", "nav.history": "History",
+  "nav.about": "Data and about", "nav.project": "Overview", "nav.guide": "Guide", "nav.history": "History",
   "doc.history_url": "https://tangjiakuo.top/demo/aio-history/en/",
   "doc.other_lang": "阅读中文版",
 });
 Object.assign(DICT.zh, {
-  "nav.about": "关于这个项目", "nav.project": "项目说明", "nav.guide": "使用说明", "nav.history": "迭代记录",
+  "nav.about": "数据和说明", "nav.project": "项目说明", "nav.guide": "使用说明", "nav.history": "迭代记录",
   "doc.history_url": "https://tangjiakuo.top/demo/aio-history/",
   "doc.other_lang": "Read in English",
 });
@@ -1003,7 +1003,7 @@ Object.assign(DICT.zh, {
 // ---- the menu's short names on a phone's tab bar, and goals set on the Goals page (goal_log.py) ----
 Object.assign(DICT.en, {
   "nav.short.today": "Today", "nav.short.body": "Body", "nav.short.life": "Life", "nav.short.sched": "Schedule", "nav.short.act": "Actions",
-  "nav.short.data": "Data",
+  
   "goals.edit": "Edit", "goals.set_one": "Set one", "goals.save": "Save", "goals.cancel": "Cancel", "goals.reset": "Back to the original",
   "goals.src.you": "set here", "goals.src.accepted": "suggestion you accepted",
   "goals.static": "The online demo is read-only. On your own computer, Save recomputes every page against the new goal.",
@@ -1021,7 +1021,7 @@ Object.assign(DICT.en, {
 });
 Object.assign(DICT.zh, {
   "nav.short.today": "今天", "nav.short.body": "身体", "nav.short.life": "生活", "nav.short.sched": "日程", "nav.short.act": "行动",
-  "nav.short.data": "数据",
+  
   "goals.edit": "改", "goals.set_one": "设一个", "goals.save": "保存", "goals.cancel": "取消", "goals.reset": "用回原来的",
   "goals.src.you": "在这里设的", "goals.src.accepted": "采纳的建议",
   "goals.static": "在线演示只能看。在自己电脑上运行时，点保存后每一页都按新目标重算。",

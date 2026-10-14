@@ -27,10 +27,10 @@ class Registry(unittest.TestCase):
 class Menu(unittest.TestCase):
     def test_they_sit_under_the_menu_not_in_it(self):
         listed = re.findall(r'"(\w+)"', re.search(r"const DOCS\s*=\s*\[([^\]]*)\]", APP).group(1))
-        self.assertEqual(listed, ["project", "guide", "history"])
+        self.assertEqual(listed, ["data", "project", "guide", "history"])  # where the numbers come from, then the reading pages
         nav = re.search(r"const NAV\s*=\s*\[([^\]]*)\]", APP).group(1)
         for name in listed:
-            self.assertNotIn(f'"{name}"', nav)  # the tab bar keeps the six items of the health loop
+            self.assertNotIn(f'"{name}"', nav)  # the tab bar keeps the five items of the health loop
         glyphs = dict(re.findall(r'(\w+): "(\w+)"', re.search(r"const DOC_ICON\s*=\s*\{([^}]*)\}", APP).group(1)))
         self.assertEqual(sorted(glyphs), sorted(listed))
         for glyph in glyphs.values():

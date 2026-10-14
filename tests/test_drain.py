@@ -280,7 +280,7 @@ class Menu(unittest.TestCase):
         # change and whether it happens (follow-up, goals),
         # and whether it helped (follow-up, "tomorrow will be better"), where the numbers come from (data)
         app = (Path(__file__).resolve().parents[1] / "healthaio" / "web" / "js" / "app.js").read_text(encoding="utf-8")
-        self.assertIn('const NAV = ["today", "body", "life", "sched", "act", "data"];', app)  # Weekly review went into Follow-up
+        self.assertIn('const NAV = ["today", "body", "life", "sched", "act"];', app)  # Weekly review went into Follow-up, Data under the menu
         self.assertIn('review: "followup"', app)  # an old #review link opens Follow-up, where "tomorrow will be better" is
         self.assertIn('body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight_tab"]]', app)
         self.assertIn('life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"]]', app)
