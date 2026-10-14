@@ -1,9 +1,9 @@
 // Food: the last 7 logged days against your normal and your plan, when the last meal came before sleep, the
 // energy balance against the scale, and what an early dinner has gone with the next morning.
-import { draw, esc, legendKey, mealTimeline, rangeStrip, trendLine } from "../charts.js?v=2ac1cb93c7";
-import { day, dur, inSentence, num, shortDay, signed, t } from "../i18n.js?v=2ac1cb93c7";
-import { STATE_ICON } from "../icons.js?v=2ac1cb93c7";
-import { mountTabs, tabs } from "./tabs.js?v=2ac1cb93c7";
+import { draw, esc, legendKey, mealTimeline, rangeStrip, trendLine } from "../charts.js?v=24f83eae9c";
+import { day, dur, inSentence, num, shortDay, signed, t } from "../i18n.js?v=24f83eae9c";
+import { STATE_ICON } from "../icons.js?v=24f83eae9c";
+import { mountTabs, tabs } from "./tabs.js?v=24f83eae9c";
 
 function fmt(unit, v) {
   if (v === null || v === undefined) return "—";
@@ -103,7 +103,7 @@ export default {
             { key: "balance", label: t("food.balance"), html: `<div class="food-panel">${balanceHtml(p)}</div>` },
             { key: "macros", label: t("food.macros"), html: `<div class="food-panel">${macrosHtml(p)}</div>` },
           ])}
-          <p class="small" style="margin:var(--s-4) 0 0"><a href="#review">${t("food.effect_moved")}</a></p></section>
+          <p class="small" style="margin:var(--s-4) 0 0"><a href="#followup">${t("food.effect_moved")}</a></p></section>
       </div>`;
   },
   mount(root, p) {

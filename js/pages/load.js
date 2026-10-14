@@ -2,9 +2,9 @@
 // and from the mind (hours of classes and work, the share of grade due), the 8 weeks behind and the 4 ahead, each
 // against your normal; then the training load day by day. Nothing is added into one number. The rules are in
 // modules/load.py.
-import { draw, esc, lanes, stackedColumns } from "../charts.js?v=2ac1cb93c7";
-import { day, dur, num, shortDay, t, wtype } from "../i18n.js?v=2ac1cb93c7";
-import { icon, STATE_ICON } from "../icons.js?v=2ac1cb93c7";
+import { draw, esc, lanes, stackedColumns } from "../charts.js?v=24f83eae9c";
+import { day, dur, num, shortDay, t, wtype } from "../i18n.js?v=24f83eae9c";
+import { icon, STATE_ICON } from "../icons.js?v=24f83eae9c";
 
 const TONE = { high: "watch", low: "", normal: "" };
 const hours = (v) => t("load.hours", { v: num(v, v < 10 && v % 1 ? 1 : 0) });

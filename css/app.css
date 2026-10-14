@@ -150,6 +150,8 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
   grid-template-columns: minmax(180px, 1.25fr) minmax(140px, 1.4fr) fit-content(260px) 150px; grid-template-columns: subgrid; align-items: center; }
 .drain-head { font-size: var(--t-xs); color: var(--ink-3); font-weight: 600; padding-bottom: 4px; }
 .drain-row { padding: 12px 0; border-top: 1px solid var(--line); }
+.drain-group { grid-column: 1 / -1; margin: var(--s-4) 0 2px; }
+.drain-group + .drain-row { border-top: 0; }
 .drain-row .what b { font-size: var(--t-sm); }
 .drain-row .what span { display: block; font-size: var(--t-xs); color: var(--ink-3); margin-top: 2px; }
 .drain-value { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; min-width: 0; }

@@ -1,40 +1,40 @@
 // Shell: the menu (a left sidebar that folds to icons, a bottom tab bar on phones), language and light/dark,
 // hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js?v=2ac1cb93c7";
-import { installTooltip, esc, setFormat } from "./charts.js?v=2ac1cb93c7";
-import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=2ac1cb93c7";
-import { icon } from "./icons.js?v=2ac1cb93c7";
-import { mountPrompt } from "./trained.js?v=2ac1cb93c7";
-import { loadUpdate, mountUpdate, updateNote } from "./update.js?v=2ac1cb93c7";
-import body from "./pages/body.js?v=2ac1cb93c7";
-import data from "./pages/data.js?v=2ac1cb93c7";
-import drain from "./pages/drain.js?v=2ac1cb93c7";
-import exercise from "./pages/exercise.js?v=2ac1cb93c7";
-import followup from "./pages/followup.js?v=2ac1cb93c7";
-import load from "./pages/load.js?v=2ac1cb93c7";
-import recovery from "./pages/recovery.js?v=2ac1cb93c7";
-import food from "./pages/food.js?v=2ac1cb93c7";
-import goals from "./pages/goals.js?v=2ac1cb93c7";
-import guide from "./pages/guide.js?v=2ac1cb93c7";
-import kit from "./pages/kit.js?v=2ac1cb93c7";
-import project from "./pages/project.js?v=2ac1cb93c7";
-import review from "./pages/review.js?v=2ac1cb93c7";
-import sleep from "./pages/sleep.js?v=2ac1cb93c7";
-import time from "./pages/time.js?v=2ac1cb93c7";
-import today from "./pages/today.js?v=2ac1cb93c7";
-import week from "./pages/week.js?v=2ac1cb93c7";
+import { get, isStatic } from "./api.js?v=24f83eae9c";
+import { installTooltip, esc, setFormat } from "./charts.js?v=24f83eae9c";
+import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=24f83eae9c";
+import { icon } from "./icons.js?v=24f83eae9c";
+import { mountPrompt } from "./trained.js?v=24f83eae9c";
+import { loadUpdate, mountUpdate, updateNote } from "./update.js?v=24f83eae9c";
+import body from "./pages/body.js?v=24f83eae9c";
+import data from "./pages/data.js?v=24f83eae9c";
+import drain from "./pages/drain.js?v=24f83eae9c";
+import exercise from "./pages/exercise.js?v=24f83eae9c";
+import followup from "./pages/followup.js?v=24f83eae9c";
+import load from "./pages/load.js?v=24f83eae9c";
+import recovery from "./pages/recovery.js?v=24f83eae9c";
+import food from "./pages/food.js?v=24f83eae9c";
+import goals from "./pages/goals.js?v=24f83eae9c";
+import guide from "./pages/guide.js?v=24f83eae9c";
+import kit from "./pages/kit.js?v=24f83eae9c";
+import project from "./pages/project.js?v=24f83eae9c";
+import sleep from "./pages/sleep.js?v=24f83eae9c";
+import time from "./pages/time.js?v=24f83eae9c";
+import today from "./pages/today.js?v=24f83eae9c";
+import week from "./pages/week.js?v=24f83eae9c";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
-const PAGES = { today, week, body, recovery, load, sleep, exercise, food, time, drain, followup, goals, review, data, kit, project, guide };
+const PAGES = { today, week, body, recovery, load, sleep, exercise, food, time, drain, followup, goals, data, kit, project, guide };
 // the menu is one axis, the loop of managing your health, one question per item: how am I today and what do I
 // change (Today); what is my body showing, the outcomes (Body signals: recovery, sleep, drain, weight); what do I do every day,
 // the causes I control (Daily life: exercise, food, stimulation); what is coming and how much it asks of me, body
 // and mind (Schedule: the week, then body and mind load across the weeks); what did I decide to change and is it
-// happening (Actions & goals: follow-up, goals); did it help (Weekly review); where the numbers come from (Data sources)
-const NAV = ["today", "body", "life", "sched", "act", "review", "data"];
+// happening, and did it help (Actions & goals: follow-up with "tomorrow will be better", goals); where the numbers come
+// from (Data sources). Weekly review was folded into Follow-up: its useful part was what helps the next day.
+const NAV = ["today", "body", "life", "sched", "act", "data"];
 // a menu item that holds several pages shows a small switch above the page title and opens on its first page
 const GROUPS = {
-  body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight"]],
+  body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight_tab"]],
   life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"]],
   sched: [["week", "nav.schedule_week"], ["load", "nav.load_tab"]],
   act: [["followup", "nav.followup"], ["goals", "nav.goals"]],
@@ -42,9 +42,9 @@ const GROUPS = {
 const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) => p === page)) || page;
 // a page inside a group is titled by its own tab (Weight, Sleep), not by the group
 const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;
-const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup", sched: "week" };  // old links keep working (AI work was removed)
+const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup", sched: "week", review: "followup" };  // old links keep working (AI work was removed)
 // each menu item's glyph (icons.js)
-const NAV_ICON = { today: "sun", body: "heart", life: "walk", sched: "calendar", act: "target", review: "list", data: "database" };
+const NAV_ICON = { today: "sun", body: "heart", life: "walk", sched: "calendar", act: "target", data: "database" };
 // the reading pages sit under the menu, apart from the health loop: what the project is and who it is for, how to
 // use the app, and how the personal system it comes from changed over a year. History is on the author's own site
 // (it quotes that personal system), so it is a link out, in a new tab. On a phone they are small links in the top

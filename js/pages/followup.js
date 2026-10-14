@@ -1,10 +1,12 @@
 // Follow-up (#followup): did yesterday's advice happen, checked against the data (nothing to tick); the last 14 days
 // of each piece of advice; and, for advice that keeps not happening, other ways to do it with the person's own
-// numbers instead of the same reminder again. The rules are in modules/followup.py.
-import { draw, esc } from "../charts.js?v=2ac1cb93c7";
-import { clock, day, dur, num, shortDay, t } from "../i18n.js?v=2ac1cb93c7";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=2ac1cb93c7";
-import { TODO_ICON, todoTitle } from "./today.js?v=2ac1cb93c7";
+// numbers instead of the same reminder again; and "tomorrow will be better": what has gone with a better next day
+// (the list that used to be on Weekly review). The rules are in modules/followup.py.
+import { draw, esc } from "../charts.js?v=24f83eae9c";
+import { clock, day, dur, num, shortDay, t } from "../i18n.js?v=24f83eae9c";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=24f83eae9c";
+import { effectsHtml, mountEffects } from "./effects.js?v=24f83eae9c";
+import { TODO_ICON, todoTitle } from "./today.js?v=24f83eae9c";
 
 const hours = (h) => num(h, Number.isInteger(h) ? 0 : 1);
 
@@ -107,10 +109,12 @@ export default {
         ${yesterdayHtml(p)}
         ${waysHtml(p)}
         ${daysHtml(p)}
+        <section class="card span-12" id="better">${effectsHtml(p.effects)}</section>
         <section class="card span-12"><details class="how"><summary>${t("ui.how")}</summary><p>${t("fu.rule")}</p></details></section>
       </div>`;
   },
   mount(root, p) {
+    mountEffects(root, p.effects);
     root.querySelectorAll(".fu-row .goal-dots").forEach((el) => { const r = p.rows[el.dataset.i]; draw(el, (w) => adviceDots(fortnight(p, r), { width: w })); });
   },
 };

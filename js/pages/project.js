@@ -4,8 +4,8 @@
 // made it (each opening on a click).
 // The same facts as the README's "Why it exists", shorter. The server only names the page (modules/docs.py).
 // History is not in this repository: it quotes the personal system it comes from, so it lives on the author's site.
-import { esc } from "../charts.js?v=2ac1cb93c7";
-import { getLang, t } from "../i18n.js?v=2ac1cb93c7";
+import { esc } from "../charts.js?v=24f83eae9c";
+import { getLang, t } from "../i18n.js?v=24f83eae9c";
 
 const REPO = "https://github.com/wannian001/proactive-health-aio";
 
@@ -22,10 +22,10 @@ const PROJECT = {
     ],
     loopTitle: "每天怎么转",
     loop: [["量", "Mac 和 iPhone 自动收，也能手动导入", "data", "数据来源"], ["比", "和你的平常、你的目标比", "today", "今天"],
-      ["调", "今天该调整的，最多三件", "today", "今天"], ["跟", "第二天核对做到没有，老做不到就换做法", "followup", "跟进"], ["看", "这一周和前四周并排", "review", "每周复盘"]],
+      ["调", "今天该调整的，最多三件", "today", "今天"], ["跟", "第二天核对做到没有，老做不到就换做法", "followup", "跟进"], ["验", "做了什么，第二天真的更好", "followup", "跟进 · 明天会更好"]],
     dataTitle: "数据从哪来",
     data: { head: ["从哪", "收什么", "多久一次", "你要做的"], rows: [
-      ["iPhone App", "Apple 健康里的睡眠、HRV、静息心率、步数、活动和训练（带强度评分）、体重，以及记饮食的 App 写进健康的每一餐。Apple Watch 不直接连：手表先写进 Apple 健康，再由它带过来。", "每次打开 App，把最近 3 天发到你的电脑；不在后台跑", "用 Xcode 装一次，扫码配对。免费 Apple ID 签的 App 每 7 天要续签：手机提前提醒，点一下由电脑重签"],
+      ["iPhone App", "Apple 健康里的睡眠、HRV、静息心率、最大摄氧量、步数、活动和训练（带强度评分）、体重，以及记饮食的 App 写进健康的每一餐。Apple Watch 不直接连：手表先写进 Apple 健康，再由它带过来。", "每次打开 App，把最近 3 天发到你的电脑；不在后台跑", "用 Xcode 装一次，扫码配对。免费 Apple ID 签的 App 每 7 天要续签：手机提前提醒，点一下由电脑重签"],
       ["Mac App（菜单栏）", "屏幕使用时间：这台 Mac，以及打开了“跨设备共享”的 iPhone、iPad", "每 2 小时一次。macOS 只留大约 4 周，所以要一直开着", "给它“完全磁盘访问权限”，可以设成登录时打开"],
       ["手动记录", "恢复页上的早上打卡（感觉和酸痛）、练完弹出的“练了哪儿”；Apple 健康导出包（export.zip）、课表或日历（.ics）、任意 CSV", "你想记、想导的时候", "点几下保存；导入是一条命令，适合第一次带进几年的历史"]] },
     costTitle: "它在你电脑上的开销（在一台 M4 MacBook 上实测）",
@@ -45,7 +45,7 @@ const PROJECT = {
       ["换做法", "老做不到就换：改小一步、让手机替你记、写一句“如果……就……”", "new", "followup", "跟进"],
       ["追问", "练完问练了哪儿；之后两天早上先问这些部位酸不酸", "new", "recovery", "恢复"],
       ["找上门", "不打开页面也能收到提醒", "no", null, "现在要打开页面才看得到"],
-      ["验证", "改了以后，第二天有没有更好", "part", "review", "每周复盘只说相关，不说因果"]] },
+      ["验证", "改了以后，第二天有没有更好", "part", "followup", "跟进页的“明天会更好”只说相关，不说因果"]] },
     status: { yes: "有", new: "这一版加的", no: "还没有", part: "一部分" },
     folds: [
       { h: "和现在常用的比", table: { head: ["现在用的", "管什么", "这里多做的"], rows: [
@@ -89,10 +89,10 @@ const PROJECT = {
     ],
     loopTitle: "The daily loop",
     loop: [["Measure", "The Mac and iPhone apps collect; you can also import", "data", "Data sources"], ["Compare", "Against your normal and your goals", "today", "Today"],
-      ["Adjust", "At most three things today", "today", "Today"], ["Follow up", "Checked the next day; another way when it keeps failing", "followup", "Follow-up"], ["Review", "This week next to the four before it", "review", "Weekly review"]],
+      ["Adjust", "At most three things today", "today", "Today"], ["Follow up", "Checked the next day; another way when it keeps failing", "followup", "Follow-up"], ["Check", "What has made the next day better", "followup", "Follow-up · Tomorrow will be better"]],
     dataTitle: "Where the data comes from",
     data: { head: ["From", "What", "How often", "What you do"], rows: [
-      ["iPhone app", "From Apple Health: sleep, HRV, resting heart rate, steps, activity and workouts (with their effort score), weight, and the meals a food-logging app writes into Health. The Apple Watch is not connected directly: it writes into Apple Health, and the app brings it over.", "Each time you open the app, the last 3 days go to your computer; nothing is sent while it is closed", "Install it once with Xcode and scan a QR code to pair. An app signed with a free Apple ID needs renewing every 7 days: the phone reminds you, and one tap has your computer re-sign it"],
+      ["iPhone app", "From Apple Health: sleep, HRV, resting heart rate, VO2 max, steps, activity and workouts (with their effort score), weight, and the meals a food-logging app writes into Health. The Apple Watch is not connected directly: it writes into Apple Health, and the app brings it over.", "Each time you open the app, the last 3 days go to your computer; nothing is sent while it is closed", "Install it once with Xcode and scan a QR code to pair. An app signed with a free Apple ID needs renewing every 7 days: the phone reminds you, and one tap has your computer re-sign it"],
       ["Mac app (menu bar)", "Screen Time: this Mac, plus the iPhone and iPad when “Share across devices” is on", "Every 2 hours. macOS keeps only about four weeks, so it stays running", "Give it Full Disk Access; it can open at login"],
       ["By hand", "The morning check-in on the Recovery page (how you feel, where you are sore) and the note after a workout (what it trained); an Apple Health export (export.zip), a timetable or calendar (.ics), any CSV", "Whenever you like", "A few taps and Save; an import is one command, good for bringing in years of history the first time"]] },
     costTitle: "What it costs your computer (measured on an M4 MacBook)",
@@ -112,7 +112,7 @@ const PROJECT = {
       ["Change the approach", "When it keeps failing: a smaller step, a phone setting that remembers for you, an if-then plan", "new", "followup", "Follow-up"],
       ["Ask back", "After a workout, what it trained; the next two mornings, whether those parts are sore", "new", "recovery", "Recovery"],
       ["Reach you", "A reminder without opening the page", "no", null, "For now you open the page to see it"],
-      ["Check it helped", "After a change, were the next days better", "part", "review", "Weekly review shows associations, not causes"]] },
+      ["Check it helped", "After a change, were the next days better", "part", "followup", "Tomorrow will be better (on Follow-up) shows associations, not causes"]] },
     status: { yes: "Yes", new: "New in this version", no: "Not yet", part: "In part" },
     folds: [
       { h: "Next to what people use now", table: { head: ["What people use", "What it covers", "What this adds"], rows: [
