@@ -4,12 +4,13 @@
 // a button per level), the score the morning after each training day (four parts side by side, averaged, with what
 // it trained and how sore that was), and how your body has answered training. What training asked of you is on
 // Body & mind load. The rules are in modules/recovery.py.
-import { isStatic, post } from "../api.js?v=eff2352768";
-import { bullet, draw, esc } from "../charts.js?v=eff2352768";
-import { figureSvg, mountFigure } from "../figure.js?v=eff2352768";
-import { day, dur, measure, num, shortDay, t, wtype } from "../i18n.js?v=eff2352768";
-import { icon, STATE_ICON } from "../icons.js?v=eff2352768";
-import { openTrained } from "../trained.js?v=eff2352768";
+import { isStatic, post } from "../api.js?v=2ac1cb93c7";
+import { bullet, draw, esc, scoreDots } from "../charts.js?v=2ac1cb93c7";
+import { figureSvg, mountFigure } from "../figure.js?v=2ac1cb93c7";
+import { day, dur, measure, num, shortDay, t, toDate, wtype } from "../i18n.js?v=2ac1cb93c7";
+import { icon, STATE_ICON } from "../icons.js?v=2ac1cb93c7";
+import { openTrained } from "../trained.js?v=2ac1cb93c7";
+import { compareHtml, mountCompare } from "./effects.js?v=2ac1cb93c7";
 
 const toneCls = (tone) => (tone === "good" ? "good" : tone === "bad" ? "bad" : "");
 const LOAD_TONE = { high: "watch", low: "", steady: "good" };
@@ -65,32 +66,36 @@ function partText(k, x) {
   if (k === "resting_hr") return t("after.rhr", { v: num(x.value), m: num(x.median) });
   return x.efficiency != null ? t("after.sleep_eff", { d: dur(x.value), e: num(x.efficiency) }) : t("after.sleep", { d: dur(x.value) });
 }
+const isoBack = (iso, n) => { const d = toDate(iso); d.setDate(d.getDate() - n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const sessionsText = (d) => d.sessions.map((s) => `${wtype(s.type)} ${dur(s.minutes)}${s.effort ? ` · ${t("trained.effort", { v: num(s.effort) })}` : ""}`).join(t("ui.list_sep"));
+const unnoted = (d) => d.sessions.find((s) => s.hard && s.note == null);
+
 function afterHtml(p) {
   const A = p.after, L = A.latest;
   if (!A.days.length) return `<section class="card span-12"><h2>${t("after.title")}</h2><p class="muted small">${t("after.none")}</p></section>`;
+  // the four parts, each a bar from 0 to 10 with a tick at 5 (a usual morning)
   const parts = L ? ["feel", "hrv", "resting_hr", "sleep"].map((k) => {
     const x = L.parts[k];
     return `<div class="after-part"><span class="small">${t(`after.part.${k}`)}</span>
       ${x ? `<b class="num">${num(x.score, 1)}</b><span class="after-bar"><span style="width:${(x.score * 10).toFixed(0)}%"></span></span><span class="xs muted">${esc(partText(k, x))}</span>`
         : `<b class="num muted">—</b><span class="after-bar"></span><span class="xs muted">${t(k === "feel" ? "after.no_feel" : "after.no_record")}</span>`}</div>`;
   }).join("") : "";
-  const what = (d) => d.sessions.map((s) => `${wtype(s.type)} ${dur(s.minutes)}${s.effort ? ` · ${t("trained.effort", { v: num(s.effort) })}` : ""}`).join(t("ui.list_sep"));
-  const unnoted = (d) => d.sessions.find((s) => s.hard && s.note == null);
-  const trainedOf = (d) => (d.trained.length ? `<span class="xs after-trained">${icon("exercise", 12)}${esc(regionsShort(d.trained))}</span>`
-    : unnoted(d) ? `<button type="button" class="doc-link xs" data-note="${esc(d.date)}">${t("after.note_it")}</button>` : "");
-  // a training day whose next morning has not come yet (today's) is listed with "scored tomorrow morning"
-  const rows = A.days.slice(0, 10).map((d) => `<li><span class="num small">${esc(shortDay(d.date))}</span><span class="small">${esc(what(d))} ${trainedOf(d)}</span>
-    ${d.morning > p.day ? `<span class="xs muted after-later">${t("after.tomorrow")}</span>`
-      : `<span class="after-bar"><span style="width:${d.score == null ? 0 : (d.score * 10).toFixed(0)}%"></span></span><b class="num small">${d.score == null ? "—" : num(d.score, 1)}</b>`}</li>`).join("");
-  const trainedLine = !L ? "" : L.trained.length
-    ? `<p class="small after-line">${icon("exercise", 14)}<span>${esc(t("after.trained", { list: regionsShort(L.trained) }))}${L.sore_next ? esc(t("after.sore_next", { list: L.trained.map((r) => t("sore.with_level", { region: t(`sore.region.${r}`), level: t(`sore.level_short.${L.sore_next[r] || 0}`) })).join(t("ui.list_sep")) })) : esc(t("after.sore_unchecked"))}</span></p>`
-    : unnoted(L) ? `<p class="small after-line">${icon("exercise", 14)}<span>${t("after.not_noted")}</span> <button type="button" class="doc-link" data-note="${esc(L.date)}">${t("after.note_it")}</button></p>` : "";
+  // what that session trained, each part coloured by how sore it was the next morning
+  const trained = L && L.trained.length ? `<div class="after-line">${icon("exercise", 14)}<span class="small">${t("after.trained")}</span>
+    ${L.trained.map((r) => {
+      const lv = L.sore_next ? L.sore_next[r] || 0 : null;
+      return `<span class="sore-chip" data-tip="${esc(`${t(`sore.region.${r}`)} · ${lv == null ? t("after.sore_unchecked") : t(`sore.level.${lv}`)}`)}"><i style="background:${lv == null ? "var(--c-band)" : fill(lv)}"></i>${t(`sore.region.${r}`)}</span>`;
+    }).join("")}<span class="xs muted">${t(L.sore_next ? "after.colour_next" : "after.sore_unchecked")}</span></div>` : "";
+  // training days (today's too) whose strength or hard session has nothing written about what it trained
+  const todo = A.days.slice(0, 10).filter(unnoted);
+  const todoLine = todo.length ? `<p class="small after-todo">${t("after.todo")} ${todo.map((d) => `<button type="button" class="doc-link" data-note="${esc(d.date)}">${esc(`${shortDay(d.date)} ${wtype(unnoted(d).type)}`)}</button>`).join(" · ")}</p>` : "";
   return `<section class="card span-12"><h2>${t("after.title")}<span class="aside">${t("after.sub")}</span></h2>
     ${L ? `<div class="after-top"><div><span class="eyebrow">${t("after.eyebrow", { day: day(L.date), m: day(L.morning, { weekday: false }) })}</span>
       <p class="lede" style="margin:4px 0 0"><span class="after-score num">${num(L.score, 1)}</span> <span class="chip ${BAND_TONE[L.band]}">${t(`after.band.${L.band}`)}</span></p>
       <p class="xs muted" style="margin:4px 0 0">${t("after.formula", { n: Object.keys(L.parts).length })}</p></div>
-      <div class="after-parts">${parts}</div></div>${trainedLine}` : `<p class="muted small">${t("after.no_score")}</p>`}
-    <h3 class="section-title" style="margin-top:var(--s-4)">${t("after.recent")}</h3><ul class="after-list">${rows}</ul></section>`;
+      <div class="after-parts">${parts}</div></div>${trained}` : `<p class="muted small">${t("after.no_score")}</p>`}
+    <h3 class="section-title" style="margin-top:var(--s-4)">${t("after.chart_title", { n: A.rule.after_days })}<span class="aside legend"><span class="key"><i style="background:var(--c-band)"></i>${t("after.key_band", { a: num(A.rule.low, 1), b: num(A.rule.good, 1) })}</span></span></h3>
+    <div id="after-dots" class="chart"></div>${todoLine}</section>`;
 }
 
 // ---- how the body answered training, the next morning ------------------------------------------------------------
@@ -104,18 +109,10 @@ function outcomeText(r, R) {
 function responseHtml(p) {
   const R = p.response;
   const head = R.median_load != null ? t("rec.exp", { v: num(R.median_load) }) : t("rec.exp_none", { n: R.method.min_group_days });
-  const items = R.rows.map((r) => {
-    let chip, text;
-    if (r.status !== "ok") { chip = `<span class="chip">${t("stim.too_few")}</span>`; text = t("stim.too_few_line", { a: r.yes_days, b: r.no_days, n: R.method.min_group_days }); }
-    else {
-      const worse = (r.diff > 0) === (R.better[r.outcome] === "lower");
-      chip = r.detected ? `<span class="chip ${worse ? "bad" : "good"}">${STATE_ICON[worse ? "bad" : "good"]}${t("stim.seen")}</span>` : `<span class="chip">${t("stim.not_seen")}</span>`;
-      text = outcomeText(r, R);
-    }
-    return `<li><span class="stim-out-name">${t(`rec.out.${r.outcome}`)}</span><span class="stim-out-chip">${chip}</span><span class="small muted">${esc(text)}</span></li>`;
-  }).join("");
+  const rows = compareHtml(R.rows, { name: (r) => t(`rec.out.${r.outcome}`), better: (r) => R.better[r.outcome],
+    text: (r) => (r.status === "ok" ? outcomeText(r, R) : t("stim.too_few_line", { a: r.yes_days, b: r.no_days, n: R.method.min_group_days })) });
   return `<section class="card span-12"><h2>${t("rec.body_title")}<span class="aside">${t("rec.body_sub", { n: p.rule.response_days })}</span></h2>
-    <div class="stim-group"><h3 class="section-title">${esc(head)}</h3><ul class="stim-out">${items}</ul></div>
+    <h3 class="section-title">${esc(head)}</h3><div id="rec-compare">${rows}</div>
     <p class="xs muted" style="margin:10px 0 0">${t("rec.body_note")}</p></section>`;
 }
 
@@ -148,8 +145,7 @@ function sorenessHtml(p) {
   const askedHead = S.asked.map((a) => t("asked.what", { day: day(a.date), what: wtype(a.type) })).join(t("ui.list_sep"));
   const asked = askedRegions.length ? `<div class="asked"><p class="small" style="margin:0 0 var(--s-2)">${icon("exercise", 14)} ${esc(t("asked.head", { what: askedHead }))}</p>
     ${askedRegions.map((r) => `<div class="lvl-row" role="group" aria-label="${esc(t(`sore.region.${r}`))}"><span class="small">${t(`sore.region.${r}`)}</span>
-      <span class="lvl-btns">${[0, 1, 2, 3].map((lv) => `<button type="button" class="goal-btn lvl-btn" data-region="${r}" data-level="${lv}" aria-pressed="${(levels[r] || 0) === lv && S.today}">${t(`sore.level.${lv}`)}</button>`).join("")}</span></div>`).join("")}
-    <p class="xs muted" style="margin:var(--s-2) 0 0">${t("asked.other")}</p></div>` : "";
+      <span class="lvl-btns">${[0, 1, 2, 3].map((lv) => `<button type="button" class="goal-btn lvl-btn" data-region="${r}" data-level="${lv}" aria-pressed="${(levels[r] || 0) === lv && S.today}">${t(`sore.level.${lv}`)}</button>`).join("")}</span></div>`).join("")}</div>` : "";
   const rows = S.regions.map((r, i) => `<div class="sore-row"><span>${t(`sore.region.${r.key}`)}</span>
     <span class="xs muted">${t("sore.days", { n: r.sore_days, k: S.checked })}</span><div class="sore-strip" data-i="${i}"></div></div>`).join("");
   return `<section class="card span-12"><h2>${t("sore.title")}<span class="aside">${t("sore.sub")}</span></h2>
@@ -192,6 +188,12 @@ export default {
       const m = p.recovery.metrics.find((x) => x.key === el.dataset.key);
       draw(el, (w) => bullet(m.value, m.band, { width: w, unit: m.unit, tone: m.tone }));
     });
+    mountCompare(root.querySelector("#rec-compare"), p.response.rows);
+    const A = p.after, scored = A.days.filter((d) => d.score != null);
+    const dotTip = (d) => [day(d.date), sessionsText(d), d.trained.length ? `${t("after.trained")} ${regionsShort(d.trained)}` : "", t("after.tip_score", { v: num(d.score, 1) })].filter(Boolean).join(" · ");
+    const dots = root.querySelector("#after-dots");
+    if (dots) draw(dots, (w) => scoreDots(scored.map((d) => ({ date: d.date, value: d.score, tip: dotTip(d) })),
+      { width: w, first: isoBack(p.day, A.rule.after_days - 1), last: p.day, band: { low: A.rule.low, high: A.rule.good }, refs: [{ value: 5, label: t("after.usual") }], fmt: (v) => num(v, Number.isInteger(v) ? 0 : 1) }));
     const S = p.soreness;
     root.querySelectorAll(".sore-strip").forEach((el) => draw(el, (w) => stripSvg(S.regions[el.dataset.i].days, w)));
     // tap a region: none → a little → clearly → very → none; the buttons of the parts a recent workout trained set

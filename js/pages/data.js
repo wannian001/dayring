@@ -1,8 +1,8 @@
 // Data sources (#data): what arrived over 90 days, grouped by the device it comes from (watch, phone, Mac, files
 // brought in by hand), each device with how its data reaches this computer; then the files and how to import more.
-import { coverage, draw, esc } from "../charts.js?v=eff2352768";
-import { clock, day, num, t } from "../i18n.js?v=eff2352768";
-import { icon } from "../icons.js?v=eff2352768";
+import { coverage, draw, esc } from "../charts.js?v=2ac1cb93c7";
+import { clock, day, num, t } from "../i18n.js?v=2ac1cb93c7";
+import { icon } from "../icons.js?v=2ac1cb93c7";
 
 const STATUS = { ok: "good", stale: "watch", missing: "bad" };
 const DEVICE_ICON = { watch: "watch", phone: "phone", mac: "laptop", manual: "tray" };

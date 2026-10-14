@@ -426,6 +426,33 @@ export function timeChart(layers, { width, height = 240, first, last, unit = "",
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${esc(t("chart.series"))}">${parts.join("")}</svg>`;
 }
 
+// ---- scores on a fixed scale over dates --------------------------------------------------------------------
+// points: [{date, value, tip}] ; band: {low, high} ; refs: [{value, label}]. For scores that exist only on some days
+// (the morning after a training day), so no line joins them, on a scale fixed in advance (lo..hi, 0–10 say).
+// One dot per scored day on a fixed scale, a shaded band for the usual middle and dashed reference lines; each dot has its own tooltip.
+export function scoreDots(points, { width, height = 170, first, last, lo = 0, hi = 10, band = null, refs = [], fmt = (v) => String(v) }) {
+  const m = { l: 32, r: 12, t: 10, b: 26 };
+  const n = Math.max(1, dayIndex(last, first));
+  const x = linear(0, n, m.l + 6, width - m.r - 6), y = linear(lo, hi, height - m.b, m.t);
+  const parts = [];
+  yTicks(lo, hi).forEach((v) => parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--c-grid)"/>
+    <text x="${m.l - 8}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-3)" class="num">${esc(fmt(v))}</text>`));
+  if (band) parts.push(`<rect x="${m.l}" y="${y(band.high).toFixed(1)}" width="${width - m.l - m.r}" height="${(y(band.low) - y(band.high)).toFixed(1)}" fill="var(--c-band)"/>`);
+  refs.forEach((r) => parts.push(`<line x1="${m.l}" x2="${width - m.r}" y1="${y(r.value).toFixed(1)}" y2="${y(r.value).toFixed(1)}" stroke="var(--ink-3)" stroke-dasharray="4 4"/>`));
+  const room = Math.max(2, Math.floor((width - m.l - m.r) / 44));
+  const every = Math.max(7, Math.ceil(n / (room - 1) / 7) * 7);
+  for (let k = n; k >= 0; k -= every) {  // counted back from the last day, so the newest date is always labelled
+    const d = new Date(toDate(first)); d.setDate(d.getDate() + k);
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    parts.push(`<text ${inside(x(k), shortDay(iso), 11, width)} y="${height - 6}" font-size="11" fill="var(--ink-3)">${esc(shortDay(iso))}</text>`);
+  }
+  points.filter((p) => has(p.value)).forEach((p) => parts.push(`<circle cx="${x(dayIndex(p.date, first)).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="5" fill="var(--c-mark)" stroke="var(--halo)" stroke-width="2"/>`));
+  refs.forEach((r) => parts.push(`<text x="${width - m.r}" y="${(y(r.value) - 6).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--ink-2)" ${HALO}>${esc(r.label)}</text>`));
+  const w = Math.max(10, (width - m.l - m.r) / (n + 1));
+  points.filter((p) => has(p.value)).forEach((p) => parts.push(`<rect x="${(x(dayIndex(p.date, first)) - w / 2).toFixed(1)}" y="${m.t}" width="${w.toFixed(1)}" height="${height - m.t - m.b}" fill="transparent" data-tip="${esc(p.tip || `${shortDay(p.date)} · ${fmt(p.value)}`)}"/>`));
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${esc(t("chart.series"))}">${parts.join("")}</svg>`;
+}
+
 // ---- stacked columns (categories over days or hours) -------------------------------------------------------
 // columns: [{label, values: {key: minutes}, shade: bool, tip}] ; groups: [[key, color, name]] bottom first
 // Columns of stacked categories on one scale (minutes tick on round hours), with an optional dashed limit named in a key under the axis; × = no record.
@@ -600,17 +627,19 @@ export function coverage(marks, first, { width, height = 16 }) {
 // ---- lanes: one row per activity, columns over hours or days, each row on its own scale -------------
 // rows: [{key, label, sub, parts: [[partKey, color, {hatch}]], values: [{partKey: minutes} | null], max, limit, limitLabel, fmt}]
 // (a row's fmt writes its values in its own unit, such as a count; the others use unitFmt)
-// cols: [{label, tip, shade}]. showMax: write each row's top value under its name (off when every row has the same scale)
+// cols: [{label, tip, shade, flag}]. showMax: write each row's top value under its name (off when every row has the same scale).
+// A column's flag is a word under its label (in --watch-ink), for a column that needs a look, such as a week to plan lighter
 // A part with {hatch: true} is drawn in diagonal stripes of its colour: something on top of the rest, such as the
 // minutes several devices add beyond the clock. .legend .key i.hatch is its key.
 let hatchIds = 0;
-// One row per activity with columns over hours or days, each row on its own scale; × = no record, dashed = a limit, stripes = a hatch part.
+// One row per activity with columns over hours or days, each row on its own scale; × = no record, dashed = a limit, stripes = a hatch part, a flag = a word under a column.
 export function lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, labelEvery = 1, unitFmt = formatDuration, showMax = true }) {
   const top = 4, axis = 20;
   const plotW = width - labelW - 8;
   const slot = plotW / cols.length;
   const bw = Math.max(2, Math.min(22, slot - 2));
-  const height = top + rows.length * (rowH + gap) + axis;
+  const flagged = cols.some((c) => c.flag);
+  const height = top + rows.length * (rowH + gap) + axis + (flagged ? 15 : 0);
   const parts = [];
   const hatches = new Map();  // colour -> pattern id, unique on the page (several charts share one document)
   const fillOf = (color, opts) => {
@@ -660,6 +689,7 @@ export function lanes(rows, cols, { width, rowH = 46, gap = 10, labelW = 150, la
   });
   const yAxis = top + rows.length * (rowH + gap) + 12;
   cols.forEach((c, i) => {
+    if (c.flag) parts.push(`<text x="${(labelW + slot * i + slot / 2).toFixed(1)}" y="${yAxis + 15}" text-anchor="middle" font-size="10.5" font-weight="650" fill="var(--watch-ink)">${esc(c.flag)}</text>`);
     if (i % labelEvery) return;
     parts.push(`<text x="${(labelW + slot * i + slot / 2).toFixed(1)}" y="${yAxis}" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">${esc(c.label)}</text>`);
   });

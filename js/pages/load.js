@@ -2,9 +2,9 @@
 // and from the mind (hours of classes and work, the share of grade due), the 8 weeks behind and the 4 ahead, each
 // against your normal; then the training load day by day. Nothing is added into one number. The rules are in
 // modules/load.py.
-import { draw, esc, lanes, stackedColumns } from "../charts.js?v=eff2352768";
-import { day, dur, num, shortDay, t, wtype } from "../i18n.js?v=eff2352768";
-import { icon, STATE_ICON } from "../icons.js?v=eff2352768";
+import { draw, esc, lanes, stackedColumns } from "../charts.js?v=2ac1cb93c7";
+import { day, dur, num, shortDay, t, wtype } from "../i18n.js?v=2ac1cb93c7";
+import { icon, STATE_ICON } from "../icons.js?v=2ac1cb93c7";
 
 const TONE = { high: "watch", low: "", normal: "" };
 const hours = (v) => t("load.hours", { v: num(v, v < 10 && v % 1 ? 1 : 0) });
@@ -42,8 +42,7 @@ function heroHtml(p) {
     <p class="lede" style="margin:6px 0 4px">${esc(lede)}</p>
     ${heavy ? `<p class="small" style="margin:0 0 var(--s-2)">${esc(heavy)}</p>` : ""}
     ${lighter.length ? `<p class="small load-lighter">${icon("exercise", 14)}<span>${esc(t("load.lighter", { weeks: lighter.map((x) => shortDay(x.start)).join(t("ui.list_sep")), n: p.usual_sessions }))}</span></p>` : ""}
-    <div class="tiles act-tiles" style="margin-top:var(--s-3)">${["training", "calendar", "deadlines"].map((k) => tile(k, w, p)).join("")}</div>
-    <p class="xs muted" style="margin:var(--s-3) 0 0">${t("load.note")}</p></section>`;
+    <div class="tiles act-tiles" style="margin-top:var(--s-3)">${["training", "calendar", "deadlines"].map((k) => tile(k, w, p)).join("")}</div></section>`;
 }
 
 function weeksHtml(p) {
@@ -90,15 +89,19 @@ export default {
         ${dueHtml(p)}
         <section class="card span-12"><details class="how"><summary>${t("ui.how")}</summary>
           <p>${t("load.rule", { a: p.rule.past_weeks, n: p.rule.min_weeks })}</p>
+          <p>${t("load.note")}</p>
           <p>${t("rec.rule_load", { a: p.rule.acute, c: p.rule.chronic, pct: num(p.rule.min_rated * 100) })}</p></details></section>
       </div>`;
   },
   mount(root, p) {
     const W = p.weeks;
-    const cols = W.map((w) => ({ label: shortDay(w.start), shade: w.when === "now", tip: t("load.week_of", { day: day(w.start, { weekday: false }) }) }));
+    // the heaviest week ahead and the weeks to plan lighter are marked under their column
+    const heaviest = p.heaviest?.start;
+    const flag = (w) => (w.start === heaviest ? t("load.flag.heaviest") : w.plan_lighter ? t("load.flag.lighter") : "");
+    const cols = W.map((w) => ({ label: shortDay(w.start), shade: w.when === "now", flag: flag(w), tip: t("load.week_of", { day: day(w.start, { weekday: false }) }) }));
     const max = (k, extra = () => 0) => Math.max(1, ...W.map((w) => (w[k] || 0) + extra(w)));
     const rows = [
-      { key: "training", label: t("load.m.training"), sub: t("load.what.training"), max: max("training", (w) => w.planned || 0), fmt: (v) => num(v),
+      { key: "training", label: t("load.m.training"), sub: t("load.what.training_short"), max: max("training", (w) => w.planned || 0), fmt: (v) => num(v),
         parts: [["done", "var(--c-exercise)"], ["planned", "var(--c-exercise)", { hatch: true }]],
         values: W.map((w) => (w.training == null && !w.planned ? null : { done: w.training || 0, planned: w.planned || 0 })) },
       { key: "calendar", label: t("load.m.calendar"), sub: t("load.what.calendar"), max: max("calendar"), fmt: hours,
