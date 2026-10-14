@@ -1,11 +1,11 @@
 // Today: one card for the morning (the day ring, how recovered you are, what is on, tonight, and what to adjust), then
 // every other part of your health in one line each. Numbers and a state only: the sentences that explain them live on
 // each part's own page, one click away, so a first look takes seconds.
-import { dayRing, draw, esc, RING_CATS, spark } from "../charts.js?v=8d57b217c2";
-import { clock, day, dur, measure, num, signed, t, wtype } from "../i18n.js?v=8d57b217c2";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=8d57b217c2";
-import { worseLine } from "./drain.js?v=8d57b217c2";
-import { helping } from "./effects.js?v=8d57b217c2";
+import { dayRing, draw, esc, RING_CATS, spark } from "../charts.js?v=eff2352768";
+import { clock, day, dur, measure, num, signed, t, wtype } from "../i18n.js?v=eff2352768";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=eff2352768";
+import { worseLine } from "./drain.js?v=eff2352768";
+import { helping } from "./effects.js?v=eff2352768";
 
 const shiftDay = (iso, n) => { const d = new Date(`${iso}T12:00:00`); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 const chip = (cls, text, glyph = "") => `<span class="chip ${cls}">${glyph}${esc(text)}</span>`;
@@ -98,8 +98,8 @@ function todoHtml(p) {
 
 function morningHtml(p) {
   const r = p.recovery;
-  const self = p.self && (p.self.energy != null || p.self.focus != null)
-    ? `<p class="small muted" style="margin:0">${esc(t("self.title"))}${t("today.colon")}${esc([p.self.energy != null ? t("self.energy", { v: num(p.self.energy) }) : "", p.self.focus != null ? t("self.focus", { v: num(p.self.focus) }) : ""].filter(Boolean).join(SEP()))}</p>` : "";
+  const self = p.self && (p.self.energy != null || p.self.focus != null || p.self.feel != null)
+    ? `<p class="small muted" style="margin:0">${esc(t("self.title"))}${t("today.colon")}${esc([p.self.feel != null ? t("self.feel", { v: t(`feel.${p.self.feel}`) }) : "", p.self.energy != null ? t("self.energy", { v: num(p.self.energy) }) : "", p.self.focus != null ? t("self.focus", { v: num(p.self.focus) }) : ""].filter(Boolean).join(SEP()))}</p>` : "";
   const behind = r.days_behind > 1 ? `<p class="chip watch" style="height:auto;padding:4px 10px;white-space:normal">${t("recovery.behind", { n: r.days_behind, day: day(r.as_of) })}</p>` : "";
   const legend = `<div class="legend">
     <span class="key"><i style="background:var(--c-sleep)"></i>${t("ring.sleep")}</span>

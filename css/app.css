@@ -410,26 +410,38 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 /* ---- today: what to adjust, inside the morning card under the ring ---- */
 .today-todo { margin-top: var(--s-5); padding-top: var(--s-5); border-top: 1px solid var(--line); }
 .today-followup { margin: var(--s-3) 0 0; }
-/* Recovery: the soreness figure (a white plate in both modes, as in Ready to Train; tokens --c-sore-*, --plate) */
+/* Recovery. The body figure (figure.js) is line art painted in --plate-ink on --plate, so it follows light and dark
+   mode; the regions are painted over it (tokens --c-sore-*, --c-exercise for parts trained) */
 .rec-facts { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); }
 .rec-fact { display: inline-flex; align-items: center; gap: 8px; font-size: var(--t-sm); color: var(--ink-2); }
 .rec-fact .chip { white-space: normal; height: auto; padding: 2px 9px; }
 .rec-cns { margin: var(--s-3) 0 0; }
 .sore-layout { display: grid; grid-template-columns: minmax(260px, 420px) minmax(0, 1fr); gap: var(--s-5); align-items: start; }
 @media (max-width: 760px) { .sore-layout { grid-template-columns: minmax(0, 1fr); } }
-.sore-figure-wrap { background: var(--plate); border-radius: var(--r-md); padding: var(--s-3); box-shadow: inset 0 0 0 1px var(--line); }
-.sore-figure { width: 100%; height: auto; display: block; }
-.sore-region { pointer-events: none; transition: fill .15s; }  /* the figure finds the region from the masks' pixels */
-.sore-region:focus-visible { outline: none; filter: drop-shadow(0 0 3px var(--accent)); }
-.sore-orient { font: 650 15px/1 var(--font); fill: var(--plate-ink); letter-spacing: .08em; }
-.sore-side { font: 600 13px/1 var(--font); fill: var(--plate-ink); opacity: .75; }
-.sore-figure[viewBox^="-163"] .sore-orient { font-size: 30px; }
-.sore-figure[viewBox^="-163"] .sore-side { font-size: 26px; }
-.sore-legend { margin-top: var(--s-2); color: var(--plate-ink); }
+.fig-plate { background: var(--plate); border-radius: var(--r-md); padding: var(--s-3); box-shadow: inset 0 0 0 1px var(--line); }
+.fig { width: 100%; height: auto; display: block; }
+.fig-art { fill: var(--plate-ink); pointer-events: none; }
+.fig-region { pointer-events: none; transition: fill .15s; }  /* the figure finds the region from the masks' pixels */
+.fig-region:focus-visible { outline: none; filter: drop-shadow(0 0 3px var(--accent)); }
+.fig-orient { font: 650 15px/1 var(--font); fill: var(--plate-ink); letter-spacing: .08em; }
+.fig-side { font: 600 13px/1 var(--font); fill: var(--plate-ink); opacity: .75; }
+.fig[viewBox^="-163"] .fig-orient { font-size: 30px; }
+.fig[viewBox^="-163"] .fig-side { font-size: 26px; }
+.fig-legend { margin-top: var(--s-2); color: var(--plate-ink); }
 .sore-rows { display: grid; gap: 10px; }
 .sore-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; font-size: var(--t-sm); }
 .sore-row .sore-strip { grid-column: 1 / -1; grid-row: 2; }
 .sore-msg { margin: var(--s-2) 0 0; color: var(--ink-2); }
+.sore-key { display: flex; align-items: center; gap: 8px; margin: var(--s-3) 0 0; }
+.sore-key i { flex: none; width: 16px; height: 3px; border-radius: 2px; background: var(--c-exercise); }
+/* the parts a recent workout trained, asked first: a button per level */
+.asked { margin: var(--s-4) 0 0; padding: var(--s-3); border-radius: var(--r-md); background: var(--surface-2); }
+.asked > p svg { vertical-align: -2px; color: var(--c-exercise-ink); }
+.lvl-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 4px 0; }
+.lvl-row > .small { flex: 0 0 6.5em; }
+.lvl-btns { display: flex; flex-wrap: wrap; gap: 4px; }
+.lvl-btn { padding: 0 9px; }
+.lvl-btn[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
 .rec-fact[href] { text-decoration: none; color: var(--ink-2); }
 .rec-fact[href]:hover { color: var(--ink); }
 .feel-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: var(--s-2) 0 0; }
@@ -445,6 +457,37 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 .after-bar > span { display: block; height: 100%; background: var(--c-mark); border-radius: 3px; }
 .after-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .after-list li { display: grid; grid-template-columns: 3.2em minmax(0, 1fr) minmax(60px, 160px) 2.4em; gap: 10px; align-items: center; }
+.after-later { grid-column: 3 / -1; text-align: right; }
+.after-trained { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; color: var(--c-exercise-ink); }
+.after-line { display: flex; align-items: flex-start; gap: 6px; margin: var(--s-3) 0 0; color: var(--ink-2); }
+.after-line > svg { flex: none; margin-top: 3px; color: var(--c-exercise-ink); }
+.after-line > span { min-width: 0; }
+.after-line > button { flex: none; }
+/* after a strength or hard workout (trained.js): a prompt in the corner on every page, and the dialog it opens */
+.pop { position: fixed; z-index: 40; right: var(--s-5); bottom: calc(var(--s-5) + env(safe-area-inset-bottom)); width: min(380px, calc(100vw - 2 * var(--s-4)));
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-3); padding: var(--s-4); border-radius: var(--r-lg);
+  background: var(--surface); box-shadow: var(--shadow), inset 0 0 0 1px var(--line-2); }
+.pop-close { position: absolute; top: 6px; right: 8px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: none;
+  color: var(--ink-3); font: 400 20px/1 var(--font); cursor: pointer; }
+.pop-close:hover { background: var(--surface-2); color: var(--ink); }
+.pop-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--surface-2); color: var(--c-exercise-ink); }
+.pop-text { display: grid; gap: 4px; padding-right: 22px; }
+.pop-text .small { color: var(--ink-2); }
+.pop-text .goal-act { margin-top: var(--s-2); }
+@media (max-width: 899px) { .pop { right: var(--s-4); bottom: calc(76px + env(safe-area-inset-bottom)); } html.in-app .pop { bottom: calc(var(--s-4) + env(safe-area-inset-bottom)); } }
+.trained-dlg { width: min(860px, calc(100vw - 2 * var(--s-4))); max-height: calc(100vh - 2 * var(--s-4)); padding: var(--s-5); border: 0;
+  border-radius: var(--r-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.trained-dlg::backdrop { background: var(--header); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.trained-dlg h2 { margin: 0 0 var(--s-4); font-size: var(--t-lg); }
+.trained-layout { display: grid; grid-template-columns: minmax(220px, 340px) minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+@media (max-width: 680px) { .trained-layout { grid-template-columns: minmax(0, 1fr); } .trained-dlg { padding: var(--s-4); } }
+.trained-side { display: grid; align-content: start; }
+.trained-side textarea { width: 100%; margin-top: 6px; padding: 10px 12px; border-radius: var(--r-md); border: 1px solid var(--line-2);
+  background: var(--surface-2); color: var(--ink); font: inherit; font-size: var(--t-md); resize: vertical; }
+.trained-side textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.trained-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.trained-chip[aria-pressed="true"] { background: var(--c-exercise); border-color: var(--c-exercise); color: var(--on-accent); }
+.trained-msg { margin: var(--s-2) 0 0; color: var(--ink-2); }
 /* Load */
 .load-lighter { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 var(--s-2); color: var(--watch-ink); }
 .load-lighter svg { flex: none; margin-top: 3px; }

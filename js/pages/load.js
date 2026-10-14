@@ -1,9 +1,10 @@
-// Load (#load): what is being asked of you, week by week, from the body (training load) and from the mind (hours of
-// classes and work, the share of grade due), the 8 weeks behind and the 4 ahead, each against your normal; then the
-// training load day by day. Nothing is added into one number. The rules are in modules/load.py.
-import { draw, esc, lanes, stackedColumns } from "../charts.js?v=8d57b217c2";
-import { day, dur, num, shortDay, t, wtype } from "../i18n.js?v=8d57b217c2";
-import { icon, STATE_ICON } from "../icons.js?v=8d57b217c2";
+// Body & mind load (#load, under Schedule): what is being asked of you, week by week, from the body (training load)
+// and from the mind (hours of classes and work, the share of grade due), the 8 weeks behind and the 4 ahead, each
+// against your normal; then the training load day by day. Nothing is added into one number. The rules are in
+// modules/load.py.
+import { draw, esc, lanes, stackedColumns } from "../charts.js?v=eff2352768";
+import { day, dur, num, shortDay, t, wtype } from "../i18n.js?v=eff2352768";
+import { icon, STATE_ICON } from "../icons.js?v=eff2352768";
 
 const TONE = { high: "watch", low: "", normal: "" };
 const hours = (v) => t("load.hours", { v: num(v, v < 10 && v % 1 ? 1 : 0) });
@@ -68,7 +69,7 @@ function trainingHtml(p) {
     <p class="lede" style="font-size:var(--t-lg);margin:0 0 4px">${esc(lede)} ${state}</p>
     ${notes.length ? `<p class="small muted" style="margin:0">${esc(notes.join(t("ui.list_sep")))}</p>` : ""}
     <div id="load-days" class="chart" style="margin-top:var(--s-3)"></div>
-    <p class="xs muted rec-cns">${t("rec.cns_note")}</p></section>`;
+    <p class="xs muted rec-cns">${t("rec.cns_note")} <a href="#recovery">${t("rec.to_recovery")} ›</a></p></section>`;
 }
 
 function dueHtml(p) {

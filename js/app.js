@@ -1,49 +1,50 @@
 // Shell: the menu (a left sidebar that folds to icons, a bottom tab bar on phones), language and light/dark,
 // hash routing (#today, #today/2026-10-11).
-import { get, isStatic } from "./api.js?v=8d57b217c2";
-import { installTooltip, esc, setFormat } from "./charts.js?v=8d57b217c2";
-import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=8d57b217c2";
-import { icon } from "./icons.js?v=8d57b217c2";
-import { loadUpdate, mountUpdate, updateNote } from "./update.js?v=8d57b217c2";
-import body from "./pages/body.js?v=8d57b217c2";
-import data from "./pages/data.js?v=8d57b217c2";
-import drain from "./pages/drain.js?v=8d57b217c2";
-import exercise from "./pages/exercise.js?v=8d57b217c2";
-import followup from "./pages/followup.js?v=8d57b217c2";
-import load from "./pages/load.js?v=8d57b217c2";
-import recovery from "./pages/recovery.js?v=8d57b217c2";
-import food from "./pages/food.js?v=8d57b217c2";
-import goals from "./pages/goals.js?v=8d57b217c2";
-import guide from "./pages/guide.js?v=8d57b217c2";
-import kit from "./pages/kit.js?v=8d57b217c2";
-import project from "./pages/project.js?v=8d57b217c2";
-import review from "./pages/review.js?v=8d57b217c2";
-import sleep from "./pages/sleep.js?v=8d57b217c2";
-import time from "./pages/time.js?v=8d57b217c2";
-import today from "./pages/today.js?v=8d57b217c2";
-import week from "./pages/week.js?v=8d57b217c2";
+import { get, isStatic } from "./api.js?v=eff2352768";
+import { installTooltip, esc, setFormat } from "./charts.js?v=eff2352768";
+import { getLang, setLang, t, clock, dur, measure, shortDay, toDate, wtype } from "./i18n.js?v=eff2352768";
+import { icon } from "./icons.js?v=eff2352768";
+import { mountPrompt } from "./trained.js?v=eff2352768";
+import { loadUpdate, mountUpdate, updateNote } from "./update.js?v=eff2352768";
+import body from "./pages/body.js?v=eff2352768";
+import data from "./pages/data.js?v=eff2352768";
+import drain from "./pages/drain.js?v=eff2352768";
+import exercise from "./pages/exercise.js?v=eff2352768";
+import followup from "./pages/followup.js?v=eff2352768";
+import load from "./pages/load.js?v=eff2352768";
+import recovery from "./pages/recovery.js?v=eff2352768";
+import food from "./pages/food.js?v=eff2352768";
+import goals from "./pages/goals.js?v=eff2352768";
+import guide from "./pages/guide.js?v=eff2352768";
+import kit from "./pages/kit.js?v=eff2352768";
+import project from "./pages/project.js?v=eff2352768";
+import review from "./pages/review.js?v=eff2352768";
+import sleep from "./pages/sleep.js?v=eff2352768";
+import time from "./pages/time.js?v=eff2352768";
+import today from "./pages/today.js?v=eff2352768";
+import week from "./pages/week.js?v=eff2352768";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
 const PAGES = { today, week, body, recovery, load, sleep, exercise, food, time, drain, followup, goals, review, data, kit, project, guide };
 // the menu is one axis, the loop of managing your health, one question per item: how am I today and what do I
 // change (Today); what is my body showing, the outcomes (Body signals: recovery, sleep, drain, weight); what do I do every day,
-// the causes I control (Daily life: exercise, food, stimulation); what is being asked of me, by the body and by the
-// mind (Load: training load, classes and deadlines, the schedule); what did I decide to change and is it happening
-// (Actions & goals: follow-up, goals); did it help (Weekly review); where the numbers come from (Data sources)
-const NAV = ["today", "body", "life", "load", "act", "review", "data"];
+// the causes I control (Daily life: exercise, food, stimulation); what is coming and how much it asks of me, body
+// and mind (Schedule: the week, then body and mind load across the weeks); what did I decide to change and is it
+// happening (Actions & goals: follow-up, goals); did it help (Weekly review); where the numbers come from (Data sources)
+const NAV = ["today", "body", "life", "sched", "act", "review", "data"];
 // a menu item that holds several pages shows a small switch above the page title and opens on its first page
 const GROUPS = {
   body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight"]],
   life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"]],
-  load: [["load", "nav.load_tab"], ["week", "nav.schedule"]],
+  sched: [["week", "nav.schedule_week"], ["load", "nav.load_tab"]],
   act: [["followup", "nav.followup"], ["goals", "nav.goals"]],
 };
 const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) => p === page)) || page;
 // a page inside a group is titled by its own tab (Weight, Sleep), not by the group
 const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;
-const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup" };  // old links keep working (AI work was removed)
+const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup", sched: "week" };  // old links keep working (AI work was removed)
 // each menu item's glyph (icons.js)
-const NAV_ICON = { today: "sun", body: "heart", life: "walk", load: "battery", act: "target", review: "list", data: "database" };
+const NAV_ICON = { today: "sun", body: "heart", life: "walk", sched: "calendar", act: "target", review: "list", data: "database" };
 // the reading pages sit under the menu, apart from the health loop: what the project is and who it is for, how to
 // use the app, and how the personal system it comes from changed over a year. History is on the author's own site
 // (it quotes that personal system), so it is a link out, in a new tab. On a phone they are small links in the top
@@ -170,6 +171,7 @@ async function route() {
     main.innerHTML = updateNote() + sub + PAGES[page].render(data) + footer();
     mountUpdate(main);
     PAGES[page].mount?.(main, data);
+    get("prompt").then((info) => mountPrompt(info, page), () => mountPrompt(null));  // after a strength or hard workout: what did it train?
   } catch (error) {
     const staticGap = isStatic && /^404/.test(error.message);  // the demo site only has a few pre-rendered dates
     main.innerHTML = `<div class="card"><p class="lede">${t(staticGap ? "ui.static_gap" : "ui.error")}</p><p class="muted small">${t(staticGap ? "ui.static_gap_hint" : "ui.error_hint")}</p>
