@@ -20,8 +20,8 @@ const GUIDE = {
     note: "在线演示里的人叫 Sam，是虚构的研究生，数字都是编的。想看你自己的，按下面第 2 到 4 步装到你自己的电脑上；数据只留在那台电脑里。",
     steps: [
       { h: "先看看演示", body: [
-        "左边的菜单（手机上在底部）按管理健康的顺序排：<b>今天 → 身体状态 → 生活习惯 → 日程 → 行动与目标 → 每周复盘 → 数据来源</b>。点有子页的一项，子页才展开。",
-        "<b>身体状态</b>是结果，你没法直接改（恢复、睡眠、慢性磨损、体重）；<b>生活习惯</b>是你每天做的事，能直接改（运动、饮食、刺激水平）；<b>日程</b>是接下来有什么、每周对身体和精神提了多少要求（一周日程、身心负荷）；<b>行动与目标</b>是你决定改什么、做到了没有。",
+        "左边的菜单（手机上在底部）按管理健康的顺序排：<b>今天 → 身体状态 → 生活习惯 → 日程 → 行动与目标 → 数据来源</b>。点有子页的一项，子页才展开。",
+        "<b>身体状态</b>是结果，你没法直接改（恢复、睡眠、慢性磨损、体重和心肺）；<b>生活习惯</b>是你每天做的事，能直接改（运动、饮食、刺激水平）；<b>日程</b>是接下来有什么、每周对身体和精神提了多少要求（一周日程、身心负荷）；<b>行动与目标</b>是你决定改什么、做到了没有。",
         "从“今天”开始：恢复得怎样、今天该调整什么、今天有什么安排、今晚几点该睡着。",
         "菜单旁边的两个按钮可以切换中英文和深浅色。"] },
       { h: "装到你的电脑上", body: ["需要 Python 3.9 以上，不用装别的包。先用演示数据确认能跑，然后打开 <b>http://localhost:8790</b>："], code: "install" },
@@ -42,8 +42,8 @@ const GUIDE = {
         "<b>练完力量训练或强度高的训练</b>（强度分 7 以上），打开任何一页，角落会弹出“刚练完”的提示：点“记一下”，在人体图上点练了哪儿，或者说一句练了什么（手机上按键盘的麦克风口述），写到的部位会自动点亮。不想记就点“这次不记”。",
         "<b>每天早上</b>打开“身体状态 › 恢复”打个卡：感觉怎么样点一下（没缓过来、一般、恢复得好）；前两天练过、记了部位的，那几个部位直接用按钮选酸不酸；其他部位在人体图上点；然后保存。练完的第二天早上，同一页会算出“练后第二天”的分：你的感觉、HRV、静息心率、练后那一晚的睡眠，各自和平常比再取平均，每一项都摊开写。训练完在手表或健身 App 里给这次训练打个强度分（1–10），训练负荷才算得出来。",
         "<b>排下几周的计划前</b>看“日程 › 身心负荷”：过去 8 周和接下来 4 周，训练、课和工作、截止各自和你平常的周比；课多、截止多的那周训练还照常排，它会提醒你提前减量。",
-        "想细看某一项，去“身体状态”（恢复、睡眠、慢性磨损、体重）或“生活习惯”（运动、饮食、刺激水平）。“刺激水平”看你给大脑的刺激（娱乐和社交、睡前刷手机、切换应用、几台同时用）和身体接下来的反应；激素本身手机和手表测不了。",
-        "<b>周末</b>看“每周复盘”：这一周和前四周并排放，不打分。",
+        "想细看某一项，去“身体状态”（恢复、睡眠、慢性磨损、体重和心肺）或“生活习惯”（运动、饮食、刺激水平）。“刺激水平”看你给大脑的刺激（娱乐和社交、睡前刷手机、切换应用、几台同时用）和身体接下来的反应；激素本身手机和手表测不了。",
+        "<b>过一阵子</b>看“跟进”最下面的“明天会更好”：做了和没做的日子，第二天早上有什么不同。建议有没有用，看这里。",
         "某项很久没更新，去“数据来源”页看是哪一路断了。装了 iPhone App，打开它就会把新数据发过来；没装的话，再导出一次 Apple 健康、重新导入。"] },
       { h: "怎么读这些数", body: [
         "<b>和你自己比，</b>不和人群比：“平常”是你自己前 28 天的中间一半。",
@@ -63,8 +63,8 @@ const GUIDE = {
     note: "The person in the online demo, Sam, is a made-up graduate student, and every number is invented. To see your own, install it on your computer with steps 2 to 4 below; your data stays on that computer.",
     steps: [
       { h: "Look around the demo", body: [
-        "The menu on the left (at the bottom on a phone) follows the loop of managing your health: <b>Today → Body signals → Daily life → Schedule → Actions & goals → Weekly review → Data sources</b>. An item with pages opens them with a click.",
-        "<b>Body signals</b> are outcomes you cannot change directly (recovery, sleep, drain, weight); <b>Daily life</b> is what you do every day and can change (exercise, food, stimulation); <b>Schedule</b> is what is coming and how much each week asks of the body and the mind (the week, body & mind load); <b>Actions & goals</b> is what you decided to change and whether it happens.",
+        "The menu on the left (at the bottom on a phone) follows the loop of managing your health: <b>Today → Body signals → Daily life → Schedule → Actions & goals → Data sources</b>. An item with pages opens them with a click.",
+        "<b>Body signals</b> are outcomes you cannot change directly (recovery, sleep, wear and tear, weight & fitness); <b>Daily life</b> is what you do every day and can change (exercise, food, stimulation); <b>Schedule</b> is what is coming and how much each week asks of the body and the mind (the week, body & mind load); <b>Actions & goals</b> is what you decided to change and whether it happens.",
         "Start with Today: how you recovered, what to adjust today, what is on, and when to be asleep tonight.",
         "The two buttons by the menu switch the language and light / dark."] },
       { h: "Install it on your computer", body: ["Needs Python 3.9 or newer, no other packages. Check it runs with the demo data first, then open <b>http://localhost:8790</b>:"], code: "install" },
@@ -85,8 +85,8 @@ const GUIDE = {
         "<b>After a strength session or a hard one</b> (effort 7 or more), any page shows a note in the corner: Note it, then tap the parts it trained on the body figure or say what you did in a sentence (on a phone, the keyboard's microphone takes dictation); parts the sentence names light up by themselves. Not this time, if you would rather not.",
         "<b>Each morning</b>, check in on Body signals › Recovery: one tap for how you feel (not recovered, so-so, recovered); the parts a workout of the last two days trained come with a button per level; tap anywhere else on the body figure; then save. The morning after training, the same page works out the score for the morning after: how you felt, HRV, resting heart rate and the night's sleep, each against your normal, averaged, with every part shown. Rate each workout's effort (1–10) on the watch or in the Fitness app afterwards, so the training load can be worked out.",
         "<b>Before you plan the next weeks</b>, open Schedule › Body & mind load: the 8 weeks behind and the 4 ahead, training, classes and work, and deadlines, each against your usual weeks; when a week with more classes or deadlines than usual still has your usual training planned, it tells you to plan lighter.",
-        "For a closer look, go to Body signals (recovery, sleep, drain, weight) or Daily life (exercise, food, stimulation). Stimulation is what your days feed your brain (entertainment & social, scrolling before sleep, app switching, screens at once) and what your body does next; hormones themselves can't be measured by a phone or a watch.",
-        "<b>At the weekend</b>, open Weekly review: this week next to the four before it, with no scores.",
+        "For a closer look, go to Body signals (recovery, sleep, wear and tear, weight & fitness) or Daily life (exercise, food, stimulation). Stimulation is what your days feed your brain (entertainment & social, scrolling before sleep, app switching, screens at once) and what your body does next; hormones themselves can't be measured by a phone or a watch.",
+        "<b>Every so often</b>, look at Tomorrow will be better at the bottom of Follow-up: the next morning after days you did something against days you did not. Whether the advice helps is there.",
         "If something has not updated for a while, Data sources shows which stream stopped. With the iPhone app, opening it sends the new data; without it, export from Apple Health again and import it."] },
       { h: "How to read the numbers", body: [
         "<b>You against you,</b> never a population: “normal” is the middle half of your own previous 28 days.",

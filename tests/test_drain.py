@@ -278,17 +278,18 @@ class Menu(unittest.TestCase):
         # one axis: today, what the body shows (recovery, sleep, drain, weight), what you do every day (exercise, food,
         # stimulation), what is coming and what it asks of you (the week, body and mind load), what you decided to
         # change and whether it happens (follow-up, goals),
-        # whether it helped (review), where the numbers come from (data)
+        # and whether it helped (follow-up, "tomorrow will be better"), where the numbers come from (data)
         app = (Path(__file__).resolve().parents[1] / "healthaio" / "web" / "js" / "app.js").read_text(encoding="utf-8")
-        self.assertIn('const NAV = ["today", "body", "life", "sched", "act", "review", "data"];', app)
-        self.assertIn('body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight"]]', app)
+        self.assertIn('const NAV = ["today", "body", "life", "sched", "act", "data"];', app)  # Weekly review went into Follow-up
+        self.assertIn('review: "followup"', app)  # an old #review link opens Follow-up, where "tomorrow will be better" is
+        self.assertIn('body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight_tab"]]', app)
         self.assertIn('life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"]]', app)
         self.assertIn('sched: [["week", "nav.schedule_week"], ["load", "nav.load_tab"]]', app)
         self.assertIn('act: [["followup", "nav.followup"], ["goals", "nav.goals"]]', app)
         i18n = (Path(__file__).resolve().parents[1] / "healthaio" / "web" / "js" / "i18n.js").read_text(encoding="utf-8")
         for key in ("nav.body", "nav.life", "nav.sched", "nav.short.sched", "nav.act", "nav.followup"):
             self.assertEqual(i18n.count(f'"{key}"'), 2, key)  # English and Chinese
-        for old in ("nav.time", "nav.plan", "nav.short.time", "nav.short.plan", "nav.load", "nav.short.load"):
+        for old in ("nav.time", "nav.plan", "nav.short.time", "nav.short.plan", "nav.load", "nav.short.load", "nav.review", "nav.short.review"):
             self.assertNotIn(f'"{old}"', i18n, old)
 
 

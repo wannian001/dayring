@@ -1,12 +1,11 @@
-"""What the Stimulation (#time) and Review pages do when a record is missing, late or odd.
+"""What the Stimulation (#time) page does when a record is missing, late or odd.
 
 Rules under test:
 - a day without the record an activity needs shows None for that activity (never 0), is left out of
   that activity's average, and the page says which record stopped (Stimulation rests on Screen Time only);
 - only days with a record of their own are shown (not the evening before the first night);
 - "Earlier" and "Later" step by days with records and never loop or dead-end;
-- the days the clocks change are 23 and 25 hours long, minute by minute;
-- Review's workout minutes use the same rule.
+- the days the clocks change are 23 and 25 hours long, minute by minute.
 """
 import shutil
 import tempfile
@@ -16,7 +15,7 @@ from pathlib import Path
 
 from healthaio.config import Config
 from healthaio.context import Context
-from healthaio.modules import review, static_params
+from healthaio.modules import static_params
 from healthaio.modules import time as time_page
 from healthaio.store import write_table
 
@@ -208,38 +207,6 @@ class ClockChanges(Folder):
         self.assertEqual(days[date(2026, 4, 5)].by_hour[2]["sleep"], 120)  # the repeated hour, twice
 
 
-class ReviewWorkouts(Folder):
-    def metric(self, page, key):
-        return next(m for s in page["sections"] for m in s["metrics"] if m["key"] == key)
-
-    def test_unknown_days_and_today_are_not_zero(self):
-        # screen time every day since 7 Sep, health data (with workouts) only from 5 Oct, exported on the 8th
-        body = nights(date(2026, 10, 5), date(2026, 10, 8))
-        body[-1]["complete"] = False
-        workouts = [{"start": at(date(2026, 10, 6), 18), "end": at(date(2026, 10, 6), 18, 40), "type": "running",
-                     "source": "Apple Watch"}]
-        ctx = self.context(at(date(2026, 10, 12), 9), body_daily=body, workouts=workouts,
-                           screen_sessions=screens(date(2026, 9, 7), date(2026, 10, 12)))
-        page = review.build(ctx, "2026-10-05")
-        m = self.metric(page, "workout_min")
-        values = {p["date"]: p["value"] for p in m["points"]}
-        self.assertEqual(values["2026-10-05"], 0)
-        self.assertEqual(values["2026-10-06"], 40)
-        self.assertEqual(values["2026-10-07"], 0)
-        for d in ("2026-10-08", "2026-10-09", "2026-10-10", "2026-10-11"):
-            self.assertIsNone(values[d], d)  # exported mid-day on the 8th, nothing after
-        self.assertEqual(m["days"], 3)
-        self.assertAlmostEqual(m["value"], 40 / 3)
-        self.assertIsNone(m["before"])  # weeks with screen time only: workouts unknown, not 0
-        self.assertEqual(m["before_days"], 0)
-        days = self.metric(page, "workout_days")
-        self.assertEqual(days["value"], 1)
-        self.assertIsNone(days["before"])
-
-        current = review.build(ctx, "2026-10-12")  # today is not over
-        self.assertIsNone(self.metric(current, "workout_min")["value"])
-
-
 class Words(unittest.TestCase):
     """The page's words, read from i18n.js."""
 
@@ -254,11 +221,9 @@ class Words(unittest.TestCase):
             cls.strings.setdefault(key, []).append(value)
 
     def test_one_word_one_source(self):
-        # Today's ring minutes and the workout-based exercise of Time/Review must not share a name
+        # Today's ring minutes and the workout-based exercise of the other pages must not share a name
         for ring, workouts in zip(self.strings["metric.exercise"], self.strings["act.exercise"]):
             self.assertNotEqual(ring, workouts)
-        self.assertIn("review.m.workout_min", self.strings)
-        self.assertNotIn("review.m.exercise_min", self.strings)
 
     def test_no_leftovers_of_the_attention_page(self):
         self.assertFalse([k for k in self.strings if k.startswith("attention.") or k == "nav.attention"])

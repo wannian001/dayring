@@ -6,8 +6,7 @@ const cache = new Map();
 
 export function apiUrl(name, param) {
   if (STATIC) return `api/${name}${param ? `@${param}` : ""}.json${BUILD ? `?v=${BUILD}` : ""}`;
-  const key = { review: "week" }[name] || "day";
-  return `api/${name}${param ? `?${key}=${encodeURIComponent(param)}` : ""}`;
+  return `api/${name}${param ? `?day=${encodeURIComponent(param)}` : ""}`;
 }
 
 export async function get(name, param) {

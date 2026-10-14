@@ -46,7 +46,8 @@ the way to bring in years of history at once.
 
 ### What it fills in
 
-`sleep_min`, `in_bed_min`, `sleep_start`, `sleep_end`, `hrv_ms` (SDNN), `resting_hr`, `steps`,
+`sleep_min`, `in_bed_min`, `sleep_start`, `sleep_end`, `hrv_ms` (SDNN), `resting_hr`, `vo2max` (the day's
+VO2 max estimates averaged; the watch makes one only on some outdoor walks, runs and hikes), `steps`,
 `exercise_min`, `workout_min`, `workout_type`, `active_kcal`, `basal_kcal`, `weight_kg` and `complete` in
 `body_daily.csv`; one row per workout in `workouts.csv` with `start`, `end`, `type`, `source`, `kcal`,
 `avg_hr`, `effort` and `effort_source`; and one row per meal in `meals.csv`, from what food-logging apps write into Health.

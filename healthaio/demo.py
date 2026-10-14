@@ -342,6 +342,21 @@ class Sam:
             w["effort"] = float(min(10, max(1, round(effort))))
             w["effort_source"] = "rated" if roll < 0.82 else "estimated"
 
+    def cardio(self, body: List[Dict]) -> None:
+        """VO2 max as Apple Watch estimates it: after most outdoor runs and walks, so a value every few days.
+        Flat until Sam started running regularly about seven months ago, then climbing about 1.5 mL/kg/min every three
+        months, with the watch's own scatter."""
+        rng = random.Random(SEED + 43)
+        by_day = {r["date"]: r for r in body}
+        first = self.today - timedelta(days=BODY_DAYS - 1)
+        for w in sorted(self.workouts, key=lambda x: x["start"]):
+            day = w["start"].date()
+            chance = {"running": 0.9, "walking": 0.6}.get(w["type"], 0)
+            if day >= self.today or day not in by_day or rng.random() > chance:
+                continue
+            level = 40.6 + 0.016 * max(0, (day - (self.today - timedelta(days=210))).days) + rng.gauss(0, 0.55)
+            by_day[day]["vo2max"] = round(level, 1)
+
     def lunch_run(self) -> None:
         """Today Sam fitted in a run at lunch, harder than usual (an 8 he rated himself). Nothing is written yet about
         what it trained, so every page asks (the after-workout prompt)."""
@@ -600,6 +615,7 @@ def generate(out: Path, today: Optional[date] = None, now: Optional[datetime] = 
     data = out / "data"
     sam = Sam(today, now)
     body = sam.body()
+    sam.cardio(body)
     events = sam.events()
     write_table(data, "body_daily", body)
     sore = sam.soreness()

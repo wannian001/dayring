@@ -52,6 +52,8 @@ class AppleHealthReadTest(unittest.TestCase):
         row = self.rows[date(2026, 10, 11)]
         self.assertAlmostEqual(row["hrv_ms"], 50)
         self.assertAlmostEqual(row["resting_hr"], 56)
+        self.assertAlmostEqual(row["vo2max"], 42.3)  # the day's VO2 max estimates, averaged
+        self.assertIsNone(self.rows[date(2026, 10, 10)]["vo2max"])  # most days have none
         self.assertAlmostEqual(row["exercise_min"], 40)
         self.assertAlmostEqual(row["weight_kg"], 164 * 0.45359237)
         self.assertAlmostEqual(self.rows[date(2026, 10, 10)]["weight_kg"], 75.2)

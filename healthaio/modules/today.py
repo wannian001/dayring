@@ -266,8 +266,8 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
 
 
 def summary(ctx: Context, day: date) -> Dict[str, Any]:
-    """One line each for the parts of the day the other pages own: the week's exercise, the last 7 days of food and
-    the weight trend (recovery, screens and drain are in the payload already)."""
+    """One line each for the parts of the day the other pages own: the week's exercise, the last 7 days of food, the
+    weight trend and cardio fitness (recovery, screens and wear and tear are in the payload already)."""
     from . import body as body_page
     from . import exercise as exercise_page
     week = exercise_page.week_status(ctx, day)
@@ -281,6 +281,7 @@ def summary(ctx: Context, day: date) -> Dict[str, Any]:
                      "is_current": week["is_current"], "tracked": bool(exercise_page.active_minutes(ctx, day))},
         "food": food_page.summary(ctx, day),
         "weight": {**weight["latest"], "plan": plan} if weight["points"] else None,
+        "cardio": weight["cardio"]["latest"],
     }
 
 

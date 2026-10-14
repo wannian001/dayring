@@ -18,23 +18,23 @@ import goals from "./pages/goals.js";
 import guide from "./pages/guide.js";
 import kit from "./pages/kit.js";
 import project from "./pages/project.js";
-import review from "./pages/review.js";
 import sleep from "./pages/sleep.js";
 import time from "./pages/time.js";
 import today from "./pages/today.js";
 import week from "./pages/week.js";
 
 // the design kit gallery (#kit) is a page but not a menu item: the footer of every page and the Data page link to it
-const PAGES = { today, week, body, recovery, load, sleep, exercise, food, time, drain, followup, goals, review, data, kit, project, guide };
+const PAGES = { today, week, body, recovery, load, sleep, exercise, food, time, drain, followup, goals, data, kit, project, guide };
 // the menu is one axis, the loop of managing your health, one question per item: how am I today and what do I
 // change (Today); what is my body showing, the outcomes (Body signals: recovery, sleep, drain, weight); what do I do every day,
 // the causes I control (Daily life: exercise, food, stimulation); what is coming and how much it asks of me, body
 // and mind (Schedule: the week, then body and mind load across the weeks); what did I decide to change and is it
-// happening (Actions & goals: follow-up, goals); did it help (Weekly review); where the numbers come from (Data sources)
-const NAV = ["today", "body", "life", "sched", "act", "review", "data"];
+// happening, and did it help (Actions & goals: follow-up with "tomorrow will be better", goals); where the numbers come
+// from (Data sources). Weekly review was folded into Follow-up: its useful part was what helps the next day.
+const NAV = ["today", "body", "life", "sched", "act", "data"];
 // a menu item that holds several pages shows a small switch above the page title and opens on its first page
 const GROUPS = {
-  body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight"]],
+  body: [["recovery", "nav.recovery"], ["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight_tab"]],
   life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"]],
   sched: [["week", "nav.schedule_week"], ["load", "nav.load_tab"]],
   act: [["followup", "nav.followup"], ["goals", "nav.goals"]],
@@ -42,9 +42,9 @@ const GROUPS = {
 const groupOf = (page) => Object.keys(GROUPS).find((g) => GROUPS[g].some(([p]) => p === page)) || page;
 // a page inside a group is titled by its own tab (Weight, Sleep), not by the group
 const titleKey = (page) => (GROUPS[groupOf(page)] || []).find(([p]) => p === page)?.[1] || `nav.${page}`;
-const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup", sched: "week" };  // old links keep working (AI work was removed)
+const ALIAS = { attention: "time", ai: "time", plan: "goals", life: "exercise", act: "followup", sched: "week", review: "followup" };  // old links keep working (AI work was removed)
 // each menu item's glyph (icons.js)
-const NAV_ICON = { today: "sun", body: "heart", life: "walk", sched: "calendar", act: "target", review: "list", data: "database" };
+const NAV_ICON = { today: "sun", body: "heart", life: "walk", sched: "calendar", act: "target", data: "database" };
 // the reading pages sit under the menu, apart from the health loop: what the project is and who it is for, how to
 // use the app, and how the personal system it comes from changed over a year. History is on the author's own site
 // (it quotes that personal system), so it is a link out, in a new tab. On a phone they are small links in the top

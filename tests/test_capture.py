@@ -135,6 +135,17 @@ class Receive(Base):
                          [("2026-10-12T07:00", "2026-10-12T07:10"), ("2026-10-12T07:12", "2026-10-12T07:34")])
         self.assertEqual(table(self.folder, "meals")[0]["source"], "MyFitnessPal")
 
+    def test_vo2_max_from_the_phone_lands_in_the_day(self):
+        # the iPhone app sends VO2 max with the export's own unit; an unknown type would refuse the whole package
+        data = package()
+        data["records"].append({"type": "HKQuantityTypeIdentifierVO2Max", "sourceName": "Apple Watch", "device": "Watch",
+                                "unit": "mL/min\u00b7kg", "startDate": "2026-10-12 07:34:00 +1100",
+                                "endDate": "2026-10-12 07:34:00 +1100", "value": "41.8"})
+        capture.receive(self.cfg, body(data), None)
+        days = {r["date"]: r for r in table(self.folder, "body_daily")}
+        self.assertEqual(days["2026-10-12"]["vo2max"], "41.8")
+        self.assertEqual(days["2026-10-11"]["vo2max"], "")
+
     def test_only_the_window_is_written(self):
         data = package()
         # a nap the evening before the window: it would file a short "night" under 2026-10-10

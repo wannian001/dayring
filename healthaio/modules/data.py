@@ -21,6 +21,7 @@ STREAMS = [  # key, table, column (None = any row that day), stale after N days,
     ("hrv", "body_daily", "hrv_ms", 2, "watch"),
     ("resting_hr", "body_daily", "resting_hr", 2, "watch"),
     ("exercise", "body_daily", "exercise_min", 2, "watch"),
+    ("vo2max", "body_daily", "vo2max", 30, "watch"),  # only on outdoor walks, runs and hikes: weeks can pass without one
     ("steps", "body_daily", "steps", 2, "phone"),
     ("weight", "body_daily", "weight_kg", 7, "phone"),
     ("food", "meals", None, 3, "phone"),  # a full day = at least two main meals logged; one meal = partial

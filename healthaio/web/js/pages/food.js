@@ -103,7 +103,7 @@ export default {
             { key: "balance", label: t("food.balance"), html: `<div class="food-panel">${balanceHtml(p)}</div>` },
             { key: "macros", label: t("food.macros"), html: `<div class="food-panel">${macrosHtml(p)}</div>` },
           ])}
-          <p class="small" style="margin:var(--s-4) 0 0"><a href="#review">${t("food.effect_moved")}</a></p></section>
+          <p class="small" style="margin:var(--s-4) 0 0"><a href="#followup">${t("food.effect_moved")}</a></p></section>
       </div>`;
   },
   mount(root, p) {

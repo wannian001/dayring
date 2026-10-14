@@ -31,6 +31,7 @@ Key: `date`. Typical sources: Apple Health export (healthaio import apple-health
 | `sleep_end` | datetime |  | When you woke up (local time). |
 | `hrv_ms` | number |  | Heart-rate variability (SDNN or RMSSD, but keep one kind), ms. |
 | `resting_hr` | number |  | Resting heart rate, beats per minute. |
+| `vo2max` | number |  | Cardio fitness (VO2 max), mL per kg per minute, as Apple Watch estimates it on some outdoor walks, runs and hikes; most days have none. |
 | `steps` | number |  | Steps that day. |
 | `exercise_min` | number |  | Minutes of exercise (Apple 'Exercise' ring or similar). |
 | `workout_min` | number |  | Minutes of logged workouts. 0 means rest day; empty means unknown. |

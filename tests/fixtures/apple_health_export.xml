@@ -43,6 +43,8 @@
  <Record type="HKQuantityTypeIdentifierHeartRateVariabilitySDNN" sourceName="Example Apple Watch" unit="ms" startDate="2026-10-11 15:00:00 +1100" endDate="2026-10-11 15:01:00 +1100" value="60"/>
  <Record type="HKQuantityTypeIdentifierRestingHeartRate" sourceName="Example Apple Watch" unit="count/min" startDate="2026-10-11 00:00:00 +1100" endDate="2026-10-11 23:59:00 +1100" value="55"/>
  <Record type="HKQuantityTypeIdentifierRestingHeartRate" sourceName="Example Apple Watch" unit="count/min" startDate="2026-10-11 12:00:00 +1100" endDate="2026-10-11 23:59:00 +1100" value="57"/>
+ <Record type="HKQuantityTypeIdentifierVO2Max" sourceName="Example Apple Watch" unit="mL/min·kg" startDate="2026-10-11 07:40:00 +1100" endDate="2026-10-11 07:40:00 +1100" value="42.1"/>
+ <Record type="HKQuantityTypeIdentifierVO2Max" sourceName="Example Apple Watch" unit="mL/min·kg" startDate="2026-10-11 18:10:00 +1100" endDate="2026-10-11 18:10:00 +1100" value="42.5"/>
 
  <!-- Weight: pounds converted, last of the day wins (164 lb = 74.39 kg) -->
  <Record type="HKQuantityTypeIdentifierBodyMass" sourceName="Example Scale" unit="lb" startDate="2026-10-11 08:00:00 +1100" endDate="2026-10-11 08:00:00 +1100" value="165"/>

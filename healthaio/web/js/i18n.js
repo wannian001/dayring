@@ -2,7 +2,7 @@
 const DICT = {
   en: {
     "nav.today": "Today", "nav.week": "Week", "nav.body": "Body signals", "nav.sleep": "Sleep",
-    "nav.review": "Weekly review", "nav.data": "Data sources",
+    "nav.data": "Data sources",
     "ui.demo": "Demo data", "ui.lang": "中文", "ui.mode": "Light / dark", "ui.fold": "Fold the menu", "ui.unfold": "Unfold the menu",
     "ui.prev_day": "Previous day", "ui.next_day": "Next day", "ui.back_today": "Back to today",
     "ui.how": "How this is worked out", "ui.list_sep": ", ", "ui.loading": "Loading…", "ui.error": "Could not load this page",
@@ -56,7 +56,7 @@ const DICT = {
     "week.hrv": "HRV {dir} {pct} vs the 4 weeks before", "week.up": "up", "week.down": "down",
     "week.rule": "Flags a week with at least 3 nights under 7 hours and at least 3 training days. The thresholds are a starting point, not a diagnosis.",
 
-    "effects.title": "What has tended to help the next day", "effects.outcome": "Next day's", "effects.col.what": "On the day…", "effects.col.worse": "← next day worse", "effects.col.better": "next day better →", "effects.col.diff": "Difference",
+    "effects.title": "Tomorrow will be better: what has helped the next day", "effects.outcome": "Next day's", "effects.col.what": "On the day…", "effects.col.worse": "← next day worse", "effects.col.better": "next day better →", "effects.col.diff": "Difference",
     "out.hrv": "HRV", "out.resting_hr": "Resting HR", "out.energy": "Self-rated energy",
     "eff.trained": "Logged a workout that day", "eff.steps": "Walked {min}+ steps that day", "eff.exercise": "{min}+ exercise-ring minutes that day",
     "eff.slept": "Slept {hours}+ hours that night", "eff.in_bed": "{hours}+ hours in bed that night", "eff.asleep_by": "Asleep by {clock} that night",
@@ -68,7 +68,7 @@ const DICT = {
   },
   zh: {
     "nav.today": "今天", "nav.week": "本周", "nav.body": "身体状态", "nav.sleep": "睡眠",
-    "nav.review": "每周复盘", "nav.data": "数据来源",
+    "nav.data": "数据来源",
     "ui.demo": "演示数据", "ui.lang": "EN", "ui.mode": "浅色 / 深色", "ui.fold": "收起菜单", "ui.unfold": "展开菜单",
     "ui.prev_day": "前一天", "ui.next_day": "后一天", "ui.back_today": "回到今天",
     "ui.how": "怎么算的", "ui.list_sep": "、", "ui.loading": "正在读取…", "ui.error": "这一页没读出来",
@@ -122,7 +122,7 @@ const DICT = {
     "week.hrv": "HRV 比之前 4 周{dir} {pct}", "week.up": "高", "week.down": "低",
     "week.rule": "7 天里至少 3 晚睡不到 7 小时、而且至少练了 3 天，就提示负荷叠加。阈值只是起点，不是诊断。",
 
-    "effects.title": "做什么第二天会更好", "effects.outcome": "看第二天的", "effects.col.what": "这一天……", "effects.col.worse": "← 第二天更差", "effects.col.better": "第二天更好 →", "effects.col.diff": "差多少",
+    "effects.title": "明天会更好：做什么第二天更好", "effects.outcome": "看第二天的", "effects.col.what": "这一天……", "effects.col.worse": "← 第二天更差", "effects.col.better": "第二天更好 →", "effects.col.diff": "差多少",
     "out.hrv": "HRV", "out.resting_hr": "静息心率", "out.energy": "自评精力",
     "eff.trained": "当天有训练记录", "eff.steps": "当天走了 {min} 步以上", "eff.exercise": "当天锻炼圆环满 {min} 分钟",
     "eff.slept": "当晚睡了 {hours} 小时以上", "eff.in_bed": "当晚在床上躺了 {hours} 小时以上", "eff.asleep_by": "当晚 {clock} 前睡着",
@@ -145,7 +145,7 @@ Object.assign(DICT.en, {
   "week.this": "This week", "week.in_weeks": "+{n} wk", "week.upcoming": "Next 3 weeks", "week.later": "Later this term",
   "week.overdue": "Past due date, still marked to do — check whether it was handed in", "week.none_soon": "Nothing due in the next 3 weeks.",
   "week.none_later": "Nothing further out.", "week.days_ago": "{n} days ago",
-  "body.sub": "Weight against your plan", "body.empty": "No weights yet. Add weight_kg to body_daily.csv, or import Apple Health.",
+  "body.sub": "Weight against your plan, cardio fitness against your own", "body.empty": "No weights yet. Add weight_kg to body_daily.csv, or import Apple Health.",
   "body.weight": "Weight", "body.avg7_on": "7-day average on {day}", "body.no_plan": "No weight plan in healthaio.toml",
   "body.status.on_track": "Within the planned pace", "body.status.faster": "Faster than planned", "body.status.slower": "Slower than planned", "body.status.reached": "Target reached",
   "body.rate": "Per week (last 3 weeks)", "body.since_start": "Since {day}", "body.to_go": "To {target}", "body.eta": "At this pace, around",
@@ -161,15 +161,12 @@ Object.assign(DICT.en, {
   "sleep.checks": "This week's checks",
   "sleep.check.woke_on_time": "Up with the alarm", "sleep.check.asleep_in_time": "Asleep in time", "sleep.check.slept_enough": "Slept enough", "sleep.check.screen_before_sleep_ok": "Calm last hour",
   "sleep.checks_rule": "Up with the alarm: awake within the grace minutes. Asleep in time: early enough for the target hours before the alarm (or by the planned bedtime). Slept enough: within {slack} minutes of the target. Calm last hour: no more than {min} minutes of entertainment or social apps in the hour before falling asleep. – means no record.",
-  "review.title": "Week of {from} – {to}", "review.sub": "This week next to the four before it. Facts only.", "review.partial": "This week is not over yet; numbers so far.",
-  "review.prev": "Previous week", "review.next": "Next week", "review.facts": "The week in numbers", "review.this": "This week", "review.before": "4 weeks before", "review.change": "Change",
-  "review.sec.sleep": "Sleep", "review.sec.recovery": "Recovery", "review.sec.activity": "Activity", "review.sec.screens": "Screens", "review.sec.self": "Self-rated",
-  "review.m.sleep_min": "Sleep per night", "review.m.onset": "Fell asleep", "review.m.wake": "Woke", "review.m.hrv_ms": "HRV (median)", "review.m.resting_hr": "Resting HR (median)",
-  "review.m.steps": "Steps per day", "review.m.workout_min": "Exercise per day", "review.m.workout_days": "Training days", "review.m.focus": "Focused work per day", "review.m.fun": "Entertainment per day",
-  "review.m.energy": "Energy, self-rated (0–5)", "review.m.focus_self": "Focus, self-rated (0–5)", "review.planned": "{n} planned", "review.days": "{n} d",
-  "review.later": "later", "review.earlier": "earlier", "review.same": "about the same", "review.gaps": "No body data on {days}.", "review.weight": "Weight this week",
-  "review.weight_change": "{v} vs the week before", "review.weight_days": "{n} weigh-ins", "review.due_this": "Due this week", "review.due_next": "Due next week", "review.none": "Nothing.",
-  "review.rule": "Averages per day with data (HRV and resting heart rate use the median). The comparison is the four weeks before this one. Green and red only mark the direction that is usually better or worse; small changes stay grey.",
+  "review.this": "This week", "review.change": "Change",
+  "review.sec.sleep": "Sleep", "review.sec.screens": "Screens", 
+  "review.m.sleep_min": "Sleep per night", 
+  "review.m.fun": "Entertainment per day",
+  
+  
   "data.sub": "What arrived over the last {n} days", "data.ok": "Data is flowing", "data.attention": "Something stopped",
   "data.arrivals": "Arrivals", "data.s.sleep": "Sleep", "data.s.hrv": "HRV", "data.s.steps": "Steps", "data.s.weight": "Weight", "data.s.screen": "Screen time", "data.s.self": "Self-report",
   "data.status.ok": "up to date", "data.status.stale": "stopped", "data.status.missing": "never arrived",
@@ -189,7 +186,7 @@ Object.assign(DICT.en, {
   "data.problems": "{n} unreadable rows", "data.clean": "readable", "data.problem_line": "line {line}, {column}",
   "data.import": "Bring data in", "data.import_lede": "Everything lives in plain CSV files in your data folder. Importers write them; you can also edit them by hand.",
   "data.import_note": "Nothing is uploaded anywhere. The server listens on this computer only.",
-  "data.s.resting_hr": "Resting heart rate", "data.s.exercise": "Activity minutes", "data.s.sore": "Soreness check-ins",
+  "data.s.resting_hr": "Resting heart rate", "data.s.vo2max": "VO2 max (cardio fitness)", "data.s.exercise": "Activity minutes", "data.s.sore": "Soreness check-ins",
   "data.dev.watch": "Apple Watch", "data.dev.phone": "iPhone", "data.dev.mac": "Mac", "data.dev.manual": "By hand",
   "data.dev_how.watch": "Worn to bed for sleep and HRV; workouts carry your effort rating. It writes into Apple Health, and the iPhone app brings it over",
   "data.dev_how.phone": "Counts steps; scales and food apps write into Health; the iPhone app sends it while open",
@@ -208,7 +205,7 @@ Object.assign(DICT.zh, {
   "week.this": "本周", "week.in_weeks": "+{n} 周", "week.upcoming": "接下来 3 周", "week.later": "本学期更晚的",
   "week.overdue": "日期已过、还标着待办——核对一下交了没有", "week.none_soon": "接下来 3 周没有截止。",
   "week.none_later": "再往后没有了。", "week.days_ago": "{n} 天前",
-  "body.sub": "体重对照计划", "body.empty": "还没有体重。在 body_daily.csv 里填 weight_kg，或者导入 Apple 健康。",
+  "body.sub": "体重对照计划，心肺能力和自己比", "body.empty": "还没有体重。在 body_daily.csv 里填 weight_kg，或者导入 Apple 健康。",
   "body.weight": "体重", "body.avg7_on": "{day} 的 7 天平均", "body.no_plan": "healthaio.toml 里没有体重计划",
   "body.status.on_track": "在计划速度内", "body.status.faster": "比计划快", "body.status.slower": "比计划慢", "body.status.reached": "到目标了",
   "body.rate": "每周（近 3 周）", "body.since_start": "{day} 以来", "body.to_go": "离 {target}", "body.eta": "照这个速度，大约",
@@ -224,15 +221,12 @@ Object.assign(DICT.zh, {
   "sleep.checks": "这一周的打勾",
   "sleep.check.woke_on_time": "跟着闹钟起", "sleep.check.asleep_in_time": "按时睡着", "sleep.check.slept_enough": "睡够了", "sleep.check.screen_before_sleep_ok": "睡前一小时没刷",
   "sleep.checks_rule": "跟着闹钟起：闹钟后宽限分钟内醒。按时睡着：睡着的时间够在闹钟前睡满目标时长（或在计划关灯前）。睡够了：和目标差不超过 {slack} 分钟。睡前一小时没刷：睡着前一小时娱乐和社交不超过 {min} 分钟。– 是没有记录。",
-  "review.title": "{from} – {to} 这一周", "review.sub": "这一周和之前 4 周并排，只摆事实。", "review.partial": "这一周还没过完，数字只算到现在。",
-  "review.prev": "上一周", "review.next": "下一周", "review.facts": "这一周的数", "review.this": "这一周", "review.before": "之前 4 周", "review.change": "变化",
-  "review.sec.sleep": "睡眠", "review.sec.recovery": "恢复", "review.sec.activity": "活动", "review.sec.screens": "屏幕", "review.sec.self": "自评",
-  "review.m.sleep_min": "每晚睡眠", "review.m.onset": "睡着", "review.m.wake": "醒来", "review.m.hrv_ms": "HRV（中位数）", "review.m.resting_hr": "静息心率（中位数）",
-  "review.m.steps": "每天步数", "review.m.workout_min": "每天运动", "review.m.workout_days": "训练天数", "review.m.focus": "每天专注做事", "review.m.fun": "每天娱乐",
-  "review.m.energy": "自评精力（0–5）", "review.m.focus_self": "自评专注（0–5）", "review.planned": "计划 {n} 天", "review.days": "{n} 天",
-  "review.later": "晚", "review.earlier": "早", "review.same": "差不多", "review.gaps": "{days} 没有身体数据。", "review.weight": "这一周的体重",
-  "review.weight_change": "比上一周 {v}", "review.weight_days": "称了 {n} 次", "review.due_this": "这一周截止", "review.due_next": "下一周截止", "review.none": "没有。",
-  "review.rule": "按有数据的日子取每天平均（HRV 和静息心率取中位数），对照的是这一周之前的 4 周。绿和红只标通常算好或坏的方向，变化很小的保持灰色。",
+  "review.this": "这一周", "review.change": "变化",
+  "review.sec.sleep": "睡眠", "review.sec.screens": "屏幕", 
+  "review.m.sleep_min": "每晚睡眠", 
+  "review.m.fun": "每天娱乐",
+  
+  
   "data.sub": "最近 {n} 天到了哪些数据", "data.ok": "数据都在进来", "data.attention": "有数据停了",
   "data.arrivals": "到达情况", "data.s.sleep": "睡眠", "data.s.hrv": "HRV", "data.s.steps": "步数", "data.s.weight": "体重", "data.s.screen": "屏幕时间", "data.s.self": "自评",
   "data.status.ok": "是新的", "data.status.stale": "停了", "data.status.missing": "从来没到过",
@@ -252,7 +246,7 @@ Object.assign(DICT.zh, {
   "data.problems": "{n} 行读不出", "data.clean": "都能读", "data.problem_line": "第 {line} 行，{column}",
   "data.import": "导入数据", "data.import_lede": "所有数据都是数据目录里的普通 CSV 文件。导入工具写它们，你也可以直接手改。",
   "data.import_note": "不往任何地方上传。服务只在这台电脑上监听。",
-  "data.s.resting_hr": "静息心率", "data.s.exercise": "活动分钟", "data.s.sore": "酸痛记录",
+  "data.s.resting_hr": "静息心率", "data.s.vo2max": "最大摄氧量（心肺能力）", "data.s.exercise": "活动分钟", "data.s.sore": "酸痛记录",
   "data.dev.watch": "Apple Watch", "data.dev.phone": "iPhone", "data.dev.mac": "Mac", "data.dev.manual": "手动记录",
   "data.dev_how.watch": "戴着睡觉才有睡眠和 HRV；训练带着你打的强度分。手表写进 Apple 健康，再由 iPhone App 带到电脑",
   "data.dev_how.phone": "手机自己记步数；体重秤和饮食 App 写进健康；打开 iPhone App 时发到电脑",
@@ -266,7 +260,6 @@ Object.assign(DICT.en, {
   "act.sleep": "Sleep", "act.exercise": "Exercise", "act.calendar": "Calendar", "act.screen": "Screens", "act.not_recorded": "Not recorded",
   "act.fun": "Entertainment & social", "act.focus": "Focused work", "act.communication": "Communication",
   
-  
   "act.stacked": "All devices added up", "act.ratio": "Screens at once", "act.single": "Longest on one thing",
   "time.ratio_v": "{v}×", 
   "time.stack": "Devices at once", "time.stack_note": "each device counts its own minutes; everywhere else on this page a minute counts once",
@@ -279,10 +272,7 @@ Object.assign(DICT.en, {
   "chart.row_max": "top {v}", "time.span": "{from} – {to} · {n} days with records",
   "time.prev": "Earlier 7 days", "time.next": "Later 7 days", "time.latest": "Latest",
   
-  
   "time.slight_high": "just above normal", "time.slight_low": "just below normal",
-  
-  
   
   
   "time.vs_normal": "each against your normal: the middle half of your 7-day averages in the {n} days before",
@@ -290,7 +280,6 @@ Object.assign(DICT.en, {
   "time.known": "{n} of {k} days have a record", 
   "time.stale": "{what}: the last whole day on record is {day}, so averages use only the days with one.",
   "time.stale_none": "{what}: no record yet.",
-  
   "trend.title": "Stimulation and focus, averaged",
   "trend.note": "What people call “dopamine tolerance” can't be measured by a phone or a watch. These are its shadow in behaviour, side by side, not cause and effect",
   "trend.fun": "Stimulation", "trend.fun_what": "entertainment & social a day",
@@ -303,7 +292,6 @@ Object.assign(DICT.en, {
   "trend.rule": "Stimulation and focus, averaged: stimulation is the minutes in entertainment and social apps (screens counted once across devices); focus is the day's longest stretch in work and learning apps, where a pause or something else of up to 3 minutes does not end it. The line is the average of the 7 days ending on each day (at least 4 of them with screen time). The shaded band is your normal for it: the middle half of the 7-day averages ending on each of the {n} days before those 7 (at least {min} of them). The line above each chart is the daily average of the last {level} days and of the {level} days before them, each from at least {lmin} days with screen time. The charts cover {days} days. The idea behind the card is often called “dopamine tolerance”, but dopamine itself can't be measured by a phone or a watch, so the card shows only the behaviour and never says that one causes the other.",
   "time.fun_limit": "entertainment limit {v}", 
   "time.no_screens": "No screen time these days.",
-  
   "time.restart": "This page has changed and the server still runs the older version. Restart healthaio serve to see it.",
   "dev.phone": "phone", "dev.tablet": "tablet", "dev.laptop": "laptop", "dev.desktop": "desktop", "dev.mac": "Mac", "dev.other": "other",
   "wtype.hiit": "HIIT",
@@ -311,7 +299,6 @@ Object.assign(DICT.en, {
 Object.assign(DICT.zh, {
   "act.sleep": "睡眠", "act.exercise": "运动", "act.calendar": "日程", "act.screen": "屏幕", "act.not_recorded": "没有记录",
   "act.fun": "娱乐和社交", "act.focus": "专注做事", "act.communication": "沟通",
-  
   
   "act.stacked": "几台加起来", "act.ratio": "叠加倍数", "act.single": "最长一段只做一件事",
   "time.ratio_v": "{v} 倍", 
@@ -325,10 +312,7 @@ Object.assign(DICT.zh, {
   "chart.row_max": "最高 {v}", "time.span": "{from} – {to} · {n} 个有记录的日子",
   "time.prev": "往前 7 天", "time.next": "往后 7 天", "time.latest": "最近",
   
-  
   "time.slight_high": "略高于平常", "time.slight_low": "略低于平常",
-  
-  
   
   
   "time.vs_normal": "都和你的平常比：之前 {n} 天里 7 天平均的中间一半",
@@ -336,7 +320,6 @@ Object.assign(DICT.zh, {
   "time.known": "{k} 天里 {n} 天有记录", 
   "time.stale": "{what}的完整记录最晚到 {day}，平均只算有记录的那几天。",
   "time.stale_none": "{what}还没有记录。",
-  
   "trend.title": "刺激均线 · 专注均线",
   "trend.note": "常说的“多巴胺阈值”，手机和手表测不了。这里看的是它在行为上的影子，只并排摆着，不说谁导致谁",
   "trend.fun": "刺激均线", "trend.fun_what": "每天娱乐和社交（刷、看、玩）",
@@ -349,7 +332,6 @@ Object.assign(DICT.zh, {
   "trend.rule": "刺激均线和专注均线：刺激 = 娱乐和社交类应用的分钟数（几台设备同时用只算一次）；专注 = 一天里做事和学习类应用连续最长的一段，中间停下或切到别处 3 分钟以内不算断。线是截至每一天的 7 天平均（7 天里至少 4 天有屏幕记录）。浅色带是这条线的平常：这 7 天之前 {n} 天里，以每一天结尾的 7 天平均的中间一半（至少 {min} 个）。图上方那行是最近 {level} 天和再之前 {level} 天的每日平均，各至少 {lmin} 天有屏幕记录。图里是 {days} 天。这张卡背后的说法常被叫作“多巴胺阈值”，但多巴胺本身手机和手表测不了，所以这里只摆行为，不说谁导致谁。",
   "time.fun_limit": "娱乐上限 {v}", 
   "time.no_screens": "这几天没有屏幕时间。",
-  
   "time.restart": "这一页改过了，服务还在跑旧版本。重启 healthaio serve 就能看到。",
   "dev.phone": "手机", "dev.tablet": "平板", "dev.laptop": "笔记本", "dev.desktop": "台式机", "dev.mac": "Mac", "dev.other": "其他设备",
   "wtype.workout": "训练", "wtype.other": "其他训练", "wtype.strength training": "力量训练", "wtype.functional strength training": "功能性力量训练",
@@ -365,7 +347,7 @@ Object.assign(DICT.zh, {
 
 // ---- Wear and tear (the Drain page, #drain) and the grouped menu ----
 Object.assign(DICT.en, {
-  "nav.drain": "Wear and tear", "nav.weight": "Weight", "nav.sleep_tab": "Sleep",
+  "nav.drain": "Wear and tear", "nav.weight": "Weight", "nav.weight_tab": "Weight & fitness", "nav.sleep_tab": "Sleep",
   "drain.title": "Wear and tear", "drain.sub": "{from} – {to}, against the 28 days before",
   "drain.prev": "Earlier 7 days", "drain.next": "Later 7 days", "drain.latest": "Latest",
   "drain.eyebrow": "What has been slowly wearing you down this week", "drain.group.body": "What the body already shows", "drain.group.sleep": "Sleep timing", "drain.group.screen": "Screen habits", "drain.sep": ", ",
@@ -402,7 +384,7 @@ Object.assign(DICT.en, {
   "today.drain": "Wear and tear, last 7 days", "today.drain_more": "See what is wearing you down →",
 });
 Object.assign(DICT.zh, {
-  "nav.drain": "慢性磨损", "nav.weight": "体重", "nav.sleep_tab": "睡眠",
+  "nav.drain": "慢性磨损", "nav.weight": "体重", "nav.weight_tab": "体重和心肺", "nav.sleep_tab": "睡眠",
   "drain.title": "慢性磨损", "drain.sub": "{from} – {to}，和之前 28 天比",
   "drain.prev": "往前 7 天", "drain.next": "往后 7 天", "drain.latest": "最近",
   "drain.eyebrow": "这一周，哪些东西在慢慢磨损你", "drain.group.body": "身体已经显出来的", "drain.group.sleep": "作息", "drain.group.screen": "屏幕习惯", "drain.sep": "、",
@@ -815,8 +797,7 @@ Object.assign(DICT.en, {
   "goals.unset.weight_pace": "A weight plan", "goals.unset.focus_min": "Focused work a day", "goals.unset.fun_max": "A limit on entertainment",
   "goals.rule": "Each daily goal shows the last {d} days as dots: filled = kept, a ring = not kept, a dash = no record that day. The count is the days kept among the days with a record over the last {n}, never a streak and never a score; a day without a record is not a missed day. Sleep goals use the Sleep page's checks for the night that ended that morning. Food goals count logged days only. Weekly goals show the last {w} calendar weeks and this one so far. The top line names the goal kept most often and the one kept least often (each with at least {k} days with a record).",
 
-  "review.sec.food": "Food", "review.m.kcal": "Energy a day", "review.m.protein_g": "Protein a day", "review.m.gap_h": "Last meal to sleep",
-  "review.m.logged_days": "Days logged in full", "review.m.active_min": "Active minutes a day",
+  
   "data.s.food": "Food log",
   "kit.enc.c-exercise-2": "a kind of exercise, lighter: cardio", "kit.enc.c-exercise-3": "a kind of exercise, lightest: walking",
   "kit.enc.c-sore-0": "a body region with nothing sore", "kit.enc.c-sore-1": "soreness: a little", "kit.enc.c-sore-2": "soreness: clearly sore",
@@ -931,8 +912,7 @@ Object.assign(DICT.zh, {
   "goals.unset.weight_pace": "体重计划", "goals.unset.focus_min": "每天专注做事时间", "goals.unset.fun_max": "娱乐时间上限",
   "goals.rule": "每个每日目标把最近 {d} 天画成一排点：实心 = 做到，空心圈 = 没做到，短横 = 那天没记录。计数是最近 {n} 天里有记录的日子中做到了几天，不算连续天数，也不打分；没记录的日子不算没做到。睡眠目标用作息页同一套检查，看当天早上结束的那一晚。饮食目标只算记全的日子。每周目标看最近 {w} 个自然周和本周到目前。顶上一句点出做得最稳和最常没做到的两项（各自至少 {k} 天有记录）。",
 
-  "review.sec.food": "饮食", "review.m.kcal": "每天热量", "review.m.protein_g": "每天蛋白质", "review.m.gap_h": "最后一餐到睡着",
-  "review.m.logged_days": "记全的天数", "review.m.active_min": "每天活动时间",
+  
   "data.s.food": "饮食记录",
   "kit.enc.c-exercise-2": "一种运动，浅一档：有氧", "kit.enc.c-exercise-3": "一种运动，最浅：步行",
   "kit.enc.c-sore-0": "人体图上不酸的部位", "kit.enc.c-sore-1": "酸痛：有点酸", "kit.enc.c-sore-2": "酸痛：明显酸",
@@ -980,10 +960,9 @@ Object.assign(DICT.en, {
   "eff.short.slept": "{hours}+ h sleep", "eff.short.in_bed": "{hours}+ h in bed", "eff.short.ate_early": "dinner {hours} h before bed",
   "eff.short.asleep_by": "asleep by {clock}",
   "sum.rule": "Each line is the short form of a page; open it for the numbers, charts and rules. Exercise is this calendar week against the weekly goal; food is the last 7 days logged in full; weight is the 7-day average and the rate of the last 3 weeks; drain is the 7 days before today; what helps is the list on Review.",
-  "review.due_line": "Due this week: {a} ({ap}% of grades) · next week: {b} ({bp}%).",
   "ex.src.plan": "Against your plan", "ex.src.who": "Against the WHO guideline (no plan set)", "ex.week_short": "{d} of {goal}",
   "ex.load.line": "workouts {a}, a usual week {c} ({r}×)", "ex.load.line_one": "workouts {a}",
-  "food.effect_moved": "What an early dinner goes with the next morning: on Review →",
+  "food.effect_moved": "What an early dinner goes with the next morning: on Follow-up, Tomorrow will be better →",
   "sleep.checks_moved": "Asleep in time, up with the alarm, night by night: on Goals →",
   "doc.open": "Open",
   "time.detail": "In detail", 
@@ -1013,10 +992,9 @@ Object.assign(DICT.zh, {
   "eff.short.slept": "睡够 {hours} 小时", "eff.short.in_bed": "躺够 {hours} 小时", "eff.short.ate_early": "睡前 {hours} 小时吃完",
   "eff.short.asleep_by": "{clock} 前睡着",
   "sum.rule": "每一行是一页的缩写，点开能看到这一项的数字、图和规则。运动看这个自然周对照每周目标；饮食看最近 7 天里记全的日子；体重看 7 天平均和最近 3 周的速度；消耗看今天之前的 7 天；对你有用的，完整的表在复盘页。",
-  "review.due_line": "这一周截止 {a} 项（占成绩 {ap}%）· 下一周 {b} 项（{bp}%）。",
   "ex.src.plan": "按你的计划", "ex.src.who": "按世卫组织建议（没设计划）", "ex.week_short": "已动 {d} / 目标 {goal}",
   "ex.load.line": "训练 {a}，平常一周 {c}（{r} 倍）", "ex.load.line_one": "训练 {a}",
-  "food.effect_moved": "早点吃完晚饭，第二天早上有什么不同：在复盘页 →",
+  "food.effect_moved": "早点吃完晚饭，第二天早上有什么不同：在“跟进”的“明天会更好” →",
   "sleep.checks_moved": "每晚有没有按时睡、按时起：在目标页 →",
   "doc.open": "展开",
   "time.detail": "细看", 
@@ -1025,7 +1003,7 @@ Object.assign(DICT.zh, {
 // ---- the menu's short names on a phone's tab bar, and goals set on the Goals page (goal_log.py) ----
 Object.assign(DICT.en, {
   "nav.short.today": "Today", "nav.short.body": "Body", "nav.short.life": "Life", "nav.short.sched": "Schedule", "nav.short.act": "Actions",
-  "nav.short.review": "Review", "nav.short.data": "Data",
+  "nav.short.data": "Data",
   "goals.edit": "Edit", "goals.set_one": "Set one", "goals.save": "Save", "goals.cancel": "Cancel", "goals.reset": "Back to the original",
   "goals.src.you": "set here", "goals.src.accepted": "suggestion you accepted",
   "goals.static": "The online demo is read-only. On your own computer, Save recomputes every page against the new goal.",
@@ -1043,7 +1021,7 @@ Object.assign(DICT.en, {
 });
 Object.assign(DICT.zh, {
   "nav.short.today": "今天", "nav.short.body": "身体", "nav.short.life": "生活", "nav.short.sched": "日程", "nav.short.act": "行动",
-  "nav.short.review": "复盘", "nav.short.data": "数据",
+  "nav.short.data": "数据",
   "goals.edit": "改", "goals.set_one": "设一个", "goals.save": "保存", "goals.cancel": "取消", "goals.reset": "用回原来的",
   "goals.src.you": "在这里设的", "goals.src.accepted": "采纳的建议",
   "goals.static": "在线演示只能看。在自己电脑上运行时，点保存后每一页都按新目标重算。",
@@ -1279,6 +1257,15 @@ Object.assign(DICT.en, {
   "trained.on": "trained", "trained.off": "not trained", "trained.region_aria": "{region}: {state}",
   "trained.static": "The online demo is read-only. On your own computer, Save writes this workout's row in workout_notes.csv.",
   "trained.err": "Not saved: {e}",
+  "cardio.title": "Cardio fitness (VO2 max)", "cardio.short": "Cardio fitness", "cardio.unit": "mL/kg/min",
+  "cardio.level_of": "the median of {n} estimates in the last {d} days",
+  "cardio.state.up": "{v} higher than 3 months ago", "cardio.state.down": "{v} lower than 3 months ago",
+  "cardio.state.steady": "about the same as 3 months ago", "cardio.no_then": "too few estimates 3 months ago to compare",
+  "cardio.what": "The higher it is, the easier stairs, a brisk walk or a run feel: the body's engine, built over weeks. How tired you are today is on Recovery.",
+  "cardio.stale": "The last estimate was {n} days ago: the watch makes one only on outdoor walks, runs and hikes.",
+  "cardio.chart": "The last 12 months", "cardio.key.points": "each estimate", "cardio.key.line": "level ({d}-day median)",
+  "cardio.empty": "No VO2 max yet. Apple Watch estimates it on outdoor walks, runs and hikes; import Apple Health, or let the iPhone app send it.",
+  "cardio.rule": "Apple Watch estimates VO2 max, how much oxygen the body can use at full effort, on some outdoor walks, runs and hikes. One estimate scatters by about 1 mL/kg/min and real change takes weeks, so the level is the median of the last {d} days' estimates, set against the median of those {a} to {b} days back; a change under {c} reads as about the same. It is compared with your own level only: Apple's cardio fitness levels by age and sex are a population table, which this app does not use.",
   "after.none": "No training days yet.", "after.no_score": "No training day has two parts on record yet.",
   "rec.rule_after": "The morning after each training day of the last {n} days: how you feel (your answer, 2, 5 or 8), HRV the morning after against the morning before the training, resting heart rate against your normal, and the night after (how long you slept against your normal, and how much of the time in bed you were asleep). Each body part is 5 plus 2.5 for every width of your normal it lies away, better direction up, between 0 and 10 (HRV's normal is that of its morning-to-morning changes). The parts are averaged; a morning needs two of them, one from the body. {good} and above reads as recovered well, under {low} as not recovered. It is the one total score in the app, and every part is shown with it.",
 });
@@ -1326,6 +1313,15 @@ Object.assign(DICT.zh, {
   "trained.on": "练了", "trained.off": "没练", "trained.region_aria": "{region}：{state}",
   "trained.static": "在线演示只能看。在自己电脑上运行时，保存会把这次训练写进 workout_notes.csv。",
   "trained.err": "没保存上：{e}",
+  "cardio.title": "心肺能力（最大摄氧量）", "cardio.short": "心肺能力", "cardio.unit": "毫升/公斤/分钟",
+  "cardio.level_of": "最近 {d} 天 {n} 次估算的中位数",
+  "cardio.state.up": "比 3 个月前高 {v}", "cardio.state.down": "比 3 个月前低 {v}",
+  "cardio.state.steady": "和 3 个月前差不多", "cardio.no_then": "3 个月前的估算太少，还比不了",
+  "cardio.what": "越高，爬楼、快走、跑步越轻松：这是体力的底子，要几周才练得出来。今天累不累，看“恢复”。",
+  "cardio.stale": "最近一次估算在 {n} 天前：手表只有在户外步行、跑步或徒步时才会估算。",
+  "cardio.chart": "最近 12 个月", "cardio.key.points": "每次估算", "cardio.key.line": "水平（{d} 天中位数）",
+  "cardio.empty": "还没有最大摄氧量。Apple Watch 要在户外步行、跑步或徒步时才会估算；导入 Apple 健康，或者让 iPhone App 发过来。",
+  "cardio.rule": "最大摄氧量是身体全力运动时最多能用多少氧气，Apple Watch 在户外步行、跑步、徒步时估算。单次估算会有 1 左右的误差，真正的变化要几周，所以“水平”取最近 {d} 天估算的中位数，和 {a} 到 {b} 天前那些估算的中位数比；变化不到 {c} 就算差不多。只和你自己比：Apple 按年龄和性别分的心肺等级是人群标准，这里不用。",
   "after.none": "还没有训练日。", "after.no_score": "还没有哪个训练日凑齐两项。",
   "rec.rule_after": "最近 {n} 天里每个训练日的第二天早上：你的感觉（你答的 2、5 或 8）、HRV（练后那个早上和练前那个早上比）、静息心率（和你的平常比）、练后那一晚（睡了多久和平常比，在床上有多少时间是睡着的）。身体的每一项：在 5 分的基础上，每偏离你平常一个宽度加或减 2.5 分，往好的方向加，限制在 0 到 10（HRV 用的是它早上和早上之间变化的平常宽度）。几项取平均；至少两项、其中一项来自身体，才算分。{good} 分以上算恢复得好，{low} 分以下算没恢复好。这是应用里唯一的总分，每一项都摊开写在旁边。",
 });

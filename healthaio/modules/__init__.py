@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import Any, Callable, Dict, List, Optional
 
 from ..context import Context
-from . import body, data, docs, drain, exercise, followup, food, goals, load, recovery, review, sleep, time, today, week
+from . import body, data, docs, drain, exercise, followup, food, goals, load, recovery, sleep, time, today, week
 
 PAGES: Dict[str, Callable[..., Dict[str, Any]]] = {
     "today": lambda ctx, param=None: today.build(ctx, day=param),
@@ -20,7 +20,6 @@ PAGES: Dict[str, Callable[..., Dict[str, Any]]] = {
     "exercise": lambda ctx, param=None: exercise.build(ctx, day=param),
     "goals": lambda ctx, param=None: goals.build(ctx, day=param),
     "followup": lambda ctx, param=None: followup.build(ctx, day=param),
-    "review": lambda ctx, param=None: review.build(ctx, week=param),
     "data": lambda ctx, param=None: data.build(ctx, day=param),
     # the reading pages under the menu: no numbers, only which page it is
     "project": lambda ctx, param=None: docs.build(ctx, "project"),
@@ -32,7 +31,7 @@ def static_params(name: str, ctx: Context) -> List[Optional[str]]:
     """Which parameter values `healthaio build-static` pre-renders (a static site cannot compute)."""
     if name == "today":
         return [None] + [(ctx.today - timedelta(days=k)).isoformat() for k in range(1, 15)]
-    if name in ("week", "review"):
+    if name == "week":
         start = ctx.today - timedelta(days=ctx.today.weekday())
         return [None] + [(start + timedelta(days=7 * k)).isoformat() for k in range(-4, 3)]
     if name in ("drain", "food"):

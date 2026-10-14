@@ -189,15 +189,24 @@ function weightLine(p) {
     state: w.status ? chip(cls, t(`body.status.${w.status}`)) : "", href: "#body" });
 }
 
+function cardioLine(p) {
+  const c = p.summary.cardio;
+  const name = t("cardio.short");
+  if (!c) return line({ key: "cardio", iconKey: "heart", name, text: t("sum.none"), href: "#body" });
+  const cls = { up: "good", down: "bad", steady: "" }[c.state] ?? "";
+  return line({ key: "cardio", iconKey: "heart", name, text: `${num(c.level, 1)} ${t("cardio.unit")}`,
+    state: c.state ? chip(cls, t(`cardio.state.${c.state}`, { v: num(Math.abs(c.change), 1) }), c.state === "steady" ? "" : STATE_ICON[cls]) : "", href: "#body" });
+}
+
 function patternLine(p) {
   const found = helping(p.effects);
   const words = found.map((r) => t(`eff.short.${r.key}`, { min: num(r.params?.min), hours: num(r.params?.hours), clock: r.params?.clock }));
-  return line({ key: "patterns", iconKey: "check", name: t("sum.patterns"), text: words.length ? words.join(SEP()) : t("sum.patterns_none"), href: "#review" });
+  return line({ key: "patterns", iconKey: "check", name: t("sum.patterns"), text: words.length ? words.join(SEP()) : t("sum.patterns_none"), href: "#followup" });
 }
 
 function linesHtml(p) {
   return `<section class="card span-12"><h2>${t("sum.title")}</h2>
-    <div class="sum-rows">${recoveryLines(p)}${exerciseLine(p)}${foodLine(p)}${screensLine(p)}${drainLine(p)}${weightLine(p)}${patternLine(p)}</div>
+    <div class="sum-rows">${recoveryLines(p)}${exerciseLine(p)}${foodLine(p)}${screensLine(p)}${drainLine(p)}${weightLine(p)}${cardioLine(p)}${patternLine(p)}</div>
     <details class="how"><summary>${t("ui.how")}</summary><p>${t("recovery.rule")}</p><p>${t("screens.rule")}</p><p>${t("sum.rule")}</p></details></section>`;
 }
 

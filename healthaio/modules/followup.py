@@ -24,6 +24,10 @@ Rules
   remembering, and an if-then plan ("if it is 00:30, I put the phone on the charger in the living room"). If-then
   plans are among the better-tested ways to close the gap between meaning to and doing (Gollwitzer & Sheeran 2006, a
   meta-analysis of 94 studies, d = 0.65). These are habits, not medical advice.
+- Tomorrow will be better ("effects", modules/today.py effects()): what has gone with a better next day, the days
+  after doing something against the days after not, with 95% intervals and Benjamini-Hochberg. It closes the loop:
+  whether the advice was kept is above, whether keeping it helped is here. It used to be on a Weekly review page,
+  whose week-of-facts table nobody needed.
 """
 import statistics
 from datetime import date, datetime, timedelta
@@ -195,5 +199,6 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
             "yesterday_kept": sum(1 for x in shown if x["met"]), "yesterday_known": sum(1 for x in shown if x["met"] is not None),
             "dates": [iso(d) for d in window], "rows": rows, "stuck": [r["key"] for r in rows if r["stuck"]],
             "given_days": sum(1 for d in days if d["items"]),
+            "effects": today_page.effects(ctx, end),
             "rule": {"days": DAYS, "tolerance_min": TOLERANCE_MIN, "calm_min": CALM_MIN,
                      "stuck_of": STUCK_OF, "stuck_missed": STUCK_MISSED}}

@@ -1,4 +1,11 @@
-"""Body: weight against the plan's corridor, the weekly rate, and the long view."""
+"""Weight and fitness (#body): weight against the plan's corridor, the weekly rate, and the long view; and cardio
+fitness, the VO2 max Apple Watch estimates on some outdoor walks, runs and hikes.
+
+Cardio fitness is a slow measure: one estimate scatters by about 1 mL/kg/min, and real change takes weeks. So the
+level is the median of the estimates of the last LEVEL_DAYS days, set against the median of those from about three
+months earlier (THEN_FROM..THEN_TO days back, at least 2), and a change smaller than CHANGE reads as steady. No
+population table (Apple's "cardio fitness levels" are by age and sex): you against you, as everywhere here.
+"""
 import statistics
 from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
@@ -7,6 +14,10 @@ from ..context import Context, iso
 
 CHART_DAYS = 120
 OUTLIER = 0.15  # a weight more than 15% off the median of all weights is ignored as a typo or another person
+CARDIO_DAYS = 365
+LEVEL_DAYS = 30
+THEN_FROM, THEN_TO = 120, 75
+CHANGE = 1.0  # mL/kg/min
 
 
 def avg7(points: Dict[date, float], day: date) -> Optional[float]:
@@ -25,6 +36,30 @@ def slope_per_week(series: Dict[date, float], end: date, days: int = 21) -> Opti
     if den == 0:
         return None
     return sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / den * 7
+
+
+def cardio(ctx: Context, end: date) -> Dict[str, Any]:
+    pts = {r["date"]: r["vo2max"] for r in ctx.store.rows("body_daily")
+           if r.get("vo2max") is not None and end - timedelta(days=CARDIO_DAYS) < r["date"] <= end}
+    rule = {"level_days": LEVEL_DAYS, "then_from": THEN_FROM, "then_to": THEN_TO, "change": CHANGE, "days": CARDIO_DAYS}
+    if not pts:
+        return {"latest": None, "points": [], "line": [], "rule": rule}
+    last = max(pts)
+
+    def level(at: date) -> Optional[float]:
+        vals = [v for d, v in pts.items() if at - timedelta(days=LEVEL_DAYS) < d <= at]
+        return statistics.median(vals) if vals else None
+
+    recent = [v for d, v in pts.items() if last - timedelta(days=LEVEL_DAYS) < d <= last]
+    earlier = [v for d, v in pts.items() if last - timedelta(days=THEN_FROM) < d <= last - timedelta(days=THEN_TO)]
+    now = statistics.median(recent)
+    then = statistics.median(earlier) if len(earlier) >= 2 else None
+    change = now - then if then is not None else None
+    state = None if change is None else "up" if change >= CHANGE else "down" if change <= -CHANGE else "steady"
+    return {"latest": {"date": iso(last), "value": pts[last], "level": now, "n": len(recent), "then": then,
+                       "change": change, "state": state, "stale_days": (end - last).days},
+            "points": [{"date": iso(d), "value": pts[d]} for d in sorted(pts)],
+            "line": [{"date": iso(d), "value": level(d)} for d in sorted(pts)], "rule": rule}
 
 
 def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
@@ -81,4 +116,5 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
         "monthly": [{"month": m, "kg": statistics.median(v), "n": len(v)} for m, v in sorted(monthly.items())],
         "waist": waist, "dropped": dropped,
         "weighed_days_14": sum(1 for k in range(14) if end - timedelta(days=k) in raw),
+        "cardio": cardio(ctx, end),
     }

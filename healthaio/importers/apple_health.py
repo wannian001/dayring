@@ -36,7 +36,9 @@ Steps, exercise minutes and energy burned (active and resting)
     source family are counted once.
 
 Other columns
-    ``hrv_ms`` = daily mean of SDNN, ``resting_hr`` = daily mean, ``weight_kg`` = last value of the
+    ``hrv_ms`` = daily mean of SDNN, ``resting_hr`` = daily mean, ``vo2max`` = daily mean of the watch's VO2 max
+    estimates (mL/kg/min; Apple Watch makes one on some outdoor walks, runs and hikes, so most days have none),
+    ``weight_kg`` = last value of the
     day (lb, g and st are converted). Workouts: per day the durations are summed, but a workout
     that overlaps an already-counted one by more than half its length is treated as a copy
     (e.g. the same run written by the watch and by a running app). ``workout_type`` is the
@@ -108,6 +110,7 @@ SLEEP = "HKCategoryTypeIdentifierSleepAnalysis"
 STEPS = "HKQuantityTypeIdentifierStepCount"
 HRV = "HKQuantityTypeIdentifierHeartRateVariabilitySDNN"
 RESTING_HR = "HKQuantityTypeIdentifierRestingHeartRate"
+VO2MAX = "HKQuantityTypeIdentifierVO2Max"  # unit "mL/min·kg" (mL per kg per minute)
 EXERCISE = "HKQuantityTypeIdentifierAppleExerciseTime"
 BODY_MASS = "HKQuantityTypeIdentifierBodyMass"
 ACTIVE_ENERGY = "HKQuantityTypeIdentifierActiveEnergyBurned"
@@ -119,7 +122,7 @@ EFFORT_MATCH_S = 120  # an effort sample starting this close to a workout's star
 DIETARY = {"HKQuantityTypeIdentifierDietaryEnergyConsumed": "kcal", "HKQuantityTypeIdentifierDietaryProtein": "protein_g",
            "HKQuantityTypeIdentifierDietaryCarbohydrates": "carbs_g", "HKQuantityTypeIdentifierDietaryFatTotal": "fat_g",
            "HKQuantityTypeIdentifierDietaryFiber": "fiber_g"}
-WANTED = {SLEEP, STEPS, HRV, RESTING_HR, EXERCISE, BODY_MASS, ACTIVE_ENERGY, BASAL_ENERGY, EFFORT_RATED, EFFORT_ESTIMATED, *DIETARY}
+WANTED = {SLEEP, STEPS, HRV, RESTING_HR, VO2MAX, EXERCISE, BODY_MASS, ACTIVE_ENERGY, BASAL_ENERGY, EFFORT_RATED, EFFORT_ESTIMATED, *DIETARY}
 GRAMS = {"g": 1.0, "mg": 0.001, "mcg": 0.000001, "kg": 1000.0, "oz": 28.349523125}
 MEAL_WORDS = {"breakfast": "breakfast", "lunch": "lunch", "dinner": "dinner", "supper": "dinner", "snack": "snack",
               "snacks": "snack", "drink": "drink", "drinks": "drink"}
@@ -243,6 +246,7 @@ class Collected:
     food: Dict[Tuple[float, str], Dict[str, Any]] = field(default_factory=dict)
     hrv: Dict[date, List[float]] = field(default_factory=lambda: defaultdict(lambda: [0.0, 0]))
     rhr: Dict[date, List[float]] = field(default_factory=lambda: defaultdict(lambda: [0.0, 0]))
+    vo2: Dict[date, List[float]] = field(default_factory=lambda: defaultdict(lambda: [0.0, 0]))
     weight: Dict[date, Tuple[float, float]] = field(default_factory=dict)
     workouts: Dict[date, List[Tuple[float, float, float, str, str]]] = field(default_factory=lambda: defaultdict(list))
     sessions: List["Session"] = field(default_factory=list)
@@ -380,6 +384,13 @@ def _record(out: Collected, elem, kind: str, zones: _Zones) -> None:
         acc[1] += 1
     elif kind == RESTING_HR:
         acc = out.rhr[day]
+        acc[0] += value
+        acc[1] += 1
+    elif kind == VO2MAX:
+        if not 10 <= value <= 90:  # mL/kg/min; anything else is not a watch estimate
+            out.skipped += 1
+            return
+        acc = out.vo2[day]
         acc[0] += value
         acc[1] += 1
     elif kind == BODY_MASS:
@@ -662,7 +673,7 @@ def clean_workout_type(name: str) -> str:
 def build_rows(data: Collected, tz) -> List[Row]:
     export_day = data.export_at.astimezone(tz).date() if data.export_at else None
     sleep = nights(data.sleep, tz)
-    days = set(sleep) | set(data.steps) | set(data.exercise) | set(data.hrv) | set(data.rhr) | \
+    days = set(sleep) | set(data.steps) | set(data.exercise) | set(data.hrv) | set(data.rhr) | set(data.vo2) | \
         set(data.weight) | set(data.workouts) | set(data.active) | set(data.basal)
     first_workout = min(data.workouts) if data.workouts else None
     rows: List[Row] = []
@@ -681,6 +692,9 @@ def build_rows(data: Collected, tz) -> List[Row]:
         if day in data.rhr:
             total, count = data.rhr[day]
             row["resting_hr"] = total / count
+        if day in data.vo2:
+            total, count = data.vo2[day]
+            row["vo2max"] = round(total / count, 1)
         if day in data.steps:
             row["steps"] = float(round(dedup_sum(data.steps[day])))
         if day in data.exercise:

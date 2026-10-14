@@ -17,7 +17,7 @@ page has the same shape: one sentence or one number that answers its question, t
 detail in tabs inside one card, and one "How this is worked out" fold at the end. A line on Today carries a name, a
 number and a state, never a sentence; the sentence is on the page the line opens. Nothing is dropped to get there:
 what a page no longer shows sits in a tab, a fold, or on the one page that owns it (the next-day patterns moved from
-Today to Review, the night-by-night sleep checks to Goals, the workout list from Time to Exercise). The calendar is
+Today to Follow-up, the night-by-night sleep checks to Goals, the workout list from Time to Exercise). The calendar is
 context, not a subject: one line on Today and a faint arc on the day ring; the list is on Schedule.
 
 ## What to adjust today
@@ -49,6 +49,20 @@ moving on), a phone setting that does the remembering (Downtime, App Limits; the
 itself, so it names the setting and the value), a change to the room, and an if-then plan (implementation
 intentions). Training advice is listed but not checked: rebuilding it uses the day's own workouts. Counts, never
 streaks or scores. What it does not do yet is reach you: the page has to be opened.
+
+**Tomorrow will be better** sits at the bottom of Follow-up: what has gone with a better next day (HRV, resting
+heart rate and self-rated energy the morning after doing something, against the mornings after not), with 95%
+intervals and Benjamini–Hochberg, as before. It moved here from the Weekly review page on 2026-10-14: whether the
+advice was kept and whether keeping it helped are one question asked twice, so they share a page.
+
+## Weight & fitness
+
+Weight against the plan's corridor, and cardio fitness: the VO2 max Apple Watch estimates on some outdoor walks, runs
+and hikes. One estimate scatters by about 1 mL/kg/min and real change takes weeks, so the page shows a level (the
+median of the last 30 days' estimates) against the level of about three months before, and calls a change under 1
+"about the same". Apple's cardio fitness levels by age and sex are a population table and are not used. The words
+say what it is, the body's engine built over weeks, and point to Recovery for how tired you are today, because the
+two are easy to confuse.
 
 ## Exercise, Food and Goals
 
@@ -129,7 +143,7 @@ The first page under Body signals, because recovery is the body signal the day's
 - **How the body answered training**: the next morning after hard days (load above the median of your fully rated
   training days) against every other known day, for HRV, resting heart rate and the worst sore region, with 95%
   intervals and Benjamini–Hochberg. An association; the card names the obvious confound. Each outcome is drawn as
-  on Weekly review, a difference with its interval against zero (right = better), each row on its own scale, with
+  on Follow-up's Tomorrow will be better, a difference with its interval against zero (right = better), each row on its own scale, with
   the numbers in the tooltip: the picture answers "which way, and does it cross zero" before any number is read.
 - A region clearly or very sore this morning, with training planned, gives "train, but spare the sore parts" on
   Today (after "take it easy" and "rest", which come first).
@@ -247,11 +261,13 @@ matters, and says when the evidence is softer (entertainment).
 ## Menu
 
 Today · Body signals (Recovery, Sleep, Wear and tear, Weight) · Daily life (Exercise, Food, Stimulation) · Schedule (Week,
-Body & mind load) · Actions & goals (Follow-up, Goals) · Weekly review · Data sources. The items are the loop of
+Body & mind load) · Actions & goals (Follow-up, Goals) · Data sources. The items are the loop of
 managing your health, one question each: how am I today and what do I change; what is my body showing (outcomes you
 cannot change directly); what do I do every day (the causes you can change); what is coming, and how much do the
 weeks ask of me, body and mind; what did I decide to change and is it happening; did it help; where do the numbers come
-from. On a phone's tab bar each item takes a short name: Today, Body, Life, Schedule, Actions, Review, Data. (Two earlier menus mixed axes: Today and Week (time) next to Time and Drain (topics) and
+from. On a phone's tab bar each item takes a short name: Today, Body, Life, Schedule, Actions, Data. Weekly review was folded into Follow-up on
+2026-10-14: its week-of-facts table repeated the other pages, and its one useful part, what has helped the next
+day, belongs next to whether the advice was kept ("Tomorrow will be better"). (Two earlier menus mixed axes: Today and Week (time) next to Time and Drain (topics) and
 Review and Data (meta pages); then Body held exercise and food (things you do) next to weight (an outcome), while
 Time & energy held drain (mostly body signals). Splitting outcomes from causes is what makes "what to change" a
 question the menu itself asks.) The menu sits in a sidebar on the left from 900 px (the
@@ -313,7 +329,7 @@ above the page.
 
 ## Words
 
-- One word, one source. "Exercise / 运动" is logged workouts everywhere (Review, the ring); Apple's
+- One word, one source. "Exercise / 运动" is logged workouts everywhere (the ring, Exercise); Apple's
   Exercise-ring minutes on Today are "Exercise ring / 锻炼圆环". Workout types and device names are
   translated; app names and anything you typed stay as written.
 
@@ -321,7 +337,7 @@ above the page.
 - Labels name what a person recognises ("Entertainment in the hour before sleep"), not how it is stored.
 - Page names say what the page measures. The page about screens is **Stimulation** (刺激水平): it measures what
   goes in and what the body does next, and never calls either a hormone level.
-- No scores out of 100, no streaks, no badges. The Review page only lays facts side by side.
+- No scores out of 100, no streaks, no badges.
 - A sentence that carries numbers is a chart waiting to be drawn. "2.1% lower (95% interval −7.4% to 3.2%)" is an
   interval against zero; ten rows of "date, session, score" are dots on a scale; "these weeks need a lighter plan"
   is a flag under those weeks. Words stay for what to do and why; the numbers move into the picture and its
@@ -330,7 +346,7 @@ above the page.
 ## Accessibility
 
 - Every chart has `role="img"` and a label, and every mark with a tooltip is also reachable as text elsewhere on
-  the page (the tile values, the table on Review, the sentence under each interval for screen readers).
+  the page (the tile values, the sentence under each interval for screen readers).
 - Activity icons are hidden from screen readers; the tile names and the sentence at the top of the Stimulation page
   say the same thing in words.
 - Focus is visible; motion respects `prefers-reduced-motion`; nothing scrolls sideways at 320 px.

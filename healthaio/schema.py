@@ -134,6 +134,8 @@ TABLES: Dict[str, Table] = {t.name: t for t in (
             Column("sleep_end", "datetime", "When you woke up (local time)."),
             Column("hrv_ms", "number", "Heart-rate variability (SDNN or RMSSD, but keep one kind), ms.", low=1, high=400),
             Column("resting_hr", "number", "Resting heart rate, beats per minute.", low=20, high=200),
+            Column("vo2max", "number", "Cardio fitness (VO2 max), mL per kg per minute, as Apple Watch estimates it on some "
+                   "outdoor walks, runs and hikes; most days have none.", low=10, high=90),
             Column("steps", "number", "Steps that day.", low=0),
             Column("exercise_min", "number", "Minutes of exercise (Apple 'Exercise' ring or similar).", low=0, high=1440),
             Column("workout_min", "number", "Minutes of logged workouts. 0 means rest day; empty means unknown.", low=0, high=1440),
