@@ -1,12 +1,15 @@
 """Recovery: workout effort from Apple Health, the training load built from it, soreness check-ins, and the page.
 
-Rules under test (healthaio/importers/apple_health.py, healthaio/soreness.py, healthaio/modules/recovery.py,
+Rules under test (healthaio/importers/apple_health.py, healthaio/checkin.py, healthaio/modules/recovery.py,
 healthaio/modules/actions.py):
 - a workout's effort is your own rating when there is one, else the watch's estimate; an effort sample belongs to the
   workout it starts within two minutes of, or covers for at least half; a phone package carries it the same way
 - load = effort x minutes per day; the last 7 days against the weekly average of the 28 before; minutes without an
   effort are left out and counted, and with under half of the minutes rated the load says it is unsure
-- a check-in replaces that morning's rows only; nothing tapped writes "none"; a day without rows is unknown
+- a check-in replaces that morning's rows only; nothing tapped writes "none"; a day without rows is unknown; the
+  feeling (2, 5 or 8) goes into that morning's self_report row and leaves energy, focus and the note alone
+- the morning after a training day scores four parts against your normal (5 = usual), averaged; it needs two parts,
+  one from the body
 - only this app's own page may save a check-in
 - a region clearly or very sore this morning, with training planned, gives "spare the sore parts"
 """
@@ -22,7 +25,7 @@ from datetime import date, datetime, timedelta
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-from healthaio import capture, config, demo, soreness
+from healthaio import capture, checkin, config, demo
 from healthaio.config import Config
 from healthaio.context import Context
 from healthaio.importers import apple_health
@@ -126,9 +129,10 @@ class Load(Folder):
         self.assertGreater(L["unrated_min"], 0)
 
     def test_without_a_workout_record_there_is_no_load(self):
-        page = payload(self.cfg, "recovery", None, NOW)
-        self.assertEqual(page["load"]["state"], "none")
-        self.assertTrue(all(d["load"] is None for d in page["load_days"]))
+        page = payload(self.cfg, "load", None, NOW)
+        self.assertEqual(page["training"]["state"], "none")
+        self.assertTrue(all(d["load"] is None for d in page["training_days"]))
+        self.assertEqual(payload(self.cfg, "recovery", None, NOW)["load"]["state"], "none")
 
 
 class Soreness(Folder):
@@ -136,13 +140,13 @@ class Soreness(Folder):
         return [(r["date"].isoformat(), r["region"], r["level"]) for r in Store(self.cfg.data_dir).rows("soreness")]
 
     def test_a_check_in_replaces_that_morning_only(self):
-        soreness.save(self.cfg, date(2026, 10, 11), {"torso": 2})
-        soreness.save(self.cfg, date(2026, 10, 12), {"left_calf": 1, "pelvis": 3})
-        soreness.save(self.cfg, date(2026, 10, 12), {"right_calf": 2})
+        checkin.save(self.cfg, date(2026, 10, 11), {"torso": 2})
+        checkin.save(self.cfg, date(2026, 10, 12), {"left_calf": 1, "pelvis": 3})
+        checkin.save(self.cfg, date(2026, 10, 12), {"right_calf": 2})
         self.assertEqual(self.rows(), [("2026-10-11", "torso", 2), ("2026-10-12", "right_calf", 2)])
 
     def test_nothing_tapped_is_a_morning_with_nothing_sore(self):
-        soreness.save(self.cfg, date(2026, 10, 12), {})
+        checkin.save(self.cfg, date(2026, 10, 12), {})
         self.assertEqual(self.rows(), [("2026-10-12", "none", 0)])
         log = recovery.soreness_log(self.ctx())
         self.assertEqual(log, {date(2026, 10, 12): {}})
@@ -150,27 +154,91 @@ class Soreness(Folder):
 
     def test_bad_check_ins_are_refused(self):
         for levels in ({"thigh": 1}, {"torso": 4}, {"torso": True}, ["torso"]):
-            with self.assertRaises(soreness.SorenessError, msg=levels):
-                soreness.check(levels)
-        with self.assertRaises(soreness.SorenessError):
-            soreness.from_browser(self.cfg, {"date": "2026-10-13", "levels": {}}, NOW)  # tomorrow
-        self.assertEqual(soreness.check({"torso": 0, "head": None, "left_calf": 2}), {"left_calf": 2})
+            with self.assertRaises(checkin.CheckinError, msg=levels):
+                checkin.check(levels)
+        with self.assertRaises(checkin.CheckinError):
+            checkin.from_browser(self.cfg, {"date": "2026-10-13", "levels": {}}, NOW)  # tomorrow
+        self.assertEqual(checkin.check({"torso": 0, "head": None, "left_calf": 2}), {"left_calf": 2})
 
     def test_a_hand_written_row_that_does_not_parse_survives(self):
         (self.cfg.data_dir / "soreness.csv").write_text("date,region,level\n2026-10-01,knee,2\n2026-10-12,torso,1\n")
-        soreness.save(self.cfg, date(2026, 10, 12), {"head": 1})
+        checkin.save(self.cfg, date(2026, 10, 12), {"head": 1})
         text = (self.cfg.data_dir / "soreness.csv").read_text()
         self.assertIn("2026-10-01,knee,2", text)
         self.assertNotIn("torso", text)
 
     def test_spare_the_sore_parts_when_training_is_planned(self):
         self.cfg.training = {"mon": "Gym 50 min"}
-        soreness.save(self.cfg, TODAY, {"left_calf": 2, "torso": 1})
+        checkin.save(self.cfg, TODAY, {"left_calf": 2, "torso": 1})
         ctx = self.ctx()
         out = actions.build(ctx, TODAY, today.recovery(ctx, TODAY), {"worse": []})
         item = next(x for x in out["items"] if x["domain"] == "training")
         self.assertEqual((item["key"], item["params"]["regions"]), ("spare", ["left_calf"]))  # only clearly or very sore
         self.assertFalse(followup.check(ctx, item, TODAY, {})["checked"])  # training advice is not checked
+
+
+class Feeling(Folder):
+    def test_the_feeling_joins_that_mornings_row(self):
+        write_table(self.cfg.data_dir, "self_report", [{"date": TODAY, "energy": 3, "note": "long day"}])
+        checkin.save(self.cfg, TODAY, {"torso": 1}, feel=5)
+        checkin.save(self.cfg, TODAY - timedelta(days=1), {}, feel=8)
+        rows = {r["date"]: r for r in Store(self.cfg.data_dir).rows("self_report")}
+        self.assertEqual((rows[TODAY]["feel"], rows[TODAY]["energy"], rows[TODAY]["note"]), (5, 3, "long day"))
+        self.assertEqual(rows[TODAY - timedelta(days=1)]["feel"], 8)
+        checkin.save(self.cfg, TODAY, {"torso": 2})  # no feeling given: the one saved stays
+        self.assertEqual(Store(self.cfg.data_dir).by_date("self_report")[TODAY]["feel"], 5)
+
+
+class AfterTraining(Folder):
+    def history(self, after_hrv=50.0, after_rhr=60.0, after_sleep=450, feel=None):
+        """30 steady mornings (HRV 50 +-1, resting heart rate 60 +-1, 7.5 h asleep of 8 in bed), a workout on the
+        day before the last morning, and that morning as given."""
+        body = []
+        for k in range(30, 0, -1):
+            d = TODAY - timedelta(days=k)
+            body.append({"date": d, "hrv_ms": 50.0 + (k % 3) - 1, "resting_hr": 60.0 + (k % 2), "sleep_min": 450, "in_bed_min": 480,
+                         "workout_min": 0, "complete": True})
+        body.append({"date": TODAY, "hrv_ms": after_hrv, "resting_hr": after_rhr, "sleep_min": after_sleep, "in_bed_min": 480,
+                     "workout_min": 0, "complete": False})
+        write_table(self.cfg.data_dir, "body_daily", body)
+        start = datetime.combine(TODAY - timedelta(days=1), datetime.min.time()).replace(hour=17)
+        write_table(self.cfg.data_dir, "workouts", [{"start": start, "end": start + timedelta(minutes=60), "type": "running",
+                                                    "effort": 7, "effort_source": "rated"}])
+        if feel is not None:
+            write_table(self.cfg.data_dir, "self_report", [{"date": TODAY, "feel": feel}])
+        ctx = self.ctx()
+        return recovery.after_training(ctx, TODAY, recovery.daily_load(ctx, TODAY))
+
+    def test_a_usual_morning_scores_about_five(self):
+        latest = self.history(after_hrv=49.0, feel=5)["latest"]
+        self.assertEqual(latest["date"], (TODAY - timedelta(days=1)).isoformat())
+        self.assertEqual(set(latest["parts"]), {"feel", "hrv", "resting_hr", "sleep"})
+        self.assertAlmostEqual(latest["score"], 5, delta=1.0)
+        self.assertEqual(latest["band"], "ok")
+
+    def test_a_bad_morning_scores_low_and_says_so(self):
+        latest = self.history(after_hrv=40.0, after_rhr=66.0, after_sleep=300, feel=2)["latest"]
+        self.assertLess(latest["score"], recovery.LOW)
+        self.assertEqual(latest["band"], "low")
+        for key in ("hrv", "resting_hr", "sleep"):
+            self.assertLess(latest["parts"][key]["score"], 5, key)
+        self.assertEqual(latest["parts"]["feel"]["score"], 2)
+        self.assertAlmostEqual(latest["score"], sum(p["score"] for p in latest["parts"].values()) / 4)
+
+    def test_parts_stay_between_zero_and_ten(self):
+        latest = self.history(after_hrv=90.0, after_rhr=40.0, after_sleep=700, feel=8)["latest"]
+        self.assertTrue(all(0 <= p["score"] <= 10 for p in latest["parts"].values()))
+        self.assertEqual(latest["band"], "good")
+
+    def test_a_feeling_alone_is_not_a_score(self):
+        write_table(self.cfg.data_dir, "self_report", [{"date": TODAY, "feel": 8}])
+        start = datetime.combine(TODAY - timedelta(days=1), datetime.min.time()).replace(hour=17)
+        write_table(self.cfg.data_dir, "workouts", [{"start": start, "end": start + timedelta(minutes=60), "type": "running", "effort": 7}])
+        ctx = self.ctx()
+        out = recovery.after_training(ctx, TODAY, recovery.daily_load(ctx, TODAY))
+        (day,) = out["days"]
+        self.assertIsNone(day["score"])
+        self.assertIsNone(out["latest"])
 
 
 class Endpoint(unittest.TestCase):
@@ -193,7 +261,7 @@ class Endpoint(unittest.TestCase):
         headers = {"Content-Type": "application/json"}
         if origin:
             headers["Origin"] = f"http://127.0.0.1:{self.port}" if origin == "same" else origin
-        request = urllib.request.Request(f"http://127.0.0.1:{self.port}/api/soreness", data=json.dumps(body).encode(),
+        request = urllib.request.Request(f"http://127.0.0.1:{self.port}/api/checkin", data=json.dumps(body).encode(),
                                          headers=headers, method="POST")
         try:
             with urllib.request.urlopen(request, timeout=10) as res:
@@ -202,10 +270,12 @@ class Endpoint(unittest.TestCase):
             return error.code, json.loads(error.read() or b"{}")
 
     def test_the_page_saves_and_recovery_shows_it(self):
-        status, out = self.post({"date": TODAY.isoformat(), "levels": {"pelvis": 3}})
+        status, out = self.post({"date": TODAY.isoformat(), "levels": {"pelvis": 3}, "feel": 2})
         self.assertEqual((status, out["ok"]), (200, True))
         page = payload(self.cfg, "recovery", None, NOW)
         self.assertEqual((page["soreness"]["today"], page["soreness"]["levels"]), (True, {"pelvis": 3}))
+        self.assertEqual(page["feel_today"], 2)
+        self.assertEqual(self.post({"date": TODAY.isoformat(), "levels": {}, "feel": 4})[0], 400)
 
     def test_only_this_apps_own_page_may_write(self):
         before = (self.cfg.data_dir / "soreness.csv").read_text()
@@ -233,8 +303,6 @@ class Demo(unittest.TestCase):
         p = self.page
         json.dumps(p)
         self.assertEqual(p["recovery"], payload(self.cfg, "today", None, NOW)["recovery"])
-        self.assertEqual(len(p["load_days"]), recovery.CHART_DAYS)
-        self.assertEqual(p["load_days"][-1]["date"], TODAY.isoformat())
         self.assertEqual(len(p["response"]["rows"]), len(recovery.OUTCOMES))
         for row in p["response"]["rows"]:
             if row["status"] == "ok":
@@ -255,7 +323,8 @@ class Demo(unittest.TestCase):
         used |= {f"sore.region.{r}" for r in recovery.SORE_REGIONS} | {f"sore.level.{k}" for k in range(4)}
         used |= {f"rec.out.{o}" for o in recovery.OUTCOMES} | {f"rec.out.{o}.{d}" for o in recovery.OUTCOMES for d in ("up", "down")}
         used |= {f"rec.load.{s}" for s in ("high", "low", "steady", "none", "unknown", "few_ratings")}
-        used |= {"nav.recovery", "todo.spare", "todo.short.spare", "fu.name.spare"}
+        used |= {"nav.recovery", "todo.spare", "todo.short.spare", "fu.name.spare", "feel.2", "feel.5", "feel.8", "feel.question"}
+        used |= {f"after.band.{b}" for b in ("good", "ok", "low")} | {f"after.part.{k}" for k in recovery.PARTS}
         for key in used:
             self.assertEqual(i18n.count(f'"{key}"'), 2, key)
         for sex in ("male", "female"):

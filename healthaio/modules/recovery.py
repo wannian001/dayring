@@ -17,6 +17,18 @@ your body has answered training.
   resting heart rate in beats against your normal that morning, and, where you checked in, the most sore region's
   level. Difference of means with a 95% interval, at least stats.MIN_GROUP_DAYS days a side, Benjamini-Hochberg
   across the three; only what survives is a difference. An association, not a cause.
+- After training (after_training): for each training day, one score the next morning, 0-10, from four parts put
+  side by side and averaged (the one total score this app shows, and every part is shown with it):
+  - how you feel that morning, your own answer on the check-in: 2, 5 or 8;
+  - HRV the morning after against the morning before the training;
+  - resting heart rate the day after against your normal;
+  - the night after: how long you slept against your normal, and how much of the time in bed you were asleep
+    against your normal (the two averaged).
+  Each body part is 5 plus 2.5 for every width of your normal it lies away (the width of the middle half of your
+  previous 28 days, at least SPREAD_FLOOR), better direction up, kept between 0 and 10; so 5 is a usual morning
+  and 7.5 is one band width better. For HRV the normal is that of its morning-to-morning changes, since HRV moves a
+  lot from one morning to the next and a change is what the part measures. A morning needs at least two parts, one of them from the body, for a score.
+  6.5 and above reads as recovered well, under 3.5 as not recovered.
 - Soreness: the morning check-ins in soreness.csv (1 a little, 2 clearly sore, 3 very sore, per region of the body
   figure). The figure shows the latest check-in; the last SORE_DAYS days show each region's levels. A day without a
   check-in is unknown, never "not sore".
@@ -37,6 +49,10 @@ LOAD_HIGH, LOAD_LOW = 1.3, 0.8
 MIN_RATED_SHARE = 0.5
 SORE_DAYS = 14
 RESPONSE_DAYS = 90
+AFTER_DAYS = 60  # training days of the last this many days are scored
+PARTS = ("feel", "hrv", "resting_hr", "sleep")
+SPREAD_FLOOR = {"hrv": 2.0, "resting_hr": 1.5, "sleep": 20.0, "efficiency": 2.0}
+GOOD, LOW = 6.5, 3.5
 OUTCOMES = ("hrv", "resting_hr", "sore_max")
 OUTCOME_BETTER = {"hrv": "higher", "resting_hr": "lower", "sore_max": "lower"}
 OUTCOME_UNITS = {"hrv": "%", "resting_hr": "bpm", "sore_max": "level"}
@@ -156,18 +172,67 @@ def response(ctx: Context, end: date, days: Dict[date, Dict[str, Any]], log: Dic
             "method": {"min_group_days": stats.MIN_GROUP_DAYS, "fdr": stats.FDR}}
 
 
+def _part(value: float, centre: float, width: float, higher_better: bool = True) -> float:
+    steps = (value - centre) / width
+    return max(0.0, min(10.0, 5 + 2.5 * (steps if higher_better else -steps)))
+
+
+def _normal(values: stats.Series, day: date, floor: float) -> Optional[Dict[str, float]]:
+    band = stats.typical(values, day)
+    return None if band is None else {"median": band["median"], "width": max(band["q3"] - band["q1"], floor)}
+
+
+def after_training(ctx: Context, end: date, days: Dict[date, Dict[str, Any]]) -> Dict[str, Any]:
+    """The score the morning after each training day (see the module's docstring), newest first."""
+    rows = [r for r in ctx.store.rows("body_daily") if r.get("complete") is not False or r["date"] == end]
+    hrv, rhr, sleep = stats.series(rows, "hrv_ms"), stats.series(rows, "resting_hr"), stats.series(rows, "sleep_min")
+    eff = {r["date"]: r["sleep_min"] / r["in_bed_min"] * 100 for r in rows
+           if r.get("sleep_min") and r.get("in_bed_min") and r["in_bed_min"] >= r["sleep_min"]}
+    feel = {r["date"]: r["feel"] for r in ctx.store.rows("self_report") if r.get("feel") is not None}
+    change = {d: v - hrv[d - timedelta(days=1)] for d, v in hrv.items() if d - timedelta(days=1) in hrv}  # morning to morning
+    out = []
+    for d in sorted((d for d, v in days.items() if v["minutes"] > 0 and end - timedelta(days=AFTER_DAYS) < d < end), reverse=True):
+        m = d + timedelta(days=1)
+        parts: Dict[str, Dict[str, Any]] = {}
+        if m in feel:
+            parts["feel"] = {"value": feel[m], "score": float(feel[m])}
+        n = _normal(change, m, SPREAD_FLOOR["hrv"])
+        if m in change and n:
+            parts["hrv"] = {"before": hrv[d], "after": hrv[m], "usual_change": n["median"], "width": n["width"],
+                            "score": _part(change[m], n["median"], n["width"])}
+        n = _normal(rhr, m, SPREAD_FLOOR["resting_hr"])
+        if m in rhr and n:
+            parts["resting_hr"] = {"value": rhr[m], "median": n["median"], "width": n["width"],
+                                   "score": _part(rhr[m], n["median"], n["width"], higher_better=False)}
+        n = _normal(sleep, m, SPREAD_FLOOR["sleep"])
+        if m in sleep and n:
+            scores = [_part(sleep[m], n["median"], n["width"])]
+            e = _normal(eff, m, SPREAD_FLOOR["efficiency"])
+            part = {"value": sleep[m], "median": n["median"]}
+            if m in eff and e:
+                scores.append(_part(eff[m], e["median"], e["width"]))
+                part.update(efficiency=eff[m], efficiency_median=e["median"])
+            part["score"] = sum(scores) / len(scores)
+            parts["sleep"] = part
+        body = [k for k in ("hrv", "resting_hr", "sleep") if k in parts]
+        score = sum(p["score"] for p in parts.values()) / len(parts) if len(parts) >= 2 and body else None
+        out.append({"date": iso(d), "morning": iso(m), "load": days[d]["load"], "minutes": days[d]["minutes"],
+                    "sessions": days[d]["sessions"], "parts": parts, "missing": [k for k in PARTS if k not in parts],
+                    "score": score, "band": None if score is None else "good" if score >= GOOD else "low" if score < LOW else "ok"})
+    return {"days": out, "latest": next((x for x in out if x["score"] is not None), None),
+            "rule": {"good": GOOD, "low": LOW, "floor": SPREAD_FLOOR, "after_days": AFTER_DAYS}}
+
+
 def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
     end = min(date.fromisoformat(day) if day else ctx.today, ctx.today)
     days = daily_load(ctx, end)
     log = soreness_log(ctx)
-    chart = [end - timedelta(days=k) for k in range(CHART_DAYS - 1, -1, -1)]
     return {"page": "recovery", "day": iso(end), "today": iso(ctx.today), "now": iso(ctx.now), "figure": ctx.cfg.figure,
             "recovery": today_page.recovery(ctx, end),
             "load": load_summary(days, end),
-            "load_days": [{"date": iso(d), **({"load": days[d]["load"], "minutes": days[d]["minutes"],
-                                               "rated_min": days[d]["rated_min"], "sessions": days[d]["sessions"]}
-                                              if d in days else {"load": None})} for d in chart],
             "soreness": soreness(ctx, end, log),
+            "after": after_training(ctx, end, days),
+            "feel_today": next((r["feel"] for r in ctx.store.rows("self_report") if r["date"] == end and r.get("feel") is not None), None),
             "response": response(ctx, end, days, log),
             "regions": list(SORE_REGIONS),
             "rule": {"acute": ACUTE, "chronic": CHRONIC, "min_rated": MIN_RATED_SHARE, "sore_days": SORE_DAYS,

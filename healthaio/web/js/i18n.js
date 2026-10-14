@@ -1005,7 +1005,7 @@ Object.assign(DICT.zh, {
 
 // ---- the menu's short names on a phone's tab bar, and goals set on the Goals page (goal_log.py) ----
 Object.assign(DICT.en, {
-  "nav.short.today": "Today", "nav.short.body": "Body", "nav.short.life": "Life", "nav.short.act": "Actions",
+  "nav.short.today": "Today", "nav.short.body": "Body", "nav.short.life": "Life", "nav.short.load": "Load", "nav.short.act": "Actions",
   "nav.short.review": "Review", "nav.short.data": "Data",
   "goals.edit": "Edit", "goals.set_one": "Set one", "goals.save": "Save", "goals.cancel": "Cancel", "goals.reset": "Back to the original",
   "goals.src.you": "set here", "goals.src.accepted": "suggestion you accepted",
@@ -1023,7 +1023,7 @@ Object.assign(DICT.en, {
   "goals.u.h": "h", "goals.u.min": "min", "goals.u.days": "days", "goals.u.kcal": "kcal", "goals.u.g_per_kg": "g", "goals.u.kg": "kg",
 });
 Object.assign(DICT.zh, {
-  "nav.short.today": "今天", "nav.short.body": "身体", "nav.short.life": "生活", "nav.short.act": "行动",
+  "nav.short.today": "今天", "nav.short.body": "身体", "nav.short.life": "生活", "nav.short.load": "负担", "nav.short.act": "行动",
   "nav.short.review": "复盘", "nav.short.data": "数据",
   "goals.edit": "改", "goals.set_one": "设一个", "goals.save": "保存", "goals.cancel": "取消", "goals.reset": "用回原来的",
   "goals.src.you": "在这里设的", "goals.src.accepted": "采纳的建议",
@@ -1136,7 +1136,7 @@ Object.assign(DICT.zh, {
 // ---- Recovery (#recovery, modules/recovery.py): recovered, training load, the body's answer, soreness ----
 Object.assign(DICT.en, {
   "nav.recovery": "Recovery",
-  "rec.title": "Recovery", "rec.sub": "How recovered you are, what training asked of you, and where you are sore",
+  "rec.title": "Recovery", "rec.sub": "How recovered you are, how you came back from training, and where you are sore",
   "rec.verdict_note": "The same verdict as on Today: HRV, resting heart rate and last night's sleep against your own last 28 days; two of three worse reads as below your normal.",
   "rec.load_title": "Training load", "rec.load_sub": "effort (1–10) × minutes of each workout, per day",
   "rec.load.high": "more than you're used to", "rec.load.low": "less than you're used to", "rec.load.steady": "about what you're used to",
@@ -1176,7 +1176,7 @@ Object.assign(DICT.en, {
 });
 Object.assign(DICT.zh, {
   "nav.recovery": "恢复",
-  "rec.title": "恢复", "rec.sub": "恢复得怎样、训练给了身体多少负荷、哪里酸",
+  "rec.title": "恢复", "rec.sub": "恢复得怎样、练完第二天缓过来没有、哪里酸",
   "rec.verdict_note": "和“今天”页同一个判断：HRV、静息心率、昨晚睡眠，各自和你最近 28 天比；三项里两项变差就是低于平常。",
   "rec.load_title": "训练负荷", "rec.load_sub": "每次训练的强度评分（1–10）× 分钟，按天加起来",
   "rec.load.high": "比你习惯的多", "rec.load.low": "比你习惯的少", "rec.load.steady": "和你习惯的差不多",
@@ -1213,6 +1213,64 @@ Object.assign(DICT.zh, {
   "sore.front": "正面", "sore.back": "背面", "sore.r": "右", "sore.l": "左",
   "sore.credit": "人体图和七个部位来自作者的 GEOM90007 课程项目 Ready to Train（图用 ChatGPT 图像生成制作）。七个部位分得比较粗：大腿和肩膀暂时没有单独的区域。",
   "sore.rule": "酸痛：soreness.csv 里早上的记录，每个酸的部位一行（1 有点酸、2 明显酸、3 很酸）；哪儿都不酸的早上记一行 none。人体图显示今天早上的记录；下面的小格是最近 {n} 天，没记的那天画虚线框，算不知道，不算不酸。",
+});
+
+// ---- Load (#load, modules/load.py), the morning feeling and the after-training score (modules/recovery.py) ----
+Object.assign(DICT.en, {
+  "nav.load": "Load", "nav.load_tab": "Body and mind",
+  "load.title": "Load", "load.sub": "What is asked of you each week, by the body and by the mind",
+  "load.eyebrow": "This week, from {day}",
+  "load.lede.stacked": "Body and mind are both loaded this week", "load.lede.mind": "The mind's side is heavier than usual this week",
+  "load.lede.body": "Training is heavier than usual this week", "load.lede.usual": "A usual week, for body and mind",
+  "load.heaviest": "Heaviest week ahead: from {day}, {pct}% of grade due ({n} deadlines) and {h} of classes and work.",
+  "load.lighter": "Weeks of {weeks}: the mind's side is heavier than usual and the plan still holds your usual {n} sessions or more. Worth planning lighter.",
+  "load.note": "Training load and grade share are different kinds of load, so they are never added into one number; each is set against your own usual weeks.",
+  "load.m.training": "Training (body)", "load.m.calendar": "Classes and work (mind)", "load.m.deadlines": "Deadlines (mind)",
+  "load.what.training": "effort × minutes, this week so far", "load.what.calendar": "hours on the calendar", "load.what.deadlines": "share of grade due",
+  "load.due_n": "{n} due this week", "load.plus_planned": "+ {v} planned ({n})",
+  "load.state.high": "heavier than usual", "load.state.low": "lighter than usual", "load.state.normal": "usual",
+  "load.no_band": "fewer than {n} weeks to know your usual", "load.hours": "{v} h",
+  "load.weeks_title": "{a} weeks back, {b} ahead", "load.key.done": "done", "load.key.planned": "planned", "load.key.now": "this week",
+  "load.weeks_note": "Each row has its own scale. Weeks ahead hold the training you planned (at your usual session) and the calendar as it stands.",
+  "load.week_of": "Week of {day}", "load.due_title": "Due from this week on", "load.to_schedule": "Schedule",
+  "load.rule": "Each week, Monday to Sunday: training load (effort × minutes, as on Recovery), hours of classes and work in the calendar, and the share of grade due. Usual = the middle half of the {a} full weeks before this one, from at least {n} of them. This week counts what is done plus what is still planned; a week ahead is not judged on training, since a plan is not a load, but it is flagged when classes or deadlines are heavier than usual and the plan still holds your usual number of sessions.",
+  "feel.question": "How do you feel this morning?", "feel.2": "Not recovered", "feel.5": "So-so", "feel.8": "Recovered",
+  "after.title": "The morning after training", "after.sub": "four parts, each against your own normal, averaged (0–10)",
+  "after.eyebrow": "After {day} · the morning of {m}", "after.formula": "The {n} parts below, added up and divided by {n}; 5 is a usual morning.",
+  "after.band.good": "recovered well", "after.band.ok": "so-so", "after.band.low": "not recovered",
+  "after.part.feel": "How you feel", "after.part.hrv": "HRV, before → after", "after.part.resting_hr": "Resting heart rate", "after.part.sleep": "The night after",
+  "after.hrv": "{a} → {b} ms", "after.rhr": "{v} bpm, usually {m}", "after.sleep": "{d} asleep", "after.sleep_eff": "{d} asleep, {e}% of the time in bed",
+  "after.no_feel": "not answered that morning", "after.no_record": "no record",
+  "after.recent": "Recent training days", "after.none": "No training days yet.", "after.no_score": "No training day has two parts on record yet.",
+  "rec.rule_after": "The morning after each training day of the last {n} days: how you feel (your answer, 2, 5 or 8), HRV the morning after against the morning before the training, resting heart rate against your normal, and the night after (how long you slept against your normal, and how much of the time in bed you were asleep). Each body part is 5 plus 2.5 for every width of your normal it lies away, better direction up, between 0 and 10 (HRV's normal is that of its morning-to-morning changes). The parts are averaged; a morning needs two of them, one from the body. {good} and above reads as recovered well, under {low} as not recovered. It is the one total score in the app, and every part is shown with it.",
+});
+Object.assign(DICT.zh, {
+  "nav.load": "负担", "nav.load_tab": "身心负担",
+  "load.title": "负担", "load.sub": "每周身体和精神各被要求了多少",
+  "load.eyebrow": "这一周，{day} 起",
+  "load.lede.stacked": "这周身体和精神的负担叠在一起", "load.lede.mind": "这周精神上的负担比平常重",
+  "load.lede.body": "这周训练比平常重", "load.lede.usual": "这周身体和精神都是平常的量",
+  "load.heaviest": "接下来最重的一周：{day} 起，截止占分 {pct}%（{n} 项），课和工作 {h}。",
+  "load.lighter": "{weeks} 这几周：精神负担比平常重，训练还照常排了 {n} 次以上，值得提前减量。",
+  "load.note": "训练负荷和截止占分不是一种东西，所以从不加成一个数；每一项各自和你平常的周比。",
+  "load.m.training": "训练（身体）", "load.m.calendar": "课和工作（精神）", "load.m.deadlines": "截止（精神）",
+  "load.what.training": "强度 × 分钟，这周到现在", "load.what.calendar": "日历上的小时数", "load.what.deadlines": "这周到期的占分",
+  "load.due_n": "这周到期 {n} 项", "load.plus_planned": "+ 计划 {v}（{n} 次）",
+  "load.state.high": "比平常重", "load.state.low": "比平常轻", "load.state.normal": "平常",
+  "load.no_band": "不到 {n} 周，还不知道你的平常", "load.hours": "{v} 小时",
+  "load.weeks_title": "往前 {a} 周，往后 {b} 周", "load.key.done": "练了的", "load.key.planned": "计划的", "load.key.now": "这一周",
+  "load.weeks_note": "每一行有自己的刻度。往后几周：训练按你排的计划（每次按你平常的一次算），日程按日历现在的样子。",
+  "load.week_of": "{day} 那一周", "load.due_title": "从这周起要交的", "load.to_schedule": "日程",
+  "load.rule": "每周从周一到周日看三样：训练负荷（强度 × 分钟，和恢复页一样）、日历上课和工作的小时数、到期的占分。平常 = 这周之前 {a} 个完整周的中间一半，至少要 {n} 周。这一周算已经练的加上还计划的；往后的周不判断训练（计划不是负荷），但如果课或截止比平常重、训练还照常排了你平常的次数，就提醒一下。",
+  "feel.question": "今天早上感觉怎么样？", "feel.2": "没缓过来", "feel.5": "一般", "feel.8": "恢复得好",
+  "after.title": "练后第二天", "after.sub": "四项各自和你的平常比，加起来取平均（0–10）",
+  "after.eyebrow": "{day} 练完 · {m} 早上", "after.formula": "下面 {n} 项加起来除以 {n}；5 分是平常的一个早上。",
+  "after.band.good": "恢复得好", "after.band.ok": "一般", "after.band.low": "没恢复好",
+  "after.part.feel": "你的感觉", "after.part.hrv": "HRV，练前 → 练后", "after.part.resting_hr": "静息心率", "after.part.sleep": "练后那一晚",
+  "after.hrv": "{a} → {b} ms", "after.rhr": "{v} 次/分，平常 {m}", "after.sleep": "睡了 {d}", "after.sleep_eff": "睡了 {d}，在床上 {e}% 的时间睡着",
+  "after.no_feel": "那天早上没答", "after.no_record": "没有记录",
+  "after.recent": "最近的训练日", "after.none": "还没有训练日。", "after.no_score": "还没有哪个训练日凑齐两项。",
+  "rec.rule_after": "最近 {n} 天里每个训练日的第二天早上：你的感觉（你答的 2、5 或 8）、HRV（练后那个早上和练前那个早上比）、静息心率（和你的平常比）、练后那一晚（睡了多久和平常比，在床上有多少时间是睡着的）。身体的每一项：在 5 分的基础上，每偏离你平常一个宽度加或减 2.5 分，往好的方向加，限制在 0 到 10（HRV 用的是它早上和早上之间变化的平常宽度）。几项取平均；至少两项、其中一项来自身体，才算分。{good} 分以上算恢复得好，{low} 分以下算没恢复好。这是应用里唯一的总分，每一项都摊开写在旁边。",
 });
 
 const WEEKDAY = { en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], zh: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"] };

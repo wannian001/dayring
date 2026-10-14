@@ -78,7 +78,7 @@ Key: `time`, `meal`. Typical sources: Apple Health export, which holds what MyFi
 
 ## `self_report.csv`
 
-How you said you felt, on a 0–5 scale. Optional; pages show a prompt when it is empty.
+How you said you felt. Optional; pages show a prompt when it is empty. `feel` is the Recovery page's morning check-in; energy and focus are typed by hand or written by an assistant.
 
 Key: `date`. Typical sources: typed by hand; an assistant that writes this file for you.
 
@@ -88,10 +88,11 @@ Key: `date`. Typical sources: typed by hand; an assistant that writes this file 
 | `energy` | number |  | Body energy, 0 (drained) to 5 (full). |
 | `focus` | number |  | Mental focus, 0 to 5. |
 | `note` | text |  | One line in your own words. |
+| `feel` | number |  | This morning, in one of three answers: 2 not recovered, 5 so-so, 8 recovered (the Recovery page writes it). |
 
 ## `soreness.csv`
 
-Where you were sore in the morning and how much: one row per sore region, or a single row with region `none` when you checked in and nothing was sore. A day without rows was not checked: unknown, never "not sore". The Recovery page writes this file when you tap the body figure and save; you can also write it by hand or import a CSV.
+Where you were sore in the morning and how much: one row per sore region, or a single row with region `none` when you checked in and nothing was sore. A day without rows was not checked: unknown, never "not sore". The Recovery page's morning check-in writes this file; you can also write it by hand or import a CSV.
 
 Key: `date`, `region`. Typical sources: the Recovery page's body figure; typed by hand; any CSV with these columns.
 

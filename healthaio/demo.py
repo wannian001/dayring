@@ -343,7 +343,8 @@ class Sam:
             w["effort_source"] = "rated" if roll < 0.82 else "estimated"
 
     def soreness(self) -> List[Dict]:
-        """Morning check-ins on about two mornings in three: the regions a workout loads are sore the next morning
+        """Morning check-ins on nine mornings in ten after a workout and one in two otherwise (the morning after is
+        when Sam wants to know how he came back): the regions a workout loads are sore the next morning
         and fading the one after (upper-body strength on Mondays: torso and upper arms; lower body on Fridays: hips
         and calves; runs: calves), now and then a stiff neck, and a check-in with nothing sore otherwise."""
         rng = random.Random(SEED + 31)
@@ -364,11 +365,12 @@ class Sam:
                 for region in regions:
                     if rng.random() < 0.85:
                         spot[region] = max(spot.get(region, 0), max(1, level - (1 if rng.random() < 0.25 else 0)))
+        after = {w["start"].date() + timedelta(days=1) for w in self.workouts}
         rows: List[Dict] = []
         start = self.today - timedelta(days=BODY_DAYS - 1)
         for k in range(BODY_DAYS):
             day = start + timedelta(days=k)
-            if rng.random() > 0.68:
+            if rng.random() > (0.9 if day in after else 0.5):
                 continue  # no check-in that morning
             sore = dict(hits.get(day, {}))
             if rng.random() < 0.05:
@@ -378,6 +380,25 @@ class Sam:
             for region, level in sorted(sore.items()):
                 rows.append({"date": day, "region": region, "level": level})
         return rows
+
+    def with_feelings(self, report: List[Dict], body: List[Dict], mornings) -> List[Dict]:
+        """On the mornings Sam checks in he also answers how he feels: 8 after a good night with HRV above his usual,
+        2 after a short night or a low HRV, 5 otherwise, now and then off by one answer (his own random stream)."""
+        rng = random.Random(SEED + 37)
+        by_day = {r["date"]: r for r in body}
+        hrvs = [r["hrv_ms"] for r in body if r.get("hrv_ms") is not None]
+        usual = sorted(hrvs)[len(hrvs) // 2] if hrvs else None
+        rows = {r["date"]: dict(r) for r in report}
+        for day in sorted(mornings):
+            r = by_day.get(day) or {}
+            short = (r.get("sleep_min") or 450) < 6.5 * 60
+            low = usual is not None and r.get("hrv_ms") is not None and r["hrv_ms"] < usual * 0.93
+            high = usual is not None and r.get("hrv_ms") is not None and r["hrv_ms"] > usual * 1.04
+            feel = 2 if (short or low) else 8 if (high and not short) else 5
+            if rng.random() < 0.2:
+                feel = rng.choice([x for x in (2, 5, 8) if x != feel])
+            rows.setdefault(day, {"date": day})["feel"] = feel
+        return [rows[d] for d in sorted(rows)]
 
     # ---- screen ------------------------------------------------------------------------------
     def screen(self, body: List[Dict], events: List[Dict]) -> List[Dict]:
@@ -548,12 +569,13 @@ def generate(out: Path, today: Optional[date] = None, now: Optional[datetime] = 
     body = sam.body()
     events = sam.events()
     write_table(data, "body_daily", body)
-    write_table(data, "self_report", sam.self_report(body))
+    sore = sam.soreness()
+    write_table(data, "self_report", sam.with_feelings(sam.self_report(body), body, {r["date"] for r in sore}))
     write_table(data, "events", events)
     write_table(data, "deadlines", sam.deadlines())
     sam.rate_workouts()
     write_table(data, "workouts", sam.workouts)
-    write_table(data, "soreness", sam.soreness())
+    write_table(data, "soreness", sore)
     write_table(data, "meals", sam.meals(body))
     sessions = sam.screen(body, events)
     write_table(data, "screen_sessions", sessions)

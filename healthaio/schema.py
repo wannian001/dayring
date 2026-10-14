@@ -114,6 +114,7 @@ EVENT_KINDS = ("class", "work", "training", "personal", "other")
 DEADLINE_STATUS = ("todo", "submitted", "done")
 MEALS = ("breakfast", "lunch", "dinner", "snack", "drink")
 EFFORT_SOURCES = ("rated", "estimated")
+FEELINGS = (2, 5, 8)  # the Recovery page's three answers to "how do you feel this morning?"
 # the body figure's seven regions (the soreness areas of the PMData wellness check-in), and "none" for a check-in
 # with nothing sore
 SORE_REGIONS = ("head", "torso", "pelvis", "left_upper_arm", "right_upper_arm", "left_calf", "right_calf")
@@ -192,7 +193,8 @@ TABLES: Dict[str, Table] = {t.name: t for t in (
     ),
     Table(
         name="self_report",
-        doc="How you said you felt, on a 0–5 scale. Optional; pages show a prompt when it is empty.",
+        doc="How you said you felt. Optional; pages show a prompt when it is empty. `feel` is the Recovery page's "
+            "morning check-in; energy and focus are typed by hand or written by an assistant.",
         key=("date",),
         sources=("typed by hand", "an assistant that writes this file for you"),
         columns=(
@@ -200,13 +202,15 @@ TABLES: Dict[str, Table] = {t.name: t for t in (
             Column("energy", "number", "Body energy, 0 (drained) to 5 (full).", low=0, high=5),
             Column("focus", "number", "Mental focus, 0 to 5.", low=0, high=5),
             Column("note", "text", "One line in your own words."),
+            Column("feel", "number", "This morning, in one of three answers: 2 not recovered, 5 so-so, 8 recovered "
+                   "(the Recovery page writes it).", low=0, high=10),
         ),
     ),
     Table(
         name="soreness",
         doc="Where you were sore in the morning and how much: one row per sore region, or a single row with region "
             "`none` when you checked in and nothing was sore. A day without rows was not checked: unknown, never "
-            "\"not sore\". The Recovery page writes this file when you tap the body figure and save; you can also "
+            "\"not sore\". The Recovery page's morning check-in writes this file; you can also "
             "write it by hand or import a CSV.",
         key=("date", "region"),
         sources=("the Recovery page's body figure", "typed by hand", "any CSV with these columns"),

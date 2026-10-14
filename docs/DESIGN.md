@@ -83,25 +83,57 @@ streaks or scores. What it does not do yet is reach you: the page has to be open
 
 The first page under Body signals, because recovery is the body signal the day's decisions hang on.
 
-- **How recovered** is the Today page's verdict, the same numbers, so the two pages never disagree.
-- **Training load** is each workout's effort on Apple's 1–10 scale times its minutes (session-RPE, Foster et al.
-  2001; the same idea as Apple Fitness's Training Load), the last 7 days against the weekly average of the 28 before,
-  with the Exercise page's lines (1.3 and 0.8). The effort is your own rating in the Fitness or Workout app when there
-  is one, else the watch's estimate (`workouts.csv` says which). Minutes without an effort are left out and counted,
-  and with under half of the minutes rated the load says it is unsure instead of reading low. People ask for "load on
-  the nervous system"; no device measures that, so the page says so and shows the closest honest pair: what training
-  asked (the load) and what the autonomic nervous system answered (next-morning HRV and resting heart rate).
+- **How recovered** is the Today page's verdict, the same numbers, so the two pages never disagree. Under it, this
+  week's training load (a link to Load) and this morning's soreness, one line each.
+- **The morning check-in** is two things in one save. How you feel is one tap of three: not recovered (2), so-so (5),
+  recovered (8); three steps are as many as a sleepy person tells apart, and the numbers put them on the same 0–10
+  scale as the score below. Where you are sore is the body figure from the author's GEOM90007 project Ready to Train
+  (seven regions, a male and a female figure, `[healthaio] figure`): tapping a region cycles a little → clearly →
+  very → not sore. Save sends `POST /api/checkin`, which sets that morning's `feel` in `self_report.csv` and replaces
+  its rows in `soreness.csv`, the second and last thing a page may write (same rule as goals: only this app's own
+  page). An SVG mask does not change what a click hits, so the region under the pointer is read from the masks' own
+  pixels. The figure is a white plate in both modes; the soreness colours (`--c-sore-*`) are one hue getting
+  stronger, the same in both modes. A morning without a check-in is unknown.
+- **The morning after training** answers "did I come back from that session?" for the last training day, on day 2:
+  four parts, each set against your own normal and put on 0–10 with 5 for a usual morning (2.5 points per spread
+  of your normal, better direction up): how you said you felt; HRV the morning after against the morning before
+  (scaled by how much your HRV usually moves from one morning to the next, so a jump is read against your own day to
+  day noise); resting heart rate against your 28-day median; and the night after (sleep length against your normal,
+  and how much of the time in bed you were asleep). They are added up and divided by how many there are, with at
+  least two parts and one of them from the body. This is the only total score in the app, on purpose: the parts are
+  already on one scale, each is "against your normal", and every part is shown beside the score with its own
+  number, so nothing is hidden in the sum. The last 10 training days are listed with theirs.
 - **How the body answered training**: the next morning after hard days (load above the median of your fully rated
   training days) against every other known day, for HRV, resting heart rate and the worst sore region, with 95%
   intervals and Benjamini–Hochberg. An association; the card names the obvious confound.
-- **Soreness** is the body figure from the author's GEOM90007 project Ready to Train (seven regions, a male and a
-  female figure, `[healthaio] figure`). Tapping a region cycles a little → clearly → very → not sore; Save replaces
-  that morning's rows in `soreness.csv` through `POST /api/soreness`, the second and last thing a page may write
-  (same rule as goals: only this app's own page). An SVG mask does not change what a click hits, so the region under
-  the pointer is read from the masks' own pixels. The figure is a white plate in both modes; the soreness colours
-  (`--c-sore-*`) are one hue getting stronger, the same in both modes. A morning without a check-in is unknown.
 - A region clearly or very sore this morning, with training planned, gives "train, but spare the sore parts" on
   Today (after "take it easy" and "rest", which come first).
+
+## The Load page (`#load`)
+
+The page answers "how much is being asked of me, by the body and by the mind, and is a heavy stretch coming?". It
+took the schedule out of Daily life: the weeks ahead are not a habit, they are a load, and training is only half of
+it. It looks at the 8 weeks behind, this week and the 4 ahead, Monday to Sunday.
+
+- **The body** is training load: each workout's effort on Apple's 1–10 scale times its minutes (session-RPE, Foster
+  et al. 2001; the same idea as Apple Fitness's Training Load). The effort is your own rating in the Fitness or
+  Workout app when there is one, else the watch's estimate (`workouts.csv` says which). Minutes without an effort
+  are left out and counted, and with under half of the minutes rated the load says it is unsure instead of reading
+  low. Weeks ahead hold the sessions planned in `[plan.training]`, each at the median load of your sessions in the
+  last 28 days, drawn hatched as planned. People ask for "load on the nervous system"; no device measures that, so
+  the page says so and points to the closest honest answer, the morning after on Recovery.
+- **The mind** is hours of classes and work on the calendar (`events.csv`) and the share of grade due
+  (`deadlines.csv`), with how many are due.
+- **Against your usual weeks**: each measure against the middle half of the 8 full weeks before this one (from at
+  least 4 weeks with the record). The three are never added into one number: effort × minutes and a share of grade
+  are not the same kind of thing, and a sum would hide which side is heavy.
+- **What it says**: this week (done plus still planned) as body and mind together ("stacked"), the mind's side, the
+  body's side, or a usual week; the heaviest week ahead; and the weeks to plan lighter. A week ahead is not judged
+  on training, since a plan is not a load (not every planned session happens); it is flagged instead when classes or
+  deadlines are heavier than usual and the plan still holds your usual number of sessions or more.
+- Below: the 13 weeks as three lanes (training done and planned, calendar hours, share of grade), 42 days of
+  training load (the last 7 days against the weekly average of the 28 before, with the Exercise page's lines 1.3 and
+  0.8), and the open deadlines with a link to Schedule.
 
 ## The Stimulation page (`#time`)
 
@@ -183,12 +215,12 @@ matters, and says when the evidence is softer (entertainment).
 
 ## Menu
 
-Today · Body signals (Sleep, Drain, Weight) · Daily life (Exercise, Food, Stimulation, Schedule) ·
-Actions & goals (Follow-up, Goals) · Weekly review · Data sources. The items are the loop of managing your health,
-one question each: how am I today and what do I change; what is my body showing (outcomes you cannot change
-directly); what do I do every day (the causes you can change); what did I decide to change and is it happening; did
-it help; where do the numbers come from. On a phone's tab bar each item takes a short name: Today, Body, Life,
-Actions, Review, Data. (Two earlier menus mixed axes: Today and Week (time) next to Time and Drain (topics) and
+Today · Body signals (Recovery, Sleep, Drain, Weight) · Daily life (Exercise, Food, Stimulation) · Load (Body and
+mind, Schedule) · Actions & goals (Follow-up, Goals) · Weekly review · Data sources. The items are the loop of
+managing your health, one question each: how am I today and what do I change; what is my body showing (outcomes you
+cannot change directly); what do I do every day (the causes you can change); what are the weeks asking of me, body
+and mind, behind and ahead; what did I decide to change and is it happening; did it help; where do the numbers come
+from. On a phone's tab bar each item takes a short name: Today, Body, Life, Load, Actions, Review, Data. (Two earlier menus mixed axes: Today and Week (time) next to Time and Drain (topics) and
 Review and Data (meta pages); then Body held exercise and food (things you do) next to weight (an outcome), while
 Time & energy held drain (mostly body signals). Splitting outcomes from causes is what makes "what to change" a
 question the menu itself asks.) The menu sits in a sidebar on the left from 900 px (the

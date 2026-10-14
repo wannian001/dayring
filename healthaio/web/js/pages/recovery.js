@@ -1,11 +1,10 @@
-// Recovery (#recovery, under Body signals): how recovered you are (the Today page's verdict), what your training has
-// asked of you (effort x minutes, the last 7 days against the 4 weeks before), how your body answered training the
-// next morning, and where you are sore (the body figure from the author's GEOM90007 Ready to Train project: tap a
-// region to set this morning's level, save, and the check-in goes into soreness.csv). The rules are in
-// modules/recovery.py. No number here claims to measure the nervous system: the load is what training asked, HRV and
-// resting heart rate are the autonomic system's answer.
+// Recovery (#recovery, under Body signals): how recovered you are (the Today page's verdict), the morning check-in
+// (how you feel, 2 / 5 / 8, and where you are sore on the body figure from the author's GEOM90007 Ready to Train
+// project; saved into self_report.csv and soreness.csv), the score the morning after each training day (four parts
+// side by side, averaged), and how your body has answered training. What training asked of you is on Load.
+// The rules are in modules/recovery.py.
 import { isStatic, post } from "../api.js";
-import { bullet, draw, esc, stackedColumns } from "../charts.js";
+import { bullet, draw, esc } from "../charts.js";
 import { day, dur, measure, num, shortDay, t, wtype } from "../i18n.js";
 import { icon, STATE_ICON } from "../icons.js";
 
@@ -38,27 +37,39 @@ function heroHtml(p) {
   const sore = S.today ? (Object.keys(S.levels).length ? regionsText(S.levels) : t("sore.none_today")) : t("sore.not_today");
   return `<section class="card span-12"><span class="eyebrow">${t("recovery.eyebrow")}${r.as_of ? ` · ${esc(day(r.as_of))}` : ""}</span>
     <p class="lede" style="margin:6px 0 var(--s-3)">${t(`recovery.${r.verdict}`)}</p>
-    <div class="rec-facts"><span class="rec-fact">${icon("exercise", 16)}<span>${t("rec.load_title")}</span>${loadChip}</span>
+    <div class="rec-facts"><a class="rec-fact" href="#load">${icon("exercise", 16)}<span>${t("rec.load_title")}</span>${loadChip}</a>
       <span class="rec-fact">${icon("heart", 16)}<span>${t("sore.title")}</span><span class="chip">${esc(sore)}</span></span></div>
     <div class="tiles act-tiles" style="margin-top:var(--s-4)">${r.metrics.map(tile).join("")}</div>
     <p class="xs muted" style="margin:var(--s-3) 0 0">${t("rec.verdict_note")}</p></section>`;
 }
 
-// ---- training load: effort x minutes, the last 7 days against the weekly average of the 4 weeks before ----------
-function loadHtml(p) {
-  const L = p.load;
-  let lede;
-  if (L.state === "none") lede = t("rec.load_line.none");
-  else if (L.chronic == null) lede = t("rec.load_line.no_base", { a: num(L.acute) });
-  else lede = t("rec.load_line.ratio", { a: num(L.acute), c: num(L.chronic), r: num(L.ratio, 2) });
-  const notes = [];
-  if (L.rated_share != null && L.rated_share < 1) notes.push(t("rec.rated_share", { pct: num(L.rated_share * 100) }));
-  if (L.unrated_min >= 1) notes.push(t("rec.unrated", { d: dur(L.unrated_min) }));
-  return `<section class="card span-12"><h2>${t("rec.load_title")}<span class="aside">${t("rec.load_sub")}</span></h2>
-    <p class="lede" style="font-size:var(--t-lg);margin:0 0 4px">${esc(lede)} ${L.state === "high" || L.state === "low" || L.state === "steady" ? `<span class="chip ${LOAD_TONE[L.state]}">${t(`rec.load.${L.state}`)}</span>` : ""}</p>
-    ${notes.length ? `<p class="small muted" style="margin:0">${esc(notes.join(t("ui.list_sep")))}</p>` : ""}
-    <div id="load-days" class="chart" style="margin-top:var(--s-3)"></div>
-    <p class="xs muted rec-cns">${t("rec.cns_note")}</p></section>`;
+// ---- the morning after each training day: four parts side by side, averaged ---------------------------------
+const BAND_TONE = { good: "good", ok: "", low: "bad" };
+function partText(k, x) {
+  if (k === "feel") return t(`feel.${x.value}`);
+  if (k === "hrv") return t("after.hrv", { a: num(x.before), b: num(x.after) });
+  if (k === "resting_hr") return t("after.rhr", { v: num(x.value), m: num(x.median) });
+  return x.efficiency != null ? t("after.sleep_eff", { d: dur(x.value), e: num(x.efficiency) }) : t("after.sleep", { d: dur(x.value) });
+}
+function afterHtml(p) {
+  const A = p.after, L = A.latest;
+  if (!A.days.length) return `<section class="card span-12"><h2>${t("after.title")}</h2><p class="muted small">${t("after.none")}</p></section>`;
+  const parts = L ? ["feel", "hrv", "resting_hr", "sleep"].map((k) => {
+    const x = L.parts[k];
+    return `<div class="after-part"><span class="small">${t(`after.part.${k}`)}</span>
+      ${x ? `<b class="num">${num(x.score, 1)}</b><span class="after-bar"><span style="width:${(x.score * 10).toFixed(0)}%"></span></span><span class="xs muted">${esc(partText(k, x))}</span>`
+        : `<b class="num muted">—</b><span class="after-bar"></span><span class="xs muted">${t(k === "feel" ? "after.no_feel" : "after.no_record")}</span>`}</div>`;
+  }).join("") : "";
+  const what = (d) => d.sessions.map((s) => `${wtype(s.type)} ${dur(s.minutes)}${s.effort ? ` × ${num(s.effort)}` : ""}`).join(t("ui.list_sep"));
+  const rows = A.days.slice(0, 10).map((d) => `<li><span class="num small">${esc(shortDay(d.date))}</span><span class="small">${esc(what(d))}</span>
+    <span class="after-bar"><span style="width:${d.score == null ? 0 : (d.score * 10).toFixed(0)}%"></span></span>
+    <b class="num small">${d.score == null ? "—" : num(d.score, 1)}</b></li>`).join("");
+  return `<section class="card span-12"><h2>${t("after.title")}<span class="aside">${t("after.sub")}</span></h2>
+    ${L ? `<div class="after-top"><div><span class="eyebrow">${t("after.eyebrow", { day: day(L.date), m: day(L.morning, { weekday: false }) })}</span>
+      <p class="lede" style="margin:4px 0 0"><span class="after-score num">${num(L.score, 1)}</span> <span class="chip ${BAND_TONE[L.band]}">${t(`after.band.${L.band}`)}</span></p>
+      <p class="xs muted" style="margin:4px 0 0">${t("after.formula", { n: Object.keys(L.parts).length })}</p></div>
+      <div class="after-parts">${parts}</div></div>` : `<p class="muted small">${t("after.no_score")}</p>`}
+    <h3 class="section-title" style="margin-top:var(--s-4)">${t("after.recent")}</h3><ul class="after-list">${rows}</ul></section>`;
 }
 
 // ---- how the body answered training, the next morning ------------------------------------------------------------
@@ -134,7 +145,9 @@ function sorenessHtml(p) {
       <div class="sore-side">
         <p class="lede" style="font-size:var(--t-lg);margin:0 0 4px">${esc(head)}</p>
         <p class="small muted" style="margin:0 0 var(--s-3)">${S.latest && !S.today ? esc(t("sore.latest_was", { list: Object.keys(S.levels).length ? regionsText(S.levels) : t("sore.none_short") })) : ""}</p>
-        <p class="small" style="margin:0 0 var(--s-2)">${t("sore.how_to")}</p>
+        <div class="feel-row" role="group" aria-label="${esc(t("feel.question"))}"><span class="small">${t("feel.question")}</span>
+          ${[2, 5, 8].map((v) => `<button type="button" class="goal-btn feel-btn" data-feel="${v}" aria-pressed="${p.feel_today === v}">${t(`feel.${v}`)}</button>`).join("")}</div>
+        <p class="small" style="margin:var(--s-3) 0 var(--s-2)">${t("sore.how_to")}</p>
         <div class="goal-act"><button type="button" class="goal-btn primary" id="sore-save"${isStatic ? " disabled" : ""}>${t("sore.save")}</button>
           <button type="button" class="goal-btn" id="sore-clear">${t("sore.clear")}</button></div>
         <p class="xs sore-msg" role="status">${isStatic ? t("sore.static") : ""}</p>
@@ -150,10 +163,10 @@ export default {
       <div class="grid">
         ${heroHtml(p)}
         ${sorenessHtml(p)}
-        ${loadHtml(p)}
+        ${afterHtml(p)}
         ${responseHtml(p)}
         <section class="card span-12"><details class="how"><summary>${t("ui.how")}</summary>
-          <p>${t("rec.rule_load", { a: p.rule.acute, c: p.rule.chronic, pct: num(p.rule.min_rated * 100) })}</p>
+          <p>${t("rec.rule_after", { good: num(p.after.rule.good, 1), low: num(p.after.rule.low, 1), n: p.after.rule.after_days })}</p>
           <p>${t("rec.rule_body", { n: p.rule.response_days, k: p.response.method.min_group_days })}</p>
           <p>${t("sore.rule", { n: p.rule.sore_days })}</p></details></section>
       </div>`;
@@ -163,10 +176,6 @@ export default {
       const m = p.recovery.metrics.find((x) => x.key === el.dataset.key);
       draw(el, (w) => bullet(m.value, m.band, { width: w, unit: m.unit, tone: m.tone }));
     });
-    const cols = p.load_days.map((d) => ({ label: shortDay(d.date), tip: d.load == null ? `${day(d.date)} · ${t("ui.no_data")}`
-      : `${day(d.date)} · ${t("rec.tip_load", { v: num(d.load) })}${d.sessions?.length ? ` · ${d.sessions.map((s) => `${wtype(s.type)} ${dur(s.minutes)}${s.effort ? ` × ${num(s.effort)}` : ` (${t("rec.no_effort")})`}`).join(", ")}` : ""}`,
-      values: d.load == null ? null : { load: d.load } }));
-    draw(root.querySelector("#load-days"), (w) => stackedColumns(cols, [["load", "var(--c-exercise)"]], { width: w, height: 180, minutes: false, unitFmt: (v) => num(v), labelEvery: Math.max(1, Math.ceil(42 / Math.max(1, w / 44))) }));
     const S = p.soreness;
     root.querySelectorAll(".sore-strip").forEach((el) => draw(el, (w) => stripSvg(S.regions[el.dataset.i].days, w)));
     // tap a region: none → a little → clearly → very → none. An SVG mask does not change what a click hits, so the
@@ -226,12 +235,19 @@ export default {
       if (r) svg.dataset.tip = `${t(`sore.region.${r}`)} · ${t(`sore.level.${levels[r] || 0}`)}`;
       else delete svg.dataset.tip;
     });
+    let feel = p.feel_today ?? null;
+    root.querySelectorAll(".feel-btn").forEach((b) => {
+      b.onclick = () => {
+        feel = feel === Number(b.dataset.feel) ? null : Number(b.dataset.feel);
+        root.querySelectorAll(".feel-btn").forEach((x) => x.setAttribute("aria-pressed", String(Number(x.dataset.feel) === feel)));
+      };
+    });
     root.querySelector("#sore-clear").onclick = () => { Object.keys(levels).forEach((k) => delete levels[k]); root.querySelectorAll(".sore-region").forEach(paint); };
     const msg = root.querySelector(".sore-msg");
     root.querySelector("#sore-save").onclick = async () => {
       if (isStatic) return;
       try {
-        await post("soreness", { date: p.today, levels });
+        await post("checkin", { date: p.today, levels, feel });
         window.dispatchEvent(new HashChangeEvent("hashchange"));
       } catch (error) {
         msg.textContent = t("sore.err", { e: error.message });

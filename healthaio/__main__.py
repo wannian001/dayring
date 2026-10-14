@@ -8,7 +8,7 @@
     python -m healthaio import ...           # bring data in (Apple Health, .ics, Screen Time, any CSV)
     python -m healthaio kit json|export|check|lock  # the design kit: its manifest, a copy for another app, is a copy current
     python -m healthaio goal list|set|propose|accept|decline  # goals beyond healthaio.toml (also set on the Goals page)
-    python -m healthaio soreness set torso=2 left_calf=1      # this morning's soreness (also on the Recovery page)
+    python -m healthaio checkin --feel 5 torso=2 left_calf=1  # this morning's check-in (also on the Recovery page)
     python -m healthaio serve --lan          # let your paired iPhone in (home network or Tailscale)
     python -m healthaio pair                 # open a code for the iPhone app;  devices [revoke ID|--all]
     python -m healthaio collect              # run the automatic importers once (the Mac app does it every few hours)
@@ -104,11 +104,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     for name in ("accept", "decline"):
         g = goal_sub.add_parser(name, help=f"{name} an open proposal by its id (see `goal list`)")
         g.add_argument("id")
-    p = sub.add_parser("soreness", help="a morning check-in: where you are sore and how much (also on the Recovery page)")
-    sore_sub = p.add_subparsers(dest="soreness_command", required=True)
-    g = sore_sub.add_parser("set", help="REGION=LEVEL ... (1 a little, 2 clearly, 3 very); none given = nothing sore")
-    g.add_argument("levels", nargs="*", metavar="REGION=LEVEL")
-    g.add_argument("--date", help="the morning, YYYY-MM-DD (default today)")
+    p = sub.add_parser("checkin", help="the morning check-in: how you feel and where you are sore (also on the Recovery page)")
+    p.add_argument("levels", nargs="*", metavar="REGION=LEVEL", help="1 a little, 2 clearly, 3 very; none given = nothing sore")
+    p.add_argument("--feel", type=int, choices=[2, 5, 8], help="2 not recovered, 5 so-so, 8 recovered")
+    p.add_argument("--date", help="the morning, YYYY-MM-DD (default today)")
     p = sub.add_parser("pair", help="open an 8-digit code (10 minutes) for the iPhone app")
     p.add_argument("--port", type=int, default=8790, help="the port `serve --lan` listens on")
     p.add_argument("--json", action="store_true")
@@ -173,9 +172,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.command == "goal":
         from . import goal_log
         return goal_log.run(args, cfg)
-    if args.command == "soreness":
-        from . import soreness
-        return soreness.run(args, cfg)
+    if args.command == "checkin":
+        from . import checkin
+        return checkin.run(args, cfg)
     done = _phone_commands(args, cfg)
     if done is not None:
         return done

@@ -430,6 +430,26 @@ table.checks th[scope="row"] { text-align: left; white-space: nowrap; padding-ri
 .sore-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; font-size: var(--t-sm); }
 .sore-row .sore-strip { grid-column: 1 / -1; grid-row: 2; }
 .sore-msg { margin: var(--s-2) 0 0; color: var(--ink-2); }
+.rec-fact[href] { text-decoration: none; color: var(--ink-2); }
+.rec-fact[href]:hover { color: var(--ink); }
+.feel-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: var(--s-2) 0 0; }
+.feel-btn[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+/* the morning after training: the score, its four parts, recent training days */
+.after-top { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+@media (max-width: 760px) { .after-top { grid-template-columns: minmax(0, 1fr); } }
+.after-score { font-size: var(--t-3xl); font-weight: 750; }
+.after-parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--s-3); }
+.after-part { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; align-items: center; padding: var(--s-3); border-radius: var(--r-md); background: var(--surface-2); }
+.after-part .after-bar, .after-part .xs { grid-column: 1 / -1; }
+.after-bar { display: block; height: 6px; border-radius: 3px; background: var(--c-band); overflow: hidden; }
+.after-bar > span { display: block; height: 100%; background: var(--c-mark); border-radius: 3px; }
+.after-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.after-list li { display: grid; grid-template-columns: 3.2em minmax(0, 1fr) minmax(60px, 160px) 2.4em; gap: 10px; align-items: center; }
+/* Load */
+.load-lighter { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 var(--s-2); color: var(--watch-ink); }
+.load-lighter svg { flex: none; margin-top: 3px; }
+.load-due { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.load-due li { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) auto; gap: 10px; align-items: baseline; }
 /* Stimulation: how the body answered, one row per outcome (name, verdict, the numbers) */
 .stim-group + .stim-group { margin-top: var(--s-4); }
 .stim-group h3 { margin: 0 0 var(--s-2); }
