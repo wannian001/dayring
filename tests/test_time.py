@@ -862,7 +862,7 @@ class AttentionAlias(unittest.TestCase):
         self.assertIn("ALIAS[raw]", text)  # route() resolves the alias before picking the page
         nav = re.search(r"const NAV\s*=\s*\[([^\]]*)\]", text)
         self.assertIsNotNone(nav)
-        self.assertIn('"time"', nav.group(1))
+        self.assertIn('["time", "nav.time_tab"]', text)  # a page of the Daily life item
         self.assertNotIn('"attention"', nav.group(1))
 
     def test_no_leftovers_of_the_biggest_activity_and_the_week_before(self):
@@ -883,7 +883,7 @@ class AttentionAlias(unittest.TestCase):
         self.assertIn("time", PAGES)
         self.assertNotIn("attention", PAGES)
         i18n = (ROOT / "healthaio" / "web" / "js" / "i18n.js").read_text(encoding="utf-8")
-        self.assertEqual(i18n.count('"nav.time"'), 2)  # English and Chinese
+        self.assertEqual(i18n.count('"nav.time_tab"'), 2)  # English and Chinese
         for page in (ROOT / "healthaio" / "web" / "js").rglob("*.js"):
             self.assertNotIn('href="#attention', page.read_text(encoding="utf-8"), page.name)
 

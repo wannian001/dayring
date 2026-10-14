@@ -22,14 +22,30 @@ context, not a subject: one line on Today and a faint arc on the day ring; the l
 
 ## What to adjust today
 
-At most three items, one each for training, sleep and food, each with the reason in numbers and a link to the page
-that shows them. Fixed rules (listed in `healthaio/modules/actions.py` and in the card's fold), checked in order
+At most three items, at most one each for training, sleep, food and daytime screens (when all four have one, screens
+wait: the hour before sleep is already the sleep item), each with the reason in numbers and a link to the page that
+shows them. Fixed rules (listed in `healthaio/modules/actions.py` and in the card's fold), checked in order
 within each kind: recovery below normal with training planned → take it easy; a load spike → rest; otherwise what
 the week's activity goal needs today, or a strength session when the days left barely fit. Sleep: recovery low or a
 short night → tonight's time to be asleep by; screens before sleep above normal → when to put the phone away. Food,
 over the last 7 logged days: late last meals → when to finish dinner; then protein under 90% of the target; then
-energy above the plan. Nothing off is said as "a steady day", never as invented advice. Items need the data behind
+energy above the plan. Screens in the day, over the last 7 whole days: entertainment & social above the plan, or
+above your normal when there is no plan → a cap for today (the plan, or your usual day to half an hour). Nothing off
+is said as "a steady day", never as invented advice. Items need the data behind
 them: no activity records, no "move more". No model, no score, and the card says it is not medical advice.
+
+## Follow-up
+
+Advice that is never checked turns into a list people learn to skip, and a reminder that keeps failing will not
+start working by being repeated. So the Follow-up page closes the loop from the data alone, with nothing to tick: yesterday's advice
+rebuilt with the same rules from the data as it stood that morning, each piece marked done, not done or no record
+with the fact behind it (asleep at 02:47, 2 h 17 min after the time given); the last 14 days of each piece as a row
+of dots; and for advice not done on 3 of its last 5 times, other ways with the person's own numbers in place of the
+reminder: a smaller step (halfway from the median of what they did to the target, three days in a row before
+moving on), a phone setting that does the remembering (Downtime, App Limits; the app cannot change Screen Time
+itself, so it names the setting and the value), a change to the room, and an if-then plan (implementation
+intentions). Training advice is listed but not checked: rebuilding it uses the day's own workouts. Counts, never
+streaks or scores. What it does not do yet is reach you: the page has to be opened.
 
 ## Exercise, Food and Goals
 
@@ -175,7 +191,7 @@ matters, and says when the evidence is softer (entertainment).
 
 ## The AI work page
 
-A page of the Behaviour item: how much AI agents worked for you, on how many instructions, next to your own focused
+A page of the Daily life item: how much AI agents worked for you, on how many instructions, next to your own focused
 work. The same 7 whole days and the same "your normal" as the Time page. Four numbers and two ratios: AI work a
 day (sessions you started; scheduled tasks and scripts on their own), instructions a day, AI work per instruction
 and AI work over your focused work (both from the 7 days' totals). Usage is input, not output: an agent going in
@@ -188,12 +204,15 @@ divided among them).
 
 ## Menu
 
-Today · Body (Sleep, Exercise, Food, Weight) · Time & energy (Where it went, AI work, Drain) · Goals & schedule (Goals,
-Schedule) · Weekly review · Data sources. (Plain names over single words: "Behaviour" and "Plan" said too little about
-what is inside; on a phone's tab bar each item takes a short name, Body, Time, Goals.) The items follow the loop of managing your health, one axis each: today's state and adjustments, the
-body (what you do for it and what it shows), behaviour (where time and attention go), the plan, the look back, the
-data. (An earlier menu mixed time (Today, Week) with topics (Time, Drain) and meta pages (Review, Data); one axis
-per item reads more easily.) The menu sits in a sidebar on the left from 900 px (the
+Today · Body signals (Sleep, Drain, Weight) · Daily life (Exercise, Food, Where time went, AI work, Schedule) ·
+Actions & goals (Follow-up, Goals) · Weekly review · Data sources. The items are the loop of managing your health,
+one question each: how am I today and what do I change; what is my body showing (outcomes you cannot change
+directly); what do I do every day (the causes you can change); what did I decide to change and is it happening; did
+it help; where do the numbers come from. On a phone's tab bar each item takes a short name: Today, Body, Life,
+Actions, Review, Data. (Two earlier menus mixed axes: Today and Week (time) next to Time and Drain (topics) and
+Review and Data (meta pages); then Body held exercise and food (things you do) next to weight (an outcome), while
+Time & energy held drain (mostly body signals). Splitting outcomes from causes is what makes "what to change" a
+question the menu itself asks.) The menu sits in a sidebar on the left from 900 px (the
 browser already takes height at the top and bottom, so the menu takes width instead). The sidebar folds to a 64 px
 column of icons with the button at its top; folded, the logo unfolds it, and the choice is remembered in this
 browser. A menu item that holds more than one page opens and closes its list of pages with a click (a small arrow

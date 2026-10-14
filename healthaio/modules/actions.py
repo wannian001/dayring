@@ -1,5 +1,5 @@
-"""What to adjust today: at most three things, one for training, one for sleep, one for food, each with the reason
-the numbers give and a link to the page that shows them.
+"""What to adjust today: at most three things, at most one each for training, sleep, food and daytime screens, each
+with the reason the numbers give and a link to the page that shows them.
 
 This is what makes the app proactive: instead of waiting for you to read every page, it reads them for you each
 morning and names what is off and what to do about it today. The rules are fixed and printed here; there is no
@@ -24,13 +24,22 @@ Candidates, highest priority first within each kind (a kind gets at most one):
   - late_meal: on 2 or more of them the last meal started less than plan.food.last_meal_gap_h before sleep.
   - protein: protein averaged under 90% of the target.
   - kcal: energy averaged above plan.food.kcal_max.
+- screens (the daytime; the hour before sleep is the sleep item's), whole screen days of the last 7, at least 3
+  - fun_cap: entertainment & social over the last 7 days averaged above plan.screen.entertainment_max_hours, or, with
+    no plan, above your normal (both as the Drain page judges them). Keep it under the plan today, or under the
+    median of the 28 days before (rounded to half hours) when there is no plan.
+When more than three kinds have something, the first three in the order training, sleep, food, screens are kept
+(screens come last: the screen habit that touches recovery most, the hour before sleep, is the sleep item's).
 Nothing off means a steady day: the page says so instead of inventing advice.
+
+The Follow-up page (modules/followup.py) checks each of these against what the data shows the day after.
 """
 import math
+import statistics
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List
 
-from ..context import Context, iso
+from ..context import FUN, Context, iso
 from . import exercise as exercise_page
 from . import food as food_page
 from . import plans
@@ -42,6 +51,10 @@ PROTEIN_SHORT = 0.9
 SHORT_NIGHT_MIN = 30
 CALM_LAST_HOUR_MIN = 15
 MIN_MOVE = 10  # minutes: less than this left for today is not worth a line
+BASELINE = 28  # days of screens before the window that make "your normal" for the fun cap without a plan
+DOMAINS = ("training", "sleep", "food", "screen")
+# every piece of advice, in the order the pages list them
+KEYS = ("ease", "deload", "move", "strength", "asleep_by", "phone_away", "late_meal", "protein", "kcal", "fun_cap")
 
 
 def build(ctx: Context, day: date, recovery: Dict[str, Any], drain: Dict[str, Any]) -> Dict[str, Any]:
@@ -113,7 +126,23 @@ def build(ctx: Context, day: date, recovery: Dict[str, Any], drain: Dict[str, An
             items.append({"key": "kcal", "domain": "food", "params": {"max": plan.kcal_max},
                           "why": {"avg": avg_kcal, "days": len(kcal)}, "link": "#food"})
 
-    order = {"training": 0, "sleep": 1, "food": 2}
+    # ---- screens (daytime)
+    screen = ctx.screen_known_days()
+    seen = [screen[d].share(FUN) for d in window if d in screen]
+    limit_h = ctx.cfg.screen.entertainment_max_hours
+    over_plan = any(x["key"] == "fun" for x in drain.get("plan_off") or [])  # the Today page's drain card
+    over_normal = "fun" in (drain.get("worse") or [])
+    if len(seen) >= MIN_LOGGED and (over_plan or (limit_h is None and over_normal)):
+        if limit_h is not None:
+            cap_h, source = limit_h, "plan"
+        else:
+            base = [screen[d].share(FUN) for d in (day - timedelta(days=WINDOW + 1 + k) for k in range(BASELINE)) if d in screen]
+            cap_h, source = (max(0.5, round(statistics.median(base) / 30) / 2), "normal") if base else (None, "normal")
+        if cap_h is not None:
+            items.append({"key": "fun_cap", "domain": "screen", "params": {"hours": cap_h, "source": source},
+                          "why": {"avg": sum(seen) / len(seen), "days": len(seen)}, "link": "#time"})
+
+    order = {d: i for i, d in enumerate(DOMAINS)}
     items.sort(key=lambda x: order[x["domain"]])
     return {"items": items[:MAX_ITEMS], "steady": not items,
             "inputs": {"recovery": recovery["verdict"], "week_remaining": week["remaining_min"],

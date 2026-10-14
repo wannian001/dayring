@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import Any, Callable, Dict, List, Optional
 
 from ..context import Context
-from . import ai, body, data, docs, drain, exercise, food, goals, review, sleep, time, today, week
+from . import ai, body, data, docs, drain, exercise, followup, food, goals, review, sleep, time, today, week
 
 PAGES: Dict[str, Callable[..., Dict[str, Any]]] = {
     "today": lambda ctx, param=None: today.build(ctx, day=param),
@@ -16,6 +16,7 @@ PAGES: Dict[str, Callable[..., Dict[str, Any]]] = {
     "food": lambda ctx, param=None: food.build(ctx, day=param),
     "exercise": lambda ctx, param=None: exercise.build(ctx, day=param),
     "goals": lambda ctx, param=None: goals.build(ctx, day=param),
+    "followup": lambda ctx, param=None: followup.build(ctx, day=param),
     "review": lambda ctx, param=None: review.build(ctx, week=param),
     "data": lambda ctx, param=None: data.build(ctx, day=param),
     # the reading pages under the menu: no numbers, only which page it is

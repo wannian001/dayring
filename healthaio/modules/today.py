@@ -243,7 +243,7 @@ def build(ctx: Context, day: Optional[str] = None) -> Dict[str, Any]:
         picked = ctx.today
     att = attention(ctx, picked)
     rec = recovery(ctx, picked)
-    drain_card = _drain_summary(ctx, picked)
+    drain_card = drain_summary(ctx, picked)
     from . import actions  # imported here: actions reads the Exercise and Food pages, which read this one
     return {
         "page": "today", "day": iso(picked), "today": iso(ctx.today), "now": iso(ctx.now),
@@ -282,7 +282,7 @@ def summary(ctx: Context, day: date) -> Dict[str, Any]:
     }
 
 
-def _drain_summary(ctx: Context, day: date) -> Dict[str, Any]:
+def drain_summary(ctx: Context, day: date) -> Dict[str, Any]:
     """The Drain page's two lines for the same 7 days (imported here to avoid a circular import)."""
     from . import drain
     page = drain.build(ctx, (day - timedelta(days=1)).isoformat())

@@ -85,7 +85,7 @@ class Words(unittest.TestCase):
             shapes.append([len(re.findall(pattern, html)) for pattern in
                            (r'class="card doc-card"', r"<li><b>[^<]*</b><span>", r"<li><details", r"<tr>", r'class="chip"')])
         self.assertEqual(shapes[0], shapes[1])
-        self.assertEqual(shapes[0][:3], [3, 5, 4])  # three cards, the five steps of the loop, four folds
+        self.assertEqual(shapes[0][:3], [3, 5, 5])  # three cards, the five steps of the loop, five folds
 
     def test_no_personal_data_on_the_pages(self):
         text = "".join((WEB / "js" / f).read_text(encoding="utf-8") for f in ("pages/guide.js", "pages/project.js"))

@@ -154,13 +154,13 @@ const SAMPLES = {
   ".sr": () => `<p class="small" style="margin:0">${t("kit.c.sr")}<span class="sr">${t("kit.c.sr_hidden")}</span></p>`,
   ".top": () => `<p class="small muted" style="margin:0">${t("kit.c.top")}</p>`,
   ".brand": () => `<p class="small muted" style="margin:0">${t("kit.c.brand")}</p>`,
-  ".nav": () => `<nav class="nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit" aria-current="page">${t("nav.today")}</a><a href="#kit">${t("nav.body")}</a><a href="#kit">${t("nav.time")}</a></nav>`,
+  ".nav": () => `<nav class="nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit" aria-current="page">${t("nav.today")}</a><a href="#kit">${t("nav.body")}</a><a href="#kit">${t("nav.life")}</a></nav>`,
   // drawn in place (not a child of <body>): the same menu as this page's, one menu item open on its second page and
   // two closed
   ".side": () => `<p class="small muted" style="margin:0 0 10px">${t("kit.c.side")}</p><div class="kit-side side"><div class="side-head"><span class="brand"><span>Health AIO</span></span></div>
     <nav class="side-nav" aria-label="${esc(t("kit.sample"))}"><a href="#kit">${icon("sun", 18)}<span>${t("nav.today")}</span></a>
-      <a href="#kit" aria-current="page" aria-expanded="true">${icon("heart", 18)}<span>${t("nav.body")}</span>${CARET}</a><a class="side-sub" href="#kit"><span>${t("nav.sleep_tab")}</span></a><a class="side-sub" href="#kit" aria-current="page"><span>${t("nav.exercise")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.food")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.weight")}</span></a>
-      <a href="#kit" aria-expanded="false">${icon("walk", 18)}<span>${t("nav.time")}</span>${CARET}</a><a href="#kit" aria-expanded="false">${icon("target", 18)}<span>${t("nav.plan")}</span>${CARET}</a></nav>
+      <a href="#kit" aria-current="page" aria-expanded="true">${icon("heart", 18)}<span>${t("nav.body")}</span>${CARET}</a><a class="side-sub" href="#kit"><span>${t("nav.sleep_tab")}</span></a><a class="side-sub" href="#kit" aria-current="page"><span>${t("nav.drain")}</span></a><a class="side-sub" href="#kit"><span>${t("nav.weight")}</span></a>
+      <a href="#kit" aria-expanded="false">${icon("walk", 18)}<span>${t("nav.life")}</span>${CARET}</a><a href="#kit" aria-expanded="false">${icon("target", 18)}<span>${t("nav.act")}</span>${CARET}</a></nav>
     <div class="side-tools"><button class="tool" type="button">${t("ui.lang")}</button><button class="tool" type="button" aria-label="${esc(t("ui.mode"))}">${icon("sleep", 15)}</button></div></div>`,
   ".tool": () => `<div class="tools"><button class="tool" type="button">${t("ui.lang")}</button><button class="tool" type="button" aria-label="${esc(t("ui.mode"))}">${icon("sleep", 15)}</button></div>`,
   ".demo-badge": () => `<span class="demo-badge">${t("ui.demo")}</span>`,

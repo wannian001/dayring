@@ -273,8 +273,8 @@ class Wiring(unittest.TestCase):
     def test_menu_and_words(self):
         app = (WEB / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn('import ai from "./pages/ai.js";', app)
-        self.assertIn('time: [["time", "nav.time_tab"], ["ai", "nav.ai"], ["drain", "nav.drain"]]', app)
-        self.assertNotIn('"ai"', re.search(r"const NAV\s*=\s*\[([^\]]*)\]", app).group(1))  # a page of the Behaviour item
+        self.assertIn('["time", "nav.time_tab"], ["ai", "nav.ai"]', app)
+        self.assertNotIn('"ai"', re.search(r"const NAV\s*=\s*\[([^\]]*)\]", app).group(1))  # a page of the Daily life item
         page = (WEB / "js" / "pages" / "ai.js").read_text(encoding="utf-8")
         i18n = (WEB / "js" / "i18n.js").read_text(encoding="utf-8")
         used = set(re.findall(r't\("((?:ai|time|act|cat|chg|nav)\.[\w.]+)"', page))
