@@ -1,8 +1,8 @@
-"""What the Time and Review pages do when a record is missing, late or odd.
+"""What the Stimulation (#time) and Review pages do when a record is missing, late or odd.
 
 Rules under test:
 - a day without the record an activity needs shows None for that activity (never 0), is left out of
-  that activity's average, and the page says which record stopped;
+  that activity's average, and the page says which record stopped (Stimulation rests on Screen Time only);
 - only days with a record of their own are shown (not the evening before the first night);
 - "Earlier" and "Later" step by days with records and never loop or dead-end;
 - the days the clocks change are 23 and 25 hours long, minute by minute;
@@ -68,33 +68,24 @@ class MissingRecords(Folder):
                      "source": "Apple Watch"} for d in range(1, 12)]
         ctx = self.context(at(date(2026, 10, 12), 18, 40),
                            body_daily=nights(date(2026, 9, 20), date(2026, 10, 12)),
-                           screen_sessions=screens(date(2026, 9, 20), date(2026, 10, 5)), workouts=workouts)
+                           screen_sessions=screens(date(2026, 9, 20), date(2026, 10, 5), category="entertainment"), workouts=workouts)
         p = time_page.build(ctx)
         span = p["span"]
         self.assertEqual((span["from"], span["to"]), ("2026-10-05", "2026-10-11"))
         # the stream's last day (5 Oct) was probably cut off by the import, so no day here has whole screen time
-        self.assertEqual(span["known"]["screen"], 0)
-        self.assertIsNone(span["avg"]["screen"])  # not 480/7 = 69 minutes, which would read as a big drop
-        self.assertAlmostEqual(time_page.build(ctx, p["prev"])["span"]["avg"]["screen"], 480)  # the week before had it
+        self.assertEqual(span["screen_days"], 0)
+        for key, m in span["metrics"].items():  # not 480/7 = 69 minutes, which would read as a big drop
+            self.assertIsNone(m["value"], key)
+            self.assertIsNone(m["state"], key)
+        self.assertIsNone(span["level"])
+        self.assertIsNone(p["hours"]["now"])
+        self.assertAlmostEqual(time_page.build(ctx, p["prev"])["span"]["metrics"]["fun"]["value"], 480)  # the week before had it
         # the note names the last whole day (4 Oct), the same day the numbers stop counting
         self.assertEqual(span["stale"], [{"activity": "screen", "last": "2026-10-04"}])
-        for d in span["days"]:
-            self.assertIsNone(d["totals"]["screen"], d["date"])
-            self.assertIsNone(d["totals"]["not_recorded"], d["date"])
-            if d["standout"]:  # unknown screens are never "less fun" or "less focus"
-                self.assertNotIn(d["standout"]["key"], ("fun", "focus", "communication"), d["date"])
-        for c in span["changes"]:
-            if c["key"] in ("fun", "focus", "communication"):
-                self.assertIsNone(c["state"], c["key"])
-        self.assertIsNone(span["metrics"]["screen"]["state"])
-        hist = {h["date"]: h["totals"] for h in p["history"]}
-        self.assertEqual(hist["2026-10-04"]["screen"], 480)
-        self.assertIsNone(hist["2026-10-08"]["screen"])  # × in the 30-day lanes, not an empty bar
-        self.assertEqual(hist["2026-10-08"]["exercise"], 45)
         # once the import catches up, 5 Oct is a whole day again
-        write_table(self.tmp / "data", "screen_sessions", screens(date(2026, 9, 20), date(2026, 10, 11)))
+        write_table(self.tmp / "data", "screen_sessions", screens(date(2026, 9, 20), date(2026, 10, 11), category="entertainment"))
         ctx = Context(ctx.cfg, now=ctx.now)
-        self.assertEqual(time_page.build(ctx)["span"]["known"]["screen"], 7)
+        self.assertEqual(time_page.build(ctx)["span"]["screen_days"], 7)
 
     def test_mid_day_export_is_not_a_whole_day(self):
         # Apple Health exported at noon on 11 Oct: that row is partial and there is no 12 Oct row
@@ -106,34 +97,30 @@ class MissingRecords(Folder):
         self.assertIsNone(day.value("exercise"))  # the evening workout may not be exported yet
         self.assertIsNone(day.value("sleep"))     # the night that starts that evening is not in yet
         self.assertIsNone(day.totals()["not_recorded"])
-        span = time_page.build(ctx)["span"]
-        self.assertEqual(span["known"]["exercise"], 6)
-        self.assertEqual(span["exercise_known"], 6)
-        self.assertEqual(span["known"]["sleep"], 6)
-        self.assertAlmostEqual(span["avg"]["sleep"], 480)
+        series = time_page.stim_series(ctx)
+        self.assertIn(date(2026, 10, 11), series["fun"])           # its screens are whole
+        self.assertNotIn(date(2026, 10, 11), series["before_sleep"])  # its night is not: unknown, not a calm evening
+        self.assertEqual(time_page.build(ctx)["span"]["metrics"]["before_sleep"]["known"], 6)
 
     def test_unknown_workouts_are_not_zero(self):
         # workout_min empty (before the first logged workout), and no workouts.csv at all
         ctx = self.context(at(date(2026, 10, 12), 9),
                            body_daily=nights(date(2026, 10, 1), date(2026, 10, 12), workout_min=None),
                            screen_sessions=screens(date(2026, 10, 1), date(2026, 10, 11)))
-        span = time_page.build(ctx)["span"]
-        self.assertIsNone(span["avg"]["exercise"])
-        self.assertEqual(span["exercise_known"], 0)
-        self.assertTrue(all(d["totals"]["exercise"] is None for d in span["days"]))
-        self.assertIn({"activity": "exercise", "last": None}, span["stale"])
+        self.assertTrue(all(td.value("exercise") is None for td in ctx.time_days().values()))
+        self.assertEqual(time_page.build(ctx)["span"]["stale"], [])  # the page rests on Screen Time only
 
     def test_evening_before_the_first_night_is_not_a_day(self):
         ctx = self.context(at(date(2026, 11, 12), 18, 40),
                            body_daily=nights(date(2026, 11, 1), date(2026, 11, 12)),
-                           screen_sessions=screens(date(2026, 11, 1), date(2026, 11, 12)))
+                           screen_sessions=screens(date(2026, 11, 1), date(2026, 11, 12), category="entertainment"))
         self.assertIn(date(2026, 10, 31), ctx.time_days())  # it holds the first night's first hour
         self.assertFalse(ctx.time_days()[date(2026, 10, 31)].admitted)
         p = time_page.build(ctx, "2026-11-06")
         self.assertEqual(p["span"]["from"], "2026-11-01")
+        self.assertEqual(p["span"]["n"], 6)
         self.assertIsNone(p["prev"])  # nothing before the first night
-        for key in ("sleep", "screen", "not_recorded"):
-            self.assertAlmostEqual(p["span"]["avg"][key], 480, msg=key)
+        self.assertAlmostEqual(p["span"]["metrics"]["fun"]["value"], 480)
 
 
 class Stepping(Folder):

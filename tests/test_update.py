@@ -198,9 +198,10 @@ class Settings(unittest.TestCase):
         folder = Path(tempfile.mkdtemp(prefix="healthaio-cfg-"))
         try:
             path = folder / "healthaio.toml"
+            # "ai-logs" was a source before AI work left the app: an older file still loads, without it
             path.write_text('[collect]\nsources = ["macos-screentime", "ai-logs"]\n[updates]\ncheck = false\n')
             cfg = load(path)
-            self.assertEqual((cfg.collect_sources, cfg.check_updates), (["macos-screentime", "ai-logs"], False))
+            self.assertEqual((cfg.collect_sources, cfg.check_updates), (["macos-screentime"], False))
             path.write_text('[collect]\nsources = ["everything"]\n')
             with self.assertRaises(ConfigError):
                 load(path)

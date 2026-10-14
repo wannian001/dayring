@@ -144,8 +144,7 @@ def main(argv):
         fda = os.environ.get("FAKE_FDA", "1") != "0" and not failing
         result = {"ok": fda, "at": iso(now()), "sources": [
             {"name": "macos-screentime", "ok": fda,
-             "message": "412 sessions on 3 devices" if fda else "Full Disk Access is needed to read Screen Time."},
-            {"name": "ai-logs", "ok": True, "message": "38 sessions"}]}
+             "message": "412 sessions on 3 devices" if fda else "Full Disk Access is needed to read Screen Time."}]}
         state["collect"] = result
         save_state(state)
         out(result, 0 if result["ok"] else 2)

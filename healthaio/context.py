@@ -28,20 +28,7 @@ class ScreenDay:
         return sum(self.by_category.get(c, 0.0) for c in cats)
 
 
-@dataclass
-class AiDay:
-    """AI agents on one day (ai_work, ai_prompts): working minutes split over the hours they fell in, and
-    the instructions you gave. ``you`` = sessions you started; ``other`` = scheduled tasks and scripts."""
-    day: date
-    you: float = 0.0
-    other: float = 0.0
-    prompts: float = 0.0
-    calls: float = 0.0
-    output_tokens: float = 0.0
-    by_hour: List[Dict[str, float]] = field(default_factory=lambda: [dict() for _ in range(24)])  # you / other / prompts
-
-
-ACTIVITIES = ("sleep", "exercise", "calendar", "screen")  # the Time page's lanes, in display order
+ACTIVITIES = ("sleep", "exercise", "calendar", "screen")  # what the day is split into, in display order
 SCREEN_PARTS = ("focus", "fun", "communication", "other")
 PART_OF = {"work": "focus", "learning": "focus", "entertainment": "fun", "social": "fun",
            "communication": "communication", "other": "other"}
@@ -196,7 +183,6 @@ class Context:
         self.now = now or datetime.now(self.tz).replace(tzinfo=None)
         self._screen: Optional[Dict[date, ScreenDay]] = None
         self._stack: Optional[Dict[date, StackDay]] = None
-        self._ai: Optional[Dict[date, AiDay]] = None
         self._time: Optional[Dict[date, TimeDay]] = None
         self._lengths: Dict[date, int] = {}
 
@@ -316,64 +302,6 @@ class Context:
         self._stack = out
         return out
 
-    # ---- AI agents ------------------------------------------------------------------------------
-    def ai_days(self) -> Dict[date, AiDay]:
-        """Every day from the first AI record to the last, so a day without any is a real zero (see
-        ai_known_days for which of them can be compared). A stretch's working minutes are spread evenly
-        over its rounded start-to-end minutes, so the hours of a day add up to its total."""
-        if self._ai is not None:
-            return self._ai
-        out: Dict[date, AiDay] = {}
-
-        def get(day: date) -> AiDay:
-            if day not in out:
-                out[day] = AiDay(day=day)
-            return out[day]
-
-        for row in self.store.rows("ai_work"):
-            if row["end"] <= row["start"]:
-                continue
-            spots = list(_minutes(row["start"], row["end"], self.tz))
-            if not spots:
-                continue
-            who = "you" if row["started_by"] == "you" else "other"
-            share = (row.get("minutes") or 0.0) / len(spots)
-            for day, _, hour in spots:
-                ad = get(day)
-                setattr(ad, who, getattr(ad, who) + share)
-                slot = ad.by_hour[hour]
-                slot[who] = slot.get(who, 0.0) + share
-            first = get(spots[0][0])
-            if who == "you":
-                first.calls += row.get("calls") or 0.0
-                first.output_tokens += row.get("output_tokens") or 0.0
-        for row in self.store.rows("ai_prompts"):
-            if row["started_by"] != "you":
-                continue
-            t = row["time"]
-            ad = get(t.date())
-            ad.prompts += row["count"]
-            slot = ad.by_hour[t.hour]
-            slot["prompts"] = slot.get("prompts", 0.0) + row["count"]
-        if out:
-            d, last = min(out), max(out)
-            while d < last:
-                d += timedelta(days=1)
-                get(d)
-        self._ai = out
-        return out
-
-    def ai_partial_day(self) -> Optional[date]:
-        """The last AI day when imports have stopped arriving: probably cut off part-way, so not a whole day."""
-        days = self.ai_days()
-        last = max(days) if days else None
-        return last if last is not None and last < self.today - timedelta(days=1) else None
-
-    def ai_known_days(self) -> Dict[date, AiDay]:
-        """AI days whose record is whole: before today and not the cut-off last import day."""
-        partial = self.ai_partial_day()
-        return {d: ad for d, ad in self.ai_days().items() if d < self.today and d != partial}
-
     def time_days(self) -> Dict[date, TimeDay]:
         """Sleep, exercise, calendar and screen minutes for every calendar day that has any of them,
         with what is known for each day (see TimeDay)."""
@@ -459,7 +387,7 @@ class Context:
         return first_w is not None and first_w <= d <= last_w
 
     def exercise_on(self, day: date) -> Optional[float]:
-        """Workout minutes on ``day`` by the Time page's rule, or None when that day is not known."""
+        """Workout minutes on ``day`` by the day ring's rule, or None when that day is not known."""
         td = self.time_days().get(day)
         if td is not None:
             return td.value("exercise")

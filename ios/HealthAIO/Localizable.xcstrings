@@ -31,16 +31,6 @@
         }
       }
     },
-    "AI work": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI 工作"
-          }
-        }
-      }
-    },
     "About": {
       "localizations": {
         "zh-Hans": {

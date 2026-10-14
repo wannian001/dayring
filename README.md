@@ -30,7 +30,7 @@ in one place, each compared with your own normal, and every morning, what to adj
 
 **Measure** (the Mac and iPhone apps collect what your devices already record) → **compare** (each signal against your own normal and your plan) → **adjust** (today's three things) → **follow up** (checked the next day against the data; another way when one keeps failing) → **review** (the week next to the four before it).
 
-The menu is that loop, one question per item: **Body signals** are the outcomes you cannot change directly (sleep, drain, weight); **Daily life** is what you do every day and can change (exercise, food, where time went, AI work, the schedule); **Actions & goals** is what you decided to change and whether it happens.
+The menu is that loop, one question per item: **Body signals** are the outcomes you cannot change directly (sleep, drain, weight); **Daily life** is what you do every day and can change (exercise, food, stimulation, the schedule); **Actions & goals** is what you decided to change and whether it happens.
 
 | Menu | Page | Question it answers |
 |---|---|---|
@@ -40,13 +40,12 @@ The menu is that loop, one question per item: **Body signals** are the outcomes 
 | | Weight | Weight as a 7-day average inside the corridor your plan allows, the weekly rate, and the long view. |
 | **Daily life** | Exercise | This week against the weekly goal (your plan, or the WHO guideline of 150 active minutes and 2 strength days, and it says which), day by day with the training planned for the days to come; the last 7 days against your normal; training load against recovery; 12 weeks by kind (strength, cardio, walking); how HRV and resting heart rate tend to answer each kind the next morning. |
 | | Food | The last 7 logged days against your normal and your plan: energy, protein (per kg of your weight), fibre, and the hours from the last meal to falling asleep; 14 days of meals by time of day with the hours before sleep striped; the food log set against the scale (the weekly change the log implies against the one the scale shows); what an early dinner has gone with the next morning. |
-| | Where time went | Where did the time go, and what changed? Sleep, workouts, calendar and screens (phone, tablet and laptop counted once when they overlap), each against your normal; the biggest change clearly outside your normal is named, not the biggest activity. **Devices at once** counts every device on its own: screens at once, the longest stretch on one thing, each device by the hour. **Stimulation and focus, averaged**: 90 days of entertainment & social minutes and of the longest focus stretch, each as a 7-day average against your normal, the last 28 days next to the 28 before them. What people call “dopamine tolerance” can't be measured by a phone or a watch, so the card shows the behaviour, never a dopamine number. The page is two cards: what changed with the daily averages, then the detail in tabs (a typical day, 30 days, stimulation and focus, devices at once, top apps). |
-| | AI work | How much AI agents worked for you, on how many instructions, next to your own focused work (Claude Code and Codex logs on this computer: times and counts only, never what was said). Usage is input, not output, so it is never coloured better or worse. |
+| | Stimulation | How stimulating were these 7 days, and what did your body do next? Hormones such as dopamine can't be measured by a phone or a watch, so the page shows no hormone number. It measures what goes in: five Screen Time signals, each against your normal (entertainment & social minutes, the level it leads with; entertainment in the hour before sleep; app switching; screens at once; the longest focus stretch). Then the long view (90 days of stimulation and focus as 7-day averages, the last 28 days next to the 28 before them), **how your body answered** (the night and next morning after stimulating days against the others: falling asleep, sleep, HRV, resting heart rate, with 95% intervals and a Benjamini–Hochberg correction; an association, never a cause), and in tabs: stimulation by hour of the day, devices at once, and which apps it came from. |
 | | Schedule | Seven days of classes, deadlines and training, and how heavy the coming weeks are by share of grade. |
 | **Actions & goals** | Follow-up | Did yesterday's advice happen? Each piece of the Today page's advice is checked the next day against the data (asleep by the time given, phone away, dinner early enough, protein, energy, entertainment & social under the cap), with nothing to tick, and the last 14 days of each are counted ("done n of the times with a record"). When one keeps failing (3 of its last 5 times), it offers **other ways with your own numbers** instead of the same reminder: a smaller step halfway from what you have been doing, a phone setting that remembers for you (Downtime, App Limits), and an if-then plan. Training advice is listed, not checked: rebuilding it would already know that day's workouts. |
 | | Goals | Every plan in one place: sleep, exercise, food, weight, screens, each with the last 28 days as kept / not kept / no record, counted as "n of the days with a record" (never a streak, never a score). **Set or change any goal right on the page**; a goal not set yet is listed with a button to set it. An assistant's proposals wait at the top until you accept or decline them. |
 | **Weekly review** | | One week of facts next to the four weeks before it, food and activity included, and **what has tended to help the next day** (the next morning's HRV, resting heart rate and energy after doing something against not doing it, with 95% intervals). No scores, no judging. |
-| **Data sources** | | What arrived each day for 90 days (sleep, HRV, steps, weight, screens, food log, …), which files have unreadable rows, how to import more. |
+| **Data sources** | | What arrived each day for 90 days, under the device it comes from: Apple Watch (sleep, HRV, resting heart rate, activity minutes), iPhone (steps, weight, food log), Mac (Screen Time, with the iPhone and iPad when they share it) and files brought in by hand (self-report), each with how it reaches your computer and when the iPhone and Mac apps last did; which files have unreadable rows; how to import more. |
 | *About this project* | Overview | What it is, who it is for, the problem it answers, where the data comes from (which device collects what, how often, what it costs your computer, measured), how proactive it is today, how it compares with what people use now, the trade-offs, where it stands and what comes next. |
 | | Guide | How to use it: look around the demo, install it, bring in your Apple Health export, set your goals, and what to open each day. |
 | | [History ↗](https://tangjiakuo.top/demo/aio-history/en/) | Where this project comes from: the personal system it was taken out of, over a year and four generations, what each one found and what changed. It quotes that personal system, so it lives on the author's own site; the menu links out to it. |
@@ -57,11 +56,11 @@ The menu is that loop, one question per item: **Body signals** are the outcomes 
 </p>
 <p>
   <img src="docs/images/goals.png" width="49%" alt="Goals page, light mode">
-  <img src="docs/images/food-zh.png" width="49%" alt="Food page in Chinese, dark mode">
+  <img src="docs/images/followup.png" width="49%" alt="Follow-up page, light mode">
 </p>
 <p>
-  <img src="docs/images/time.png" width="49%" alt="Where the time went, light mode">
-  <img src="docs/images/drain.png" width="49%" alt="Drain page, light mode">
+  <img src="docs/images/time.png" width="49%" alt="Stimulation page, light mode">
+  <img src="docs/images/data.png" width="49%" alt="Data sources by device, light mode">
 </p>
 
 English and Chinese, light and dark (it follows your system), phone and desktop. On a computer the menu is a sidebar
@@ -116,7 +115,6 @@ cp examples/healthaio.example.toml healthaio.toml     # timezone, plans (sleep, 
 python3 -m healthaio import apple-health ~/Downloads/export.zip
 python3 -m healthaio import ics ~/Downloads/timetable.ics --kind class
 python3 -m healthaio import macos-screentime        # macOS only, experimental
-python3 -m healthaio import ai-logs                 # Claude Code and Codex: times and counts only
 python3 -m healthaio check                           # which rows could not be read
 python3 -m healthaio serve
 ```
@@ -252,7 +250,7 @@ repository contains none of that data.
 
 **记录**（Mac 和 iPhone 的小 App 把设备已经记下的收过来）→ **对比**（每个信号对比你自己的平常、对比你的计划）→ **调整**（今天的三件事）→ **跟进**（第二天按数据核对做到没有；老做不到就换个做法）→ **复盘**（这一周和之前四周并排）。
 
-菜单就是这个闭环，一项回答一个问题：**身体状态**是结果，你没法直接改（睡眠、消耗、体重）；**生活习惯**是你每天做的事，能直接改（运动、饮食、时间去向、AI 干活量、日程）；**行动与目标**是你决定改什么、做到了没有。
+菜单就是这个闭环，一项回答一个问题：**身体状态**是结果，你没法直接改（睡眠、消耗、体重）；**生活习惯**是你每天做的事，能直接改（运动、饮食、刺激水平、日程）；**行动与目标**是你决定改什么、做到了没有。
 
 | 菜单 | 页面 | 回答的问题 |
 |---|---|---|
@@ -262,13 +260,12 @@ repository contains none of that data.
 | | 体重 | 体重 7 天平均是不是在计划允许的走廊里、每周降多少、长期走势。 |
 | **生活习惯** | 运动 | 本周对照每周目标（你的计划，没设就用世卫组织建议的每周 150 分钟活动、2 天力量训练，并写明用的是哪个），一天一格，还没到的日子写着计划的训练；最近 7 天对比平常；训练负荷对照恢复；12 周按种类（力量、有氧、步行）；每种训练后第二天早上的 HRV 和静息心率通常怎么样。 |
 | | 饮食 | 最近 7 天里记全的日子对比平常、对比计划：热量、蛋白质（按体重每公斤算）、膳食纤维、最后一餐到睡着隔了几小时；最近 14 天每一餐在一天里的时刻，睡前几小时画斜纹；饮食记录和体重秤对账（按记录该每周变多少、秤上实际变多少）；早点吃完晚饭的第二天早上有什么不同。 |
-| | 时间去向 | 时间都去哪了，和平常比变了什么？睡眠、训练、日程和屏幕（手机、平板、电脑同一时刻只算一次）各自和平常比；写出的是明显超出平常的变化里最大的那一项，而不是占得最多的那一项。**几台同时用**：每台设备各算各的，叠加倍数、最长一段只做一件事、每台设备按小时。**刺激均线 · 专注均线**：90 天里每天的娱乐社交时长和最长一段专注，各画成 7 天平均、对着你的平常，并把最近 28 天和再之前 28 天并排。常说的“多巴胺阈值”手机和手表测不了，所以这里只摆行为，不出现多巴胺的数。整页两张卡：变了什么和每天平均，其余放在标签里（典型的一天、最近 30 天、刺激和专注、几台同时用、常用应用）。 |
-| | AI 干活量 | AI 代理替你干了多少、你下了多少指令，和你自己专注做事放在一起看（读这台电脑上 Claude Code 和 Codex 的日志：只读时刻和条数，绝不读说了什么）。用量是投入不是产出，所以不分好坏。 |
+| | 刺激水平 | 这 7 天刺激多不多，身体接下来怎么回应？多巴胺这类激素手机和手表测不了，所以页面上没有激素的数。它量的是输入：屏幕使用时间里的五个信号，各自和平常比（娱乐和社交时长，是页面先说的那个水平；睡前一小时的娱乐和社交；切换应用；几台同时用；最长一段专注）。接着是长期走势（90 天的刺激和专注，7 天平均，最近 28 天和再之前 28 天并排）、**身体怎么回应**（刺激多的日子之后的当晚和第二天早上，和其他日子比：入睡时刻、睡眠时长、HRV、静息心率，带 95% 区间和 Benjamini–Hochberg 校正；只说相关，不说因果），标签里还有：一天里什么时候刺激最多、几台同时用、刺激来自哪些应用。 |
 | | 日程 | 七天的课、截止和训练；接下来几周按占成绩的比例看有多重。 |
 | **行动与目标** | 跟进 | 昨天的建议做到了没有？“今天”页的每条建议，第二天按数据核对（按时睡着、按时放下手机、晚饭够早、蛋白质、热量、娱乐和社交不超上限），不用你打勾；每条建议最近 14 天给了几次、有记录的那几次做到几次。同一条老做不到（最近 5 次里 3 次以上），就不再重复提醒，而是给**按你自己的数字算的其他做法**：把一步改小（取你最近的实际和目标的中间）、让手机替你记（停用时间、App 限额）、写一句“如果……就……”。训练类建议列出来但不核对：重算时已经看得到那天练了什么。 |
 | | 目标 | 所有计划放在一处：睡眠、运动、饮食、体重、屏幕，每个目标把最近 28 天画成做到 / 没做到 / 没记录，计数写成“有记录的日子里做到几天”（不算连续天数，也不打分）。**目标可以直接在页面上设、随时改**；没设的目标列出来，旁边有“设一个”。AI 助手提的建议放在最上面，你采纳或不要之前什么都不变。 |
 | **每周复盘** | | 一周的事实和之前四周并排，饮食和活动也在里面；还有**做什么第二天会更好**（做了和没做的日子比第二天早上的 HRV、静息心率和精力，带 95% 区间）。不打分，不评价。 |
-| **数据来源** | | 90 天里每天到了什么数据（睡眠、HRV、步数、体重、屏幕、饮食记录……）、哪些文件有读不出的行、怎么继续导入。 |
+| **数据来源** | | 90 天里每天到了什么数据，按它从哪台设备来分组：Apple Watch（睡眠、HRV、静息心率、活动分钟）、iPhone（步数、体重、饮食记录）、Mac（屏幕使用时间，打开跨设备共享后含 iPhone 和 iPad）和手动导入的文件（自评），每组写明怎么到你的电脑、iPhone App 和 Mac App 上次什么时候送到；哪些文件有读不出的行；怎么继续导入。 |
 | *关于这个项目* | 项目说明 | 它是什么、为谁做、解决什么问题、数据从哪来（哪台设备收什么、多久一次、在你电脑上的开销，实测）、“主动”到哪一步、和现在常用的比、有意的取舍、现在到哪一步、接下来做什么。 |
 | | 使用说明 | 怎么用：先看演示，装到自己电脑上，导入 Apple 健康的导出包，设目标，以及每天该看哪里。 |
 | | [迭代记录 ↗](https://tangjiakuo.top/demo/aio-history/) | 这个项目的来历：它是从作者自己用了一年的个人系统里抽出来的；那个系统换了四代，每一代发现了什么、改了什么。它引了那个个人系统里的内容，所以放在作者自己的网站上，菜单里是一个指过去的链接。 |
@@ -282,8 +279,8 @@ repository contains none of that data.
   <img src="docs/images/drain-zh.png" width="49%" alt="消耗页，深色">
 </p>
 <p>
-  <img src="docs/images/ai-zh.png" width="49%" alt="AI 干活量页，深色">
-  <img src="docs/images/sleep-zh.png" width="49%" alt="作息页，深色">
+  <img src="docs/images/time-zh.png" width="49%" alt="刺激水平页，深色">
+  <img src="docs/images/data-zh.png" width="49%" alt="数据来源（按设备），深色">
 </p>
 
 界面中英双语，浅色和深色（默认跟随系统），手机和电脑都能用。电脑上菜单是左边的侧栏，能收成一列图标；手机上是底部的标签栏。项目说明、使用说明和迭代记录的链接在菜单下面（手机上是顶栏的小图标）。
@@ -318,7 +315,6 @@ cp examples/healthaio.example.toml healthaio.toml     # 时区、计划（睡眠
 python3 -m healthaio import apple-health ~/Downloads/export.zip
 python3 -m healthaio import ics ~/Downloads/timetable.ics --kind class
 python3 -m healthaio import macos-screentime        # 只限 macOS，试验性
-python3 -m healthaio import ai-logs                 # Claude Code 和 Codex：只读时刻和条数
 python3 -m healthaio check                           # 看哪些行读不出
 python3 -m healthaio serve
 ```

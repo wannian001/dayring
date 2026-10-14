@@ -132,20 +132,15 @@ class OneThing(StackCase):
 
 
 class RatioAsAChange(unittest.TestCase):
-    def test_the_ratio_needs_a_tenth_and_ranks_by_the_minutes_it_means(self):
+    def test_the_ratio_of_seven_days_needs_five_hundredths(self):
         band = {"q1": 110.0, "median": 112.0, "q3": 114.0, "days": 20}
-        just = time_page.compare("ratio", 120.0, band, time_page.min_width("ratio", False), clock=500)
+        just = time_page.compare("ratio", 118.0, band)
         self.assertEqual(just["state"], "high")
-        self.assertFalse(just["clear"])           # 0.06 past a 0.04 band: under the 0.1 a day needs
-        clear = time_page.compare("ratio", 130.0, band, time_page.min_width("ratio", False), clock=500)
+        self.assertFalse(just["clear"])           # 0.04 past a 0.04 band: the band counts as 0.05 wide
+        clear = time_page.compare("ratio", 120.0, band)
         self.assertTrue(clear["clear"])
         self.assertEqual(clear["tone"], "bad")    # more screens at once is worse
-        self.assertAlmostEqual(clear["size"], 18 / 100 * 500)  # 0.18 over 500 minutes of screens = 90 device minutes
-        week = time_page.compare("ratio", 120.0, band, time_page.min_width("ratio", True), clock=500)
-        self.assertTrue(week["clear"])            # a 7-day average needs only 0.05
-        fun = time_page.compare("fun", 260.0, {"q1": 180.0, "median": 200.0, "q3": 220.0}, 15)
-        self.assertEqual(fun["size"], 60)
-        self.assertEqual(time_page.standout([fun, clear])["key"], "ratio")
+        self.assertEqual(clear["unit"], "ratio")
 
     def test_the_week_normal_is_device_time_over_clock_time(self):
         first = date(2026, 10, 5)

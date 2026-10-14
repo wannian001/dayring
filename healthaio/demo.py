@@ -93,6 +93,11 @@ def _hm(text: str) -> time:
     return time(int(hour), int(minute))
 
 
+def _since_noon(t: datetime) -> int:
+    """Minutes after the previous noon, so 23:30 comes before 01:10."""
+    return (t.hour * 60 + t.minute - 12 * 60) % (24 * 60)
+
+
 def _at(day: date, minutes_from_midnight: float) -> datetime:
     return datetime.combine(day, time()) + timedelta(minutes=round(minutes_from_midnight))
 
@@ -323,8 +328,19 @@ class Sam:
 
     # ---- screen ------------------------------------------------------------------------------
     def screen(self, body: List[Dict], events: List[Dict]) -> List[Dict]:
+        """Sam's screens. Two habits make the Stimulation page's "how the body answers" card show something: on
+        nights Sam falls asleep later than usual the last hour is mostly scrolling (on earlier nights mostly
+        winding down), and the evening before a morning with HRV under Sam's normal (a stressful day) holds more
+        entertainment."""
         rng = random.Random(SEED + 11)
         by_day = {row["date"]: row for row in body}
+        onsets = sorted(_since_noon(row["sleep_start"]) for row in body if row.get("sleep_start"))
+        usual_onset = onsets[len(onsets) // 2] if onsets else None
+        hrv = {row["date"]: row["hrv_ms"] for row in body if row.get("hrv_ms") is not None}
+
+        def stressed(morning: date) -> bool:
+            past = sorted(hrv[morning - timedelta(days=j)] for j in range(1, 29) if morning - timedelta(days=j) in hrv)
+            return morning in hrv and len(past) >= 10 and hrv[morning] < past[len(past) // 2]
         classes: Dict[date, List[Tuple[datetime, datetime]]] = {}
         for e in list(events) + list(self.workouts):
             classes.setdefault(e["start"].date(), []).append((e["start"], e["end"]))
@@ -337,6 +353,8 @@ class Sam:
             stop = min(bed, self.now) if day == self.today else bed
             busy = classes.get(day, [])
             deadline_crunch = any(0 <= (self.today + timedelta(days=d[0]) - day).days <= 2 for d in DEADLINES)
+            late_night = usual_onset is not None and next_row.get("sleep_start") is not None and _since_noon(bed) > usual_onset
+            tense = stressed(day + timedelta(days=1))
             t = wake + timedelta(minutes=rng.uniform(1, 6))
             while t < stop:
                 if any(a <= t < b for a, b in busy):
@@ -346,15 +364,16 @@ class Sam:
                 hour = t.hour + t.minute / 60
                 before_bed = minutes_left < 60
                 if before_bed:
-                    weights = {"social": 5, "entertainment": 4, "communication": 1.5, "other": 0.5}
+                    weights = ({"social": 6, "entertainment": 5, "communication": 1, "other": 0.3} if late_night
+                               else {"social": 0.6, "entertainment": 0.2, "communication": 2, "other": 3})
                 elif hour < 12:
                     weights = {"social": 2.5, "communication": 2, "work": 2, "learning": 1.5, "other": 1}
                 elif hour < 18:
                     weights = {"work": 5 + (3 if deadline_crunch else 0), "learning": 2.5, "communication": 2,
-                               "social": 1.5, "entertainment": 1, "other": 0.8}
+                               "social": 1.5 * (3 if tense else 1), "entertainment": 1 * (4 if tense else 1), "other": 0.8}
                 else:
-                    weights = {"work": 2 + (4 if deadline_crunch else 0), "entertainment": 4.5, "social": 2.5,
-                               "communication": 1.5, "learning": 0.8, "other": 0.5}
+                    weights = {"work": 2 + (4 if deadline_crunch else 0), "entertainment": 4.5 * (3 if tense else 1),
+                               "social": 2.5 * (2.5 if tense else 1), "communication": 1.5, "learning": 0.8, "other": 0.5}
                 category = rng.choices(list(weights), list(weights.values()))[0]
                 device, app, _ = rng.choices(APPS[category], [w for _, _, w in APPS[category]])[0]
                 length = {"work": rng.expovariate(1 / 32), "learning": rng.expovariate(1 / 26),
@@ -413,58 +432,6 @@ class Sam:
                         t = end
                     t += timedelta(minutes=rng.uniform(3, 9) if busy else rng.uniform(5, 14))
         return out
-
-    # ---- AI agents ---------------------------------------------------------------------------
-    def ai(self, sessions: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
-        """Claude Code and Codex for Sam (ai_work, ai_prompts): whenever Sam is in Claude or the terminal on the
-        laptop, and in most coding sessions in VS Code (the agent in the editor), an instruction every few minutes,
-        each followed by a few minutes of the agent working (it keeps going when Sam picks up the phone); now and
-        then a second session at once; some nights a scheduled task."""
-        rng = random.Random(SEED + 13)
-        work: List[Dict] = []
-        prompts: Dict[tuple, float] = {}
-
-        def code(n: int) -> str:
-            return f"demo{n:06d}"
-
-        def stretch(start: datetime, minutes: float, tool: str, session: str, who: str) -> None:
-            end = start + timedelta(minutes=minutes)
-            calls = max(2.0, round(minutes * rng.uniform(2, 5)))
-            work.append({"start": start.replace(second=0, microsecond=0), "end": (end + timedelta(seconds=59)).replace(second=0, microsecond=0),
-                         "tool": tool, "session": session, "started_by": who, "minutes": round(minutes, 2),
-                         "calls": calls, "output_tokens": round(calls * rng.uniform(300, 1200))})
-
-        n = 0
-        for s in sessions:
-            if s["device"] != "laptop" or not (s["app"] in AGENT_APPS or (s["app"] in EDITOR_AGENT and rng.random() < EDITOR_AGENT[s["app"]])):
-                continue
-            length = (s["end"] - s["start"]).total_seconds() / 60
-            if length < 4:
-                continue
-            n += 1
-            tool = "claude_code" if s["app"] == "Claude" or rng.random() < 0.7 else "codex"
-            session = code(n)
-            t = s["start"] + timedelta(minutes=rng.uniform(0.3, 1.5))
-            while t < s["end"]:
-                key = (t.replace(second=0, microsecond=0), tool, session)
-                prompts[key] = prompts.get(key, 0) + 1
-                busy = rng.uniform(3, 13)
-                stretch(t + timedelta(seconds=20), busy, tool, session, "you")
-                t += timedelta(minutes=busy + rng.uniform(1, 6))  # reading what it did, then the next ask
-            if rng.random() < 0.25:  # a second session at once: the other agent on another part of the work
-                n += 1
-                other = "codex" if tool == "claude_code" else "claude_code"
-                start = s["start"] + timedelta(minutes=rng.uniform(1, 4))
-                prompts[(start.replace(second=0, microsecond=0), other, code(n))] = 1
-                stretch(start + timedelta(seconds=30), min(length, rng.uniform(8, 30)), other, code(n), "you")
-        for k in range(SCREEN_DAYS - 1, 0, -1):  # some nights a scheduled task (a nightly summary)
-            if rng.random() < 0.45:
-                n += 1
-                night = datetime.combine(self.today - timedelta(days=k), time(2, 10)) + timedelta(minutes=rng.uniform(0, 20))
-                stretch(night, rng.uniform(5, 14), "claude_code", code(n), "scheduled")
-        rows = [{"time": t, "tool": tool, "session": session, "started_by": "you", "count": float(c)}
-                for (t, tool, session), c in prompts.items() if t <= self.now]
-        return [w for w in work if w["end"] <= self.now + timedelta(minutes=1) or w["start"] < self.now], rows
 
 
 def demo_config(today: date, start_kg: float = 81.2) -> str:
@@ -535,9 +502,6 @@ def generate(out: Path, today: Optional[date] = None, now: Optional[datetime] = 
     write_table(data, "meals", sam.meals(body))
     sessions = sam.screen(body, events)
     write_table(data, "screen_sessions", sessions)
-    work, prompts = sam.ai(sessions)
-    write_table(data, "ai_work", work)
-    write_table(data, "ai_prompts", prompts)
     config = out / "healthaio.toml"
     config.write_text(demo_config(today, sam.weight_start_kg), encoding="utf-8")
     # one proposal from an assistant, waiting on the Goals page (see goal_log): it changes nothing until accepted

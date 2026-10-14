@@ -9,7 +9,6 @@ from pathlib import Path
 from healthaio.config import Config
 from healthaio.context import Context
 from healthaio.importers import apple_health
-from healthaio.modules import time as time_page
 from healthaio.store import Store, write_table
 
 TZ = "Australia/Melbourne"
@@ -65,9 +64,6 @@ class Pauses(Case):
 
         ctx = Context(self.cfg, now=datetime(2026, 10, 12, 18, 40))
         self.assertEqual(ctx.time_days()[date(2026, 10, 11)].total("exercise"), 60)  # as on Today, not 90
-        listed = time_page._workouts(ctx, date(2026, 10, 11), date(2026, 10, 11))
-        self.assertEqual(len(listed), 1)  # one workout in the list, with its moving minutes
-        self.assertEqual((listed[0]["start"], listed[0]["minutes"]), ("2026-10-11T09:00", 60))
 
     def test_duration_shorter_than_its_span_without_pause_events(self):
         self.run_import(workout("TraditionalStrengthTraining", "2026-10-11 17:00:00 +1100",

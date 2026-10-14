@@ -1,7 +1,8 @@
 // Health AIO design kit: stroke icons, coloured by currentColor. Part of the kit (see docs/DESIGN_KIT.md).
-// One per lane of the Time page and one per thing "what changed" can name, plus food (a bowl), a check (a usual
-// day), the up / down arrows of the change badge and the menu's glyphs (sun, calendar, heart, clock, battery, list,
-// database, target, walk, info, and sidebar for the fold button). Same grid (24), stroke (1.8) and round joins throughout.
+// One per kind of time and screen use, plus food (a bowl), a check (a usual day), the up / down arrows of a change
+// badge, the menu's glyphs (sun, calendar, heart, clock, battery, list, database, target, walk, info, and sidebar for
+// the fold button) and the devices data comes from (watch, phone, laptop, and tray for files brought in by hand).
+// Same grid (24), stroke (1.8) and round joins throughout.
 // Convention: the comment line right above each export is its one-line doc (`healthaio kit json` reads it).
 const svg = (body, size) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 const PATHS = {
@@ -16,7 +17,7 @@ const PATHS = {
   focus: '<rect x="4.5" y="5" width="15" height="10" rx="1.5"/><path d="M2.5 18.5h19"/><path d="m10.3 8-2 2 2 2M13.7 8l2 2-2 2"/>',
   // screens at once (the stacking ratio): two screens, one in front of the other
   ratio: '<rect x="2.5" y="4" width="13" height="9.5" rx="1.6"/><rect x="8.5" y="9.5" width="13" height="9.5" rx="1.6" fill="var(--halo)"/>',
-  // AI agents working for you: a sparkle
+  // an AI assistant: a sparkle
   ai: '<path d="M11 3.5 12.8 9l5.5 1.8-5.5 1.8L11 18l-1.8-5.4L3.7 10.8 9.2 9z"/><path d="M18.5 14.5l.8 2.1 2.2.8-2.2.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"/>',
   // the longest stretch on one thing: a stopwatch
   single: '<circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V10M10 3.5h4M12 3.5v3M18.2 7.3l1.3-1.3"/>',
@@ -41,12 +42,20 @@ const PATHS = {
   info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><circle cx="12" cy="7.9" r=".7" fill="currentColor"/>',
   // behaviour: a person walking
   walk: '<circle cx="13" cy="4.5" r="1.8"/><path d="m9.5 21 2.6-6.2 2.9 2.4V21M8 12.5l2-4.6 4 .8 2.5 3.3M12 8.7l.1 6.1"/>',
+  // where data comes from: a watch (sleep, HRV, resting heart rate)
+  watch: '<rect x="6.5" y="6" width="11" height="12" rx="3.2"/><path d="M9 6l.6-3h4.8l.6 3M9 18l.6 3h4.8l.6-3M17.5 10.5h1"/><path d="M12 9.3V12l1.8 1.2"/>',
+  // a phone (steps, weight, food logs, and the app that sends Apple Health)
+  phone: '<rect x="6.5" y="2.5" width="11" height="19" rx="2.6"/><path d="M10.5 5.3h3M11 18.6h2"/>',
+  // a laptop (Screen Time, and the computer the dashboard runs on)
+  laptop: '<rect x="4.5" y="5" width="15" height="10" rx="1.5"/><path d="M2.5 18.5h19"/>',
+  // files brought in by hand: an arrow into a tray
+  tray: '<path d="M12 3.5v10M8 9.8l4 4 4-4"/><path d="M4 14.5v3.5A2 2 0 0 0 6 20h12a2 2 0 0 0 2-2v-3.5"/>',
 };
 // The names icon() knows, in drawing order.
 export const ICON_KEYS = Object.freeze(Object.keys(PATHS));
 // The icon for key at size px (an unknown key draws the dashed clock of "not recorded").
 export function icon(key, size = 20) { return svg(PATHS[key] || PATHS.not_recorded, size); }
-// The colour each icon is drawn in: its data colour (ai: focus blue, work done for you), ink-3 for not recorded, ink-2 for the check, food (no data colour of its own) and the two devices-at-once measures; the menu glyphs take the text colour.
+// The colour each icon is drawn in: its data colour (ai, the AI assistant: focus blue), ink-3 for not recorded, ink-2 for the check, food (no data colour of its own) and the two devices-at-once measures; the menu glyphs take the text colour.
 export const COLOR = { sleep: "var(--c-sleep)", exercise: "var(--c-exercise)", calendar: "var(--c-event)", screen: "var(--c-focus)",
   focus: "var(--c-focus)", fun: "var(--c-fun)", communication: "var(--c-comms)", other: "var(--c-other)", not_recorded: "var(--ink-3)",
   ratio: "var(--ink-2)", single: "var(--ink-2)", ai: "var(--c-focus)", check: "var(--ink-2)", food: "var(--ink-2)" };

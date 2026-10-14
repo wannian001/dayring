@@ -1,4 +1,4 @@
-"""The Time page: each activity measured from its own record, minute by minute.
+"""Minutes by activity (the day ring's and the Stimulation page's ground), and the Stimulation page (#time).
 
 Rules under test (healthaio/context.py, healthaio/modules/time.py):
 - a record that crosses midnight is split at midnight, minute by minute;
@@ -7,11 +7,10 @@ Rules under test (healthaio/context.py, healthaio/modules/time.py):
 - a day without the record an activity needs shows None for it, never 0 (tests/test_time_coverage.py);
 - a workout known only as a daily total (body_daily.workout_min) still counts, without hours;
 - planned training on the calendar is not counted; logged workouts are;
-- the page names what changed compared with your normal, never the biggest activity: the screen
-  total is not a candidate, a day without a record is left out of the normal, a change counts only
-  when it is at least one band width outside normal, and the biggest of those in minutes is named; a
-  day is compared with the 28 days before it, the 7-day average with your usual 7-day averages (see
-  WhatChanged below).
+- Stimulation: five Screen Time signals, each the shown days' daily average against your usual 7-day averages;
+  a day without Screen Time is unknown, never calm; a signal is above or below normal only one band width
+  outside it; the page leads with entertainment & social; how the body answered is an association with a
+  95% interval and Benjamini-Hochberg, called a difference only when it survives (see Stimulation below).
 """
 import json
 import re
@@ -25,7 +24,7 @@ from pathlib import Path
 from healthaio import config, demo
 from healthaio.config import Config
 from healthaio import stats
-from healthaio.context import ACTIVITIES, SCREEN_PARTS, STACK_KEYS, Context
+from healthaio.context import ACTIVITIES, SCREEN_PARTS, Context
 from healthaio.importers import apple_health
 from healthaio.modules import PAGES, static_params
 from healthaio.modules import time as time_page
@@ -48,10 +47,10 @@ def walk(value, skip=("delta",)):
     if isinstance(value, dict):
         for k, v in value.items():
             if k not in skip:
-                yield from walk(v)
+                yield from walk(v, skip)
     elif isinstance(value, list):
         for v in value:
-            yield from walk(v)
+            yield from walk(v, skip)
     else:
         yield value
 
@@ -188,16 +187,6 @@ class TimeDaysMinutes(FolderCase):
         self.assertEqual(rest.value("exercise"), 0)       # a rest day is a known 0
         self.assertIsNone(unknown.value("exercise"))       # an empty workout_min is unknown, not 0
 
-        page = payload(ctx.cfg, "time", None, ctx.now)
-        span = page["span"]
-        self.assertEqual([d["date"] for d in span["days"]], ["2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05"])
-        self.assertTrue(span["untimed_exercise"])
-        self.assertEqual(span["exercise_days"], 2)
-        self.assertEqual(span["exercise_known"], 3)
-        self.assertEqual(span["known"]["exercise"], 3)
-        self.assertAlmostEqual(span["avg"]["exercise"], (45 + 30 + 0) / 3)  # 3-05 is left out, not counted as 0
-        self.assertAlmostEqual(sum(h["exercise"] for h in span["by_hour"]), 30 / 3)  # only the timed workout has hours
-        self.assertEqual([w["type"] for w in span["workouts"]], ["running"])
 
     def test_planned_training_is_not_counted_but_workouts_are(self):
         ctx = self.context(
@@ -252,58 +241,54 @@ def at(d: date, hour: int, minute: int = 0) -> datetime:
     return datetime.combine(d, datetime.min.time()) + timedelta(hours=hour, minutes=minute)
 
 
-class WhatChanged(FolderCase):
-    """The standout is the biggest clear change against your normal, not the biggest activity."""
+def stressful(first: date, last: date, fun, hrv):
+    """history() plus HRV: ``fun(k)`` minutes of entertainment on the k-th day, ``hrv(k)`` the next morning."""
+    body, sessions = history(first, last, fun=fun)
+    for k, row in enumerate(body):
+        if k:
+            row["hrv_ms"] = hrv(k - 1)
+    return body, sessions
+
+
+class Stimulation(FolderCase):
+    """What goes in against your normal, and how the body answered."""
     WEEK = date(2026, 10, 5)  # the first shown day of the latest page (today = 12 Oct)
 
-    def test_fun_above_normal_is_named_although_screens_are_the_biggest(self):
+    def test_more_entertainment_than_usual_reads_high(self):
         week = self.WEEK
-        # four normal weeks (fun 90-130 minutes, work 420-460), then a week with 200 minutes of fun a day
+        # four usual weeks (fun 90-130 minutes), then a week with 200 minutes of fun a day
         body, sessions = history(date(2026, 8, 20), date(2026, 10, 11),
                                  fun=lambda k: 200 if date(2026, 8, 20) + timedelta(days=k) >= week else 90 + (k % 5) * 10)
         ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions)
-        span = time_page.build(ctx)["span"]
+        p = time_page.build(ctx)
+        span = p["span"]
         self.assertEqual(span["from"], "2026-10-05")
-        normal = time_page.typical_week(time_page.normal_series(ctx)["fun"], week)
-        for d in span["days"]:
-            tot = d["totals"]
-            self.assertGreater(tot["screen"], max(tot["sleep"] or 0, tot["exercise"] or 0, tot["calendar"] or 0), d["date"])  # screens win every day
-            s = d["standout"]
-            self.assertEqual((s["key"], s["state"], s["tone"]), ("fun", "high", "bad"), d["date"])
-            self.assertAlmostEqual(s["delta"], 200 - s["band"]["median"])
-            self.assertGreaterEqual(s["score"], time_page.STANDOUT_MIN, d["date"])
-        top = span["standout"]
-        self.assertEqual((top["key"], top["state"], top["tone"], top["clear"]), ("fun", "high", "bad", True))
-        self.assertEqual(top["band"], normal)  # your usual 7-day averages before the first shown day
-        self.assertAlmostEqual(top["value"], 200)
-        self.assertAlmostEqual(top["delta"], 200 - normal["median"])
-        self.assertEqual(span["changes"][0], top)
-        self.assertNotIn("screen", [c["key"] for c in span["changes"]])  # the total is never a candidate
-        self.assertEqual(span["metrics"]["screen"]["state"], "high")       # it is still shown against its normal
-        self.assertNotIn("top", span)
-        self.assertNotIn("top", span["days"][0])
+        fun = span["metrics"]["fun"]
+        normal = time_page.typical_week(time_page.stim_series(ctx)["fun"], week)
+        self.assertEqual(fun["band"], normal)  # your usual 7-day averages before the first shown day
+        self.assertAlmostEqual(fun["value"], 200)
+        self.assertEqual((fun["state"], fun["tone"], fun["clear"]), ("high", "bad", True))
+        self.assertAlmostEqual(fun["delta"], 200 - normal["median"])
+        self.assertEqual(span["level"], "high")
+        # the hours add up to the minutes: 20:00-23:20 every day of the week
+        self.assertAlmostEqual(sum(p["hours"]["now"]), 200)
+        self.assertEqual([round(v) for v in p["hours"]["now"][20:23]], [60, 60, 60])
+        self.assertEqual(p["apps"][0]["app"], "YouTube")
 
-    def test_a_usual_week_has_no_standout(self):
+    def test_a_usual_week_reads_normal(self):
         body, sessions = history(date(2026, 8, 20), date(2026, 10, 11), fun=lambda k: 110, work=lambda k: 440)
         ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions)
         span = time_page.build(ctx)["span"]
-        self.assertIsNone(span["standout"])
-        self.assertTrue(all(c["score"] == 0 for c in span["changes"]))
-        self.assertEqual({c["key"]: c["state"] for c in span["changes"]},
-                         {"fun": "normal", "focus": "normal", "communication": "normal", "sleep": "normal",
-                          "exercise": "normal", "calendar": None,  # no calendar file: not compared
-                          "ratio": "normal", "single": "normal"})  # one device: always one screen at a time
-        self.assertEqual(span["compared"], 7)
-        for d in span["days"]:
-            self.assertIsNone(d["standout"], d["date"])
-            # the last day's evening belongs to tonight's sleep, not recorded yet: sleep is not compared
-            self.assertEqual(d["compared"], 6 if d["date"] == "2026-10-11" else 7, d["date"])
+        self.assertEqual(span["level"], "normal")
+        self.assertEqual(span["also"], [])
+        self.assertTrue(all(m["score"] == 0 and not m["clear"] for m in span["metrics"].values()))
+        self.assertEqual(span["metrics"]["ratio"]["state"], "normal")  # one device at a time, as always
 
     def test_a_varied_usual_week_stays_quiet(self):
-        # the same random habits every day: each day lands outside the middle half of something about
-        # half the time, but almost never one band width outside it
+        # the same random habits every day: a week lands outside the middle half now and then, but seldom one
+        # band width outside it
         import random
-        quiet_days = days = quiet_spans = spans = 0
+        quiet = spans = 0
         for seed in range(6):
             rng = random.Random(seed)
             fun = [rng.randint(100, 200) for _ in range(80)]
@@ -312,92 +297,47 @@ class WhatChanged(FolderCase):
             ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions)
             page = time_page.build(ctx)
             for _ in range(5):
-                span = page["span"]
                 spans += 1
-                quiet_spans += span["standout"] is None
-                for d in span["days"]:
-                    days += 1
-                    quiet_days += d["standout"] is None
-                    if d["standout"]:
-                        self.assertGreaterEqual(abs(d["standout"]["delta"]), time_page.DAY_MIN_WIDTH)
+                quiet += page["span"]["level"] == "normal"
                 page = time_page.build(ctx, page["prev"])
             shutil.rmtree(self.tmp / "data")
-        # (with "anything outside the middle half" nearly every day and every week would name something)
-        self.assertGreaterEqual(quiet_days / days, 0.85, (quiet_days, days))
-        self.assertGreaterEqual(quiet_spans / spans, 2 / 3, (quiet_spans, spans))
+        self.assertGreaterEqual(quiet / spans, 2 / 3, (quiet, spans))
 
-    def test_a_week_without_exercise_reads_low(self):
-        # three 50-minute workouts a week, then none at all: the 7-day average falls from about 21 minutes
-        # a day to 0. Single days are 0 on four days of every week, so a band of single days would call it
-        # normal; the band of 7-day averages does not.
-        body, sessions = history(date(2026, 8, 20), date(2026, 10, 11), fun=lambda k: 110, work=lambda k: 440)
-        workouts = weekdays_from(date(2026, 8, 20), self.WEEK - timedelta(days=1), (0, 2, 4), lambda d: {
-            "start": at(d, 18), "end": at(d, 18, 50), "type": "running", "source": "Apple Watch"})
-        ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions, workouts=workouts)
-        span = time_page.build(ctx)["span"]
-        ex = span["metrics"]["exercise"]
-        self.assertEqual(span["known"]["exercise"], 7)
-        self.assertEqual(ex["value"], 0)
-        self.assertAlmostEqual(ex["band"]["median"], 150 / 7)
-        self.assertEqual((ex["state"], ex["tone"], ex["clear"]), ("low", "bad", True))
-        self.assertAlmostEqual(ex["delta"], -150 / 7)
-        self.assertEqual(span["standout"]["key"], "exercise")
-        # a band of single days has its bottom at 0, so 0 would sit inside it
-        self.assertEqual(stats.typical(time_page.normal_series(ctx)["exercise"], self.WEEK)["q1"], 0)
-
-    def test_a_week_without_classes_reads_low(self):
-        body, sessions = history(date(2026, 8, 20), date(2026, 10, 11), fun=lambda k: 110, work=lambda k: 440)
-        events = weekdays_from(date(2026, 8, 20), self.WEEK - timedelta(days=1), range(5), lambda d: {
-            "start": at(d, 10), "end": at(d, 12), "title": "Lecture", "kind": "class"})
-        ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions, events=events)
-        span = time_page.build(ctx)["span"]
-        cal = span["metrics"]["calendar"]
-        self.assertEqual(span["known"]["calendar"], 7)  # the calendar file exists, the week is just empty
-        self.assertEqual((cal["value"], cal["state"], cal["tone"], cal["clear"]), (0, "low", "neutral", True))
-        self.assertAlmostEqual(cal["delta"], -600 / 7)
-        self.assertEqual(span["standout"]["key"], "calendar")
-
-    def test_a_day_without_screen_time_never_makes_fun_or_focus_the_standout(self):
+    def test_a_day_without_screen_time_is_unknown_not_calm(self):
         gap = {date(2026, 9, 14) + timedelta(days=k) for k in range(14)}  # Screen Time off for two weeks
         body, sessions = history(date(2026, 8, 1), date(2026, 10, 11), skip=gap)
         ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions)
-        series = time_page.normal_series(ctx)
-        self.assertFalse(gap & set(series["fun"]))  # the gap is not two weeks of zero fun
-        self.assertFalse(gap & set(series["focus"]))
-        # the week inside the gap: fun and focus are unknown, so they are neither standout nor compared
+        series = time_page.stim_series(ctx)
+        for key in time_page.STIM_KEYS:
+            self.assertFalse(gap & set(series[key]), key)  # the gap is not two weeks of zero
+        # the week inside the gap: nothing is known, so nothing is compared
         p = time_page.build(ctx, "2026-09-27")
-        for d in p["span"]["days"]:
-            self.assertIsNone(d["totals"]["fun"], d["date"])
-            if d["standout"]:
-                self.assertNotIn(d["standout"]["key"], ("fun", "focus", "communication"), d["date"])
-        for c in p["span"]["changes"]:
-            if c["key"] in ("fun", "focus", "communication"):
-                self.assertIsNone(c["value"])
-                self.assertIsNone(c["state"])
-                self.assertEqual(c["score"], 0)
+        self.assertIsNone(p["span"]["level"])
+        for key, m in p["span"]["metrics"].items():
+            self.assertIsNone(m["value"], key)
+            self.assertEqual(m["score"], 0, key)
         # back on screens with the usual habits: the normal skips the gap, so nothing reads as a jump
-        # (with the gap counted as 0 the normal would sink and the usual 110 minutes of fun would look high)
         span = time_page.build(ctx)["span"]
-        for key in ("fun", "focus"):
-            m = span["metrics"][key]
-            self.assertFalse(m["clear"], key)
-            self.assertLess(abs(m["delta"]), 10, key)
-        # 7-day averages with at least 4 days of screen time: 10 before the gap, 4 after it
-        self.assertEqual(span["metrics"]["fun"]["band"]["days"], 14)
-        self.assertIsNone(span["standout"])
+        self.assertFalse(span["metrics"]["fun"]["clear"])
+        self.assertLess(abs(span["metrics"]["fun"]["delta"]), 10)
+        self.assertEqual(span["metrics"]["fun"]["band"]["days"], 14)  # 10 averages before the gap, 4 after it
+
+    def test_the_hour_before_sleep_needs_both_days_on_record(self):
+        # entertainment until 23:20 every evening, asleep at 23:00: 60 minutes of it in the last hour
+        body, sessions = history(date(2026, 9, 1), date(2026, 10, 11), fun=lambda k: 200)
+        ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions)
+        series = time_page.stim_series(ctx)
+        self.assertEqual(series["before_sleep"][date(2026, 10, 1)], 60)
+        # the night after the last whole day (11 Oct) ends this morning; its hour is on record
+        self.assertIn(date(2026, 10, 10), series["before_sleep"])
 
     def test_tone_follows_the_better_direction(self):
         band = {"q1": 100.0, "median": 120.0, "q3": 140.0, "days": 20}
-        tones = {(key, value): time_page.compare(key, value, band, 15)["tone"]
-                 for key in time_page.CANDIDATES for value in (60.0, 120.0, 200.0)}
-        self.assertEqual(tones[("fun", 200.0)], "bad")
-        self.assertEqual(tones[("fun", 60.0)], "good")
-        for key in ("focus", "exercise", "sleep"):
-            self.assertEqual(tones[(key, 200.0)], "good", key)
-            self.assertEqual(tones[(key, 60.0)], "bad", key)
-        for key in ("communication", "calendar"):
-            self.assertEqual({tones[(key, 60.0)], tones[(key, 200.0)]}, {"neutral"}, key)
-        self.assertEqual({tones[(k, 120.0)] for k in time_page.CANDIDATES}, {"neutral"})  # within normal
+        for key in time_page.STIM_KEYS:
+            high, low = time_page.compare(key, 400.0, band), time_page.compare(key, 20.0, band)
+            want = ("good", "bad") if key == "longest_focus" else ("bad", "good")
+            self.assertEqual((high["tone"], low["tone"]), want, key)
+            self.assertEqual(time_page.compare(key, 120.0, band)["tone"], "neutral", key)
 
     def test_score_is_distance_outside_in_band_widths(self):
         band = {"q1": 100.0, "median": 120.0, "q3": 140.0, "days": 20}
@@ -406,55 +346,55 @@ class WhatChanged(FolderCase):
         self.assertAlmostEqual(time_page.score(180, band, 15), 40 / 40)
         self.assertAlmostEqual(time_page.score(80, band, 15), 20 / 40)
         narrow = {"q1": 10.0, "median": 12.0, "q3": 14.0, "days": 20}
-        self.assertAlmostEqual(time_page.score(29, narrow, 15), 15 / 15)    # at least 15 minutes wide (7-day averages)
-        self.assertAlmostEqual(time_page.score(44, narrow, 30), 30 / 30)    # at least 30 minutes wide (single days)
+        self.assertAlmostEqual(time_page.score(29, narrow, 15), 15 / 15)    # at least 15 minutes wide
         steady = {"q1": 470.0, "median": 480.0, "q3": 490.0, "days": 20}
         self.assertAlmostEqual(time_page.score(538, steady, 30), 48 / 48)   # or a tenth of the usual value, if larger
         self.assertEqual(time_page.score(None, band, 15), 0)
         self.assertEqual(time_page.score(500, None, 15), 0)
 
-    def test_values_are_compared_in_whole_minutes(self):
+    def test_values_are_compared_as_printed(self):
         band = {"q1": 100.2, "median": 120.0, "q3": 475.5, "days": 20}
-        on_edge = time_page.compare("sleep", 475.57, band, 30)  # prints as the top of the normal
+        on_edge = time_page.compare("fun", 475.57, band)  # prints as the top of the normal
         self.assertEqual((on_edge["state"], on_edge["score"], on_edge["clear"]), ("normal", 0, False))
-        self.assertEqual(time_page.compare("sleep", 476.6, band, 30)["state"], "high")
+        self.assertEqual(time_page.compare("fun", 476.6, band)["state"], "high")
+        switches = {"q1": 4.5, "median": 4.6, "q3": 4.71, "days": 20}
+        self.assertEqual(time_page.compare("switches", 4.74, switches)["state"], "normal")  # 4.7 / h either way
+        self.assertEqual(time_page.compare("switches", 4.76, switches)["state"], "high")
 
     def test_a_change_must_be_clearly_outside(self):
         band = {"q1": 100.0, "median": 120.0, "q3": 140.0, "days": 20}
-        just = time_page.compare("fun", 170.0, band, 15)        # 30 minutes past the edge of a 40-minute band
+        just = time_page.compare("fun", 170.0, band)        # 30 minutes past the edge of a 40-minute band
         self.assertEqual((just["state"], just["clear"]), ("high", False))
-        self.assertIsNone(time_page.standout([just]))
-        clear = time_page.compare("fun", 180.0, band, 15)       # one band width past it
-        self.assertTrue(clear["clear"])
-        self.assertEqual(time_page.standout([just, clear]), clear)
-        # a single day: communication 28 minutes above an 18-minute band is not a change (the band counts
-        # as 30 minutes wide), entertainment 130 minutes above a 110-minute band is
-        comms = time_page.compare("communication", 58.0, {"q1": 12.0, "median": 18.0, "q3": 30.0}, time_page.DAY_MIN_WIDTH)
-        fun = time_page.compare("fun", 387.0, {"q1": 146.0, "median": 189.0, "q3": 257.0}, time_page.DAY_MIN_WIDTH)
-        self.assertEqual((comms["state"], comms["clear"]), ("high", False))
-        self.assertEqual(time_page.standout([comms, fun])["key"], "fun")
+        self.assertTrue(time_page.compare("fun", 180.0, band)["clear"])  # one band width past it
+        ratio = {"q1": 112.0, "median": 114.0, "q3": 116.0, "days": 20}  # hundredths: 1.12x-1.16x
+        self.assertFalse(time_page.compare("ratio", 120.0, ratio)["clear"])  # the band counts as 0.05 wide
+        self.assertTrue(time_page.compare("ratio", 121.0, ratio)["clear"])
 
-    def test_the_biggest_clear_change_in_minutes_is_named(self):
-        # communication is further outside in band widths, but focused work moved far more minutes:
-        # the sentence names focused work, so its minutes are the biggest number on the page
-        comms = time_page.compare("communication", 60.0, {"q1": 10.0, "median": 15.0, "q3": 20.0}, 15)
-        focus = time_page.compare("focus", 180.0, {"q1": 300.0, "median": 340.0, "q3": 380.0}, 15)
-        self.assertGreater(comms["score"], focus["score"])
-        self.assertTrue(comms["clear"] and focus["clear"])
-        ranked = time_page.ranked([comms, focus])
-        self.assertEqual([c["key"] for c in ranked], ["focus", "communication"])
-        self.assertEqual(time_page.standout(ranked)["key"], "focus")
-        self.assertAlmostEqual(time_page.standout(ranked)["delta"], -160)
+    def test_the_body_answer_is_called_a_difference_only_when_it_survives(self):
+        # 90 days alternating busy (300 minutes of fun) and quiet (60) days; HRV 10% lower after the busy ones
+        first, last = date(2026, 7, 1), date(2026, 10, 11)
+        busy = lambda k: k % 2 == 0
+        body, sessions = stressful(first, last, fun=lambda k: 300 if busy(k) else 60,
+                                   hrv=lambda k: (45 if busy(k) else 50) + (k % 3) * 0.5)
+        ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions)
+        r = time_page.build(ctx)["response"]
+        self.assertEqual(r["days"], time_page.RESPONSE_DAYS)
+        rows = {(x["exposure"], x["outcome"]): x for x in r["rows"]}
+        self.assertEqual(len(rows), 8)
+        hrv = rows[("fun_high", "hrv")]
+        self.assertTrue(hrv["detected"])
+        self.assertLess(hrv["high"], 0)  # lower after busy days, the whole interval below zero
+        self.assertFalse(rows[("fun_high", "resting_hr")].get("detected", False))  # no heart rate recorded
+        self.assertEqual(rows[("fun_high", "resting_hr")]["status"], "too_few")
+        # the same every evening: no calm evenings to compare with
+        self.assertEqual(rows[("late_fun", "asleep")]["status"], "too_few")
 
-    def test_ties_follow_the_candidate_order(self):
-        band = {"q1": 100.0, "median": 120.0, "q3": 140.0, "days": 20}
-        changes = [time_page.compare(k, 180.0, band, 15) for k in reversed(time_page.CANDIDATES)]
-        self.assertEqual(time_page.standout(changes)["key"], "fun")
-        changes = [time_page.compare("sleep", 180.0, band, 15), time_page.compare("exercise", 180.0, band, 15),
-                   time_page.compare("fun", 130.0, band, 15)]
-        self.assertEqual(time_page.standout(changes)["key"], "exercise")
-        self.assertIsNone(time_page.standout([time_page.compare("fun", 130.0, band, 15)]))
-        self.assertEqual(time_page.CANDIDATES, ("fun", "focus", "communication", "exercise", "calendar", "sleep", "ratio", "single"))
+    def test_too_few_days_say_so(self):
+        body, sessions = stressful(date(2026, 10, 1), date(2026, 10, 11), fun=lambda k: 100 + k, hrv=lambda k: 50)
+        ctx = self.context(dt(10, 12, 18, 40), body_daily=body, screen_sessions=sessions)
+        r = time_page.build(ctx)["response"]
+        self.assertIsNone(r["median_fun"])
+        self.assertTrue(all(x["status"] == "too_few" for x in r["rows"]))
 
 
 class DemoTimePage(unittest.TestCase):
@@ -479,127 +419,52 @@ class DemoTimePage(unittest.TestCase):
         label = p["day"]
         self.assertFalse(p["empty"], label)
         json.dumps(p)  # JSON-ready without default=str
-        for v in walk(p):
+        for v in walk(p, skip=("delta", "diff", "low", "high", "rows")):
             if isinstance(v, (int, float)) and not isinstance(v, bool):
                 self.assertGreaterEqual(v, 0, label)
         span = p["span"]
-        dates = [date.fromisoformat(d["date"]) for d in span["days"]]
+        ctx = Context(self.cfg, now=NOW)
+        every = time_page.data_days(ctx)
+        shown = [d for d in every if span["from"] <= d.isoformat() <= span["to"]]
         self.assertEqual(span["n"], 7, label)
-        self.assertEqual(len(dates), 7, label)
-        self.assertEqual(dates, sorted(dates), label)
-        self.assertTrue(all(d < TODAY for d in dates), label)  # today is not over, so never in the span
-        self.assertEqual((dates[-1] - dates[0]).days, 6, label)  # the demo records every day: 7 whole days in a row
-        self.assertEqual(span["from"], dates[0].isoformat())
-        self.assertEqual(span["to"], dates[-1].isoformat())
+        self.assertEqual(len(shown), 7, label)
+        self.assertTrue(all(d < TODAY for d in shown), label)  # today is not over, so never in the span
+        self.assertEqual((shown[-1] - shown[0]).days, 6, label)  # the demo records every day: 7 whole days in a row
         self.assertEqual(p["day"], span["to"])
-
-        for d in span["days"]:
-            tot, length = d["totals"], d["minutes_in_day"]
-            self.assertIn(length, (1380, 1440, 1500), d["date"])
-            lanes = [tot[a] for a in ACTIVITIES if tot[a] is not None]
-            for key, value in tot.items():
-                if value is not None and key not in STACK_KEYS:  # device time may add up to more than the day
-                    self.assertLessEqual(value, length, (d["date"], key))
-            if tot["stacked"] is not None:  # every minute on a screen has at least one device left after the deductions
-                self.assertGreaterEqual(tot["stacked"], tot["screen"], d["date"])
-                self.assertAlmostEqual(tot["ratio"], tot["stacked"] / tot["screen"] * 100, msg=d["date"])
-                self.assertLessEqual(tot["single"], tot["screen"], d["date"])
-            self.assertIsNotNone(tot["screen"], d["date"])  # the demo has screen time every day
-            self.assertAlmostEqual(tot["screen"], sum(tot[k] for k in SCREEN_PARTS), msg=d["date"])
-            if tot["not_recorded"] is not None:
-                self.assertIsNotNone(tot["sleep"], d["date"])
-                # recorded = length - not_recorded lies between the biggest lane and the sum of the lanes
-                recorded = length - tot["not_recorded"]
-                self.assertGreaterEqual(recorded + 1e-9, max(lanes), d["date"])
-                self.assertLessEqual(recorded, sum(lanes) + 1e-9, d["date"])
-            s = d["standout"]
-            self.assertNotIn("top", d)
-            if s is not None:  # what changed that day, against the 28 days before it
-                self.assertIn(s["key"], time_page.CANDIDATES, d["date"])
-                self.assertEqual(s["value"], tot[s["key"]], d["date"])
-                self.assertIn(s["state"], ("high", "low"), d["date"])
-                self.assertLessEqual(s["band"]["days"], 28)
-                self.assertAlmostEqual(s["delta"], s["value"] - s["band"]["median"], msg=d["date"])
-                self.assertEqual(s["tone"], stats.tone(s["state"], time_page.BETTER[s["key"]]))
-                self.assertGreaterEqual(s["score"], time_page.STANDOUT_MIN, d["date"])  # clearly outside, not a wobble
-
-        avg = span["avg"]
-        for key in avg:
-            values = [d["totals"][key] for d in span["days"] if d["totals"][key] is not None]
-            self.assertEqual(span["known"][key], len(values), (label, key))
-            if key == "ratio":  # the span's device time over its clock time, so it agrees with the two hours beside it
-                self.assertAlmostEqual(avg[key], avg["stacked"] / avg["screen"] * 100, msg=label)
-            elif values:  # each average is over the days that have that record, never padded with zeros
-                self.assertAlmostEqual(avg[key], sum(values) / len(values), msg=(label, key))
+        series = time_page.stim_series(ctx)
+        self.assertEqual(span["screen_days"], sum(1 for d in shown if d in series["fun"]))
+        M = span["metrics"]
+        self.assertEqual(sorted(M), sorted(time_page.STIM_KEYS))
+        for key, m in M.items():
+            have = [series[key][d] for d in shown if d in series[key]]
+            self.assertEqual(m["known"], len(have), (label, key))
+            if key != "ratio" and have:  # each average is over the days that have the record, never padded with zeros
+                self.assertAlmostEqual(m["value"], sum(have) / len(have), msg=(label, key))
+            if m["state"] in (None, "normal"):
+                self.assertEqual(m["score"], 0, (label, key))
+            self.assertEqual(m["clear"], m["score"] >= time_page.STANDOUT_MIN, (label, key))
+            self.assertEqual(m["tone"], stats.tone(m["state"], time_page.BETTER[key]), (label, key))
+        self.assertEqual(span["level"], time_page.level(M))
+        self.assertEqual(span["also"], [k for k in time_page.STIM_KEYS[1:] if M[k]["clear"]])
+        # the hour chart adds up to the daily average of entertainment & social
+        self.assertEqual(len(p["hours"]["now"]), 24)
+        self.assertAlmostEqual(sum(p["hours"]["now"]), M["fun"]["value"], msg=label)
+        self.assertTrue(all(v <= 60 + 1e-9 for v in p["hours"]["now"]), label)
+        # where it came from: entertainment and social apps only, most first
+        self.assertTrue(all(a["category"] in ("entertainment", "social") for a in p["apps"]), label)
+        minutes = [a["minutes"] for a in p["apps"]]
+        self.assertEqual(minutes, sorted(minutes, reverse=True), label)
+        self.assertLessEqual(p["plan"]["over"], p["plan"]["known"])
+        # how the body answered: eight comparisons; a difference only when it survives the correction
+        R = p["response"]
+        self.assertEqual(len(R["rows"]), len(time_page.EXPOSURES) * len(time_page.OUTCOMES))
+        for row in R["rows"]:
+            if row["status"] == "ok":
+                self.assertLessEqual(row["low"], row["diff"])
+                self.assertLessEqual(row["diff"], row["high"])
+                self.assertEqual(row["detected"], row["p_adjusted"] < stats.FDR)
             else:
-                self.assertIsNone(avg[key], (label, key))
-        self.assertAlmostEqual(avg["screen"], sum(avg[k] for k in SCREEN_PARTS), msg=label)
-
-        # what changed: every candidate once, the clear changes first (biggest in minutes first; the ratio by the
-        # device minutes it means at that screen time), then the rest (furthest outside first); the standout is
-        # the first clear one, the screen total never one
-        changes = span["changes"]
-        self.assertEqual(sorted(c["key"] for c in changes), sorted(time_page.CANDIDATES), label)
-        clear = [c for c in changes if c["clear"]]
-        self.assertEqual(changes[:len(clear)], clear, label)
-        for c in clear:
-            minutes = abs(c["delta"]) / 100 * avg["screen"] if c["key"] == "ratio" else abs(c["delta"])
-            self.assertAlmostEqual(c["size"], minutes, msg=(label, c["key"]))
-        self.assertEqual([c["size"] for c in clear], sorted((c["size"] for c in clear), reverse=True), label)
-        rest = [c["score"] for c in changes[len(clear):]]
-        self.assertEqual(rest, sorted(rest, reverse=True), label)
-        for c in changes:
-            self.assertEqual(c["value"], avg[c["key"]], (label, c["key"]))
-            self.assertEqual(c, span["metrics"][c["key"]])
-            if c["state"] in (None, "normal"):
-                self.assertEqual(c["score"], 0, (label, c["key"]))
-            else:
-                self.assertGreater(c["score"], 0, (label, c["key"]))
-            self.assertEqual(c["clear"], c["score"] >= time_page.STANDOUT_MIN, (label, c["key"]))
-        if span["standout"] is None:
-            self.assertEqual(clear, [], label)
-        else:
-            self.assertEqual(span["standout"], changes[0], label)
-            self.assertTrue(span["standout"]["clear"], label)
-        self.assertNotIn("top", span)
-        self.assertNotIn("before", p)  # one baseline for the whole page: no "vs the 7 days before"
-        screen = span["metrics"]["screen"]  # the total keeps a tile, compared once its normal exists
-        self.assertIn(screen["state"], ("high", "low", "normal") if screen["band"] else (None,), label)
-
-        # the hour chart adds up to the per-day numbers
-        self.assertEqual(len(span["by_hour"]), 24)
-        for key in HOUR_KEYS:
-            self.assertAlmostEqual(sum(h[key] for h in span["by_hour"]), avg[key], msg=(label, key))
-        if not span["untimed_exercise"]:
-            self.assertAlmostEqual(sum(h["exercise"] for h in span["by_hour"]), avg["exercise"], msg=label)
-        for h in span["by_hour"]:
-            for key in ("sleep", "exercise", "calendar"):
-                self.assertLessEqual(h[key], 60 + 1e-9, label)
-            self.assertLessEqual(sum(h[k] for k in SCREEN_PARTS), 60 + 1e-9, label)
-
-        # the workouts list is the exercise lane (the demo's workouts never overlap or cross midnight)
-        starts = [w["start"] for w in span["workouts"]]
-        self.assertEqual(starts, sorted(starts))
-        for w in span["workouts"]:
-            self.assertGreater(w["minutes"], 0)
-            self.assertTrue(span["from"] <= w["start"][:10] <= span["to"], w)
-        if not span["untimed_exercise"]:
-            self.assertAlmostEqual(sum(w["minutes"] for w in span["workouts"]),
-                                   sum(d["totals"]["exercise"] or 0 for d in span["days"]), msg=label)
-        self.assertEqual(span["exercise_days"], sum(1 for d in span["days"] if (d["totals"]["exercise"] or 0) > 0))
-        self.assertEqual(span["exercise_known"], sum(1 for d in span["days"] if d["totals"]["exercise"] is not None))
-
-        # 30 days of history ending on the shown day; the 7 shown days are shaded
-        hist = p["history"]
-        self.assertEqual(len(hist), 30)
-        hd = [date.fromisoformat(h["date"]) for h in hist]
-        self.assertEqual(hd[-1], dates[-1])
-        self.assertTrue(all((b - a).days == 1 for a, b in zip(hd, hd[1:])))
-        self.assertEqual({h["date"] for h in hist if h["in_span"]}, {d.isoformat() for d in dates})
-        by_date = {d["date"]: d["totals"] for d in span["days"]}
-        for h in hist:
-            if h["in_span"]:
-                self.assertEqual(h["totals"], by_date[h["date"]])
+                self.assertNotIn("detected", row)
         self.assertEqual(span["stale"], [], label)  # every demo record runs up to yesterday
 
     def test_latest_page_invariants(self):
@@ -610,25 +475,21 @@ class DemoTimePage(unittest.TestCase):
         self.assertIsNone(p["next"])  # nothing later than yesterday
         self.assertEqual(p["page"], "time")
 
-    def test_missing_night_is_left_out_not_zero(self):
-        # the demo watch stayed on the charger the night before 5 Oct: that day and the evening before it
-        # have no full sleep record, so they show nothing for sleep and are left out of its average
-        p = self.page("2026-10-11")
-        days = {d["date"]: d["totals"] for d in p["span"]["days"]}
-        self.assertIsNone(days["2026-10-05"]["sleep"])
-        self.assertIsNone(days["2026-10-05"]["not_recorded"])
-        known = [t["sleep"] for t in days.values() if t["sleep"] is not None]
-        self.assertEqual(p["span"]["known"]["sleep"], 6)
-        self.assertAlmostEqual(p["span"]["avg"]["sleep"], sum(known) / 6)
-        self.assertGreater(p["span"]["avg"]["sleep"], 7 * 60)  # not dragged towards 6h by a zero night
-        hist = {h["date"]: h["totals"] for h in p["history"]}
-        self.assertIsNone(hist["2026-10-05"]["sleep"])  # drawn as × in the 30-day lanes
-
     def test_clock_change_day_is_23_hours(self):
-        p = self.page("2026-10-04")
-        days = {d["date"]: d for d in p["span"]["days"]}
-        self.assertEqual(days["2026-10-04"]["minutes_in_day"], 1380)
-        self.assertEqual(days["2026-10-03"]["minutes_in_day"], 1440)
+        days = Context(self.cfg, now=NOW).time_days()
+        self.assertEqual(days[date(2026, 10, 4)].length, 1380)
+        self.assertEqual(days[date(2026, 10, 3)].length, 1440)
+
+    def test_the_demo_body_answers_a_stimulating_day(self):
+        # Sam scrolls more on the day before a morning with HRV under his normal, and in the last hour on nights he
+        # falls asleep later than usual (demo.Sam.screen), so the card has something to show
+        detected = [r for r in self.latest["response"]["rows"] if r.get("detected")]
+        self.assertTrue(detected)
+        for r in detected:
+            if r["outcome"] == "hrv":
+                self.assertLess(r["diff"], 0)
+            if r["outcome"] == "asleep":
+                self.assertGreater(r["diff"], 0)
 
     def test_earlier_pages_invariants(self):
         for day in ("2026-10-10", "2026-10-04", "2026-09-27", "2026-07-01"):
@@ -651,16 +512,6 @@ class DemoTimePage(unittest.TestCase):
         earlier = self.page(p["prev"])
         self.assertEqual(earlier["span"]["to"], every[first - 1].isoformat())
         self.assertEqual(earlier["span"]["from"], every[first - 7].isoformat())
-
-    def test_demo_never_names_the_screen_total(self):
-        # screens are the biggest waking activity on every demo day; the page still names something else
-        for param in (None, "2026-10-04", "2026-09-27"):
-            p = self.page(param)
-            for d in p["span"]["days"]:
-                tot = d["totals"]
-                self.assertGreater(tot["screen"], max(tot["exercise"] or 0, tot["calendar"] or 0), d["date"])
-                if d["standout"]:
-                    self.assertNotEqual(d["standout"]["key"], "screen")
 
     def test_next_continues_without_skipping_days(self):
         p = self.page("2026-10-04")
@@ -865,19 +716,21 @@ class AttentionAlias(unittest.TestCase):
         self.assertIn('["time", "nav.time_tab"]', text)  # a page of the Daily life item
         self.assertNotIn('"attention"', nav.group(1))
 
-    def test_no_leftovers_of_the_biggest_activity_and_the_week_before(self):
+    def test_no_leftovers_of_where_time_went(self):
         i18n = (ROOT / "healthaio" / "web" / "js" / "i18n.js").read_text(encoding="utf-8")
-        for key in ("time.top_line", "time.top_days", "time.no_top", "time.vs", "time.before", "time.same", "act.screen_lower"):
+        for key in ("time.top_line", "time.change_line", "time.usual_line", "time.history_note", "time.workouts", "chg.fun"):
             self.assertNotIn(f'"{key}"', i18n, key)
         page = (ROOT / "healthaio" / "web" / "js" / "pages" / "time.js").read_text(encoding="utf-8")
-        for code in ("S.top", "p.before", "top_counts"):
+        for code in ("S.top", "standout", "p.history", "workouts"):
             self.assertNotIn(code, page, code)
-        icons = (ROOT / "healthaio" / "web" / "js" / "icons.js").read_text(encoding="utf-8")
-        for key in time_page.CANDIDATES + ("check", "up", "down"):
-            self.assertRegex(icons, rf"\b{key}: '<", key)
-        for key in time_page.CANDIDATES:
-            self.assertEqual(i18n.count(f'"chg.{key}"'), 2, key)  # English and Chinese
-            self.assertEqual(i18n.count(f'"chg.short.{key}"'), 2, key)
+        used = set(re.findall(r't\("(stim\.[\w.]+)"', page))
+        used |= {f"stim.m.{k}" for k in time_page.STIM_KEYS} | {f"stim.what.{k}" for k in time_page.STIM_KEYS}
+        used |= {f"stim.dir.{k}.{s}" for k in time_page.STIM_KEYS[1:] for s in ("high", "low")}
+        used |= {f"stim.out.{o}" for o in time_page.OUTCOMES} | {f"stim.out.{o}.{d}" for o in time_page.OUTCOMES for d in ("up", "down")}
+        used |= {f"stim.level.{k}" for k in ("high", "low", "normal", "none")} | {f"stim.exp.{e}" for e in time_page.EXPOSURES}
+        for key in used:
+            self.assertEqual(i18n.count(f'"{key}"'), 2, key)  # English and Chinese
+        self.assertIn("can't be measured by a phone or a watch", i18n)  # no number on the page claims to be a hormone
 
     def test_time_page_is_registered_and_named(self):
         self.assertIn("time", PAGES)

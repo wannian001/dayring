@@ -7,10 +7,9 @@ timezone = "Australia/Melbourne"  # IANA name; all times in the CSV files are lo
 locale = "en"                     # en or zh; the page has a switch too
 title = "Health AIO"
 
-# What `healthaio collect` (the Mac app, every 2 hours) imports by itself. "ai-logs" adds Claude Code and Codex
-# (times and counts only). Default: Screen Time only.
+# What `healthaio collect` (the Mac app, every 2 hours) imports by itself: Screen Time.
 # [collect]
-# sources = ["macos-screentime", "ai-logs"]
+# sources = ["macos-screentime"]
 
 # Once a day the app asks GitHub whether there is a newer version (its only request to the internet).
 # [updates]

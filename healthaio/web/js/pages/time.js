@@ -1,106 +1,55 @@
-// Time: where the day went, and what changed. One rule for every block: each activity is measured from
-// its own record, minute by minute, and compared with one baseline, your normal (a day with the middle
-// half of the 28 days before it, the 7-day average with your usual 7-day averages). The page never names
-// the biggest activity (screens would win every day); it names the biggest change that lies clearly
-// outside normal (`clear`, worked out in modules/time.py), and colours only those. Lanes may overlap;
-// unrecorded waking time is shown as such. A day without an activity's record shows "—" for it (never 0)
-// and is left out of its average and normal. Devices at once (each device counting its own minutes) has its
-// own tab; its two measures, screens at once (a ratio, kept in hundredths) and the longest stretch on one thing,
-// are candidates of "what changed" like the rest. Two cards: what changed with the daily averages, then the
-// detail as tabs (a typical day, 30 days, stimulation and focus, devices at once, top apps).
+// Stimulation (#time; the page used to be "Where time went", and keeps its address): how stimulating these 7 days
+// were against your normal, the long view, and how your body answered afterwards. Hormones (dopamine, cortisol,
+// melatonin) cannot be measured by a phone or a watch, so no number on the page claims to be one; it shows what goes
+// in (five Screen Time signals) and what the body does next (sleep, HRV, resting heart rate), and says plainly that
+// the second is an association. The numbers and rules are in modules/time.py. One answer card, then the long view,
+// then the body, then the detail in tabs (a typical day, devices at once, where it came from).
 import { bullet, draw, esc, lanes, timeChart } from "../charts.js";
-import { day, device, dur, getLang, num, shortDay, t, weekdayShort } from "../i18n.js";
-import { COLOR, icon, STATE_ICON } from "../icons.js";
+import { day, device, dur, getLang, num, t } from "../i18n.js";
+import { icon, STATE_ICON } from "../icons.js";
 import { mountTabs, tabs } from "./tabs.js";
 
-const ORDER = ["sleep", "exercise", "calendar", "screen"];  // the lanes, in the same order in both lane charts
-const TILES = ["screen", "fun", "focus", "communication", "exercise", "calendar", "sleep", "not_recorded"];  // every candidate has a tile
 const SCREEN_PARTS = [["fun", "var(--c-fun)"], ["focus", "var(--c-focus)"], ["communication", "var(--c-comms)"], ["other", "var(--c-other)"]];
-// compact, for the small day cells; a narrow cell may break before the unit, never inside it ("10.6 / 小时")
-const hours = (m) => t("time.hours", { h: num(m / 60, 1) });
-const CAT_COLOR = { work: "var(--c-focus)", learning: "var(--c-focus)", entertainment: "var(--c-fun)", social: "var(--c-fun)", communication: "var(--c-comms)", other: "var(--c-other)" };
-const keep = (text) => text.replace(/ /g, "\u00a0");  // one duration never breaks across lines ("4 小时 23 分")
+const KEYS = ["fun", "before_sleep", "switches", "ratio", "longest_focus"];
+const ICON = { fun: "fun", before_sleep: "sleep", switches: "ratio", ratio: "screen", longest_focus: "focus" };
+const COLOR = { fun: "var(--c-fun)", before_sleep: "var(--c-sleep)", switches: "var(--ink-2)", ratio: "var(--ink-2)", longest_focus: "var(--c-focus)" };
 const toneCls = (tone) => (tone === "good" ? "good" : tone === "bad" ? "bad" : "");
-const shownTone = (c) => (c.clear ? c.tone : "neutral");  // green and red only for a clear change
-// a value in its own unit: the stacking ratio is kept in hundredths (142 = 1.42×), everything else in minutes
-const ratio = (v) => (v == null ? "—" : t("time.ratio_v", { v: num(v / 100, 2) }));
-const fmt = (key, v) => (key === "ratio" ? ratio(v) : dur(v));
-const dirWord = (c, kind) => (c.key === "ratio" ? t(`chg.${c.state === "high" ? "higher" : "lower"}`)
-  : t(`chg.${c.state === "high" ? (kind === "short" ? "up" : "more") : (kind === "short" ? "down" : "less")}`));
-const listOf = (keys) => keys.map((k) => t(`chg.${k}`)).join(t("ui.list_sep"));
-// "normal 0m–0m" reads as a glitch: a normal that is one value is written once ("usually none" when 0)
-function bandLabel(b, { range = "band", one = "band_one", none = "time.band_none" } = {}, vars = {}, key = "") {
-  const low = keep(fmt(key, b.q1)), high = keep(fmt(key, b.q3));
-  if (low !== high) return t(range, { ...vars, low, high });
-  return Math.round(b.q3) === 0 ? t(none, vars) : t(one, { ...vars, low });
+const keep = (text) => text.replace(/ /g, " ");  // one value never breaks across lines ("4 小时 23 分")
+// a value in its own unit: minutes, switches per screen hour, or the ratio kept in hundredths (142 = 1.42×)
+function fmt(unit, v) {
+  if (v == null) return "—";
+  if (unit === "ratio") return t("time.ratio_v", { v: num(v / 100, 2) });
+  if (unit === "per_hour") return t("stim.per_hour", { v: num(v, 1) });
+  return dur(v);
 }
-// Chinese has no spaces between words, so a balanced line may break inside one ("最 / 大"): keep each
-// phrase together, breaking inside it only when it is longer than the line. Phrases end at punctuation
-// or at a "|" in the string (a break hint, never shown)
+// Chinese has no spaces between words: keep each phrase together (phrases end at punctuation or a "|" hint)
 const phrases = (text) => (getLang() === "zh"
   ? text.split(/(?<=[，：；。])|\|/).filter(Boolean).map((x) => `<span class="ph">${esc(x)}</span>`).join("")
   : esc(text.replace(/\|/g, "")));
 
-// how many of the shown days have this record, when not all of them do
-function knownNote(S, key) {
-  const k = S.known[key];
-  if (k === S.n) return "";
-  if (key === "not_recorded") return t("time.nr_known", { n: k, k: S.n });  // it needs both a night and screen time
-  return k ? t("time.known", { n: k, k: S.n }) : t("time.no_record");
+function bandText(m) {
+  if (!m.band) return m.few ? t("time.few") : "";
+  const low = keep(fmt(m.unit, m.band.q1)), high = keep(fmt(m.unit, m.band.q3));
+  return low === high ? t("band_one", { low }) : t("band", { low, high });
 }
 
-// within normal; just past its edge (grey, "just above normal"); or clearly outside (coloured, "above normal")
+// within normal; just past its edge (grey); or clearly outside (coloured)
 function stateChip(m) {
   if (m.value == null) return "";
   if (!m.state) return `<span class="chip">${t(m.few ? "time.few" : "state.none")}</span>`;
   if (m.state !== "normal" && !m.clear) return `<span class="chip">${t(`time.slight_${m.state}`)}</span>`;
-  const tone = shownTone(m);
+  const tone = m.state === "normal" ? "neutral" : m.tone;
   return `<span class="chip ${toneCls(tone)}">${STATE_ICON[tone] || ""}${t(`state.${m.state}`)}</span>`;
 }
 
-function tile(key, S, extra = [], body = "", cls = "") {
-  const m = S.metrics[key];
-  const band = m.band ? bandLabel(m.band, {}, {}, key) : "";
-  // each piece of the note wraps as a whole ("娱乐上限 3 小时" never leaves "时" alone on a line)
-  const pieces = [band, knownNote(S, key), ...extra].filter(Boolean);
+function tile(m, extra = []) {
+  const pieces = [bandText(m), m.known < m.n ? t("time.known", { n: m.known, k: m.n }) : "", ...extra].filter(Boolean);
   const note = pieces.map((x, i) => `<span class="piece">${esc(x)}${i < pieces.length - 1 ? " ·" : ""}</span>`).join(" ");
-  // four rows shared with the tiles beside it (CSS subgrid), so values and bullets line up across a row
-  return `<div class="tile act-tile${key === "screen" ? " act-wide" : ""}${cls}">
-    <div class="label"><span class="act-name" style="color:${COLOR[key === "stacked" ? "screen" : key]}">${icon(key === "stacked" ? "screen" : key, 16)}<span>${t(`act.${key}`)}</span></span>${stateChip(m)}</div>
-    <div class="act-value"><div class="value">${fmt(key, m.value)}</div>${body}</div>
-    <div class="bul" data-key="${key}"></div>
+  return `<div class="tile act-tile">
+    <div class="label"><span class="act-name" style="color:${COLOR[m.key]}">${icon(ICON[m.key], 16)}<span>${t(`stim.m.${m.key}`)}</span></span>${stateChip(m)}</div>
+    <div class="act-value"><div class="value">${fmt(m.unit, m.value)}</div><span class="xs muted">${t(`stim.what.${m.key}`)}</span></div>
+    <div class="bul" data-key="${m.key}"></div>
     <div class="note">${note}</div></div>`;
-}
-
-// the coloured icon of a change, with an up / down badge in its tone
-function changeIcon(key, state, tone, size) {
-  const badge = state ? `<span class="chg-badge ${toneCls(tone)}">${icon(state === "high" ? "up" : "down", Math.max(14, Math.round(size * 0.42)))}</span>` : "";
-  return `<span class="chg-icon" style="color:${COLOR[key]}">${icon(key, size)}${badge}</span>`;
-}
-
-function dayCell(d) {
-  const s = d.standout;
-  const tot = d.totals;
-  const ex = tot.exercise;
-  const foot = [t("time.foot_screen", { v: tot.screen == null ? "—" : hours(tot.screen) }),
-    ex == null ? t("time.foot_ex", { v: "—" }) : ex ? t("time.foot_ex", { v: dur(ex) }) : t("time.foot_rest")];
-  let mark, label, delta = "";
-  if (s) {
-    mark = changeIcon(s.key, s.state, s.tone, 30);  // a day's standout is always a clear change
-    label = t("time.day_label", { what: t(`chg.short.${s.key}`), dir: dirWord(s, "short") });
-    delta = `<b class="daycell-delta num ${toneCls(s.tone)}">${fmt(s.key, Math.abs(s.delta))}</b>`;
-  } else if (d.compared) {
-    mark = `<span class="chg-icon" style="color:var(--ink-3)">${icon("check", 30)}</span>`;
-    label = t("time.day_usual");
-  } else {
-    mark = `<span class="chg-icon" style="color:var(--ink-3)">${icon("not_recorded", 30)}</span>`;
-    label = t("time.day_no_normal");
-  }
-  return `<div class="daycell${s ? "" : " usual"}">
-    <span class="daycell-date xs muted"><span>${weekdayShort(d.date)}</span><span>${shortDay(d.date)}</span></span>
-    <span class="daycell-mark">${mark}</span>
-    <span class="daycell-what"><span class="daycell-label">${esc(label)}</span>${delta}</span>
-    <span class="daycell-foot xs muted">${foot.map((f) => `<span>${esc(f)}</span>`).join('<span class="sep" aria-hidden="true"> · </span>')}</span></div>`;
 }
 
 function staleNote(S) {
@@ -109,28 +58,31 @@ function staleNote(S) {
     : t("time.stale_none", { what: t(`act.${s.activity}`) }))}</p>`).join("");
 }
 
-// devices at once: device time, screens at once and the longest stretch on one thing, then device time by hour
-function stackHtml(p) {
-  const S = p.span, K = S.stack, A = S.avg;
-  if (!K) return "";
-  const byDevice = Object.entries(K.devices).sort((a, b) => b[1] - a[1]).map(([d, m]) => `${device(d)} ${dur(m)}`).join(" · ");
-  const best = K.best_single;
-  const tiles = [
-    tile("stacked", S, [t("time.stack_clock", { v: dur(A.screen) }), byDevice], "", " stack-tile"),
-    tile("ratio", S, A.stacked != null ? [t("time.ratio_note", { s: dur(A.stacked), c: dur(A.screen) })] : [], "", " stack-tile"),
-    tile("single", S, best ? [t("time.single_best", { d: dur(best.minutes), app: best.app, device: device(best.device), day: day(best.date), at: best.start })] : [], "", " stack-tile"),
-  ].join("");
-  const agent = Object.values(K.agent_by_hour).reduce((a, b) => a + b, 0);
-  return `<p class="xs muted tab-note">${phrases(t("time.stack_note"))}</p>
-    <div class="tiles act-tiles stack-tiles">${tiles}</div>
-    <div class="section-title stack-hours-title"><span>${phrases(t("time.stack_hours"))}</span><span class="aside legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}
-      <span class="key"><i style="background:var(--c-axis)"></i>${t("time.key_clock")}</span><span class="key"><i class="hatch"></i>${t("time.key_extra")}</span></span></div>
-    <div id="stack-hours" class="chart"></div>
-    ${agent >= 1 ? `<p class="xs muted" style="margin:8px 0 0">${esc(t("time.agent_note", { v: dur(agent) }))}</p>` : ""}`;
+// the answer: the level of entertainment & social against your normal, then the other signals clearly outside it
+function heroHtml(p) {
+  const S = p.span, M = S.metrics, fun = M.fun;
+  const lede = S.level ? t(`stim.level.${S.level}`) : t("stim.level.none");
+  const sub = fun.value == null ? t("stim.no_screens")
+    : fun.band ? t("stim.fun_line", { v: keep(dur(fun.value)), band: bandText(fun) }) : t("stim.fun_line_none", { v: keep(dur(fun.value)), n: p.baseline_days, min: p.baseline_min });
+  const plan = p.plan.fun_max_min != null && p.plan.known ? t("stim.plan_line", { h: dur(p.plan.fun_max_min, { short: true }), n: p.plan.over, k: p.plan.known }) : "";
+  const also = S.also.length ? `<div class="chg-also"><span class="xs muted">${t("stim.also")}</span>${S.also.map((k) => {
+    const m = M[k];
+    return `<span class="chip ${toneCls(m.tone)}">${icon(m.state === "high" ? "up" : "down", 12)}${esc(t(`stim.dir.${k}.${m.state}`))}</span>`;
+  }).join("")}</div>` : "";
+  const mark = S.level === "high" || S.level === "low"
+    ? `<span class="chg-icon" style="color:var(--c-fun)">${icon("fun", 56)}<span class="chg-badge ${toneCls(fun.tone)}">${icon(S.level === "high" ? "up" : "down", 24)}</span></span>`
+    : `<span class="chg-icon" style="color:var(--ink-3)">${icon(S.level ? "check" : "not_recorded", 56)}</span>`;
+  const tiles = KEYS.map((k) => tile({ ...M[k], n: S.n }, k === "fun" && p.plan.fun_max_min != null ? [t("time.fun_limit", { v: dur(p.plan.fun_max_min, { short: true }) })] : [])).join("");
+  return `<section class="card span-12"><div class="time-hero stim-hero">
+    <div class="time-top">${mark}</div>
+    <div class="time-lede"><span class="eyebrow">${t("stim.eyebrow", { n: S.n })}</span><p class="lede" style="margin:4px 0">${phrases(lede)}</p>
+      <p class="small muted" style="margin:0">${esc(sub)}${plan ? ` ${esc(plan)}` : ""}</p>${also}${staleNote(S)}</div></div>
+    <div class="time-avg"><h2 class="section-title">${t("stim.signals")}<span class="aside">${t("time.vs_normal", { n: p.baseline_days })}</span></h2>
+      <div class="tiles act-tiles">${tiles}</div>
+      <p class="xs muted stim-note">${phrases(t("stim.hormone_note"))}</p></div></section>`;
 }
 
-// stimulation and focus, averaged: what people call "dopamine tolerance" can't be measured, so the card shows
-// the behaviour around it, side by side and never as cause and effect (modules/time.py, trend)
+// the long view: stimulation and focus as 7-day averages over 90 days (modules/time.py, trend)
 const TREND = [["fun", "fun", "var(--c-fun)"], ["longest_focus", "focus", "var(--c-focus)"]];
 const tenths = (v) => num(Math.round(v * 10) / 10, Math.round(v * 10) % 10 ? 1 : 0);
 // stimulation is drawn in hours, so the axis steps on round hours (1, 2, 5) rather than 100 minutes (1.7h)
@@ -150,112 +102,120 @@ function trendHtml(p) {
       <p class="small" style="margin:2px 0 8px">${phrases(level)}</p>
       <div id="trend-${key}" class="chart"></div></div>`;
   };
-  return `<p class="xs muted tab-note">${phrases(t("trend.note"))}</p>
+  return `<section class="card span-12"><h2>${t("trend.title")}</h2><p class="xs muted tab-note">${phrases(t("trend.note"))}</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:20px 32px">${TREND.map(box).join("")}</div>
-    <p class="xs muted" style="margin:10px 0 0">${esc(t("trend.key"))}</p>`;
+    <p class="xs muted" style="margin:10px 0 0">${esc(t("trend.key"))}</p></section>`;
 }
 
-function heroHtml(p, tiles) {
-  const S = p.span;
-  const top = S.standout;
-  const compared = S.changes.filter((c) => c.state).map((c) => c.key);
-  const skipped = S.changes.filter((c) => !c.state).map((c) => c.key);
-  let mark, lede, sub, chips = "";
-  if (top) {
-    mark = changeIcon(top.key, top.state, top.tone, 56);
-    lede = t(top.key === "ratio" ? "time.change_line_ratio" : "time.change_line", { n: S.n, what: t(`chg.${top.key}`), dir: dirWord(top), d: keep(fmt(top.key, Math.abs(top.delta))) });
-    sub = bandLabel(top.band, { range: "time.change_sub", one: "time.change_sub_one", none: "time.change_sub_none" }, { v: keep(fmt(top.key, top.value)) }, top.key);
-    const others = S.changes.filter((c) => c.key !== top.key && c.clear);  // the same rule as the standout
-    if (others.length) {
-      chips = `<div class="chg-also"><span class="xs muted">${t("time.also")}</span>${others.map((c) => `<span class="chip ${toneCls(c.tone)}">${icon(c.state === "high" ? "up" : "down", 12)}${esc(t("time.chip", { what: t(`act.${c.key}`), d: fmt(c.key, Math.abs(c.delta)), dir: dirWord(c) }))}</span>`).join("")}</div>`;
-    }
-  } else if (compared.length) {
-    mark = `<span class="chg-icon" style="color:${COLOR.check}">${icon("check", 56)}</span>`;
-    lede = t("time.usual_line", { n: S.n });
-    const slight = S.changes.filter((c) => c.state === "high" || c.state === "low").map((c) => c.key);
-    sub = slight.length ? t("time.usual_sub_slight", { list: listOf(slight) }) : t("time.usual_sub", { list: listOf(compared) });
-  } else {
-    mark = `<span class="chg-icon" style="color:var(--ink-3)">${icon("not_recorded", 56)}</span>`;
-    lede = t("time.no_normal_line");
-    sub = t("time.no_normal_sub", { n: p.baseline_days, min: p.baseline_min });
-  }
-  const notCompared = compared.length && skipped.length ? `<p class="xs muted" style="margin:6px 0 0">${esc(t("time.not_compared", { list: listOf(skipped) }))}</p>` : "";
-  return `<section class="card span-12"><div class="time-hero">
-    <div class="time-top">${mark}</div>
-    <div class="time-lede"><span class="eyebrow">${t("time.eyebrow")}</span><p class="lede" style="margin:4px 0">${phrases(lede)}</p>
-      <p class="small muted" style="margin:0">${esc(sub)}</p>${chips}${notCompared}${staleNote(S)}</div>
-    <div class="days-strip">${S.days.map(dayCell).join("")}</div></div>
-    <div class="time-avg"><h2 class="section-title">${t("time.per_day")}<span class="aside">${t("time.vs_normal", { n: p.baseline_days })}</span></h2><div class="tiles act-tiles">${tiles}</div></div></section>`;
+// how the body answered: the night and next morning after stimulating days, against the others (an association)
+function outcomeText(r, R) {
+  const unit = R.units[r.outcome];
+  const show = (v) => (unit === "%" ? `${num(Math.abs(v), 1)}%` : unit === "bpm" ? t("stim.bpm", { v: num(Math.abs(v), 1) }) : dur(Math.abs(v)));
+  const range = (v) => (unit === "%" ? `${v < 0 ? "−" : ""}${num(Math.abs(v), 1)}%` : unit === "bpm" ? `${v < 0 ? "−" : ""}${num(Math.abs(v), 1)}` : `${v < 0 ? "−" : ""}${dur(Math.abs(v))}`);
+  const dir = t(`stim.out.${r.outcome}.${r.diff >= 0 ? "up" : "down"}`, { v: show(r.diff) });
+  return t("stim.out_line", { dir, low: range(r.low), high: range(r.high) });
+}
+
+function responseHtml(p) {
+  const R = p.response;
+  if (!R) return "";
+  const groups = ["fun_high", "late_fun"].map((e) => {
+    const rows = R.rows.filter((r) => r.exposure === e);
+    const head = e === "fun_high"
+      ? (R.median_fun != null ? t("stim.exp.fun_high", { v: dur(R.median_fun) }) : t("stim.exp.fun_high_none"))
+      : t("stim.exp.late_fun", { v: dur(R.calm_min) });
+    const items = rows.map((r) => {
+      let chip, text;
+      if (r.status !== "ok") { chip = `<span class="chip">${t("stim.too_few")}</span>`; text = t("stim.too_few_line", { a: r.yes_days, b: r.no_days, n: R.method.min_group_days }); }
+      else if (r.detected) {
+        const better = R.better[r.outcome], worse = (r.diff > 0) === (better === "lower");
+        chip = `<span class="chip ${worse ? "bad" : "good"}">${STATE_ICON[worse ? "bad" : "good"]}${t("stim.seen")}</span>`; text = outcomeText(r, R);
+      } else { chip = `<span class="chip">${t("stim.not_seen")}</span>`; text = outcomeText(r, R); }
+      return `<li><span class="stim-out-name">${t(`stim.out.${r.outcome}`)}</span><span class="stim-out-chip">${chip}</span><span class="small muted">${esc(text)}</span></li>`;
+    }).join("");
+    return `<div class="stim-group"><h3 class="section-title">${esc(head)}</h3><ul class="stim-out">${items}</ul></div>`;
+  }).join("");
+  return `<section class="card span-12"><h2>${t("stim.body_title")}<span class="aside">${t("stim.body_sub", { n: R.days })}</span></h2>
+    ${groups}<p class="xs muted" style="margin:10px 0 0">${phrases(t("stim.body_note"))}</p></section>`;
+}
+
+// devices at once: device time, screens at once and the longest stretch on one thing, then device time by hour
+function stackHtml(p) {
+  const K = p.stack;
+  if (!K) return "";
+  const byDevice = Object.entries(K.devices).sort((a, b) => b[1] - a[1]).map(([d, m]) => `${device(d)} ${dur(m)}`).join(" · ");
+  const best = K.best_single;
+  const lines = [
+    K.stacked != null ? t("time.ratio_note", { s: dur(K.stacked), c: dur(K.screen) }) : "",
+    byDevice,
+    best ? t("time.single_best", { d: dur(best.minutes), app: best.app, device: device(best.device), day: day(best.date), at: best.start }) : "",
+  ].filter(Boolean);
+  const agent = Object.values(K.agent_by_hour).reduce((a, b) => a + b, 0);
+  return `<p class="xs muted tab-note">${phrases(t("time.stack_note"))}</p>
+    <ul class="agenda">${lines.map((l) => `<li style="grid-template-columns:minmax(0,1fr)"><span class="small">${esc(l)}</span></li>`).join("")}</ul>
+    <div class="section-title stack-hours-title"><span>${phrases(t("time.stack_hours"))}</span><span class="aside legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}
+      <span class="key"><i style="background:var(--c-axis)"></i>${t("time.key_clock")}</span><span class="key"><i class="hatch"></i>${t("time.key_extra")}</span></span></div>
+    <div id="stack-hours" class="chart"></div>
+    ${agent >= 1 ? `<p class="xs muted" style="margin:8px 0 0">${esc(t("time.agent_note", { v: dur(agent) }))}</p>` : ""}`;
+}
+
+function appsHtml(p) {
+  if (!p.apps.length) return `<p class="muted small">${t("time.no_screens")}</p>`;
+  const max = Math.max(1, ...p.apps.map((a) => a.minutes));
+  const items = p.apps.map((a) => `<li><span class="app"><span class="app-name" title="${esc(a.app)}">${esc(a.app)}</span><span class="chip">${esc(device(a.device))}</span></span>
+    <span class="hbar"><span style="width:${(a.minutes / max * 100).toFixed(1)}%;background:var(--c-fun)"></span></span>
+    <span class="num small">${dur(a.minutes)}</span></li>`).join("");
+  return `<p class="xs muted tab-note">${t("stim.apps_note")}</p><ul class="apps">${items}</ul>`;
 }
 
 export default {
   render(p) {
     if (p.empty) {
       const back = p.next ? `<p class="small"><a href="${p.next === p.newest ? "#time" : `#time/${p.next}`}">${t("time.next")} ›</a></p>` : "";
-      return `<div class="head"><div><h1>${t("time.title")}</h1></div></div><div class="card"><div class="empty">${t("time.empty")}</div>${back}</div>`;
+      return `<div class="head"><div><h1>${t("stim.title")}</h1></div></div><div class="card"><div class="empty">${t("stim.empty")}</div>${back}</div>`;
     }
     const S = p.span;
-    // a server started before this page changed still sends the old numbers (no normal, or no `clear`)
-    if (!S.metrics || !S.changes.every((c) => "clear" in c)) return `<div class="head"><div><h1>${t("time.title")}</h1></div></div><div class="card"><div class="empty">${t("time.restart")}</div></div>`;
-    const A = S.avg;
+    // a server started before this page changed still sends the old numbers
+    if (!S.metrics || !S.metrics.before_sleep) return `<div class="head"><div><h1>${t("stim.title")}</h1></div></div><div class="card"><div class="empty">${t("time.restart")}</div></div>`;
     // "Later" ends on the newest day when it gets there; that page is the latest one (#time, also on the static site)
     const nextHref = p.next === p.newest ? "#time" : `#time/${p.next}`;
     const stepper = `<div class="stepper">${p.prev ? `<a href="#time/${p.prev}">‹ ${t("time.prev")}</a>` : `<span aria-disabled="true">‹ ${t("time.prev")}</span>`}
       ${p.next ? `<a href="${nextHref}">${t("time.next")} ›</a>${p.next !== p.newest ? `<a href="#time">${t("time.latest")}</a>` : ""}` : ""}</div>`;
-    const screenSplit = SCREEN_PARTS.map(([k, c]) => (A[k] ? `<span style="flex:${A[k]};background:${c}" data-tip="${esc(`${t(`cat.${k}`)} ${dur(A[k])}`)}"></span>` : "")).join("");
-    const exKnown = S.exercise_known;
-    const exDays = exKnown ? t("time.exercise_days", { n: S.exercise_days, k: exKnown }) : "";
-    const L = p.limits;
-    const tiles = TILES.map((key) => {
-      if (key === "screen") return tile(key, S, [], A.screen != null ? `<div class="catbar" style="height:8px" role="img" aria-label="${esc(SCREEN_PARTS.map(([k]) => `${t(`cat.${k}`)} ${dur(A[k])}`).join(", "))}">${screenSplit}</div>` : "");
-      if (key === "fun") return tile(key, S, L.fun_max_min ? [t("time.fun_limit", { v: dur(L.fun_max_min, { short: true }) })] : []);
-      if (key === "focus") return tile(key, S, L.focus_min_min ? [t("time.focus_goal", { v: dur(L.focus_min_min, { short: true }) })] : []);
-      if (key === "exercise") return tile(key, S, [exDays]);
-      if (key === "sleep") return tile(key, S);  // how sleep is clocked is in "How this is worked out"
-      return tile(key, S);
-    }).join("");
-    const maxApp = Math.max(1, ...S.apps.map((a) => a.minutes));
-    const apps = S.apps.map((a) => `<li><span class="app"><span class="app-name" title="${esc(a.app)}">${esc(a.app)}</span><span class="chip">${esc(device(a.device))}</span></span>
-      <span class="hbar"><span style="width:${(a.minutes / maxApp * 100).toFixed(1)}%;background:${CAT_COLOR[a.category]}"></span></span>
-      <span class="num small">${dur(a.minutes)}</span></li>`).join("");
-    const devices = Object.entries(S.devices).sort((a, b) => b[1] - a[1]).map(([d, m]) => `${esc(device(d))} ${dur(m)}`).join(" · ");
-    return `<div class="head"><div><h1>${t("time.title")}</h1><div class="sub">${t("time.span", { from: day(S.from, { weekday: false }), to: day(S.to, { weekday: false }), n: S.n })}</div></div>${stepper}</div>
+    return `<div class="head"><div><h1>${t("stim.title")}</h1><div class="sub">${t("time.span", { from: day(S.from, { weekday: false }), to: day(S.to, { weekday: false }), n: S.n })}</div></div>${stepper}</div>
       <div class="grid">
-        ${heroHtml(p, tiles)}
+        ${heroHtml(p)}
+        ${trendHtml(p)}
+        ${responseHtml(p)}
         <section class="card span-12"><h2>${t("time.detail")}</h2>
           ${tabs("time", [
-            { key: "day", label: t("time.tab.day"), html: `<p class="xs muted tab-note legend">${SCREEN_PARTS.map(([k, c]) => `<span class="key"><i style="background:${c}"></i>${t(`cat.${k}`)}</span>`).join("")}</p><div id="hours" class="chart"></div>` },
-            { key: "history", label: t("time.tab.history"), html: `<p class="xs muted tab-note">${phrases(t("time.history_note"))}</p><div id="history" class="chart"></div>` },
-            p.trend ? { key: "trend", label: t("time.tab.trend"), html: trendHtml(p) } : null,
-            S.stack ? { key: "stack", label: t("time.stack"), html: stackHtml(p) } : null,
-            { key: "apps", label: t("time.tab.apps"), html: apps ? `<p class="xs muted tab-note">${t("time.apps_note")}</p><ul class="apps">${apps}</ul>
-              <p class="xs muted" style="margin:10px 0 0">${t("time.devices")}: ${devices}</p>` : `<p class="muted small">${t("time.no_screens")}</p>` },
+            p.hours.now ? { key: "hours", label: t("stim.tab.hours"), html: `<p class="xs muted tab-note">${phrases(t("stim.hours_note"))}</p><div id="fun-hours" class="chart"></div>` } : null,
+            p.stack ? { key: "stack", label: t("time.stack"), html: stackHtml(p) } : null,
+            { key: "apps", label: t("stim.tab.apps"), html: appsHtml(p) },
           ])}
-          <details class="how"><summary>${t("ui.how")}</summary><p>${esc(t("time.rule", { n: p.baseline_days, min: p.baseline_min }))}</p><p>${esc(t("time.sleep_note"))}</p><p>${esc(t("time.rule_stack"))}</p>${p.trend ? `<p>${esc(t("trend.rule", { n: p.baseline_days, min: p.baseline_min, level: p.trend.level_days, lmin: p.trend.level_min, days: p.trend.days }))}</p>` : ""}</details></section>
+          <details class="how"><summary>${t("ui.how")}</summary><p>${esc(t("stim.rule", { n: p.baseline_days, min: p.baseline_min }))}</p>
+            <p>${esc(t("stim.rule_body", { days: p.response.days || 90, n: p.response.method.min_group_days, calm: p.response.calm_min }))}</p>
+            <p>${esc(t("time.rule_stack"))}</p>${p.trend ? `<p>${esc(t("trend.rule", { n: p.baseline_days, min: p.baseline_min, level: p.trend.level_days, lmin: p.trend.level_min, days: p.trend.days }))}</p>` : ""}</details></section>
       </div>`;
   },
   mount(root, p) {
-    if (p.empty || !p.span.metrics || !p.span.changes.every((c) => "clear" in c)) return;
+    if (p.empty || !p.span.metrics || !p.span.metrics.before_sleep) return;
     mountTabs(root);
-    const S = p.span;
+    const M = p.span.metrics;
     root.querySelectorAll(".bul").forEach((el) => {
-      const m = S.metrics[el.dataset.key];
-      draw(el, (w) => bullet(m.value, m.band, { width: w, unit: "min", tone: shownTone(m) }));
+      const m = M[el.dataset.key];
+      draw(el, (w) => bullet(m.value, m.band, { width: w, unit: m.unit === "min" ? "min" : "", tone: m.clear ? m.tone : "neutral" }));
     });
-    const ROW = {
-      sleep: { parts: [["sleep", "var(--c-sleep)"]] },
-      exercise: { parts: [["exercise", "var(--c-exercise)"]] },
-      calendar: { parts: [["calendar", "var(--c-event)"]] },
-      screen: { parts: SCREEN_PARTS },
-    };
-    // a column with no record for that activity is null (drawn as ×), never an empty bar
-    const hourVal = (key) => S.by_hour.map((h) => (key === "screen" ? (h.fun == null ? null : h) : h[key] == null ? null : { [key]: h[key] }));
-    const hourRows = ORDER.map((key) => ({ key, label: t(`act.${key}`), sub: dur(S.avg[key]), parts: ROW[key].parts, values: hourVal(key), max: 60 }));
-    const hourCols = S.by_hour.map((_, i) => ({ label: String(i).padStart(2, "0"), tip: `${String(i).padStart(2, "0")}:00` }));
+    const cols = Array.from({ length: 24 }, (_, i) => ({ label: String(i).padStart(2, "0"), tip: `${String(i).padStart(2, "0")}:00` }));
     const every = (w, labelW, n, px) => Math.max(1, Math.ceil(px / Math.max(1, (w - labelW - 8) / n)));  // labels never touch
     const labelW = (w) => (w < 560 ? 92 : 150);
-    draw(root.querySelector("#hours"), (w) => lanes(hourRows, hourCols, { width: w, labelW: labelW(w), labelEvery: Math.max(every(w, labelW(w), 24, 26), w < 560 ? 6 : 3), showMax: false }));
-    const K = S.stack;
+    const H = p.hours;
+    if (H.now) {
+      const max = Math.max(10, ...H.now, ...(H.normal || []));
+      const rows = [{ key: "now", label: t("stim.hours_now"), sub: t("stim.hours_now_sub", { n: p.span.screen_days }), parts: [["fun", "var(--c-fun)"]], max, values: H.now.map((v) => ({ fun: v })) }];
+      if (H.normal) rows.push({ key: "normal", label: t("stim.hours_normal"), sub: t("stim.hours_normal_sub", { n: H.normal_days }), parts: [["fun", "var(--ink-3)"]], max, values: H.normal.map((v) => ({ fun: v })) });
+      draw(root.querySelector("#fun-hours"), (w) => lanes(rows, cols, { width: w, labelW: labelW(w), labelEvery: Math.max(every(w, labelW(w), 24, 26), w < 560 ? 6 : 3), showMax: false }));
+    }
+    const K = p.stack;
     if (K) {
       // one row per device in the priority order (others after), then all devices: the clock time and what devices at once add on top
       const order = [...(p.devices_order || []).filter((d) => d in K.devices), ...Object.keys(K.devices).filter((d) => !(p.devices_order || []).includes(d)).sort()];
@@ -266,21 +226,8 @@ export default {
       const allRow = { key: "all", label: t("time.all_devices"), sub: t("chart.row_max", { v: dur(allMax) }), max: allMax,
         parts: [["clock", "var(--c-axis)"], ["extra", "var(--ink)", { hatch: true }]],
         values: totals.map((m, h) => ({ clock: K.clock_by_hour[h], extra: Math.max(0, m - K.clock_by_hour[h]) })) };
-      draw(root.querySelector("#stack-hours"), (w) => lanes([...devRows, allRow], hourCols, { width: w, labelW: labelW(w), labelEvery: Math.max(every(w, labelW(w), 24, 26), w < 560 ? 6 : 3), showMax: false }));
+      draw(root.querySelector("#stack-hours"), (w) => lanes([...devRows, allRow], cols, { width: w, labelW: labelW(w), labelEvery: Math.max(every(w, labelW(w), 24, 26), w < 560 ? 6 : 3), showMax: false }));
     }
-    const H = p.history;
-    const val = (key) => H.map((d) => { const v = d.totals?.[key]; return v == null ? null : key === "screen" ? d.totals : { [key]: v }; });
-    const peak = (key) => Math.max(30, ...H.map((d) => d.totals?.[key] ?? 0));
-    const limit = p.limits.fun_max_min;
-    // devices at once: the minutes several devices add beyond the clock, striped like the extra on the card above
-    const extra = H.map((d) => (d.totals?.stacked == null || d.totals?.screen == null ? null : { extra: Math.max(0, d.totals.stacked - d.totals.screen) }));
-    const extraRow = { key: "extra", label: t("time.extra_row"), sub: t("time.extra_sub"), parts: [["extra", "var(--ink)", { hatch: true }]], values: extra,
-      max: Math.max(30, ...extra.map((v) => v?.extra ?? 0)) };
-    const dayRows = (w) => [...ORDER.map((key) => ({ key, label: t(`act.${key}`), parts: ROW[key].parts, values: val(key), max: peak(key),
-      ...(key === "screen" && limit ? { limit, limitLabel: t(w < 560 ? "time.limit_short" : "time.fun_limit", { v: dur(limit, { short: true }) }) } : {}) })),
-      ...(extra.some((v) => v) ? [extraRow] : [])];
-    const dayCols = H.map((d) => ({ label: shortDay(d.date), tip: day(d.date), shade: d.in_span }));
-    draw(root.querySelector("#history"), (w) => lanes(dayRows(w), dayCols, { width: w, rowH: 58, labelW: labelW(w), labelEvery: Math.max(every(w, labelW(w), H.length, 44), w < 560 ? 7 : 3) }));
     const T = p.trend;
     if (T) {
       TREND.forEach(([key]) => {

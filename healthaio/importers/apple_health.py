@@ -52,7 +52,7 @@ Workouts with their times (``workouts.csv``)
     clearly shorter than start to end, the row runs from the start for the duration. Copies of one
     workout from two apps are found by their real (UTC) times and written once, from the most
     trusted source. Times are written in the configured timezone, like screen time and the calendar,
-    so all of them line up on the Time page (only the day a workout counts for in ``body_daily``
+    so all of them line up on the day ring (only the day a workout counts for in ``body_daily``
     follows ``HKTimeZone``). Start and end are rounded to the minute and the end is always after
     the start; stretches under 30 seconds and workouts dated before 2000 or after the export are
     left out. ``kcal`` is the workout's active energy when the export has it.

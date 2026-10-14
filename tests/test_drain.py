@@ -265,8 +265,8 @@ class DrainWords(unittest.TestCase):
         self.assertIn('href="#today">Next day', self.render("en", "today", "2026-10-11").replace(" ›", ""))
 
     def test_english_lists_read_as_sentences(self):
-        html = self.render("en", "today", "2026-10-07")  # the 7 days to 6 Oct, with three signals worse than normal
-        self.assertIn("Worse than your normal: resting heart rate, screens in the hour before sleep, app switching", html)
+        html = self.render("en", "today", "2026-10-07")  # the 7 days to 6 Oct, with two signals worse than normal
+        self.assertIn("Worse than your normal: resting heart rate, app switching", html)
         # Today keeps one line per part; the plan comparison is on the Drain page for the same 7 days
         self.assertIn("Against your plan: falling asleep later than planned by", self.render("en", "drain", "2026-10-06"))
         self.assertIn("跟计划比：入睡时刻比计划晚", self.render("zh", "drain", None))
@@ -275,13 +275,13 @@ class DrainWords(unittest.TestCase):
 
 class Menu(unittest.TestCase):
     def test_menu_follows_the_health_loop(self):
-        # one axis: today, what the body shows (sleep, drain, weight), what you do every day (exercise, food, where
-        # time went, AI work, the schedule), what you decided to change and whether it happens (follow-up, goals),
+        # one axis: today, what the body shows (sleep, drain, weight), what you do every day (exercise, food,
+        # stimulation, the schedule), what you decided to change and whether it happens (follow-up, goals),
         # whether it helped (review), where the numbers come from (data)
         app = (Path(__file__).resolve().parents[1] / "healthaio" / "web" / "js" / "app.js").read_text(encoding="utf-8")
         self.assertIn('const NAV = ["today", "body", "life", "act", "review", "data"];', app)
         self.assertIn('body: [["sleep", "nav.sleep_tab"], ["drain", "nav.drain"], ["body", "nav.weight"]]', app)
-        self.assertIn('life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"], ["ai", "nav.ai"], ["week", "nav.schedule"]]', app)
+        self.assertIn('life: [["exercise", "nav.exercise"], ["food", "nav.food"], ["time", "nav.time_tab"], ["week", "nav.schedule"]]', app)
         self.assertIn('act: [["followup", "nav.followup"], ["goals", "nav.goals"]]', app)
         i18n = (Path(__file__).resolve().parents[1] / "healthaio" / "web" / "js" / "i18n.js").read_text(encoding="utf-8")
         for key in ("nav.body", "nav.life", "nav.act", "nav.followup"):

@@ -11,7 +11,6 @@ from unittest import mock
 from healthaio import collect, iphone
 from healthaio.config import Config
 from healthaio.importers import macos_screentime
-from healthaio.importers._common import Summary
 
 
 class Collect(unittest.TestCase):
@@ -22,22 +21,18 @@ class Collect(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.folder, ignore_errors=True)
 
-    def test_a_failing_source_is_reported_and_the_others_still_run(self):
-        self.cfg.collect_sources = ["macos-screentime", "ai-logs"]
+    def test_a_failing_source_is_reported_and_saved(self):
         denied = macos_screentime.ScreenTimeError(macos_screentime.FDA_MESSAGE)
         with mock.patch("sys.platform", "darwin"), \
-                mock.patch.object(macos_screentime, "import_screentime", side_effect=denied), \
-                mock.patch("healthaio.importers.ai_logs.import_ai_logs",
-                           return_value=Summary(table="ai_work", imported=3, total=3)):
+                mock.patch.object(macos_screentime, "import_screentime", side_effect=denied):
             result = collect.collect(self.cfg)
         self.assertFalse(result["ok"])
-        screen, ai = result["sources"]
+        (screen,) = result["sources"]
         self.assertEqual((screen["name"], screen["ok"]), ("macos-screentime", False))
         self.assertIn("Full Disk Access", screen["message"])
         self.assertIn("Health AIO Mac app", screen["message"])
-        self.assertEqual((ai["name"], ai["ok"]), ("ai-logs", True))
         saved = json.loads((self.folder / ".healthaio" / "collect.json").read_text())
-        self.assertEqual(saved["sources"][1]["ok"], True)
+        self.assertEqual(saved["sources"][0]["ok"], False)
 
     def test_screen_time_is_only_read_on_a_mac(self):
         with mock.patch("sys.platform", "linux"):

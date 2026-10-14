@@ -49,8 +49,7 @@ enum Snapshot {
         m.fda = .granted
         m.collect = CollectResult([
             "ok": true, "at": "2026-10-13T21:00:02+11:00",
-            "sources": [["name": "macos-screentime", "ok": true, "message": "412 sessions on 3 devices"],
-                        ["name": "ai-logs", "ok": true, "message": "38 sessions"]],
+            "sources": [["name": "macos-screentime", "ok": true, "message": "412 sessions on 3 devices"]],
         ])
         m.nextCollect = now.addingTimeInterval(108 * 60)
         m.devices = Device.list(["devices": [["id": "demo-device-1", "name": "iPhone",
@@ -73,8 +72,7 @@ enum Snapshot {
         m.fda = .denied
         m.collect = CollectResult([
             "ok": false, "at": "2026-10-13T19:00:04+11:00",
-            "sources": [["name": "macos-screentime", "ok": false, "message": "Full Disk Access is needed to read Screen Time."],
-                        ["name": "ai-logs", "ok": true, "message": "41 sessions"]],
+            "sources": [["name": "macos-screentime", "ok": false, "message": "Full Disk Access is needed to read Screen Time."]],
         ])
         m.nextCollect = now.addingTimeInterval(108 * 60)
         m.devices = Device.list(["devices": [["id": "demo-device-1", "name": "iPhone",

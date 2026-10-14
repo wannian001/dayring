@@ -27,7 +27,8 @@ DEFAULT_DEVICES = ["phone", "tablet", "laptop", "desktop"]
 # A computer keeps its screen on while you are away; a phone or tablet locks itself. So when an AI agent app is in
 # front on a computer while another device is in use, the agent is working and you are on the other device.
 DEFAULT_COMPUTERS = ["laptop", "desktop"]
-COLLECT_SOURCES = ("macos-screentime", "ai-logs")
+COLLECT_SOURCES = ("macos-screentime",)
+RETIRED_SOURCES = ("ai-logs",)  # still accepted in an older healthaio.toml, and ignored: the app no longer reads AI logs
 DEFAULT_COLLECT = ["macos-screentime"]
 DEFAULT_AGENT_APPS = ["Claude", "ChatGPT", "Codex", "Cursor", "Windsurf", "Terminal", "iTerm2", "Warp", "Ghostty"]
 
@@ -249,9 +250,9 @@ def load(path: Optional[Path] = None, data_dir: Optional[Path] = None) -> Config
     collect = raw.get("collect", {})
     if collect.get("sources") is not None:
         sources = collect["sources"]
-        if not isinstance(sources, list) or any(s not in COLLECT_SOURCES for s in sources):
+        if not isinstance(sources, list) or any(s not in COLLECT_SOURCES + RETIRED_SOURCES for s in sources):
             raise ConfigError(f"collect.sources must be a list of {', '.join(COLLECT_SOURCES)}")
-        cfg.collect_sources = [str(s) for s in sources]
+        cfg.collect_sources = [str(s) for s in sources if s not in RETIRED_SOURCES]
     updates = raw.get("updates", {})
     if updates.get("check") is not None:
         if not isinstance(updates["check"], bool):

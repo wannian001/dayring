@@ -79,83 +79,51 @@ streaks or scores. What it does not do yet is reach you: the page has to be open
 - Every chart is drawn at its real pixel width (redrawn on resize), so text never scales with the chart. The charts
   live in the design kit (`healthaio/web/js/charts.js`); pages only map their data onto them.
 
-## The Time page: one rule
+## The Stimulation page (`#time`)
 
-The page answers "where did the time go, and what changed?". Every block on it (the sentence and icons at
-the top, the daily-average tiles, the typical day, the last 30 days) uses the same rule:
+The page answers "how stimulating were my days, and what did my body do afterwards?". It replaced "Where your
+time went" on 2026-10-14: where the hours went is already on Today's day ring, and the question people bring to
+their screen data is not "A, B or C" but whether their days are getting more stimulating and whether it shows in
+their body. It keeps the address `#time`, so old links (and `#attention`, `#ai`) still open it.
 
-- **Each activity from its own record, minute by minute.** Sleep = falling asleep to waking (`sleep_start` to
-  `sleep_end`). Exercise = workouts with a start and an end (`workouts.csv`; a paused workout counts its minutes moving); a day known only by its daily
-  `workout_min` adds to the totals but cannot be placed in the hours. Calendar = blocks of kind class, work,
-  personal and other; planned training is left out because the workout itself counts. Screens = app sessions,
-  counted once across devices. The one exception is the **Devices at once** card, which says so in its title row:
-  there each device counts its own minutes (an agent app on a computer while another device is in use, and one app
-  on several devices at once, are taken out first), so the stacking ratio (device time over clock time) and the
-  longest stretch on one thing can be compared with your normal and named as what changed like the rest.
-- **Days are calendar days.** Every activity is cut at midnight, sleep included, so a night counts partly in
-  each day (the Sleep page files the whole night under the morning you woke up instead). Workouts, screens
-  and the calendar are in the configured timezone; Apple Health sleep times are in the zone you slept in, so
-  on travel days the sleep lane can sit off the others by the time difference.
-- **Lanes may overlap.** A lecture with the laptop open is both calendar and screens, so the activities can add
-  up to more than 24 hours. Nothing is subtracted to make them fit.
-- **Not recorded.** The minutes of the day that no record covers. It is a tile of its own, not shared out among
-  the others.
-- **What changed, not what was biggest.** Screens take the most waking time almost every day, so naming the
-  biggest activity says nothing. The page names what changed against your normal instead, the same "you
-  vs you" rule as every other page. The candidates are entertainment & social, focused work, communication,
-  exercise, calendar time and sleep; the screen total is not one (its parts say what moved), nor are other
-  screen time and not recorded.
-  - *Normal for a day* = `stats.typical` over that activity's daily minutes in the 28 days before it (at
-    least 10 days), counting only days whose record for it exists: a day without Screen Time is not a
-    zero-screen day.
-  - *Normal for the 7 days shown* = the middle half of your 7-day averages (`time.typical_week`): one
-    average for the 7 days ending on each of the 28 days before the first shown day, each over the days
-    with the record (at least 4 of the 7), and at least 10 such averages. The value is the shown days'
-    daily average; an average resting on fewer than half of the shown days is shown but not compared. A
-    band of single days would not do here: exercise three times a week or classes on weekdays put many
-    single days at 0, so a week with no workout or no class at all would sit inside it, and the change
-    would be measured from a daily median of 0.
-  - *Score* = how far the value lies outside its band, in band widths: the distance past q1 or q3 divided
-    by max(q3 − q1, the floor, 10% of the median), where the floor is 30 minutes for a single day and 15
-    minutes a day for the 7-day average; 0 inside the band. Values are compared in whole minutes, as
-    printed.
-  - *A change* is a score of at least 1 (`STANDOUT_MIN`): at least one band width past the edge of
-    normal. Inside the middle half every candidate would land outside about half the time, so with six of
-    them nearly every day and every week would name something; one band width keeps the usual ups and
-    downs quiet (measured on made-up usual habits: about 1 day in 20 names a change instead of 19 in 20).
-    The floor keeps a habit that hardly moves from turning a few minutes into a change.
-  - *The standout* is the change furthest from the middle of its normal in minutes (delta = value −
-    median), ties going to the order above, so the sentence and the minutes printed with it always agree.
-    No change: no standout.
-  - *Tone* (green / red) only gives the direction, and only for a change: less entertainment, more focused
-    work, more exercise and more sleep are better; communication and calendar time have none. A value
-    outside the middle half but not one band width out reads "just above / just below normal", uncoloured.
-  - The top shows the standout's icon in its colour with an up / down badge and one sentence ("Compared with
-    your normal, the biggest change these 7 days: entertainment & social, 1h 12m more a day"), with chips for
-    the other changes; with no change, a check and "These 7 days look like your normal". Each day cell shows
-    that day's change (or a check for a usual day, or a dashed clock and "No normal yet" when nothing that
-    day could be compared yet) and that day's screen total and workout minutes underneath.
-  - The daily-average tiles (screens with their split, entertainment & social, focused work, communication,
-    exercise, calendar, sleep, not recorded) are the 7-day averages, each with a state chip, a bullet against
-    the band of 7-day averages and "normal x–y" (one value is written once, "usually none" when it is 0),
-    like the Today tiles. There is one baseline for the whole page: nothing is compared with "the 7 days
-    before".
-- **A missing record is not zero.** Each activity is only counted on a day that has the record it needs, and
-  is left out of its average otherwise (the tile says "6 of 7 days have a record"; the 30-day lanes draw ×):
-  sleep needs the night that ended that morning and the one that started that evening; exercise needs a
-  workout, a `workout_min` (0 = rest day), or a day between the first and last logged workout, and never
-  counts on the day an Apple Health export was made (`complete = 0`); screens need screen sessions, and when
-  Screen Time has stopped arriving its last day counts as cut off; calendar needs an events file. Not
-  recorded is only worked out for days with both a night and screen time. When a record stops before the
-  last day shown, the page says so. A day left out this way is left out of every later day's normal too.
-- **Real minutes.** On the day the clocks go forward the skipped hour is not counted and the day is 23 hours;
-  on the day they go back a record that runs through the repeated hour counts it twice and the day is 25.
-- **Which days.** Whole days only (today is not over yet), and only days with a record of their own: screen
-  time, or a `body_daily` row dated that day (the evening before the first night is not a day). The latest 7
-  such days are shown; "Earlier" and "Later" step by 7 such days, and "Later" ends on the newest one, so a
-  gap in the data never strands the stepper.
-
-The Today page's screen card links here. Old `#attention` links open this page.
+- **No hormone numbers.** Dopamine, cortisol and melatonin cannot be measured by a phone or a watch, so the page
+  never shows a number for them; a card says so. It measures the two ends that can be measured: what goes in, and
+  what the body does next.
+- **What goes in: five signals from Screen Time,** each the daily average of the 7 days shown against your normal.
+  Entertainment & social minutes (each minute once across devices) is the level the page leads with; the hour
+  before sleep (entertainment & social in the hour before falling asleep that night), app switching (sessions per
+  screen hour, as on Drain), screens at once (device time over clock time) and the longest focus stretch (work and
+  learning apps; longer is better) say how it was spread. *Normal* = the middle half of your 7-day averages ending
+  on each of the 28 days before the first shown day (`time.typical_week`, at least 10 of them, each from at least
+  4 days with the record); an average of 7 days moves much less than one day, so a band of single days would let
+  a quiet or a heavy week read as usual. *A change* = at least one band width outside it (the width counts as at
+  least 15 minutes for entertainment & social, 5 for the last hour and the focus stretch, 2 switches an hour and
+  0.05 for the ratio, or a tenth of the usual value when larger); just past the edge reads "just above normal",
+  uncoloured.
+- **The top** is one sentence: more / less stimulation than your normal, or within it (from entertainment & social
+  alone), the minutes against the band, your plan if you set one ("over it on 5 of 7 days"), and chips for the
+  other signals clearly outside normal. Then the five tiles, each with a bullet against its band.
+- **The long view** is the 90-day card (7-day averages of entertainment & social and of the longest focus stretch,
+  the last 28 days next to the 28 before them): whether the baseline is drifting, which is what people mean by
+  "dopamine tolerance", shown as behaviour.
+- **How the body answered** compares, over the last 90 days, the night and next morning after days with
+  entertainment & social above your own median against the rest, and after evenings with more than 15 minutes of
+  it in the last hour against calm ones: when you fell asleep, how long you slept, the next morning's HRV (percent
+  against your normal) and resting heart rate (beats against it). Difference of means with a 95% interval, at
+  least 8 days on each side, Benjamini–Hochberg across all eight; only what survives is "a difference". The card
+  says it is an association and gives the obvious other reading (a stressful day brings both).
+- **In detail**, as tabs: entertainment & social by hour of the day (these days against your usual day), devices
+  at once (each device counts its own minutes; an agent app on a computer while another device is in use, and one
+  app on several devices at once, are taken out first), and where it came from (the entertainment and social apps
+  and sites, per device).
+- **A missing record is not zero.** Only days whose Screen Time is whole count (today is not over; when Screen
+  Time has stopped arriving its last day counts as cut off), and a night whose last hour sits partly on a day
+  without a whole record leaves the hour before sleep unknown. When Screen Time stops before the last day shown,
+  the page says so.
+- **Minutes are real minutes,** counted from the records minute by minute in the configured timezone (the same
+  `Context.time_days` the day ring uses): on the day the clocks go forward the skipped hour is not counted.
+- **Which days.** Whole days with a record of their own; the latest 7 are shown, and "Earlier" and "Later" step by
+  7 such days, "Later" ending on the newest one, so a gap never strands the stepper.
 
 ## The Drain page
 
@@ -173,7 +141,7 @@ matters, and says when the evidence is softer (entertainment).
 - **No total score.** The signals have different units and different strength of evidence.
 - **Missing is missing.** Each signal uses only days its own record covers in full; fewer than 4 of the 7 days and
   the row says so instead of guessing. A screen day counts only when it is whole: not today, and not the last day
-  of a Screen Time import that has stopped arriving (the same rule the Time page uses), since that day was most
+  of a Screen Time import that has stopped arriving (the same rule the Stimulation page uses), since that day was most
   likely cut off part-way. Screens in the hour before sleep need a screen record for every day that hour touches.
   When no signal can be set against your normal, the page says so instead of "nothing got worse", and a plan that
   could not be checked is named as such, never counted as within plan.
@@ -189,22 +157,9 @@ matters, and says when the evidence is softer (entertainment).
 - The week stack-up check (at least 3 nights under 7 hours and at least 3 training days) moved here from Today;
   Today keeps a two-line summary that links to this page.
 
-## The AI work page
-
-A page of the Daily life item: how much AI agents worked for you, on how many instructions, next to your own focused
-work. The same 7 whole days and the same "your normal" as the Time page. Four numbers and two ratios: AI work a
-day (sessions you started; scheduled tasks and scripts on their own), instructions a day, AI work per instruction
-and AI work over your focused work (both from the 7 days' totals). Usage is input, not output: an agent going in
-circles adds minutes too, so the AI numbers keep no better or worse colour; only your focused work keeps the Time
-page's direction. AI work is drawn in focus blue stripes, "work, done for you", instead of a sixth data colour:
-no further hue passes the colour-vision checks against the five already in use. Below the tiles: AI and your
-day by the hour (sleep, screens, AI working, your instructions, one 0–24 axis), the last 30 days, and what came
-out 7 days at a time (deadlines marked submitted or done, with the focused work and AI work of those days
-divided among them).
-
 ## Menu
 
-Today · Body signals (Sleep, Drain, Weight) · Daily life (Exercise, Food, Where time went, AI work, Schedule) ·
+Today · Body signals (Sleep, Drain, Weight) · Daily life (Exercise, Food, Stimulation, Schedule) ·
 Actions & goals (Follow-up, Goals) · Weekly review · Data sources. The items are the loop of managing your health,
 one question each: how am I today and what do I change; what is my body showing (outcomes you cannot change
 directly); what do I do every day (the causes you can change); what did I decide to change and is it happening; did
@@ -245,11 +200,10 @@ above the page.
 
   Focus / entertainment / communication pass the colour-vision checks in both modes for every pair
   (worst CVD ΔE 9.2). Sleep is too close to focus for protanopia, so it is never placed next to it: it has its
-  own track on the ring, its own lane on the Time page and its own chart on the Sleep page.
+  own track on the ring, its own chart on the Sleep page.
   Exercise was checked against every colour above, sleep included, in both modes: worst CVD ΔE 8.7 in light and
   8.4 in dark (both against sleep), at least 9.3 against the screen colours, and at least 3:1 contrast on every
-  mode's surface. So exercise may sit next to sleep: they are neighbouring lanes on the Time page and
-  neighbouring tracks on the ring. Exercise minutes written as text use the darker (light mode) or lighter
+  mode's surface. So exercise may sit next to sleep: they are neighbouring tracks on the ring. Exercise minutes written as text use the darker (light mode) or lighter
   (dark mode) text step, at least 5.5:1 on every mode's surface. Calendar blocks are drawn in ink, not a
   data colour.
 - Status colours (good / watch / off) are reserved for states and always come with a word or icon.
@@ -272,20 +226,20 @@ above the page.
 
 ## Words
 
-- One word, one source. "Exercise / 运动" is logged workouts everywhere (Time, Review, the ring); Apple's
+- One word, one source. "Exercise / 运动" is logged workouts everywhere (Review, the ring); Apple's
   Exercise-ring minutes on Today are "Exercise ring / 锻炼圆环". Workout types and device names are
   translated; app names and anything you typed stay as written.
 
 - The server returns numbers; the browser writes sentences from `i18n.js`. Add a language by adding a dictionary.
 - Labels name what a person recognises ("Entertainment in the hour before sleep"), not how it is stored.
-- Page names say what the page measures. The page about the day's hours is **Time** (时间), titled "Where your
-  time went" (时间去向), not "Attention": it holds sleep and workouts too, and what it counts is time.
+- Page names say what the page measures. The page about screens is **Stimulation** (刺激水平): it measures what
+  goes in and what the body does next, and never calls either a hormone level.
 - No scores out of 100, no streaks, no badges. The Review page only lays facts side by side.
 
 ## Accessibility
 
 - Every chart has `role="img"` and a label, and every mark with a tooltip is also reachable as text elsewhere on
   the page (the tile values, the table on Review, the sentence under each interval for screen readers).
-- Activity icons are hidden from screen readers; the tile names and the sentence at the top of the Time page
+- Activity icons are hidden from screen readers; the tile names and the sentence at the top of the Stimulation page
   say the same thing in words.
 - Focus is visible; motion respects `prefers-reduced-motion`; nothing scrolls sideways at 320 px.

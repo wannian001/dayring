@@ -42,7 +42,7 @@ enum Strings {
 
     /// Tables in the order the dashboard lists them; unknown ones after, by name.
     static func tableOrder(_ a: String, _ b: String) -> Bool {
-        let order = ["body_daily", "workouts", "meals", "screen_sessions", "events", "ai_work"]
+        let order = ["body_daily", "workouts", "meals", "screen_sessions", "events"]
         let ia = order.firstIndex(of: a) ?? order.count, ib = order.firstIndex(of: b) ?? order.count
         return ia != ib ? ia < ib : a < b
     }
@@ -54,7 +54,6 @@ enum Strings {
         case "meals": return String(localized: "Meals")
         case "screen_sessions": return String(localized: "Screen time")
         case "events": return String(localized: "Calendar")
-        case "ai_work": return String(localized: "AI work")
         default: return name
         }
     }

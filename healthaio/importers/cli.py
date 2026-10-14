@@ -13,7 +13,6 @@ Commands::
     healthaio import apple-health PATH                       export.zip, export.xml or the unzipped folder
     healthaio import ics PATH [--kind K] [--all-day] [--days-back N] [--days-ahead N]
     healthaio import macos-screentime [--days N] [--device NAME]     (experimental)
-    healthaio import ai-logs [--claude-dir DIR] [--codex-dir DIR ...] [--days N]
     healthaio import csv TABLE PATH --map 'Source=column,...' [--date-format F] [--replace]
 """
 import argparse
@@ -46,13 +45,6 @@ def add_parsers(subparsers) -> argparse.ArgumentParser:
                             help="macOS Screen Time (Biome) -> screen_sessions (experimental; needs Full Disk Access)")
     screen.add_argument("--days", type=int, default=28, metavar="N", help="how far back to read (default 28)")
     screen.add_argument("--device", metavar="NAME", help="name for this Mac (default laptop/desktop)")
-
-    ai = sub.add_parser("ai-logs", help="Claude Code and Codex logs on this computer -> ai_work, ai_prompts "
-                                        "(times and counts only, never what was said)")
-    ai.add_argument("--claude-dir", type=Path, metavar="DIR", help="Claude Code logs (default ~/.claude/projects)")
-    ai.add_argument("--codex-dir", type=Path, action="append", metavar="DIR",
-                    help="Codex logs, repeatable (default ~/.codex/sessions and ~/.codex/archived_sessions)")
-    ai.add_argument("--days", type=int, metavar="N", help="only the last N days (default: everything the logs hold)")
 
     table = sub.add_parser("csv", help="any CSV with its own column names -> any table")
     table.add_argument("table", choices=list(TABLES))
@@ -89,9 +81,6 @@ def _dispatch(args, cfg):
     if args.importer == "macos-screentime":
         from .macos_screentime import import_screentime
         return import_screentime(cfg, days=args.days, local_device=args.device)
-    if args.importer == "ai-logs":
-        from .ai_logs import import_ai_logs
-        return import_ai_logs(cfg, claude_dir=args.claude_dir, codex_dirs=args.codex_dir, days=args.days)
     if args.importer == "csv":
         from .csv_map import import_csv
         return import_csv(args.table, args.path, cfg, args.map, date_format=args.date_format,

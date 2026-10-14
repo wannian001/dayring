@@ -70,7 +70,6 @@ enum S {
     static func sourceName(_ raw: String) -> String {
         switch raw {
         case "macos-screentime": return tr("Screen Time", "屏幕使用时间")
-        case "ai-logs": return tr("AI logs", "AI 日志")
         default: return raw
         }
     }

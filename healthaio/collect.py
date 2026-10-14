@@ -2,7 +2,7 @@
 
 The Mac app runs ``collect`` every few hours. Screen Time keeps only about four weeks, so a gap of more than that is
 lost for good; the app holds Full Disk Access so that its child processes (this one) may read it. Which importers run
-is ``[collect] sources`` in healthaio.toml (default: Screen Time only; add "ai-logs" for Claude Code and Codex).
+is ``[collect] sources`` in healthaio.toml (Screen Time is the only one).
 """
 import csv
 import os
@@ -13,8 +13,7 @@ from typing import Any, Dict, List, Optional
 from . import __version__, capture, config as config_mod, iphone, phone, state, update
 from .schema import TABLES
 
-LATEST = {"body_daily": "date", "workouts": "start", "meals": "time", "screen_sessions": "start", "events": "start",
-          "ai_work": "start"}
+LATEST = {"body_daily": "date", "workouts": "start", "meals": "time", "screen_sessions": "start", "events": "start"}
 
 
 def full_disk_access() -> Optional[bool]:
@@ -33,9 +32,8 @@ def full_disk_access() -> Optional[bool]:
 
 
 def collect(cfg) -> Dict[str, Any]:
-    from .importers.ai_logs import import_ai_logs
     from .importers.macos_screentime import import_screentime
-    runs = {"macos-screentime": lambda: import_screentime(cfg), "ai-logs": lambda: import_ai_logs(cfg)}
+    runs = {"macos-screentime": lambda: import_screentime(cfg)}
     sources: List[Dict[str, Any]] = []
     for name in cfg.collect_sources:
         if name == "macos-screentime" and sys.platform != "darwin":

@@ -44,7 +44,7 @@ def build(ctx: Context, week: Optional[str] = None) -> Dict[str, Any]:
     whole = lambda name: (lambda d: (body.get(d) or {}).get(name) if complete(d) else None)
 
     def exercise(d: date) -> Optional[float]:
-        """Workout minutes by the Time page's rule; None for today and for days with no workout record."""
+        """Workout minutes by the day ring's rule (context.exercise_on); None for today and for days with no workout record."""
         return ctx.exercise_on(d) if d < ctx.today else None
 
     active = exercise_page.active_minutes(ctx, ctx.today - timedelta(days=1))
