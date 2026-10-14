@@ -2,9 +2,9 @@
 // (/api/kit; api/kit.json on the static site) and drawn with made-up sample data. Not a menu item: the footer
 // of every page and the Data page link here. Every manifest entry needs a sample below (tests/test_kit.py).
 import { blockColumns, bullet, coverage, dayDots, dayRing, draw, esc, interval, keptDots, ladderChart, lanes, legendKey, mealTimeline,
-  rangeStrip, RING_CATS, scoreDots, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js?v=8ad8a09b08";
-import { dur, getLang, measure, num, shortDay, t } from "../i18n.js?v=8ad8a09b08";
-import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js?v=8ad8a09b08";
+  rangeStrip, RING_CATS, scoreDots, sleepWindows, spark, stackedColumns, timeChart, trendLine } from "../charts.js?v=2a288595f6";
+import { dur, getLang, measure, num, shortDay, t } from "../i18n.js?v=2a288595f6";
+import { COLOR, ICON_KEYS, icon, STATE_ICON } from "../icons.js?v=2a288595f6";
 
 const DOCS = "https://github.com/wannian001/proactive-health-aio/blob/main/docs/DESIGN_KIT.md";
 const SIZES = [13, 16, 28, 64];

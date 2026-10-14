@@ -689,7 +689,7 @@ Object.assign(DICT.zh, {
 
 // ---- proactive health: the health menu, what to adjust today, Exercise, Food and Goals ----
 Object.assign(DICT.en, {
-  "nav.life": "Daily life", "nav.act": "Actions & goals", "nav.followup": "Follow-up", "nav.exercise": "Exercise", "nav.food": "Food", "nav.goals": "Goals", "nav.schedule": "Schedule",
+  "nav.life": "Daily life", "nav.plans": "Plans & follow-up", "nav.followup": "Follow-up", "nav.exercise": "Exercise", "nav.food": "Food", "nav.goals": "Goals", "nav.schedule": "Schedule",
   "eff.ate_early": "Last meal {hours}+ h before sleep that night",
 
   "todo.title": "What to adjust today", "todo.aside": "read off every page this morning",
@@ -804,7 +804,7 @@ Object.assign(DICT.en, {
   "kit.enc.c-sore-3": "soreness: very sore", "kit.enc.plate": "the body figure's plate", "kit.enc.plate-ink": "labels on the plate",
 });
 Object.assign(DICT.zh, {
-  "nav.life": "生活习惯", "nav.act": "行动与目标", "nav.followup": "跟进", "nav.exercise": "运动", "nav.food": "饮食", "nav.goals": "目标", "nav.schedule": "日程",
+  "nav.life": "生活习惯", "nav.plans": "计划与跟进", "nav.followup": "跟进", "nav.exercise": "运动", "nav.food": "饮食", "nav.goals": "目标", "nav.schedule": "日程",
   "eff.ate_early": "当晚最后一餐离睡着 {hours} 小时以上",
 
   "todo.title": "今天该调整的", "todo.aside": "今早从各页读出来的",
@@ -1002,7 +1002,7 @@ Object.assign(DICT.zh, {
 
 // ---- the menu's short names on a phone's tab bar, and goals set on the Goals page (goal_log.py) ----
 Object.assign(DICT.en, {
-  "nav.short.today": "Today", "nav.short.body": "Body", "nav.short.life": "Life", "nav.short.sched": "Schedule", "nav.short.act": "Actions",
+  "nav.short.today": "Today", "nav.short.body": "Body", "nav.short.life": "Life", "nav.short.plans": "Plans",
   
   "goals.edit": "Edit", "goals.set_one": "Set one", "goals.save": "Save", "goals.cancel": "Cancel", "goals.reset": "Back to the original",
   "goals.src.you": "set here", "goals.src.accepted": "suggestion you accepted",
@@ -1020,7 +1020,7 @@ Object.assign(DICT.en, {
   "goals.u.h": "h", "goals.u.min": "min", "goals.u.days": "days", "goals.u.kcal": "kcal", "goals.u.g_per_kg": "g", "goals.u.kg": "kg",
 });
 Object.assign(DICT.zh, {
-  "nav.short.today": "今天", "nav.short.body": "身体", "nav.short.life": "生活", "nav.short.sched": "日程", "nav.short.act": "行动",
+  "nav.short.today": "今天", "nav.short.body": "身体", "nav.short.life": "生活", "nav.short.plans": "计划",
   
   "goals.edit": "改", "goals.set_one": "设一个", "goals.save": "保存", "goals.cancel": "取消", "goals.reset": "用回原来的",
   "goals.src.you": "在这里设的", "goals.src.accepted": "采纳的建议",
@@ -1214,7 +1214,7 @@ Object.assign(DICT.zh, {
 
 // ---- Load (#load, modules/load.py), the morning feeling and the after-training score (modules/recovery.py) ----
 Object.assign(DICT.en, {
-  "nav.sched": "Schedule", "nav.schedule_week": "Week", "nav.load_tab": "Body & mind load",
+  "nav.schedule_week": "Week", "nav.load_tab": "Body & mind load",
   "load.title": "Body & mind load", "load.sub": "What is asked of you each week, by the body and by the mind",
   "load.eyebrow": "This week, from {day}",
   "load.lede.stacked": "Body and mind are both loaded this week", "load.lede.mind": "The mind's side is heavier than usual this week",
@@ -1270,7 +1270,7 @@ Object.assign(DICT.en, {
   "rec.rule_after": "The morning after each training day of the last {n} days: how you feel (your answer, 2, 5 or 8), HRV the morning after against the morning before the training, resting heart rate against your normal, and the night after (how long you slept against your normal, and how much of the time in bed you were asleep). Each body part is 5 plus 2.5 for every width of your normal it lies away, better direction up, between 0 and 10 (HRV's normal is that of its morning-to-morning changes). The parts are averaged; a morning needs two of them, one from the body. {good} and above reads as recovered well, under {low} as not recovered. It is the one total score in the app, and every part is shown with it.",
 });
 Object.assign(DICT.zh, {
-  "nav.sched": "日程", "nav.schedule_week": "一周日程", "nav.load_tab": "身心负荷",
+  "nav.schedule_week": "一周日程", "nav.load_tab": "身心负荷",
   "load.title": "身心负荷", "load.sub": "每周身体和精神各被要求了多少",
   "load.eyebrow": "这一周，{day} 起",
   "load.lede.stacked": "这周身体和精神的负荷叠在一起", "load.lede.mind": "这周精神上的负荷比平常重",

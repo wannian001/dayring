@@ -1,9 +1,9 @@
 // Exercise: this week against the weekly goal, the last 7 days against your normal, load against recovery,
 // twelve weeks by kind, and how the body tends to answer each kind the next day.
-import { bullet, draw, esc, spark, stackedColumns } from "../charts.js?v=8ad8a09b08";
-import { clock, day, dur, measure, num, shortDay, signed, t, weekdayShort, wtype } from "../i18n.js?v=8ad8a09b08";
-import { STATE_ICON } from "../icons.js?v=8ad8a09b08";
-import { mountTabs, tabs } from "./tabs.js?v=8ad8a09b08";
+import { bullet, draw, esc, spark, stackedColumns } from "../charts.js?v=2a288595f6";
+import { clock, day, dur, measure, num, shortDay, signed, t, weekdayShort, wtype } from "../i18n.js?v=2a288595f6";
+import { STATE_ICON } from "../icons.js?v=2a288595f6";
+import { mountTabs, tabs } from "./tabs.js?v=2a288595f6";
 
 const chip = (cls, text) => `<span class="chip ${cls}">${esc(text)}</span>`;
 
