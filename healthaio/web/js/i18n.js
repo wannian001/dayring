@@ -363,12 +363,12 @@ Object.assign(DICT.zh, {
   "wtype.snow sports": "雪上运动", "wtype.jump rope": "跳绳", "wtype.water sports": "水上运动", "wtype.surfing sports": "冲浪",
 });
 
-// ---- Drain page and the grouped menu ----
+// ---- Wear and tear (the Drain page, #drain) and the grouped menu ----
 Object.assign(DICT.en, {
-  "nav.drain": "Drain", "nav.weight": "Weight", "nav.sleep_tab": "Sleep",
-  "drain.title": "Drain", "drain.sub": "{from} – {to}, against the 28 days before",
+  "nav.drain": "Wear and tear", "nav.weight": "Weight", "nav.sleep_tab": "Sleep",
+  "drain.title": "Wear and tear", "drain.sub": "{from} – {to}, against the 28 days before",
   "drain.prev": "Earlier 7 days", "drain.next": "Later 7 days", "drain.latest": "Latest",
-  "drain.eyebrow": "What is quietly wearing you down", "drain.sep": ", ",
+  "drain.eyebrow": "What has been slowly wearing you down this week", "drain.group.body": "What the body already shows", "drain.group.sleep": "Sleep timing", "drain.group.screen": "Screen habits", "drain.sep": ", ",
   "drain.worse_none": "Against your normal, nothing got worse", "drain.worse_some": "Worse than your normal: {list}",
   "drain.plan_none": "Everything with a plan is within it.", "drain.plan_some": "Against your plan: {list}.",
   "drain.plan_unset": "No plans set for these yet (plan.sleep.bedtime, plan.screen.entertainment_max_hours).",
@@ -394,18 +394,18 @@ Object.assign(DICT.en, {
   "drain.worse_none_some": "Of the {n} signals with enough records, none got worse than your normal",
   "drain.plan_within": "Within plan: {list}.", "drain.plan_unchecked": "Too few records to check against the plan: {list}.",
   "drain.plan_sep": ", ", "drain.sentence_sep": " ",
-  "drain.load_title": "Load over these 7 days", "drain.load_strain": "Short sleep and hard training stacked up in these 7 days",
+  "drain.load_title": "Short nights and hard training together?", "drain.load_strain": "Short sleep and hard training stacked up in these 7 days",
   "drain.load_ok": "No stack-up of short sleep and hard training in these 7 days",
   "drain.load_unknown": "Too few nights recorded in these 7 days to check for a stack-up",
   "drain.key.median": "middle of your normal", "drain.key.weeks": "weekly averages, last 8 weeks",
   "drain.usual_per_hour": "normal {a}–{b} an hour",
-  "today.drain": "Drain, last 7 days", "today.drain_more": "See what is wearing you down →",
+  "today.drain": "Wear and tear, last 7 days", "today.drain_more": "See what is wearing you down →",
 });
 Object.assign(DICT.zh, {
-  "nav.drain": "消耗", "nav.weight": "体重", "nav.sleep_tab": "睡眠",
-  "drain.title": "消耗", "drain.sub": "{from} – {to}，和之前 28 天比",
+  "nav.drain": "慢性磨损", "nav.weight": "体重", "nav.sleep_tab": "睡眠",
+  "drain.title": "慢性磨损", "drain.sub": "{from} – {to}，和之前 28 天比",
   "drain.prev": "往前 7 天", "drain.next": "往后 7 天", "drain.latest": "最近",
-  "drain.eyebrow": "哪些东西在悄悄耗你", "drain.sep": "、",
+  "drain.eyebrow": "这一周，哪些东西在慢慢磨损你", "drain.group.body": "身体已经显出来的", "drain.group.sleep": "作息", "drain.group.screen": "屏幕习惯", "drain.sep": "、",
   "drain.worse_none": "跟自己的平常比，没有哪项变差", "drain.worse_some": "跟自己的平常比，有 {n} 项变差：{list}",
   "drain.plan_none": "定了计划的几项都在计划内。", "drain.plan_some": "跟计划比：{list}。",
   "drain.plan_unset": "这几项还没定计划（plan.sleep.bedtime、plan.screen.entertainment_max_hours）。",
@@ -431,12 +431,12 @@ Object.assign(DICT.zh, {
   "drain.worse_none_some": "记录够的 {n} 项里，没有哪项比平常差",
   "drain.plan_within": "在计划内：{list}。", "drain.plan_unchecked": "记录不够，没法跟计划比：{list}。",
   "drain.plan_sep": "，", "drain.sentence_sep": "",
-  "drain.load_title": "这 7 天的负荷", "drain.load_strain": "这 7 天睡眠不足和高强度训练叠在一起了",
+  "drain.load_title": "睡得少，又练得狠？", "drain.load_strain": "这 7 天睡眠不足和高强度训练叠在一起了",
   "drain.load_ok": "这 7 天没有出现睡眠不足叠加高强度训练",
   "drain.load_unknown": "这 7 天记到的夜晚太少，看不出有没有叠加",
   "drain.key.median": "平常的中间值", "drain.key.weeks": "最近 8 周的每周平均",
   "drain.usual_per_hour": "平常每小时 {a}–{b} 次",
-  "today.drain": "消耗 · 最近 7 天", "today.drain_more": "看哪些在耗你 →",
+  "today.drain": "慢性磨损 · 最近 7 天", "today.drain_more": "看哪些在磨损你 →",
 });
 
 // ---- the design kit gallery (#kit) ----
@@ -973,7 +973,7 @@ Object.assign(DICT.en, {
   "sum.food_ok": "on plan", "sum.food_off": "off the plan", "sum.food_within": "within the plan",
   "sum.screens_name": "Screens yesterday",
   "sum.screens_bad": "worse than usual", "sum.screens_good": "better than usual", "sum.screens_usual": "as usual", "sum.stale": "stopped {n} days ago",
-  "sum.drain_name": "Drain, 7 days",
+  "sum.drain_name": "Wear and tear, 7 days",
   "sum.strain": "short nights and hard training", "sum.drain_n": "{n} worse than usual", "sum.drain_ok": "nothing worse",
   "sum.patterns": "What helps you", "sum.patterns_none": "Nothing clear yet",
   "eff.short.trained": "training", "eff.short.steps": "{min}+ steps", "eff.short.exercise": "{min}+ active minutes",
@@ -1006,7 +1006,7 @@ Object.assign(DICT.zh, {
   "sum.food_ok": "都在计划内", "sum.food_off": "和计划不符", "sum.food_within": "在计划内",
   "sum.screens_name": "昨天屏幕",
   "sum.screens_bad": "比平常差", "sum.screens_good": "比平常好", "sum.screens_usual": "和平常差不多", "sum.stale": "停了 {n} 天",
-  "sum.drain_name": "消耗 · 7 天",
+  "sum.drain_name": "慢性磨损 · 7 天",
   "sum.strain": "睡得少又练得狠", "sum.drain_n": "{n} 项比平常差", "sum.drain_ok": "没有哪项变差",
   "sum.patterns": "对你有用的", "sum.patterns_none": "还没看出来",
   "eff.short.trained": "训练", "eff.short.steps": "走够 {min} 步", "eff.short.exercise": "锻炼够 {min} 分钟",

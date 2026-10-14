@@ -173,7 +173,7 @@ function screensLine(p) {
 
 function drainLine(p) {
   const d = p.drain;
-  // the Drain page for the same 7 days as this line (the latest window when this is today)
+  // the Wear and tear page (#drain) for the same 7 days as this line (the latest window when this is today)
   const more = p.looking_back ? `#drain/${d.window.to}` : "#drain";
   const state = d.strain ? chip("watch", t("sum.strain")) : d.worse.length ? chip("bad", t("sum.drain_n", { n: d.worse.length }), STATE_ICON.bad) : d.compared ? chip("good", t("sum.drain_ok"), STATE_ICON.good) : "";
   return line({ key: "drain", iconKey: "battery", name: t("sum.drain_name"), text: worseLine(d.worse, d.compared, d.signals), state, href: more });

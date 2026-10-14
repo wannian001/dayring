@@ -1,4 +1,5 @@
-// Drain: seven quiet signals over the last 7 days, each against your normal and, where set, your plan.
+// Wear and tear (#drain): seven quiet signals over the last 7 days, in three groups (what the body already shows,
+// sleep timing, screen habits), each against your normal and, where set, your plan.
 // No total score: the signals have different units and different strength of evidence.
 import { draw, esc, legendKey, rangeStrip, trendLine } from "../charts.js";
 import { day, dur, inSentence, num, shortDay, t } from "../i18n.js";
@@ -75,7 +76,9 @@ export default {
     const plan = planLine(p.rows);
     const later = p.next === p.latest ? "#drain" : `#drain/${p.next}`;
     const stepper = `<div class="stepper"><a href="#drain/${p.prev}">‹ ${t("drain.prev")}</a>${p.next ? `<a href="${later}">${t("drain.next")} ›</a><a href="#drain">${t("drain.latest")}</a>` : ""}</div>`;
-    const rows = p.rows.map((r, i) => `<div class="drain-row">
+    // the seven in three groups, each headed where its first signal starts
+    const GROUP = { resting_hr: "body", asleep: "sleep", before_sleep: "screen" };
+    const rows = p.rows.map((r, i) => `${GROUP[r.key] ? `<div class="drain-group section-title">${t(`drain.group.${GROUP[r.key]}`)}</div>` : ""}<div class="drain-row">
       <div class="what"><b>${esc(label(r.key))}</b><span>${esc(t(`drain.why.${r.key}`))}</span></div>
       <div class="drain-strip" data-i="${i}"></div>
       <div class="drain-value"><b class="num">${esc(fmt(r.unit, r.value))}</b>
@@ -98,7 +101,7 @@ export default {
           <p class="lede" style="font-size:var(--t-lg)">${t(load)}</p>
           ${strainFacts.length ? `<ul class="agenda">${strainFacts.map((f) => `<li style="grid-template-columns:minmax(0,1fr)"><span>${esc(f)}</span></li>`).join("")}</ul>` : ""}
           <details class="how"><summary>${t("ui.how")}</summary><p>${t("week.rule")}</p></details></section>
-        <section class="card span-12"><details class="how" open><summary>${t("ui.how")}</summary><p>${t("drain.rule", { w: p.rule.window, b: p.rule.baseline })}</p></details></section>
+        <section class="card span-12"><details class="how"><summary>${t("ui.how")}</summary><p>${t("drain.rule", { w: p.rule.window, b: p.rule.baseline })}</p></details></section>
       </div>`;
   },
   mount(root, p) {

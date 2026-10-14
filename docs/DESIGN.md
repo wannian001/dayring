@@ -59,7 +59,7 @@ streaks or scores. What it does not do yet is reach you: the page has to be open
   4 weeks before; above 1.3 with recovery not better than usual = ease off), 12 weeks by kind with the goal dashed,
   and how HRV and resting heart rate answer each kind the next morning (medians, a description, not a test).
 - **Food** counts a day once two main meals are logged; fewer is shown, not averaged, and a day not logged is
-  unknown, never zero. Rows like the Drain page's (value, normal band, plan tick, 8 weekly averages) for energy,
+  unknown, never zero. Rows like the Wear and tear page's (value, normal band, plan tick, 8 weekly averages) for energy,
   protein, the hours from the last meal to sleep and fibre; the plan wins the colour, because the plan is the
   point of the page. The last meal is judged night by night (two or more late nights = off the plan), not by its
   average. Meals by time of day draw each day from waking to sleep with the hours before sleep striped. The energy
@@ -174,7 +174,7 @@ their body. It keeps the address `#time`, so old links (and `#attention`, `#ai`)
 - **What goes in: five signals from Screen Time,** each the daily average of the 7 days shown against your normal.
   Entertainment & social minutes (each minute once across devices) is the level the page leads with; the hour
   before sleep (entertainment & social in the hour before falling asleep that night), app switching (sessions per
-  screen hour, as on Drain), screens at once (device time over clock time) and the longest focus stretch (work and
+  screen hour, as on Wear and tear), screens at once (device time over clock time) and the longest focus stretch (work and
   learning apps; longer is better) say how it was spread. *Normal* = the middle half of your 7-day averages ending
   on each of the 28 days before the first shown day (`time.typical_week`, at least 10 of them, each from at least
   4 days with the record); an average of 7 days moves much less than one day, so a band of single days would let
@@ -207,14 +207,19 @@ their body. It keeps the address `#time`, so old links (and `#attention`, `#ai`)
 - **Which days.** Whole days with a record of their own; the latest 7 are shown, and "Earlier" and "Later" step by
   7 such days, "Later" ending on the newest one, so a gap never strands the stepper.
 
-## The Drain page
+## The Wear and tear page (`#drain`)
 
-The page answers "what has been quietly wearing me down this week?" with seven signals named the way physiology
+The page answers "what has been slowly wearing me down this week?" (慢性磨损: chronic wear, not the calories
+"消耗" would suggest; it was called Drain, and its address stays `#drain`) with seven signals named the way physiology
 and sleep research name them: resting heart rate (higher is worse), HRV (lower is worse), the time you fall
 asleep (later is worse), sleep-timing spread (the standard deviation of each night's midpoint; larger is worse), screens in the
 hour before sleep, entertainment & social, and app switches per screen hour. Each row has one line on why it
 matters, and says when the evidence is softer (entertainment).
 
+- **Three groups**, so seven rows read as three questions: what the body already shows (resting heart rate, HRV),
+  sleep timing (falling asleep, spread) and screen habits (before sleep, entertainment & social, switching). The
+  card at the bottom asks "short nights and hard training in the same week?" (it was "load over these 7 days",
+  which read like the Body & mind load page).
 - **Two judgements, never mixed.** Against your normal: the last 7 days' average against the middle half of the
   28 days before (sleep-timing spread against the range of the four 7-night blocks before, because a spread only
   exists over a run of nights). Against your plan, only where `healthaio.toml` sets one: falling asleep against
@@ -235,13 +240,13 @@ matters, and says when the evidence is softer (entertainment).
   so the strips line up down the card. At 900 px and narrower the strip and the weekly line get rows of their
   own and the weekly line carries its own label; on phones the value moves under the name.
 - **Stepping.** Earlier / Later move 7 days at a time; Later from a window off the 7-day grid (opened from a past
-  day on Today) ends on the latest window. Today's card links to the Drain window it summarises.
+  day on Today) ends on the latest window. Today's card links to the Wear and tear window it summarises.
 - The week stack-up check (at least 3 nights under 7 hours and at least 3 training days) moved here from Today;
   Today keeps a two-line summary that links to this page.
 
 ## Menu
 
-Today · Body signals (Recovery, Sleep, Drain, Weight) · Daily life (Exercise, Food, Stimulation) · Schedule (Week,
+Today · Body signals (Recovery, Sleep, Wear and tear, Weight) · Daily life (Exercise, Food, Stimulation) · Schedule (Week,
 Body & mind load) · Actions & goals (Follow-up, Goals) · Weekly review · Data sources. The items are the loop of
 managing your health, one question each: how am I today and what do I change; what is my body showing (outcomes you
 cannot change directly); what do I do every day (the causes you can change); what is coming, and how much do the

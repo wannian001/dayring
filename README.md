@@ -37,7 +37,7 @@ The menu is that loop, one question per item: **Body signals** are the outcomes 
 | **Today** | | One card for the morning: the day ring, how recovered you are against your own last 28 days, today's training and calendar in a line, when to be asleep tonight, and **what to adjust today** (at most three: at most one each for training, sleep, food and daytime screens, with the reason in a few words; a link checks yesterday's on Follow-up). Under it, every other part in one line with its number and state (sleep, HRV, resting heart rate, the week's exercise, food, screens, drain, weight, what helps you); a line opens its page. |
 | **Body signals** | Recovery | How recovered you are (the Today verdict, with its three signals), how you came back from each training day, and where you are sore. **The morning check-in**: how you feel, in one tap (not recovered = 2, so-so = 5, recovered = 8), and where you are sore (tap the body figure from the author's GEOM90007 project Ready to Train, three levels per region; 14 days per region below, with the days each part was trained marked). **After a strength session or a hard one** (effort 7 or more), every page pops up a note in the corner for 36 hours: tap the parts it trained on the figure, or say it in a sentence (typed, or dictated with the phone keyboard's microphone; "bench, rows, curls" lights up the torso and both upper arms by itself). The next two mornings, the check-in asks about those parts first, with a button per level. **The morning after training** is the app's one total score: four parts on 0–10, each against your own normal (5 is a usual morning): how you said you felt, HRV the morning after against the morning before, resting heart rate, and the night after (how long you slept, and how much of the time in bed you were asleep); added up and divided by how many there are, with every part shown beside it, the parts the session trained coloured by how sore they were the next morning, and 60 days of these scores as one dot per training day. Below it, how next-morning HRV, resting heart rate and soreness answer hard days, drawn as differences with 95% intervals against zero. A clearly sore region with training planned gives "spare the sore parts" on Today. |
 | | Sleep | Tonight's times and how far the alarm plan has come; the last 7 nights against the 7 before; 21 nights on one axis and, in a tab, the alarm ladder (one step earlier after each on-time morning). Night-by-night checks are on Goals. |
-| | Drain | What has been quietly wearing you down over 7 days? Seven signals (resting heart rate, HRV, the time you fall asleep, sleep-timing spread, screens before sleep, entertainment & social, app switching), each against your normal and your plan, plus whether short nights and hard training stacked up. No total score. |
+| | Wear and tear | What has been slowly wearing you down this week? Seven signals in three groups: what the body already shows (resting heart rate, HRV), sleep timing (the time you fall asleep, how much it moves night to night) and screen habits (screens before sleep, entertainment & social, app switching), each against your normal and your plan; plus whether short nights and hard training came in the same week. No total score. |
 | | Weight | Weight as a 7-day average inside the corridor your plan allows, the weekly rate, and the long view. |
 | **Daily life** | Exercise | This week against the weekly goal (your plan, or the WHO guideline of 150 active minutes and 2 strength days, and it says which), day by day with the training planned for the days to come; the last 7 days against your normal; training load against recovery; 12 weeks by kind (strength, cardio, walking); how HRV and resting heart rate tend to answer each kind the next morning. |
 | | Food | The last 7 logged days against your normal and your plan: energy, protein (per kg of your weight), fibre, and the hours from the last meal to falling asleep; 14 days of meals by time of day with the hours before sleep striped; the food log set against the scale (the weekly change the log implies against the one the scale shows); what an early dinner has gone with the next morning. |
@@ -61,7 +61,7 @@ The menu is that loop, one question per item: **Body signals** are the outcomes 
   <img src="docs/images/food.png" width="49%" alt="Food page, light mode">
 </p>
 <p>
-  <img src="docs/images/drain-zh.png" width="49%" alt="Drain page in Chinese, dark mode">
+  <img src="docs/images/drain-zh.png" width="49%" alt="Wear and tear page in Chinese, dark mode">
   <img src="docs/images/week.png" width="49%" alt="Schedule page, light mode">
 </p>
 <p>
@@ -94,7 +94,7 @@ on the left that folds to a column of icons; on a phone it is a tab bar at the b
   synced is shown but not compared. When a stream stops, every page says how old its numbers are.
 - **One total score, shown in parts.** The only total is the morning after training on Recovery: four parts that
   are each already "against your normal" on the same 0–10 scale, averaged, with every part beside it. Everything
-  else keeps its signals apart (Drain, Load): different units and different strength of evidence do not add up.
+  else keeps its signals apart (Wear and tear, Body & mind load): different units and different strength of evidence do not add up.
 - **Associations, not causes.** "What has tended to help" compares the days after doing something with the days after
   not doing it, with 95% intervals and a Benjamini–Hochberg correction across the list. Only results that survive are
   coloured; the page says why you might train more on days you already feel good.
@@ -265,14 +265,14 @@ repository contains none of that data.
 
 **记录**（Mac 和 iPhone 的小 App 把设备已经记下的收过来）→ **对比**（每个信号对比你自己的平常、对比你的计划）→ **调整**（今天的三件事）→ **跟进**（第二天按数据核对做到没有；老做不到就换个做法）→ **复盘**（这一周和之前四周并排）。
 
-菜单就是这个闭环，一项回答一个问题：**身体状态**是结果，你没法直接改（恢复、睡眠、消耗、体重）；**生活习惯**是你每天做的事，能直接改（运动、饮食、刺激水平）；**日程**是接下来有什么、每周对身体和精神提了多少要求（一周日程、身心负荷）；**行动与目标**是你决定改什么、做到了没有。
+菜单就是这个闭环，一项回答一个问题：**身体状态**是结果，你没法直接改（恢复、睡眠、慢性磨损、体重）；**生活习惯**是你每天做的事，能直接改（运动、饮食、刺激水平）；**日程**是接下来有什么、每周对身体和精神提了多少要求（一周日程、身心负荷）；**行动与目标**是你决定改什么、做到了没有。
 
 | 菜单 | 页面 | 回答的问题 |
 |---|---|---|
 | **今天** | | 早上看的一张卡：一天的环、恢复和你自己最近 28 天比怎么样、今天的训练和日程一行、今晚几点睡着，以及**今天该调整的**（最多三件：训练、睡眠、饮食、白天的屏幕各最多一件，原因几个字说清；下面有个链接去“跟进”看昨天的做到没有）。下面是其他各项，一项一行，只写数字和状态（睡眠、HRV、静息心率、本周运动、饮食、屏幕、消耗、体重、对你有用的），点一行进它的页面。 |
 | **身体状态** | 恢复 | 恢复得怎样（和“今天”页同一个判断和它的三个信号）、每次练完第二天缓过来没有、哪里酸。**早上打卡**：今天感觉怎么样，点一下（没缓过来 = 2、一般 = 5、恢复得好 = 8）；哪里酸，在人体图（来自作者的 GEOM90007 课程项目 Ready to Train）上点，每个部位三档，下面是每个部位最近 14 天，练过的那天有标记。**练完力量训练或强度高的训练**（强度分 7 以上），36 小时内每一页的角落都会弹出提示：在人体图上点练了哪儿，或者说一句（打字，或者用手机键盘的麦克风口述；写“卧推、划船、二头”会自动点亮躯干和两侧上臂）。之后两天早上打卡，会先用按钮问这些部位酸不酸。**练后第二天**是应用里唯一的总分：四项都换成 0–10、各自和你的平常比（5 分是平常的一个早上）：你答的感觉、HRV（练后那个早上和练前那个早上比）、静息心率、练后那一晚（睡了多久，在床上有多少时间是睡着的）；加起来除以项数，每一项都摊开写在旁边，这次练到的部位按第二天早上酸不酸上色，下面是最近 60 天的分，每个训练日一个点。再往下是练得重的日子之后，第二天早上的 HRV、静息心率和酸痛怎么回应，画成对着零线的差值和 95% 区间。某个部位明显酸、今天又排了训练，“今天”页会提醒“避开酸的部位”。 |
 | | 睡眠 | 今晚几点睡、闹钟前移计划走到哪了；最近 7 晚和再往前 7 晚比；21 晚画在同一根轴上，另一个标签是闹钟台阶（每按时起一天，闹钟往前挪一步）。每晚的打勾在目标页。 |
-| | 消耗 | 最近 7 天哪些东西在悄悄耗你？七个信号（静息心率、HRV、入睡时刻、作息波动、睡前屏幕、娱乐和社交、应用切换），各自和平常比、和计划比；另外看睡眠不足和高强度训练有没有叠在一起。不打总分。 |
+| | 慢性磨损 | 这一周哪些东西在慢慢磨损你？七个信号分三组：身体已经显出来的（静息心率、HRV）、作息（入睡时刻、每晚差多少）、屏幕习惯（睡前屏幕、娱乐和社交、应用切换），各自和平常比、和计划比；另外看睡得少和练得狠有没有撞在同一周。不打总分。 |
 | | 体重 | 体重 7 天平均是不是在计划允许的走廊里、每周降多少、长期走势。 |
 | **生活习惯** | 运动 | 本周对照每周目标（你的计划，没设就用世卫组织建议的每周 150 分钟活动、2 天力量训练，并写明用的是哪个），一天一格，还没到的日子写着计划的训练；最近 7 天对比平常；训练负荷对照恢复；12 周按种类（力量、有氧、步行）；每种训练后第二天早上的 HRV 和静息心率通常怎么样。 |
 | | 饮食 | 最近 7 天里记全的日子对比平常、对比计划：热量、蛋白质（按体重每公斤算）、膳食纤维、最后一餐到睡着隔了几小时；最近 14 天每一餐在一天里的时刻，睡前几小时画斜纹；饮食记录和体重秤对账（按记录该每周变多少、秤上实际变多少）；早点吃完晚饭的第二天早上有什么不同。 |
@@ -301,7 +301,7 @@ repository contains none of that data.
 </p>
 <p>
   <img src="docs/images/goals-zh.png" width="49%" alt="目标页，深色">
-  <img src="docs/images/drain-zh.png" width="49%" alt="消耗页，深色">
+  <img src="docs/images/drain-zh.png" width="49%" alt="慢性磨损页，深色">
 </p>
 <p>
   <img src="docs/images/time-zh.png" width="49%" alt="刺激水平页，深色">
@@ -316,7 +316,7 @@ repository contains none of that data.
 - **今天的调整是看得懂的规则。** 恢复低于平常、今天又排了训练 → 放轻松；昨晚睡少了 → 今晚几点前睡着；最近 7 个记全的晚上有 2 晚以上最后一餐离睡觉太近 → 几点前吃完晚饭；娱乐和社交高于计划（没设计划时高于平常）→ 今天的上限；等等（完整列表在 `healthaio/modules/actions.py` 和页面上）。最多三件，训练、睡眠、饮食、白天的屏幕各最多一件；没有偏离就写“照计划来”，绝不编建议。
 - **建议要跟进，不是重复。** 第二天按数据核对每条建议做到没有，不用打勾（`healthaio/modules/followup.py`）；最近 5 次里 3 次以上没做到的，不再重复同一句提醒，而是给按你自己的数字算的其他做法（把一步改小、让手机的设置替你记、写一句“如果……就……”）。
 - **缺的就是缺。** 空格表示不知道，不当成 0。一天记了不到两顿正餐，照样显示但不算平均；一天完全没记，不等于那天没吃。同步时还没过完的那天照样显示，但不跟平常比。某路数据停了，每一页都会写明数字是多久以前的。
-- **只有一个总分，而且摊开给你看。** 唯一的总分是“恢复”页的练后第二天：四项各自先和你的平常比、换成同一把 0–10 的尺子，再取平均，每一项都写在旁边。其他地方各项分开放（消耗、负担）：单位不同、证据强弱不同的东西加不到一起。
+- **只有一个总分，而且摊开给你看。** 唯一的总分是“恢复”页的练后第二天：四项各自先和你的平常比、换成同一把 0–10 的尺子，再取平均，每一项都写在旁边。其他地方各项分开放（慢性磨损、身心负荷）：单位不同、证据强弱不同的东西加不到一起。
 - **是关联，不是因果。** “做什么第二天会更好”拿做了和没做的第二天比，给 95% 区间，整张表一起做 Benjamini–Hochberg 校正，只有校正后还成立的才上颜色；页面也写明为什么状态好的日子本来就更可能去练。
 - **颜色有含义。** 数据颜色跟着被测的东西走（专注永远是蓝，娱乐永远是橙，运动永远是品红，训练种类用它的浅几档来分），做过色弱校验；绿和红只用来表示更好和更差，而且一定配文字。
 
