@@ -49,24 +49,19 @@ struct HealthReader: Sendable {
         ).result(for: store)
         for sample in sleep {
             guard let value = HealthNames.sleepValue(sample.value) else { continue }
-            records.append(record(sample, type: HealthNames.sleepType.identifier, unit: nil,
-                                  value: .text(value), metadataKeys: HealthNames.metadataKeys, formats: formats))
+            records.append(HealthReader.record(sample, type: HealthNames.sleepType.identifier, unit: nil,
+                                               value: .text(value), source: HealthReader.source(of: sample),
+                                               metadataKeys: HealthNames.metadataKeys, formats: formats))
         }
 
         for spec in HealthNames.quantities {
             let type = HKQuantityType(spec.identifier)
-            let unit = spec.hkUnit
             let samples = try await HKSampleQueryDescriptor(
                 predicates: [.quantitySample(type: type, predicate: dayPredicate)],
                 sortDescriptors: [SortDescriptor(\.startDate)]
             ).result(for: store)
-            for sample in samples where sample.quantity.is(compatibleWith: unit) {
-                let number = sample.quantity.doubleValue(for: unit)
-                records.append(record(sample, type: spec.identifier.rawValue, unit: spec.unit,
-                                      value: .text(NumberText.string(number)),
-                                      metadataKeys: spec.isFood ? HealthNames.foodMetadataKeys : HealthNames.metadataKeys,
-                                      formats: formats))
-            }
+            records += HealthReader.quantityRecords(samples, spec: spec, formats: formats,
+                                                    source: HealthReader.source(of:))
         }
 
         let workouts = try await HKSampleQueryDescriptor(
@@ -78,15 +73,30 @@ struct HealthReader: Sendable {
         return Result(records: records, workouts: workoutRecords, completedAt: Date())
     }
 
-    private func source(of sample: HKSample) -> SourcePrivacy.Source {
+    /// One type's samples as records: the spec's type name and unit string exactly as they are, each value read in
+    /// that unit; a sample whose quantity does not fit the unit is skipped. The source is passed in, so the tests can
+    /// run this on samples they make themselves, which never went through Apple Health.
+    static func quantityRecords(_ samples: [HKQuantitySample], spec: HealthNames.QuantitySpec, formats: DateFormats,
+                                source: (HKSample) -> SourcePrivacy.Source) -> [HealthRecord] {
+        let unit = spec.hkUnit
+        let metadataKeys = spec.isFood ? HealthNames.foodMetadataKeys : HealthNames.metadataKeys
+        return samples.compactMap { sample in
+            guard sample.quantity.is(compatibleWith: unit) else { return nil }
+            return record(sample, type: spec.identifier.rawValue, unit: spec.unit,
+                          value: .text(NumberText.string(sample.quantity.doubleValue(for: unit))),
+                          source: source(sample), metadataKeys: metadataKeys, formats: formats)
+        }
+    }
+
+    private static func source(of sample: HKSample) -> SourcePrivacy.Source {
         let revision = sample.sourceRevision
         return SourcePrivacy.source(bundleID: revision.source.bundleIdentifier, name: revision.source.name,
                                     productType: revision.productType, deviceModel: sample.device?.model)
     }
 
-    private func record(_ sample: HKSample, type: String, unit: String?, value: ExportValue,
-                        metadataKeys: [String], formats: DateFormats) -> HealthRecord {
-        let source = source(of: sample)
+    private static func record(_ sample: HKSample, type: String, unit: String?, value: ExportValue,
+                               source: SourcePrivacy.Source, metadataKeys: [String],
+                               formats: DateFormats) -> HealthRecord {
         var metadata: [String: String] = [:]
         for key in metadataKeys {
             if let text = sample.metadata?[key] as? String, !text.isEmpty { metadata[key] = text }
@@ -98,7 +108,7 @@ struct HealthReader: Sendable {
     }
 
     private func workout(_ workout: HKWorkout, formats: DateFormats) -> WorkoutRecord {
-        let source = source(of: workout)
+        let source = HealthReader.source(of: workout)
         let events = (workout.workoutEvents ?? []).compactMap { event -> WorkoutEvent? in
             guard let name = HealthNames.eventName(event.type) else { return nil }
             return WorkoutEvent(type: name, date: formats.exportString(event.dateInterval.start))

@@ -41,13 +41,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Health AIO reads sleep, steps, heart rate, weight, food and workouts and sends them only to your own computer."
+            "value": "Health AIO reads sleep, steps, heart rate, VO2 max (cardio fitness), weight, food and workouts and sends them only to your own computer."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Health AIO 读取睡眠、步数、心率、体重、饮食和体能训练，只发送到你自己的电脑。"
+            "value": "Health AIO 读取睡眠、步数、心率、最大摄氧量（心肺能力）、体重、饮食和体能训练，只发送到你自己的电脑。"
           }
         }
       }

@@ -59,6 +59,9 @@ enum SamplePackage {
                     unit: "appleEffortScore")
                 add("HKQuantityTypeIdentifierEstimatedWorkoutEffortScore", at(day, 7), at(day, 7, 31), "7",
                     unit: "appleEffortScore")
+                // The watch's VO2 max estimate from the outdoor run, a single moment at its end.
+                add("HKQuantityTypeIdentifierVO2Max", at(day, 7, 31), at(day, 7, 31), "41.8",
+                    unit: HealthNames.vo2MaxUnit)
             }
         }
 

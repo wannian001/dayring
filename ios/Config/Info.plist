@@ -29,7 +29,7 @@
 		</dict>
 	</dict>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Health AIO reads sleep, steps, heart rate, weight, food and workouts and sends them only to your own computer.</string>
+	<string>Health AIO reads sleep, steps, heart rate, VO2 max (cardio fitness), weight, food and workouts and sends them only to your own computer.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Health AIO talks to healthaio on your own computer over your home network.</string>
 </dict>

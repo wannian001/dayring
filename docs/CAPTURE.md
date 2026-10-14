@@ -100,14 +100,16 @@ by hand and the same days sent by the app give the same rows.
 - Record fields the server reads: `type`, `sourceName`, `device`, `unit`, `startDate`, `endDate`, `value`, and from
   `metadata` only `HKTimeZone`, `HKFoodType`, `HKFoodMeal` and `meal`. Anything else is dropped before the package is
   stored.
-- Types the app reads: sleep analysis, steps, exercise minutes, resting heart rate, HRV (SDNN), body mass, active and
-  resting energy, dietary energy, protein, carbohydrate, fat and fibre, and workouts; on iOS 18 and later also the
-  workout effort scores, `HKQuantityTypeIdentifierWorkoutEffortScore` (the 1–10 rating you give a workout) and
+- Types the app reads: sleep analysis, steps, exercise minutes, resting heart rate, HRV (SDNN), VO2 max
+  (`HKQuantityTypeIdentifierVO2Max`, the watch's cardio fitness estimate), body mass, active and resting energy,
+  dietary energy, protein, carbohydrate, fat and fibre, and workouts; on iOS 18 and later also the workout effort
+  scores, `HKQuantityTypeIdentifierWorkoutEffortScore` (the 1–10 rating you give a workout) and
   `HKQuantityTypeIdentifierEstimatedWorkoutEffortScore` (the watch's own estimate), each sample spanning its
-  workout's start and end. Units: `count`, `min`, `count/min`, `ms`, `kg`, `kcal`, `g`, and `appleEffortScore`
-  (values 1–10) for the effort scores. Sleep values are the `HKCategoryValueSleepAnalysis…` names (InBed,
-  AsleepUnspecified, Awake, AsleepCore, AsleepDeep, AsleepREM). The app also asks to read heart rate, because iOS
-  hides a workout's average heart rate without it; heart-rate samples themselves are never read or sent.
+  workout's start and end. Units: `count`, `min`, `count/min`, `ms`, `mL/min·kg` for VO2 max (the dot is U+00B7,
+  as in the export), `kg`, `kcal`, `g`, and `appleEffortScore` (values 1–10) for the effort scores. Sleep values are
+  the `HKCategoryValueSleepAnalysis…` names (InBed, AsleepUnspecified, Awake, AsleepCore, AsleepDeep, AsleepREM).
+  The app also asks to read heart rate, because iOS hides a workout's average heart rate without it; heart-rate
+  samples themselves are never read or sent.
 - **No personal names.** Apple's own sources carry the name you gave your devices ("Sam's Apple Watch"). The app
   sends the product instead: `sourceName` "Apple Watch" or "iPhone", `device` "Watch" or "iPhone". Third-party app
   names (a food logger) are kept, since the merge rules need them.

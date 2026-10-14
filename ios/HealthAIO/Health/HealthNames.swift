@@ -8,10 +8,15 @@ enum HealthNames {
         let unit: String
         let isFood: Bool
 
-        /// The unit values are read in. The effort score's unit comes from its own constructor rather than the
-        /// unit-string parser, so reading never depends on the parser knowing a unit that iOS 18 added.
+        /// The unit values are read in. The effort score's and VO2 max's units come from their own constructors
+        /// rather than the unit-string parser, so reading never depends on the parser knowing a unit that iOS 18
+        /// added, or reading the middle dot in VO2 max's unit string.
         var hkUnit: HKUnit {
             if unit == HealthNames.effortUnit, #available(iOS 18.0, *) { return .appleEffortScore() }
+            if unit == HealthNames.vo2MaxUnit {
+                return HKUnit.literUnit(with: .milli)
+                    .unitDivided(by: HKUnit.gramUnit(with: .kilo).unitMultiplied(by: .minute()))
+            }
             return HKUnit(from: unit)
         }
     }
@@ -36,6 +41,7 @@ enum HealthNames {
         QuantitySpec(identifier: .appleExerciseTime, unit: "min", isFood: false),
         QuantitySpec(identifier: .restingHeartRate, unit: "count/min", isFood: false),
         QuantitySpec(identifier: .heartRateVariabilitySDNN, unit: "ms", isFood: false),
+        QuantitySpec(identifier: .vo2Max, unit: vo2MaxUnit, isFood: false),
         QuantitySpec(identifier: .bodyMass, unit: "kg", isFood: false),
         QuantitySpec(identifier: .activeEnergyBurned, unit: "kcal", isFood: false),
         QuantitySpec(identifier: .basalEnergyBurned, unit: "kcal", isFood: false),
@@ -45,6 +51,11 @@ enum HealthNames {
         QuantitySpec(identifier: .dietaryFatTotal, unit: "g", isFood: true),
         QuantitySpec(identifier: .dietaryFiber, unit: "g", isFood: true),
     ]
+
+    /// VO2 max's unit string as in the export, `mL/min·kg`: millilitres of oxygen per minute per kilogram of body
+    /// weight. The dot is U+00B7 MIDDLE DOT, written as an escape so no editor swaps it for a look-alike. The watch
+    /// estimates VO2 max ("cardio fitness") during outdoor walks, runs and hikes.
+    static let vo2MaxUnit = "mL/min\u{00B7}kg"
 
     /// `HKUnit.appleEffortScore()`'s unit string, as in the export. Values are 1–10.
     static let effortUnit = "appleEffortScore"
