@@ -4,8 +4,8 @@
 // made it (each opening on a click).
 // The same facts as the README's "Why it exists", shorter. The server only names the page (modules/docs.py).
 // History is not in this repository: it quotes the personal system it comes from, so it lives on the author's site.
-import { esc } from "../charts.js?v=3b938c3357";
-import { getLang, t } from "../i18n.js?v=3b938c3357";
+import { esc } from "../charts.js?v=927cbc558c";
+import { getLang, t } from "../i18n.js?v=927cbc558c";
 
 const REPO = "https://github.com/wannian001/proactive-health-aio";
 
@@ -25,9 +25,9 @@ const PROJECT = {
       ["调", "今天该调整的，最多三件", "today", "今天"], ["跟", "第二天核对做到没有，老做不到就换做法", "followup", "跟进"], ["看", "这一周和前四周并排", "review", "每周复盘"]],
     dataTitle: "数据从哪来",
     data: { head: ["从哪", "收什么", "多久一次", "你要做的"], rows: [
-      ["iPhone App", "Apple 健康里的睡眠、HRV、静息心率、步数、活动和训练、体重，以及记饮食的 App 写进健康的每一餐。Apple Watch 不直接连：手表先写进 Apple 健康，再由它带过来。", "每次打开 App，把最近 3 天发到你的电脑；不在后台跑", "用 Xcode 装一次，扫码配对。免费 Apple ID 签的 App 每 7 天要续签：手机提前提醒，点一下由电脑重签"],
+      ["iPhone App", "Apple 健康里的睡眠、HRV、静息心率、步数、活动和训练（带强度评分）、体重，以及记饮食的 App 写进健康的每一餐。Apple Watch 不直接连：手表先写进 Apple 健康，再由它带过来。", "每次打开 App，把最近 3 天发到你的电脑；不在后台跑", "用 Xcode 装一次，扫码配对。免费 Apple ID 签的 App 每 7 天要续签：手机提前提醒，点一下由电脑重签"],
       ["Mac App（菜单栏）", "屏幕使用时间：这台 Mac，以及打开了“跨设备共享”的 iPhone、iPad", "每 2 小时一次。macOS 只留大约 4 周，所以要一直开着", "给它“完全磁盘访问权限”，可以设成登录时打开"],
-      ["手动导入", "Apple 健康导出包（export.zip）、课表或日历（.ics）、任意 CSV", "你想导的时候", "一条命令。适合第一次带进几年的历史"]] },
+      ["手动记录", "恢复页上的早上打卡（感觉和酸痛）；Apple 健康导出包（export.zip）、课表或日历（.ics）、任意 CSV", "你想记、想导的时候", "点几下保存；导入是一条命令，适合第一次带进几年的历史"]] },
     costTitle: "它在你电脑上的开销（在一台 M4 MacBook 上实测）",
     cost: [
       "<b>没有服务器要扛：</b>每个人的电脑就是自己的服务器，作者这边不收任何数据。唯一联网的是每天问一次 GitHub 有没有新版本。",
@@ -58,7 +58,8 @@ const PROJECT = {
         "<b>不上云、不在后台同步：</b>iPhone App 打开时才把数据发到你自己的电脑；没装就导入 Apple 健康的导出包。换来的是数据只在你的电脑上。",
         "<b>规则，不是模型：</b>建议来自几条写明的固定规则，能解释、能检查，但不会自己“学”。",
         "<b>和自己比：</b>刚开始的 28 天还没有“平常”，回答会少。",
-        "<b>不是医疗建议：</b>只看行为和身体信号，不诊断，不打总分，不算连胜。"] },
+        "<b>不是医疗建议：</b>只看行为和身体信号，不诊断，不算连胜。",
+        "<b>只有一个总分：</b>练后第二天的恢复分。四项先各自和你的平常比、换成同一把 0–10 的尺子再取平均，每一项都摊开写；别处单位不同的东西从不加成一个数，比如身体和精神的负担各看各的。"] },
       { h: "现在到哪一步", items: [
         "<b>电脑这边</b>（看板、导入、跟进）：在作者的 Mac 上用真实的屏幕使用时间跑过采集；每条规则都有测试。",
         "<b>iPhone App：</b>在模拟器上测过配对、读健康、发包的全流程，还没在真手机上读过真数据。",
@@ -90,9 +91,9 @@ const PROJECT = {
       ["Adjust", "At most three things today", "today", "Today"], ["Follow up", "Checked the next day; another way when it keeps failing", "followup", "Follow-up"], ["Review", "This week next to the four before it", "review", "Weekly review"]],
     dataTitle: "Where the data comes from",
     data: { head: ["From", "What", "How often", "What you do"], rows: [
-      ["iPhone app", "From Apple Health: sleep, HRV, resting heart rate, steps, activity and workouts, weight, and the meals a food-logging app writes into Health. The Apple Watch is not connected directly: it writes into Apple Health, and the app brings it over.", "Each time you open the app, the last 3 days go to your computer; nothing is sent while it is closed", "Install it once with Xcode and scan a QR code to pair. An app signed with a free Apple ID needs renewing every 7 days: the phone reminds you, and one tap has your computer re-sign it"],
+      ["iPhone app", "From Apple Health: sleep, HRV, resting heart rate, steps, activity and workouts (with their effort score), weight, and the meals a food-logging app writes into Health. The Apple Watch is not connected directly: it writes into Apple Health, and the app brings it over.", "Each time you open the app, the last 3 days go to your computer; nothing is sent while it is closed", "Install it once with Xcode and scan a QR code to pair. An app signed with a free Apple ID needs renewing every 7 days: the phone reminds you, and one tap has your computer re-sign it"],
       ["Mac app (menu bar)", "Screen Time: this Mac, plus the iPhone and iPad when “Share across devices” is on", "Every 2 hours. macOS keeps only about four weeks, so it stays running", "Give it Full Disk Access; it can open at login"],
-      ["Import by hand", "An Apple Health export (export.zip), a timetable or calendar (.ics), any CSV", "Whenever you like", "One command. Good for bringing in years of history the first time"]] },
+      ["By hand", "The morning check-in on the Recovery page (how you feel, where you are sore); an Apple Health export (export.zip), a timetable or calendar (.ics), any CSV", "Whenever you like", "A few taps and Save; an import is one command, good for bringing in years of history the first time"]] },
     costTitle: "What it costs your computer (measured on an M4 MacBook)",
     cost: [
       "<b>No server to carry:</b> each person's computer is their own server, and the author receives no data. The only request to the internet is asking GitHub once a day whether there is a newer version.",
@@ -123,7 +124,8 @@ const PROJECT = {
         "<b>No cloud, and no sending while the app is closed:</b> the iPhone app sends the data to your own computer while it is open; without it you import an Apple Health export. In return, the data never leaves your computer.",
         "<b>Rules, not a model:</b> the advice comes from a few fixed rules, written down, explainable and checkable, but it does not “learn”.",
         "<b>You against you:</b> in the first 28 days there is no normal yet, so there are fewer answers.",
-        "<b>Not medical advice:</b> behaviour and body signals only; no diagnosis, no total score, no streaks."] },
+        "<b>Not medical advice:</b> behaviour and body signals only; no diagnosis, no streaks.",
+        "<b>One total score only:</b> the morning after training. Its four parts are each set against your normal on the same 0–10 scale and then averaged, every part shown; nothing else with different units is added into one number, so the load on the body and on the mind stay apart."] },
       { h: "Where it stands", items: [
         "<b>The computer side</b> (dashboard, importers, follow-up): collection has run on the author's Mac with real Screen Time; every rule has tests.",
         "<b>The iPhone app:</b> pairing, reading Health and sending have been tested end to end in the simulator, not yet on a real phone with real data.",

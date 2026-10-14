@@ -1,5 +1,5 @@
-import { draw, esc, timeChart } from "../charts.js?v=3b938c3357";
-import { day, num, signed, t } from "../i18n.js?v=3b938c3357";
+import { draw, esc, timeChart } from "../charts.js?v=927cbc558c";
+import { day, num, signed, t } from "../i18n.js?v=927cbc558c";
 
 const kg = (v) => (v == null ? "—" : `${num(v, 1)} kg`);
 const STATUS = { on_track: "good", faster: "watch", slower: "watch", reached: "good" };

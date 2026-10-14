@@ -1,11 +1,11 @@
 // Today: one card for the morning (the day ring, how recovered you are, what is on, tonight, and what to adjust), then
 // every other part of your health in one line each. Numbers and a state only: the sentences that explain them live on
 // each part's own page, one click away, so a first look takes seconds.
-import { dayRing, draw, esc, RING_CATS, spark } from "../charts.js?v=3b938c3357";
-import { clock, day, dur, measure, num, signed, t, wtype } from "../i18n.js?v=3b938c3357";
-import { COLOR, icon, STATE_ICON } from "../icons.js?v=3b938c3357";
-import { worseLine } from "./drain.js?v=3b938c3357";
-import { helping } from "./effects.js?v=3b938c3357";
+import { dayRing, draw, esc, RING_CATS, spark } from "../charts.js?v=927cbc558c";
+import { clock, day, dur, measure, num, signed, t, wtype } from "../i18n.js?v=927cbc558c";
+import { COLOR, icon, STATE_ICON } from "../icons.js?v=927cbc558c";
+import { worseLine } from "./drain.js?v=927cbc558c";
+import { helping } from "./effects.js?v=927cbc558c";
 
 const shiftDay = (iso, n) => { const d = new Date(`${iso}T12:00:00`); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 const chip = (cls, text, glyph = "") => `<span class="chip ${cls}">${glyph}${esc(text)}</span>`;
@@ -55,6 +55,7 @@ export function todoTitle(x) {
     case "deload": return t("todo.deload");
     case "move": return t("todo.move", { d: dur(q.min) });
     case "strength": return t("todo.strength", { n: q.left });
+    case "spare": return t("todo.spare", { list: (q.regions || []).map((r) => t(`sore.region.${r}`)).join(t("ui.list_sep")) });
     case "asleep_by": return t("todo.asleep_by", { clock: clock(q.clock) });
     case "phone_away": return t("todo.phone_away", { clock: clock(q.clock) });
     case "late_meal": return q.clock ? t("todo.late_meal", { clock: clock(q.clock) }) : t("todo.late_meal_h", { h: num(q.hours) });
@@ -72,6 +73,7 @@ function todoWhy(x) {
     case "deload": return t("todo.short.deload");
     case "move": return t("todo.short.move", { left: dur(w.remaining) });
     case "strength": return t("todo.short.strength", { n: w.days_left });
+    case "spare": return t("todo.short.spare");
     case "asleep_by": return w.low ? t("todo.short.ease") : t("todo.short.asleep", { d: dur(w.short_by) });
     case "phone_away": return w.drain ? t("todo.short.phone_drain") : t("todo.short.phone_last", { d: dur(w.last_night) });
     case "late_meal": return t("todo.short.late_meal", { n: w.late, k: w.known });
@@ -125,7 +127,7 @@ function line({ key, iconKey, name, text, viz = "", state = "", href }) {
 }
 
 function recoveryLines(p) {
-  const href = { sleep: "#sleep", hrv: "#drain", resting_hr: "#drain" };
+  const href = { sleep: "#sleep", hrv: "#recovery", resting_hr: "#recovery" };
   return p.recovery.metrics.map((m) => line({ key: m.key, iconKey: m.key === "sleep" ? "sleep" : "heart", name: t(`metric.${m.key}`),
     text: measure(m.value, m.unit), state: stateChip(m), href: href[m.key] })).join("");
 }

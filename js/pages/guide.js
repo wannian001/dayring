@@ -2,8 +2,8 @@
 // Numbered steps in the order you meet them, in one card, each opening on a click; commands are the ones in the README's Quick start
 // and companion-app sections. The server only
 // names the page (modules/docs.py).
-import { esc } from "../charts.js?v=3b938c3357";
-import { getLang, t } from "../i18n.js?v=3b938c3357";
+import { esc } from "../charts.js?v=927cbc558c";
+import { getLang, t } from "../i18n.js?v=927cbc558c";
 
 const CODE = {
   install: ["git clone https://github.com/wannian001/proactive-health-aio.git", "cd proactive-health-aio", "python3 -m healthaio serve --demo"],
@@ -20,8 +20,8 @@ const GUIDE = {
     note: "在线演示里的人叫 Sam，是虚构的研究生，数字都是编的。想看你自己的，按下面第 2 到 4 步装到你自己的电脑上；数据只留在那台电脑里。",
     steps: [
       { h: "先看看演示", body: [
-        "左边的菜单（手机上在底部）按管理健康的顺序排：<b>今天 → 身体状态 → 生活习惯 → 行动与目标 → 每周复盘 → 数据来源</b>。点有子页的一项，子页才展开。",
-        "<b>身体状态</b>是结果，你没法直接改（睡眠、消耗、体重）；<b>生活习惯</b>是你每天做的事，能直接改（运动、饮食、刺激水平、日程）；<b>行动与目标</b>是你决定改什么、做到了没有。",
+        "左边的菜单（手机上在底部）按管理健康的顺序排：<b>今天 → 身体状态 → 生活习惯 → 负担 → 行动与目标 → 每周复盘 → 数据来源</b>。点有子页的一项，子页才展开。",
+        "<b>身体状态</b>是结果，你没法直接改（恢复、睡眠、消耗、体重）；<b>生活习惯</b>是你每天做的事，能直接改（运动、饮食、刺激水平）；<b>负担</b>是每周对身体和精神提了多少要求，过去几周和接下来几周（身心负担、日程）；<b>行动与目标</b>是你决定改什么、做到了没有。",
         "从“今天”开始：恢复得怎样、今天该调整什么、今天有什么安排、今晚几点该睡着。",
         "菜单旁边的两个按钮可以切换中英文和深浅色。"] },
       { h: "装到你的电脑上", body: ["需要 Python 3.9 以上，不用装别的包。先用演示数据确认能跑，然后打开 <b>http://localhost:8790</b>："], code: "install" },
@@ -39,7 +39,9 @@ const GUIDE = {
       { h: "每天怎么用", body: [
         "<b>早上</b>打开“今天”：先看恢复（和你自己最近 28 天比），再看“今天该调整的”：训练、睡眠、饮食、白天的屏幕各最多一件，一共最多三件，每件都写明依据的数字。",
         "<b>第二天</b>看“行动与目标 › 跟进”：昨天的建议按数据核对做到没有，不用你打勾。同一条老做不到，那里会换几种做法给你：改小一步、让手机替你记、写一句“如果……就……”。",
-        "想细看某一项，去“身体状态”（睡眠、消耗、体重）或“生活习惯”（运动、饮食、刺激水平、日程）。“刺激水平”看你给大脑的刺激（娱乐和社交、睡前刷手机、切换应用、几台同时用）和身体接下来的反应；激素本身手机和手表测不了。",
+        "<b>每天早上</b>打开“身体状态 › 恢复”打个卡：感觉怎么样点一下（没缓过来、一般、恢复得好），在人体图上点哪儿酸、多酸，保存。练完的第二天早上，同一页会算出“练后第二天”的分：你的感觉、HRV、静息心率、练后那一晚的睡眠，各自和平常比再取平均，每一项都摊开写。训练完在手表或健身 App 里给这次训练打个强度分（1–10），训练负荷才算得出来。",
+        "<b>排下几周的计划前</b>看“负担 › 身心负担”：过去 8 周和接下来 4 周，训练、课和工作、截止各自和你平常的周比；课多、截止多的那周训练还照常排，它会提醒你提前减量。",
+        "想细看某一项，去“身体状态”（恢复、睡眠、消耗、体重）或“生活习惯”（运动、饮食、刺激水平）。“刺激水平”看你给大脑的刺激（娱乐和社交、睡前刷手机、切换应用、几台同时用）和身体接下来的反应；激素本身手机和手表测不了。",
         "<b>周末</b>看“每周复盘”：这一周和前四周并排放，不打分。",
         "某项很久没更新，去“数据来源”页看是哪一路断了。装了 iPhone App，打开它就会把新数据发过来；没装的话，再导出一次 Apple 健康、重新导入。"] },
       { h: "怎么读这些数", body: [
@@ -48,9 +50,9 @@ const GUIDE = {
         "<b>关联不是因果：</b>“做什么第二天会更好”只说哪些事常和更好的第二天一起出现。",
         "<b>不是医疗建议：</b>建议都是日常习惯（早点睡、早点吃、练轻一点）；健康问题请找专业人士。"] },
       { h: "你的数据", body: [
-        "数据是你电脑上一个文件夹里的普通 CSV 文件，导入工具写它们，看板只读。",
+        "数据是你电脑上一个文件夹里的普通 CSV 文件，导入工具写它们。",
         "服务默认只在本机（127.0.0.1）运行。让手机连进来时，只认你配对过的设备，手机能发的只有 Apple 健康的样本。",
-        "页面唯一会写的，是你在目标页设的目标：每次一行，记在 healthaio.toml 旁边的 goals.jsonl 里。",
+        "页面会写的只有两样：你在目标页设的目标（每次一行，记在 healthaio.toml 旁边的 goals.jsonl 里），和你在恢复页保存的早上打卡（只改那天早上 self_report.csv 里的 feel，并替换那天早上 soreness.csv 里的几行）。",
         "唯一联网的是每天问一次 GitHub 有没有新版本，只带版本号；在 healthaio.toml 里写 [updates] check = false 就关掉。"] },
     ],
     history: "这个项目是怎么来的？看迭代记录（在作者的网站上）",
@@ -60,8 +62,8 @@ const GUIDE = {
     note: "The person in the online demo, Sam, is a made-up graduate student, and every number is invented. To see your own, install it on your computer with steps 2 to 4 below; your data stays on that computer.",
     steps: [
       { h: "Look around the demo", body: [
-        "The menu on the left (at the bottom on a phone) follows the loop of managing your health: <b>Today → Body signals → Daily life → Actions & goals → Weekly review → Data sources</b>. An item with pages opens them with a click.",
-        "<b>Body signals</b> are outcomes you cannot change directly (sleep, drain, weight); <b>Daily life</b> is what you do every day and can change (exercise, food, stimulation, the schedule); <b>Actions & goals</b> is what you decided to change and whether it happens.",
+        "The menu on the left (at the bottom on a phone) follows the loop of managing your health: <b>Today → Body signals → Daily life → Load → Actions & goals → Weekly review → Data sources</b>. An item with pages opens them with a click.",
+        "<b>Body signals</b> are outcomes you cannot change directly (recovery, sleep, drain, weight); <b>Daily life</b> is what you do every day and can change (exercise, food, stimulation); <b>Load</b> is what each week asks of the body and the mind, behind you and ahead (the load, the schedule); <b>Actions & goals</b> is what you decided to change and whether it happens.",
         "Start with Today: how you recovered, what to adjust today, what is on, and when to be asleep tonight.",
         "The two buttons by the menu switch the language and light / dark."] },
       { h: "Install it on your computer", body: ["Needs Python 3.9 or newer, no other packages. Check it runs with the demo data first, then open <b>http://localhost:8790</b>:"], code: "install" },
@@ -79,7 +81,9 @@ const GUIDE = {
       { h: "A normal day with it", body: [
         "<b>In the morning</b>, open Today: first recovery (against your own last 28 days), then what to adjust today: at most one thing each for training, sleep, food and daytime screens, three at most, each with the numbers behind it.",
         "<b>The next day</b>, open Actions & goals › Follow-up: yesterday's advice, checked against the data, with nothing to tick. When the same advice keeps not happening, it offers other ways: a smaller step, a phone setting that remembers for you, an if-then plan.",
-        "For a closer look, go to Body signals (sleep, drain, weight) or Daily life (exercise, food, stimulation, the schedule). Stimulation is what your days feed your brain (entertainment & social, scrolling before sleep, app switching, screens at once) and what your body does next; hormones themselves can't be measured by a phone or a watch.",
+        "<b>Each morning</b>, check in on Body signals › Recovery: one tap for how you feel (not recovered, so-so, recovered), then tap where you are sore and how much on the body figure, and save. The morning after training, the same page works out the score for the morning after: how you felt, HRV, resting heart rate and the night's sleep, each against your normal, averaged, with every part shown. Rate each workout's effort (1–10) on the watch or in the Fitness app afterwards, so the training load can be worked out.",
+        "<b>Before you plan the next weeks</b>, open Load › Body and mind: the 8 weeks behind and the 4 ahead, training, classes and work, and deadlines, each against your usual weeks; when a week with more classes or deadlines than usual still has your usual training planned, it tells you to plan lighter.",
+        "For a closer look, go to Body signals (recovery, sleep, drain, weight) or Daily life (exercise, food, stimulation). Stimulation is what your days feed your brain (entertainment & social, scrolling before sleep, app switching, screens at once) and what your body does next; hormones themselves can't be measured by a phone or a watch.",
         "<b>At the weekend</b>, open Weekly review: this week next to the four before it, with no scores.",
         "If something has not updated for a while, Data sources shows which stream stopped. With the iPhone app, opening it sends the new data; without it, export from Apple Health again and import it."] },
       { h: "How to read the numbers", body: [
@@ -88,9 +92,9 @@ const GUIDE = {
         "<b>Associations, not causes:</b> “What has tended to help the next day” only says what has gone with a better next day.",
         "<b>Not medical advice:</b> the suggestions are everyday habits (sleep earlier, eat earlier, train lighter); for anything about your health, talk to a professional."] },
       { h: "Your data", body: [
-        "Your data is plain CSV files in a folder on your computer. The importers write them; the dashboard only reads them.",
+        "Your data is plain CSV files in a folder on your computer. The importers write them.",
         "The server listens only on this computer (127.0.0.1) unless you let your phone in, and then only devices you paired; all a phone can send is Apple Health samples.",
-        "The one thing a page writes is a goal you set on the Goals page: one line each, in goals.jsonl next to healthaio.toml.",
+        "A page writes two things only: a goal you set on the Goals page (one line each, in goals.jsonl next to healthaio.toml), and the morning check-in you save on the Recovery page (it sets that morning's feel in self_report.csv and replaces that morning's rows in soreness.csv).",
         "The one request to the internet is asking GitHub once a day whether there is a newer version, with nothing but the version number; [updates] check = false in healthaio.toml turns it off."] },
     ],
     history: "Where did this project come from? Read its history (on the author's site)",
